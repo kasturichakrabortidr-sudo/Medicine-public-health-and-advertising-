@@ -12,6 +12,23 @@ it in a single continuous reasoning thread.
 
 ---
 
+## Easiest way to run it (no technical knowledge needed)
+
+1. **Install Python** from [python.org/downloads](https://www.python.org/downloads/)
+   — on Windows, tick **"Add Python to PATH"** during install.
+2. **Download this project**: on the GitHub page, pick the branch, click the
+   green **Code** button → **Download ZIP**, and unzip it anywhere.
+3. **Start it**:
+   - Windows: double-click **`Start-Windows.bat`**
+   - Mac: double-click **`Start-Mac.command`** (if blocked, right-click → Open)
+
+That's it. The launcher installs everything itself, walks you through getting
+an API key the first time, asks you plain-English questions about your brand,
+and then builds the strategy while you watch. Your finished documents appear
+in the `output` folder, and your answers are remembered for next time.
+
+---
+
 ## The working process — fully outlined
 
 This is the exact process the agent executes, phase by phase. Each phase is a
