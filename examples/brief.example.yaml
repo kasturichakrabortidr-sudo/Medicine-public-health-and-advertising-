@@ -1,0 +1,63 @@
+# Example client brief for the medicomarketing strategy agent.
+# Only `brand` and `therapy_area` are required — every other field improves
+# output quality. Anything missing is recorded by the agent as an evidence
+# gap or research task rather than invented.
+
+brand: CardioShield
+product: sacubitril/valsartan fixed-dose combination (illustrative example)
+therapy_area: Cardiology - chronic heart failure
+indication: HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV
+market: India (metro + tier-2/3 cities)
+
+business_goal: >
+  Grow quarterly prescription volume 15% QoQ over 4 quarters by moving
+  cardiologists and consultant physicians from late/second-line use to
+  guideline-consistent early initiation.
+
+target_specialties:
+  - Cardiologists (interventional and non-interventional)
+  - Consultant physicians managing heart failure
+  - GP referrers in tier-2/3 cities
+
+hcp_segments:
+  - KOL academic cardiologists (metro teaching hospitals)
+  - Senior private-practice cardiologists (metro and tier-2)
+  - Early-career cardiologists and DM trainees
+  - Consultant physicians with high HF caseload (tier-2/3)
+
+brand_evidence:
+  - "PARADIGM-HF style pivotal RCT: significant reduction in CV death and HF hospitalisation vs enalapril"
+  - Local real-world evidence study (n≈1,200) showing tolerability in Indian patients
+  - Post-hoc analyses in elderly and diabetic subgroups
+
+existing_evidence:
+  - Independent meta-analyses supporting ARNI class benefit in HFrEF
+  - Registry data on Indian HF epidemiology (younger onset vs Western cohorts)
+
+evolving_evidence:
+  - Emerging data on early in-hospital initiation post-decompensation
+  - Ongoing local health-economics study (readmission cost offset)
+
+guidelines:
+  - ESC heart failure guidelines (Class I recommendation for ARNI in HFrEF)
+  - ACC/AHA/HFSA guideline (four-pillar foundational therapy)
+  - CSI (Cardiological Society of India) position statements
+
+hcp_insights:
+  - Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB "to stabilise first"
+  - Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching
+  - Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is
+  - KOLs want local RWE and Indian patient data before advocating publicly
+
+competitors:
+  - Generic ACE inhibitors / ARBs (habit + low cost)
+  - SGLT2 inhibitors competing for "next pillar added" mindshare
+
+access_and_cost:
+  - Largely out-of-pocket market; monthly cost 8-10x generic ARB
+  - Patient assistance program exists but is under-used by prescribers
+  - Limited insurance/reimbursement coverage outside metros
+
+constraints:
+  - Full compliance with UCPMP; no inducements; MLR review on all materials
+  - Campaign window: 4 quarters; field force of 60 reps across 22 cities
