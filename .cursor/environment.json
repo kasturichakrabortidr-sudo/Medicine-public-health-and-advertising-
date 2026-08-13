@@ -1,0 +1,4 @@
+{
+  "name": "Medicomarketing Strategy Agent",
+  "install": "pip install -r requirements.txt && (command -v python >/dev/null 2>&1 || sudo ln -sf \"$(command -v python3)\" /usr/local/bin/python || true)"
+}
