@@ -1,3 +1,14 @@
+---
+title: Medicomarketing Strategy Agent
+emoji: 💊
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: "4.44.0"
+app_file: app.py
+pinned: false
+---
+
 # Medicomarketing Strategy Agent
 
 An AI agent that builds a complete, evidence-led **medicomarketing strategy from

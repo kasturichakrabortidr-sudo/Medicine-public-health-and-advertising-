@@ -28,13 +28,16 @@ class StrategyEngine:
         model: str = DEFAULT_MODEL,
         web_search: bool = False,
         quiet: bool = False,
+        api_key: str | None = None,
+        writer=None,
     ):
-        self.client = anthropic.Anthropic()
+        self.client = anthropic.Anthropic(api_key=api_key) if api_key else anthropic.Anthropic()
         self.brief = brief
         self.out_dir = Path(out_dir)
         self.model = model
         self.web_search = web_search
         self.quiet = quiet
+        self.writer = writer
         self.messages: list[dict] = []
         self.results: dict[str, str] = {}
 
@@ -132,8 +135,11 @@ class StrategyEngine:
         with self.client.messages.stream(**kwargs) as stream:
             for text in stream.text_stream:
                 if not self.quiet:
-                    sys.stdout.write(text)
-                    sys.stdout.flush()
+                    if self.writer:
+                        self.writer.write(text)
+                    else:
+                        sys.stdout.write(text)
+                        sys.stdout.flush()
             return stream.get_final_message()
 
     def _messages_with_cache(self) -> list[dict]:
@@ -150,4 +156,7 @@ class StrategyEngine:
 
     def _log(self, text: str) -> None:
         if not self.quiet:
-            print(text)
+            if self.writer:
+                self.writer.write(text + "\n")
+            else:
+                print(text)
