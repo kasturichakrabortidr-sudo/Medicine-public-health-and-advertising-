@@ -205,4 +205,4 @@ with gr.Blocks(
         "medical-legal-regulatory review before use with HCPs.*"
     )
 
-demo.queue().launch()
+demo.queue().launch(server_name="0.0.0.0", server_port=int(os.environ.get("PORT", 7860)))
