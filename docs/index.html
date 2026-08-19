@@ -865,8 +865,8 @@ async function streamPhase(apiKey, userContent, onChunk) {
   messages.push({ role: 'user', content: userContent });
 
   const body = {
-    model: 'claude-opus-5',
-    max_tokens: 8192,
+    model: 'claude-sonnet-4-5-20250514',
+    max_tokens: 16000,
     stream: true,
     system: SYSTEM_PROMPT,
     messages: messages,
@@ -926,17 +926,23 @@ async function handleRun() {
   }
 
   const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey.startsWith('sk-ant-')) {
-    setNotice('Please enter your Anthropic API key (starts with sk-ant-) at the top right.', 'err');
+  if (!apiKey) {
+    alert('Please enter your Anthropic API key in the top-right field (starts with sk-ant-).');
+    return;
+  }
+  if (!apiKey.startsWith('sk-ant-') && !apiKey.startsWith('sk-')) {
+    alert('The API key looks wrong. It should start with sk-ant-\n\nGet one at: platform.anthropic.com → API Keys');
     return;
   }
 
   const brand = document.getElementById('brand').value.trim();
   const ta = document.getElementById('therapy_area').value.trim();
   if (!brand || !ta) {
-    setNotice('Brand name and Therapy area are required.', 'err');
+    alert('Please fill in Brand name and Therapy area (both are required).');
     return;
   }
+
+  console.log('▶ Run clicked — brand:', brand, '| therapy:', ta, '| key prefix:', apiKey.substring(0, 14) + '…');
 
   setNotice('', '');
   running = true;
@@ -1003,7 +1009,10 @@ async function handleRun() {
 
   } catch (err) {
     if (err.name !== 'AbortError') {
-      setNotice(`Error: ${err.message}`, 'err');
+      const msg = `Error: ${err.message}`;
+      console.error(msg, err);
+      setNotice(msg, 'err');
+      alert(msg + '\n\nOpen browser DevTools (F12 → Console) for details.');
     }
   } finally {
     running = false;
