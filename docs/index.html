@@ -865,7 +865,7 @@ async function streamPhase(apiKey, userContent, onChunk) {
   messages.push({ role: 'user', content: userContent });
 
   const body = {
-    model: 'claude-sonnet-4-5-20250514',
+    model: 'claude-opus-5',
     max_tokens: 16000,
     stream: true,
     system: SYSTEM_PROMPT,
