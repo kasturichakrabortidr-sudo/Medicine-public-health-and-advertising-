@@ -678,7 +678,10 @@ def _spine_rows(records: list[dict], interventions: list[dict]) -> list[dict]:
         if not means:
             continue
         short = r.get("short") or ""
-        iv = next((i for i in interventions if short and short in (i.get("evidenceAnchor") or "")), None)
+        execute = r.get("spine_execute") or ""
+        iv = next((i for i in interventions if i["name"] and i["name"] in execute), None)
+        if iv is None:
+            iv = next((i for i in interventions if short and short in (i.get("evidenceAnchor") or "")), None)
         if iv is None:
             want = mapping.get(r.get("directs") or "")
             iv = next((i for i in interventions if i["id"] == want), None) if want else None

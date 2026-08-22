@@ -64,6 +64,10 @@ def test_spine_connects_pioneer_to_first_touch():
     moves = " ".join(f"{r.get('move')} {r.get('execute')}" for r in execute["chart"]["data"])
     assert "PIONEER-HF" in names
     assert "First-Touch" in moves
+    paradigm = next(r for r in execute["chart"]["data"] if "PARADIGM" in str(r.get("name")))
+    pioneer = next(r for r in execute["chart"]["data"] if "PIONEER" in str(r.get("name")))
+    assert "First-Touch" in str(paradigm.get("move"))
+    assert "First-Touch" in str(pioneer.get("move"))
     assert any("30415601" in str(r.get("pmid")) for r in execute["chart"]["data"])
     compare = next(s for s in pack["slides"] if s["id"] == "science-compare")
     assert compare["chart"]["kind"] == "compare"
