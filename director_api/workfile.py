@@ -11,6 +11,7 @@ from typing import Any
 
 from .cite import mark
 from .extract import ExtractedBrief
+from .molecule import science_name
 from .paper_read import paper_jobs, uses_hf_playbook
 
 PHASE_TITLES = [
@@ -51,7 +52,8 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
         "howBuilt": (
             f"We started with the brief for {brief.brand or 'this brand'}. "
             "The brief is not expected to contain paper links. "
-            f"We searched PubMed for {brief.product or brief.therapy_area or 'this product/indication'}, "
+            f"We searched PubMed for {science_name(brief) or brief.therapy_area or 'this molecule/indication'}, "
+            "not the campaign brand. "
             "read the abstracts, and kept a short set of load-bearing papers. "
             f"{len(records)} paper{'s' if len(records) != 1 else ''} have a number. "
             "One paper is not a case: load-bearing lines quote the pack, not a single PMID. "
@@ -103,7 +105,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     known = [
         f"{mark(r)} {r.get('short')}: {r.get('claim_permitted')}"
         for r in records[:6]
-    ] or ["No numbered paper on the register yet. PubMed is searched from the product and therapy area; the brief does not need to list papers."]
+    ] or ["No numbered paper on the register yet. PubMed is searched from the INN and therapy area, not the brand; the brief does not need to list papers."]
     unknown = [
         f"{g['stream']}: {g['item']}" for g in gaps[:6]
     ] or ["No uncited brief lines."]
@@ -135,10 +137,10 @@ def _p01(brief, doctrine, records, gaps) -> dict:
 
 def _p02(brief, records) -> dict:
     pop = brief.indication or brief.therapy_area or "the indicated population"
-    product = brief.product or brief.brand or "the product"
+    molecule = science_name(brief) or "the labelled molecule"
     pico = [
         ["Population", pop, "Taken from the brief. We will not widen it."],
-        ["Intervention", f"{product}" + (" at the first eligible encounter" if any(r.get("directs") == "first-eligible-start" for r in records) else " as labelled"), "Eligible as labelled — not 'all comers'."],
+        ["Intervention", f"{molecule}" + (" at the first eligible encounter" if any(r.get("directs") == "first-eligible-start" for r in records) else " as labelled"), "Eligible as labelled — not 'all comers'. Science uses the INN, not the brand."],
         ["Comparator", "Habitual ACEI/ARB or SoC delay" if any(r.get("directs") == "first-eligible-start" for r in records) else "The comparator named in the sourced papers", "The comparator is the current habit, not a straw man."],
         ["Outcomes we may use", _outcome_line(records), "Only endpoints published in numbered papers."],
         ["Setting", brief.market or "markets named in the brief", "Local label and code still govern."],
@@ -153,7 +155,7 @@ def _p02(brief, records) -> dict:
             "C — uncited brief item, local RWE without a paper, ongoing study — research task, not a lead",
         ],
         include="Peer-reviewed papers and society guidelines with a PMID or DOI. HFrEF/indication must match the brief.",
-        exclude="Invented HRs, congress rumours, competitor claims without a source, and papers that do not match this product/indication.",
+        exclude="Invented HRs, congress rumours, competitor claims without a source, papers that do not match this molecule/indication, and brand-name queries.",
     )
 
 
@@ -182,7 +184,7 @@ def _p03(brief, records, gaps, lead) -> dict:
     ]
     return _phase(
         "03",
-            "Every row is a paper we can put a number on. We searched PubMed from the product and therapy area; the brief is not the source of the links. One paper is not a case — the lead needs a pack. Brief lines without a number stay in the gap table. We did not give them an effect size.",
+            "Every row is a paper we can put a number on. We searched PubMed from the molecule (INN) and therapy area, not the brand; the brief is not the source of the links. One paper is not a case — the lead needs a pack. Brief lines without a number stay in the gap table. We did not give them an effect size.",
         forefront={
             "headers": ["Ref", "Job", "Source", "Stream", "Design / N", "Published finding", "Grade", "What we may say", "Caveat"],
             "rows": rows,
@@ -284,7 +286,7 @@ def _p05(brief, records, doctrine) -> dict:
         start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
         current = delay = next((i for i in insights if _looks_like_delay(i)), "Start is later than first-eligible. The brief does not describe the current habit in so many words.")
         required = (
-            f"Start {brief.brand or 'the product'} at the first eligible encounter"
+            f"Start {science_name(brief) or brief.brand or 'the molecule'} at the first eligible encounter"
             + (f" — the window studied in {mark(start)} {start.get('short')}" if start else "")
             + "."
         )
@@ -299,7 +301,7 @@ def _p05(brief, records, doctrine) -> dict:
         if jobs:
             required = (
                 "One paper is not a case. "
-                f"When the doctor decides on {brief.brand or 'the product'}, use the numbered pack together — "
+                f"When the doctor decides on {science_name(brief) or brief.brand or 'the molecule'}, use the numbered pack together — "
                 + "; ".join(
                     f"{mark(r)} {r.get('roleLabel') or r.get('short')}: "
                     f"{_short(r.get('claim_permitted') or r.get('finding') or '', 90)}"

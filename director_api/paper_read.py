@@ -15,6 +15,8 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from typing import Any
 
+from .molecule import inn_from_text, science_name
+
 HR_RE = re.compile(
     r"\b(?:hazard ratio|HR)\s*(?:of|=|:)?\s*(\d+\.\d+)"
     r"(?:\s*[;(,]?\s*(?:95%\s*CI[:\s]*)(\d+\.\d+)\s*(?:to|[–\-])\s*(\d+\.\d+))?",
@@ -61,25 +63,10 @@ PRODUCT_STOP = {
     "product", "drug", "dose", "strength", "film", "coated",
 }
 
-ILLUSTRATIVE_RE = re.compile(
-    r"\b(fictional|illustrative|placeholder|dummy product|not a real)\b",
-    re.I,
-)
-
 
 def search_product_name(product: str) -> str:
-    """Strip fiction markers, doses, and trade-dress so PubMed is not poisoned."""
-    if not product or ILLUSTRATIVE_RE.search(product):
-        return ""
-    text = re.sub(r"[™®]", " ", product)
-    text = re.sub(r"\([^)]*\)", " ", text)
-    text = re.sub(r"\d+\s*mg\b", " ", text, flags=re.I)
-    text = re.sub(r"\b(once[-\s]?daily|oral therapy|film[-\s]?coated)\b", " ", text, flags=re.I)
-    tokens = [
-        t for t in re.findall(r"[A-Za-z][A-Za-z0-9-]{2,}", text)
-        if t.lower() not in PRODUCT_STOP
-    ]
-    return " ".join(tokens)
+    """INN for a product string. Empty when the string is only a trade name."""
+    return inn_from_text(product)
 
 
 def fetch_abstracts(pmids: list[str]) -> dict[str, dict[str, Any]]:
@@ -224,7 +211,7 @@ def select_papers(
     limit: int = 4,
 ) -> list[dict[str, Any]]:
     """Keep a short, non-duplicate set of load-bearing papers."""
-    product = getattr(brief, "product", "") or ""
+    product = science_name(brief) or inn_from_text(getattr(brief, "product", "") or "")
     parsed_map: dict[str, dict[str, Any]] = {}
     scored: list[tuple[int, dict, dict]] = []
     for hit in hits:
@@ -305,7 +292,7 @@ def apply_reading(
     """Write extracted findings onto a PubMed record and tie them to the brief."""
     title = record.get("title") or ""
     abstract = (reading or {}).get("abstract") or ""
-    product = getattr(brief, "product", "") or ""
+    product = science_name(brief) or inn_from_text(getattr(brief, "product", "") or "")
     parsed = extract_finding(title, abstract, product, sections=(reading or {}).get("sections"))
     pages = (reading or {}).get("pages") or record.get("pages") or ""
     pubtypes = (reading or {}).get("pubtypes") or []
@@ -499,7 +486,7 @@ def _claim_sentence(
     hr,
     comparator: str = "the comparator",
 ) -> str:
-    who = product or "the intervention"
+    who = inn_from_text(product) or "the intervention"
     prefix = f"{trial}: " if trial else ""
     if hr is not None:
         extra = ""

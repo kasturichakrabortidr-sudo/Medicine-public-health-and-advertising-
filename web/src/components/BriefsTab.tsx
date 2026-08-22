@@ -235,8 +235,10 @@ export function BriefsTab({
       <section className="card">
         <h2>Working brief</h2>
         <p className="muted small">
-          Edit after extraction. Only brand and therapy area are required; gaps become
-          research tasks, not invented facts.
+          Edit after extraction. Brand is the campaign name. Molecule (INN) is
+          what we search on PubMed and quote in the science — never the brand.
+          Only brand and therapy area are required; gaps become research tasks,
+          not invented facts.
         </p>
         {(previews.length > 0 || Boolean(brief.raw_text)) && (!brief.brand || !brief.therapy_area) ? (
           <div className="alert watch">
@@ -249,7 +251,7 @@ export function BriefsTab({
         ) : null}
         <div className="field-grid">
           {field("brand", "Brand")}
-          {field("product", "Product / molecule")}
+          {field("product", "Molecule (INN)")}
           {field("therapy_area", "Therapy area")}
           {field("indication", "Indication")}
           {field("market", "Market")}

@@ -38,7 +38,7 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-paper-pack",
+        "build": "2026-08-22-inn-not-brand",
     }
 
 

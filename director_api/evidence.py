@@ -1,10 +1,10 @@
 """Validated, cited evidence that sets the campaign lead.
 
 Client briefs never contain paper links. Science is sourced from (1) a curated
-catalog when the product/class in the brief matches a published trial, and
-(2) a live PubMed search on the product, indication, and therapy area.
-Uncited brief items stay gaps. PubMed hits become numbered records with PMID/DOI
-but never receive an invented effect size.
+catalog when the molecule/class in the brief matches a published trial, and
+(2) a live PubMed search on the INN, indication, and therapy area — never the
+campaign brand. Uncited brief items stay gaps. PubMed hits become numbered
+records with PMID/DOI but never receive an invented effect size.
 """
 
 from __future__ import annotations
@@ -18,13 +18,13 @@ import urllib.request
 from typing import Any
 
 from .extract import ExtractedBrief
+from .molecule import pubmed_term, science_name
 from .paper_read import (
     apply_reading,
     assign_paper_jobs,
     brief_has_delay,
     fetch_abstracts,
     paper_jobs,
-    search_product_name,
     select_papers,
 )
 
@@ -474,6 +474,7 @@ def _brief_blob(brief: ExtractedBrief) -> str:
     parts = [
         brief.brand,
         brief.product,
+        science_name(brief),
         brief.therapy_area,
         brief.indication,
         brief.market,
@@ -674,9 +675,9 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     if not matched:
         return {
             "statement": (
-                "No citable paper was retrieved for this product/indication yet. "
+                "No citable paper was retrieved for this molecule/indication yet. "
                 "Do not lock a scientific lead. The brief is not expected to contain paper links — "
-                "we search PubMed from the product and therapy area."
+                "we search PubMed from the INN and therapy area, not the brand name."
             ),
             "why": "The working file has no DOI/PMID-backed row. Strategy stays behavioural until science is sourced.",
             "directs": "none",
@@ -906,14 +907,14 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
                 ),
                 "status": "pubmed-retrieved",
                 "note": (
-                    "Independent PubMed hit for this product/indication. "
+                    "Independent PubMed hit for this molecule/indication. "
                     "Confirm against the full text before it can become a promotional claim."
                 ),
             })
     if not hits:
         return []
-    product = search_product_name(brief.product or "")
-    product_tokens = [t for t in re.findall(r"[a-z0-9-]{5,}", product.lower())]
+    molecule = science_name(brief)
+    product_tokens = [t for t in re.findall(r"[a-z0-9-]{5,}", molecule.lower())]
     if product_tokens:
         product_hits = [h for h in hits if any(t in (h.get("title") or "").lower() for t in product_tokens)]
         if product_hits:
@@ -923,15 +924,15 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
 
 
 def _pubmed_queries(brief: ExtractedBrief) -> list[str]:
-    product = search_product_name(brief.product or "")
-    brand = search_product_name(brief.brand or "")
+    product = science_name(brief)
+    focus = pubmed_term(product)
     disease = _disease_clause(brief)
-    focus = product or (brand if disease else brand)
     typed_core = " ".join(p for p in (focus, disease) if p).strip()
     queries: list[str] = []
-    if product and disease:
+    if focus and disease:
+        title = f"{focus}[Title]" if " AND " not in focus else focus
         queries.append(
-            f"{product}[Title] AND ({disease}) AND "
+            f"{title} AND ({disease}) AND "
             "(randomized OR trial OR guideline OR meta-analysis)"
         )
     if typed_core and len(re.sub(r"[^A-Za-z0-9]+", "", typed_core)) >= 5:
@@ -986,7 +987,7 @@ def _title_matches_brief(title: str, brief: ExtractedBrief) -> bool:
         "oral", "brand", "heart", "failure",
     }
     tokens = []
-    product = search_product_name(brief.product or "")
+    product = science_name(brief)
     tokens.extend(re.findall(r"[a-z0-9-]{4,}", product.lower()))
     for field in (brief.indication, brief.therapy_area):
         cleaned = _clean_query_bit(field or "")

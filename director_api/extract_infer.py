@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 
 from .extract import ExtractedBrief, KNOWN_FIELDS, _as_list, _normalize_key
+from .molecule import inn_from_text
 
 BRAND_STOP = {
     "confidential",
@@ -359,12 +360,7 @@ def _guess_brand(blob: str) -> str:
 
 
 def _guess_product(blob: str) -> str:
-    m = re.search(
-        r"\b([a-z]{5,}(?:mab|nib|tide|sartan|gliptin|gliflozin|olol|pril|statin|parin))\b",
-        blob,
-        re.I,
-    )
-    return m.group(1) if m else ""
+    return inn_from_text(blob)
 
 
 def _guess_therapy(blob: str) -> str:

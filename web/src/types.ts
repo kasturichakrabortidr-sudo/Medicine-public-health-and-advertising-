@@ -77,8 +77,7 @@ export interface ExtractedBrief {
 export interface StrategyPack {
   meta: {
     brand: string;
-    product: string;
-    therapyArea: string;
+    molecule?: string;
     market: string;
     generatedAt: string;
     mode: string;

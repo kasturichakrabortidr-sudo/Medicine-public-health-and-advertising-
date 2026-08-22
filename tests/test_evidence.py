@@ -473,6 +473,21 @@ def test_fictional_hfpef_brief_gets_a_paper_pack_not_one_reprint():
 
     pack = generate_pack(brief, pubmed=False)
     assert pack["meta"]["brand"].startswith("Cardiava")
+    assert pack["meta"].get("molecule") in ("", None)
+    p02 = next(p for p in pack["workfile"]["phases"] if p["id"] == "02")
+    intervention = " ".join(str(c) for c in p02["pico"]["rows"][1]).lower()
+    assert "velmecor" not in intervention
+    assert "cardiava" not in intervention
+    how = (pack["workfile"].get("howBuilt") or "").lower()
+    assert "velmecor" not in how
+    assert "cardiava" not in how or "brief for" in how
+    papers_blob = " ".join(
+        f"{r.get('claim_permitted')} {r.get('title')}" for r in pack["evidence"]["records"]
+    ).lower()
+    assert "empagliflozin" in papers_blob
+    assert "dapagliflozin" in papers_blob
+    assert "jardiance" not in papers_blob
+    assert "farxiga" not in papers_blob
     assert pack["doctrine"]["id"] != "first-touch"
     assert "Lead the campaign with first-eligible" not in pack["evidence"]["lead"]["statement"]
     house = next(p for p in pack["workfile"]["phases"] if p["id"] == "07")["house"]["rows"]

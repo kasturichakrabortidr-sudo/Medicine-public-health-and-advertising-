@@ -86,7 +86,7 @@ export default function App() {
         <div className="mark">
           <strong>STRATA</strong>
           <span>Working file for HCP campaigns</span>
-          <span className="build-stamp">22 Aug · a pack of papers, not one reprint</span>
+          <span className="build-stamp">22 Aug · science uses the INN, not the brand</span>
         </div>
         <nav className="nav">
           <button type="button" className={tab === "briefs" ? "active" : ""} onClick={() => setTab("briefs")}>

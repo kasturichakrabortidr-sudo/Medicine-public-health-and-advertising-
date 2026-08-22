@@ -12,6 +12,7 @@ from datetime import date
 from .cite import attach_references, mark
 from .evidence import resolve_evidence
 from .extract import ExtractedBrief
+from .molecule import science_name
 from .paper_read import brief_has_delay, hf_catalog_pack, paper_jobs
 from .workfile import build_workfile
 
@@ -35,6 +36,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
     ta = brief.therapy_area or "Specialty care"
     market = brief.market or "Priority markets"
     product = brief.product or brand
+    molecule = science_name(brief)
     ledger = resolve_evidence(brief, pubmed=pubmed)
     attach_references(ledger)
     doctrine = _doctrine_for(brief, ledger)
@@ -45,6 +47,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
         "meta": {
             "brand": brand,
             "product": product,
+            "molecule": molecule,
             "therapyArea": ta,
             "market": market,
             "generatedAt": date.today().isoformat(),
@@ -146,7 +149,7 @@ def _bind_science(doctrine: dict, ledger: dict) -> None:
     cites = lead.get("citations") or []
     if not cites:
         doctrine["scienceLead"] = (
-            "No citable paper retrieved yet — we search PubMed from the product and therapy area. "
+            "No citable paper retrieved yet — we search PubMed from the INN and therapy area, not the brand. "
             "Do not lock a scientific lead."
         )
         return
@@ -201,7 +204,8 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "narrative": doctrine["thesis"],
             "layout": "title",
             "bullets": [
-                f"Product: {brief.product or brand}",
+                f"Molecule (INN): {science_name(brief) or 'not named — search uses the indication'}",
+                f"Brand: {brand}",
                 f"Indication: {brief.indication or ta}",
                 f"{len(records)} numbered papers. {len(ledger.get('gaps') or [])} uncited brief lines.",
             ],
