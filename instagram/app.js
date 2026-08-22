@@ -344,4 +344,9 @@ document.addEventListener("keydown", (event) => {
 });
 
 renderGrid();
-startFilm();
+
+if (new URLSearchParams(window.location.search).has("profile")) {
+  showProfile();
+} else {
+  startFilm();
+}

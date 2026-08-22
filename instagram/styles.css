@@ -607,9 +607,13 @@ button {
   inset: 0;
   background: rgba(11, 18, 32, 0.72);
   z-index: 20;
-  display: grid;
+  display: none;
   place-items: center;
   padding: 24px;
+}
+
+.overlay:not([hidden]) {
+  display: grid;
 }
 
 .overlay-close {
