@@ -181,6 +181,15 @@ async function startFilm() {
   }
 }
 
+document.querySelector(".intro-stage").addEventListener("click", async () => {
+  setMuted(false);
+  try {
+    await video.play();
+  } catch {
+    /* ignore */
+  }
+});
+
 video.addEventListener("timeupdate", () => {
   if (!video.duration) return;
   bar.style.width = `${(video.currentTime / video.duration) * 100}%`;
@@ -288,7 +297,11 @@ document.querySelector(".highlights").addEventListener("click", (event) => {
 });
 
 document.querySelectorAll("[data-close]").forEach((button) => {
-  button.addEventListener("click", closeOverlays);
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeOverlays();
+  });
 });
 
 document.getElementById("story-next").addEventListener("click", () => {

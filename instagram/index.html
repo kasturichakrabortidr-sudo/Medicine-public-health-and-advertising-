@@ -28,30 +28,30 @@
     </form>
 
     <section id="intro" class="intro" aria-label="Introduction film">
-      <video
-        id="intro-video"
-        class="intro-video"
-        poster="assets/video/poster.jpg"
-        playsinline
-        preload="auto"
-      >
-        <source src="assets/video/intro.mp4" type="video/mp4" />
-        <track kind="captions" src="assets/video/intro.vtt" srclang="en" label="English" default />
-      </video>
-
-      <div class="intro-veil"></div>
-
       <header class="intro-top">
         <div class="mark">
           <b>STRATA</b>
           <span>AI Strategy Director</span>
         </div>
         <div class="intro-top-actions">
-          <button type="button" class="text-btn" id="replay-later" hidden>Replay film</button>
-          <button type="button" class="text-btn" id="skip-intro">Skip</button>
+          <button type="button" class="text-btn" id="skip-intro">Skip to profile</button>
           <a class="cta-btn" href="try.html">Try for free</a>
         </div>
       </header>
+
+      <div class="intro-stage">
+        <video
+          id="intro-video"
+          class="intro-video"
+          poster="assets/video/poster.jpg"
+          playsinline
+          preload="auto"
+        >
+          <source src="assets/video/intro.mp4" type="video/mp4" />
+          <track kind="captions" src="assets/video/intro.vtt" srclang="en" label="English" default />
+        </video>
+        <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
+      </div>
 
       <div class="intro-copy">
         <p class="eyebrow">Introduction · 31 seconds</p>
@@ -76,7 +76,6 @@
         <a class="cta-btn large" href="try.html">Try for free</a>
       </div>
 
-      <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
     </section>
 
     <div class="ig-shell" id="profile">
