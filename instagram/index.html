@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>STRATA — Instagram</title>
+    <meta
+      name="description"
+      content="STRATA is the AI Strategy Director for HCP campaigns. Watch how it solves weeks of scattered evidence and guessed messaging — then try it free."
+    />
+    <link rel="icon" href="assets/avatar.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,640;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="view-intro">
+    <form name="try-strata" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="try-strata" />
+      <input name="name" />
+      <input name="email" type="email" />
+      <input name="role" />
+      <input name="brand" />
+      <input name="bot-field" />
+    </form>
+
+    <section id="intro" class="intro" aria-label="Introduction film">
+      <video
+        id="intro-video"
+        class="intro-video"
+        poster="assets/video/poster.jpg"
+        playsinline
+        preload="auto"
+      >
+        <source src="assets/video/intro.mp4" type="video/mp4" />
+        <track kind="captions" src="assets/video/intro.vtt" srclang="en" label="English" default />
+      </video>
+
+      <div class="intro-veil"></div>
+
+      <header class="intro-top">
+        <div class="mark">
+          <b>STRATA</b>
+          <span>AI Strategy Director</span>
+        </div>
+        <div class="intro-top-actions">
+          <button type="button" class="text-btn" id="replay-later" hidden>Replay film</button>
+          <button type="button" class="text-btn" id="skip-intro">Skip</button>
+          <a class="cta-btn" href="try.html">Try for free</a>
+        </div>
+      </header>
+
+      <div class="intro-copy">
+        <p class="eyebrow">Introduction · 31 seconds</p>
+        <h1>What the app is. The problem it ends. Why nothing else works like this.</h1>
+        <p class="lede">
+          Agencies still spend weeks assembling an HCP strategy from scattered papers and guessed
+          messaging. STRATA writes the working file first — evidence-traced, doctrine-led, ready
+          for MLR.
+        </p>
+      </div>
+
+      <div class="intro-bottom">
+        <button type="button" class="icon-btn" id="toggle-sound" aria-label="Unmute film">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M4 10v4h3l5 4V6L7 10H4zm11.5 2a3.5 3.5 0 0 0-2-3.15v6.3a3.5 3.5 0 0 0 2-3.15z"
+              fill="currentColor"
+            />
+          </svg>
+          <span>Sound</span>
+        </button>
+        <a class="cta-btn large" href="try.html">Try for free</a>
+      </div>
+
+      <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
+    </section>
+
+    <div class="ig-shell" id="profile">
+      <aside class="ig-rail" aria-label="STRATA">
+        <div class="mark">
+          <b>STRATA</b>
+          <span>Working file for HCP campaigns</span>
+        </div>
+        <p class="rail-line">
+          The AI Strategy Director that writes the thinking before anyone sees a slide.
+        </p>
+        <a class="cta-btn" href="try.html">Try for free</a>
+        <button type="button" class="ghost-btn" id="replay-intro">Replay the film</button>
+        <p class="doctrine-chip">
+          <em>Not a funnel.</em>
+          It picks a doctrine from the tension in the brief. Every claim traces to named evidence.
+          Gaps stay gaps.
+        </p>
+      </aside>
+
+      <main class="ig-page">
+        <header class="ig-top">
+          <div class="ig-wordmark">
+            <span class="ig-camera" aria-hidden="true"></span>
+            <strong>strata.director</strong>
+          </div>
+          <a class="pill-link" href="try.html">Try free</a>
+        </header>
+
+        <section class="profile-head">
+          <img class="avatar" src="assets/avatar.jpg" alt="STRATA mark" />
+          <div class="profile-meta">
+            <div class="user-row">
+              <h1>strata.director</h1>
+              <span class="verified" title="STRATA official">✓</span>
+            </div>
+            <ul class="stats">
+              <li><b>12</b> posts</li>
+              <li><b>launch</b> studio</li>
+              <li><b>HCP</b> only</li>
+            </ul>
+            <div class="actions">
+              <a class="cta-btn compact" href="try.html">Try for free</a>
+              <button type="button" class="follow-btn" id="follow-btn">Follow</button>
+              <button type="button" class="icon-square" id="share-profile" aria-label="Copy profile link">
+                ↗
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="bio">
+          <p class="bio-name">STRATA</p>
+          <p class="bio-role">AI Strategy Director · medicomarketing</p>
+          <p>
+            A complete HCP strategy used to take weeks.<br />
+            We write the <em>working file</em> first — doctrine, evidence, then the deck.
+          </p>
+          <p class="bio-points">
+            Evidence first · nothing invented<br />
+            MLR-aware · one continuous reasoning thread
+          </p>
+          <a class="bio-link" href="try.html">strata.director/try — start free</a>
+        </section>
+
+        <nav class="highlights" aria-label="Highlights">
+          <button type="button" data-highlight="brief">
+            <img src="assets/highlights/highlight-brief.jpg" alt="" />
+            <span>Brief</span>
+          </button>
+          <button type="button" data-highlight="doctrine">
+            <img src="assets/highlights/highlight-doctrine.jpg" alt="" />
+            <span>Doctrine</span>
+          </button>
+          <button type="button" data-highlight="evidence">
+            <img src="assets/highlights/highlight-evidence.jpg" alt="" />
+            <span>Evidence</span>
+          </button>
+          <button type="button" data-highlight="deck">
+            <img src="assets/highlights/highlight-deck.jpg" alt="" />
+            <span>Deck</span>
+          </button>
+          <button type="button" data-highlight="try">
+            <img src="assets/highlights/highlight-try.jpg" alt="" />
+            <span>Try free</span>
+          </button>
+        </nav>
+
+        <div class="tabs" role="tablist">
+          <button type="button" class="active" data-tab="posts" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h7v7H3V3zm11 0h7v7h-7V3zM3 14h7v7H3v-7zm11 0h7v7h-7v-7z"/></svg>
+            Posts
+          </button>
+          <button type="button" data-tab="reels" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 6h16v12H4V6zm6.5 3.2v5.6L14.8 12 10.5 9.2z"/></svg>
+            Reels
+          </button>
+          <button type="button" data-tab="tagged" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-3.3 0-6 2-6 4.5V20h12v-1.5c0-2.5-2.7-4.5-6-4.5z"/></svg>
+            Tagged
+          </button>
+        </div>
+
+        <section class="grid" id="posts-grid" data-panel="posts"></section>
+        <section class="reels-panel" id="reels-panel" data-panel="reels" hidden></section>
+        <section class="tagged" data-panel="tagged" hidden>
+          <p>No tagged posts yet. This page is the official STRATA studio.</p>
+        </section>
+      </main>
+    </div>
+
+    <div class="overlay" id="post-overlay" hidden>
+      <button type="button" class="overlay-close" data-close aria-label="Close">×</button>
+      <article class="post-card">
+        <div class="post-media">
+          <img id="post-image" alt="" />
+          <video id="post-video" controls playsinline hidden></video>
+        </div>
+        <aside class="post-side">
+          <header>
+            <img src="assets/avatar.jpg" alt="" />
+            <div>
+              <strong>strata.director</strong>
+              <span>STRATA · official</span>
+            </div>
+          </header>
+          <p class="caption" id="post-caption"></p>
+          <a class="cta-btn" href="try.html">Try for free</a>
+        </aside>
+      </article>
+    </div>
+
+    <div class="overlay story-overlay" id="story-overlay" hidden>
+      <div class="story">
+        <div class="story-bars" id="story-bars"></div>
+        <header>
+          <img src="assets/avatar.jpg" alt="" />
+          <strong id="story-title">STRATA</strong>
+          <button type="button" data-close aria-label="Close story">×</button>
+        </header>
+        <img id="story-image" alt="" />
+        <p id="story-text"></p>
+        <a class="cta-btn" href="try.html">Try for free</a>
+        <button type="button" class="story-hit left" id="story-prev" aria-label="Previous"></button>
+        <button type="button" class="story-hit right" id="story-next" aria-label="Next"></button>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

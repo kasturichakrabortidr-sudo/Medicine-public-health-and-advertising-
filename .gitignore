@@ -7,3 +7,4 @@ output/
 api_key.txt
 my-brief.yaml
 my-outline.txt
+.netlify

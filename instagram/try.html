@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Try STRATA free</title>
+    <link rel="icon" href="assets/avatar.jpg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,640;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="try-page">
+      <section class="try-hero">
+        <div>
+          <a class="text-btn" href="index.html">← Back to the Instagram page</a>
+          <div class="mark" style="margin-top: 28px">
+            <b>STRATA</b>
+            <span>AI Strategy Director</span>
+          </div>
+          <h1>Try STRATA free.</h1>
+          <p class="lede">
+            Start a complete, evidence-led HCP strategy this afternoon. No generic funnel. The
+            working file is written before anyone sees a slide.
+          </p>
+        </div>
+        <ul class="try-list">
+          <li>Upload a brief in any format — PDF, deck, notes, or paste.</li>
+          <li>STRATA extracts the working file and picks a doctrine from the tension in it.</li>
+          <li>Evidence is traced to named sources. Gaps stay gaps. Nothing is invented.</li>
+          <li>Then you get the strat deck and the measurement room — flagged for MLR.</li>
+        </ul>
+      </section>
+
+      <section class="try-form-wrap">
+        <h2>Reserve your free start</h2>
+        <p class="fine">We will send launch access and the local starter. No spam. No pharma list rental.</p>
+
+        <form class="try-form" name="try-strata" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks">
+          <input type="hidden" name="form-name" value="try-strata" />
+          <p hidden><label>Don’t fill this <input name="bot-field" /></label></p>
+          <label>Name <input name="name" required autocomplete="name" /></label>
+          <label>Work email <input name="email" type="email" required autocomplete="email" /></label>
+          <label>
+            Role
+            <select name="role" required>
+              <option value="">Select</option>
+              <option>Brand / marketing lead</option>
+              <option>Medical / MLR</option>
+              <option>Agency strategist</option>
+              <option>Agency creative</option>
+              <option>Founder / consultant</option>
+            </select>
+          </label>
+          <label>Brand or therapy area <input name="brand" placeholder="e.g. HFrEF, oncology, device" /></label>
+          <button class="cta-btn large" type="submit">Start free</button>
+        </form>
+
+        <p class="fine" style="margin-top: 28px">
+          Already have the repo? Run <code>python start_director.py</code> and open
+          <code>http://127.0.0.1:8080</code>. The Instagram film is the public front of that same
+          working file.
+        </p>
+      </section>
+    </div>
+  </body>
+</html>
