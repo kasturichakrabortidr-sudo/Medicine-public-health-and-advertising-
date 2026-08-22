@@ -545,6 +545,7 @@ def _science_slides(lead: dict, records: list[dict], gaps: list[dict]) -> list[d
     people = _people_rows(records)
     compare = _compare_rows(records)
     lead_marks = mark(*cites)
+    all_marks = mark(*records)
     slides = [
         {
             "id": "science-lead",
@@ -628,7 +629,7 @@ def _science_slides(lead: dict, records: list[dict], gaps: list[dict]) -> list[d
         "kicker": "Evidence forefront — numbered",
         "title": "Every lead claim traces to a numbered paper",
         "narrative": (
-            f"{len(records)} numbered papers {lead_marks}. {len(gaps)} brief items still lack a DOI/PMID "
+            f"{len(records)} numbered papers {all_marks}. {len(gaps)} brief items still lack a DOI/PMID "
             "and cannot set direction. Full Vancouver list at the end of the deck."
         ),
         "layout": "split",
