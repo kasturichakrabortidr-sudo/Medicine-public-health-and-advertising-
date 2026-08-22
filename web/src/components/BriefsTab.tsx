@@ -29,10 +29,14 @@ export function BriefsTab({
   onPack,
   busy,
   setBusy,
+  writeCost = 8,
+  onNeedCredits,
 }: {
   onPack: (pack: StrategyPack) => void;
   busy: boolean;
   setBusy: (v: boolean) => void;
+  writeCost?: number;
+  onNeedCredits?: () => void;
 }) {
   const [files, setFiles] = useState<File[]>([]);
   const [pasted, setPasted] = useState("");
@@ -135,7 +139,9 @@ export function BriefsTab({
       }
       onPack(pack);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(msg);
+      if (/credit/i.test(msg)) onNeedCredits?.();
     } finally {
       setBusy(false);
     }
@@ -208,7 +214,7 @@ export function BriefsTab({
             Extract fields
           </button>
           <button className="btn copper" type="button" disabled={busy} onClick={generate}>
-            {busy ? "Reading the brief…" : "Write the working file"}
+            {busy ? "Reading the brief…" : `Write the working file · ${writeCost} credits`}
           </button>
         </div>
         {error ? <p className="error">{error}</p> : null}

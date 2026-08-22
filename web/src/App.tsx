@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { fetchDemo, saveProject } from "./api";
+import { fetchBilling, fetchDemo, fetchWallet, saveProject } from "./api";
 import { BriefsTab } from "./components/BriefsTab";
 import { DashboardTab } from "./components/DashboardTab";
 import { DeckTab } from "./components/DeckTab";
 import { EvidenceTab } from "./components/EvidenceTab";
+import { PlansTab } from "./components/PlansTab";
 import { ProjectsTab } from "./components/ProjectsTab";
 import { WorkingFileTab } from "./components/WorkingFileTab";
 import { RefLinksProvider } from "./links";
-import type { StrategyPack, TabId } from "./types";
+import type { BillingCatalog, StrategyPack, TabId, Wallet } from "./types";
 
 const USER_PACK_KEY = "strata.userPack.v4";
 
@@ -21,6 +22,20 @@ export default function App() {
   const [pack, setPack] = useState<StrategyPack | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [billing, setBilling] = useState<BillingCatalog | null>(null);
+
+  const refreshWallet = async (wallet?: Wallet) => {
+    if (wallet) {
+      setBilling((prev) => (prev ? { ...prev, wallet } : prev));
+      return;
+    }
+    try {
+      const next = await fetchBilling();
+      setBilling(next);
+    } catch {
+      /* meter is optional if the engine is down */
+    }
+  };
 
   const applyPack = (next: StrategyPack, go: TabId = "work") => {
     setPack(next);
@@ -75,6 +90,14 @@ export default function App() {
     } catch {
       /* ignore */
     }
+    void refreshWallet();
+    const params = new URLSearchParams(window.location.search);
+    const flag = params.get("billing");
+    if (flag === "success" || flag === "portal") {
+      setTab("plans");
+      void fetchWallet().then((wallet) => refreshWallet(wallet)).catch(() => refreshWallet());
+    }
+    if (flag === "cancel") setTab("plans");
   }, []);
 
   const demo = isDemoPack(pack);
@@ -128,7 +151,14 @@ export default function App() {
           >
             Measurement
           </button>
+          <button type="button" className={tab === "plans" ? "active" : ""} onClick={() => setTab("plans")}>
+            Plans
+          </button>
         </nav>
+        <button className="credit-chip" type="button" onClick={() => setTab("plans")}>
+          <strong>{billing ? `${billing.wallet.credits} credits` : "Credits"}</strong>
+          {billing ? `${billing.wallet.planName} · write a file is ${billing.catalog.actions.write_file.credits}` : "Open plans"}
+        </button>
         <button className="btn" type="button" onClick={loadDemo} disabled={busy}>
           Open the CardioShield demo
         </button>
@@ -163,6 +193,8 @@ export default function App() {
             <BriefsTab
               busy={busy}
               setBusy={setBusy}
+              writeCost={billing?.catalog.actions.write_file.credits}
+              onNeedCredits={() => setTab("plans")}
               onPack={(next) => {
                 setError("");
                 applyPack(next, "work");
@@ -170,6 +202,11 @@ export default function App() {
                   void saveProject(next, "ongoing").catch((err) => {
                     setError(err instanceof Error ? err.message : String(err));
                   });
+                }
+                if (next.meta.credits) {
+                  void refreshWallet(next.meta.credits);
+                } else {
+                  void refreshWallet();
                 }
               }}
             />
@@ -187,8 +224,15 @@ export default function App() {
         )}
         {tab === "work" && pack && <WorkingFileTab pack={pack} />}
         {tab === "evidence" && pack && <EvidenceTab pack={pack} />}
-        {tab === "deck" && pack && <DeckTab pack={pack} />}
+        {tab === "deck" && pack && <DeckTab pack={pack} onSpent={() => void refreshWallet()} />}
         {tab === "dashboard" && pack && <DashboardTab pack={pack} />}
+        {tab === "plans" && (
+          <PlansTab
+            billing={billing}
+            onWallet={(wallet) => void refreshWallet(wallet)}
+            onError={setError}
+          />
+        )}
       </main>
     </div>
     </RefLinksProvider>

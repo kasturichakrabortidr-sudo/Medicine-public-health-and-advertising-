@@ -197,6 +197,110 @@ button {
   gap: 18px;
 }
 
+.credit-chip {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 0;
+  width: 100%;
+  text-align: left;
+  background: rgba(196, 132, 74, 0.16);
+  color: #f0c48a;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.credit-chip strong {
+  display: block;
+  font-size: 18px;
+  letter-spacing: 0;
+  color: #faf6ef;
+}
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.plan-grid.packs {
+  grid-template-columns: minmax(0, 320px);
+  margin-bottom: 24px;
+}
+
+.plan-card {
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+
+.plan-card.current {
+  border-color: var(--copper);
+}
+
+.plan-card h2 {
+  font-family: var(--serif);
+  margin: 0 0 8px;
+}
+
+.plan-kicker {
+  margin: 0 0 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--copper-2);
+}
+
+.plan-price {
+  font-family: var(--serif);
+  font-size: 28px;
+  margin: 0;
+}
+
+.plan-price span {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.plan-credits {
+  margin: 4px 0 10px;
+  font-weight: 650;
+}
+
+.plan-card ul {
+  margin: 0 0 16px;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.plan-pack-head {
+  font-family: var(--serif);
+  margin: 28px 0 12px;
+}
+
+.credit-ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.credit-ledger li {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+@media (max-width: 980px) {
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .card {
   background: var(--cream);
   border: 1px solid var(--line);

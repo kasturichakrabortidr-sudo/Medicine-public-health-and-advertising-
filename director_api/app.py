@@ -7,14 +7,25 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from medicomarketing_agent.config import load_brief
 
+from .billing import (
+    COOKIE,
+    BillingError,
+    apply_pack,
+    apply_subscription,
+    catalog as billing_catalog,
+    load_wallet,
+    public_wallet,
+    spend,
+)
 from .deck_skills import catalog
 from .extract import ExtractedBrief, extract_files, merge_into_brief
 from .generate import generate_pack
 from .pptx_export import filename_for, pack_to_pptx
 from .projects import delete_project, get_project, list_projects, save_project, upsert_ongoing
+from . import stripe_billing
 
 app = FastAPI(title="STRATA Strategy Director", version="1.0.0")
 app.add_middleware(
@@ -40,8 +51,9 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-strategy-spine-v2",
+        "build": "2026-08-22-credits",
         "deckSkills": catalog()["skills"],
+        "billing": {"stripe": billing_catalog()["stripe"], "actions": billing_catalog()["actions"]},
     }
 
 
@@ -90,6 +102,7 @@ async def extract(
 
 @app.post("/api/generate")
 async def generate(
+    request: Request,
     files: list[UploadFile] | None = File(default=None),
     pasted: str = Form(default=""),
     brief_json: str = Form(default=""),
@@ -130,6 +143,12 @@ async def generate(
 
     if mode == "demo":
         raise HTTPException(400, "Demo mode is only available from GET /api/demo.")
+
+    wallet = _wallet(request)
+    try:
+        spend(wallet, "write_file")
+    except BillingError as exc:
+        raise HTTPException(exc.status, exc.payload) from exc
 
     pack = generate_pack(brief, mode=mode)
     pack["meta"]["demo"] = False
@@ -172,7 +191,8 @@ async def generate(
         upsert_ongoing(pack)
     except (OSError, ValueError, TypeError):
         pass
-    return pack
+    pack["meta"]["credits"] = public_wallet(wallet)
+    return _with_wallet(pack, request, wallet)
 
 
 @app.get("/api/deck-skills")
@@ -225,6 +245,90 @@ def projects_delete(pid: str):
     return {"ok": True, "id": pid}
 
 
+@app.get("/api/billing")
+def billing_catalog_get(request: Request):
+    wallet = _wallet(request)
+    return _with_wallet({"catalog": billing_catalog(), "wallet": public_wallet(wallet)}, request, wallet)
+
+
+@app.get("/api/billing/me")
+def billing_me(request: Request):
+    wallet = _wallet(request)
+    return _with_wallet(public_wallet(wallet), request, wallet)
+
+
+@app.post("/api/billing/checkout")
+async def billing_checkout(request: Request):
+    wallet = _wallet(request)
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+    item = str((payload or {}).get("item") or "")
+    base = str(request.base_url).rstrip("/")
+    if not stripe_billing.configured():
+        raise HTTPException(
+            503,
+            {
+                "error": "stripe_missing",
+                "message": "Add STRIPE_SECRET_KEY to take real payments. Until then you can start a plan on this machine.",
+                "sandbox": True,
+            },
+        )
+    try:
+        session = stripe_billing.start_checkout(wallet, item, base)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(502, f"Stripe checkout failed: {exc}") from exc
+    return _with_wallet(session, request, wallet)
+
+
+@app.post("/api/billing/portal")
+async def billing_portal(request: Request):
+    wallet = _wallet(request)
+    if not stripe_billing.configured():
+        raise HTTPException(503, "Stripe is not configured.")
+    try:
+        session = stripe_billing.start_portal(wallet, str(request.base_url).rstrip("/"))
+    except Exception as exc:
+        raise HTTPException(400, str(exc)) from exc
+    return _with_wallet(session, request, wallet)
+
+
+@app.post("/api/billing/sandbox")
+async def billing_sandbox(request: Request):
+    if stripe_billing.configured():
+        raise HTTPException(400, "Stripe is configured. Use Checkout, not the local grant.")
+    wallet = _wallet(request)
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+    item = str((payload or {}).get("item") or "")
+    try:
+        if item in ("practice", "agency"):
+            wallet = apply_subscription(wallet, item)
+        elif item:
+            wallet = apply_pack(wallet, item)
+        else:
+            raise HTTPException(400, "Pick a plan or credit pack.")
+    except BillingError as exc:
+        raise HTTPException(exc.status, exc.payload) from exc
+    return _with_wallet({"ok": True, "wallet": public_wallet(wallet)}, request, wallet)
+
+
+@app.post("/api/billing/webhook")
+async def billing_webhook(request: Request):
+    payload = await request.body()
+    signature = request.headers.get("stripe-signature") or ""
+    try:
+        event = stripe_billing.parse_webhook(payload, signature)
+    except Exception as exc:
+        raise HTTPException(400, f"Webhook rejected: {exc}") from exc
+    return stripe_billing.handle_event(event)
+
+
 @app.get("/api/export/pptx")
 def export_demo_pptx():
     return _pptx_response(demo())
@@ -238,7 +342,17 @@ async def export_pptx(request: Request):
         raise HTTPException(400, f"Body must be a JSON strategy pack: {exc}") from exc
     if not isinstance(pack, dict) or not pack.get("slides"):
         raise HTTPException(400, "JSON must be a strategy pack with slides.")
-    return _pptx_response(pack)
+    meta = pack.get("meta") or {}
+    demo = bool(meta.get("demo")) or meta.get("mode") == "demo"
+    wallet = _wallet(request)
+    if not demo:
+        try:
+            spend(wallet, "export_pptx")
+        except BillingError as exc:
+            raise HTTPException(exc.status, exc.payload) from exc
+    response = _pptx_response(pack)
+    _set_cookie(response, request, wallet)
+    return response
 
 
 def _pptx_response(pack: dict) -> Response:
@@ -306,6 +420,28 @@ def _web_file(path: str):
         503,
         "Web build missing. From the repo root run: python start_director.py",
     )
+
+
+def _wallet(request: Request) -> dict:
+    return load_wallet(request.cookies.get(COOKIE))
+
+
+def _set_cookie(response: Response, request: Request, wallet: dict) -> None:
+    response.set_cookie(
+        COOKIE,
+        wallet["id"],
+        httponly=True,
+        samesite="lax",
+        max_age=60 * 60 * 24 * 365,
+        path="/",
+        secure=request.url.scheme == "https",
+    )
+
+
+def _with_wallet(payload, request: Request, wallet: dict) -> JSONResponse:
+    response = JSONResponse(payload)
+    _set_cookie(response, request, wallet)
+    return response
 
 
 def _brief_from_mapping(data: dict) -> ExtractedBrief:

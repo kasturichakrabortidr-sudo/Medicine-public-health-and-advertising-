@@ -128,6 +128,7 @@ export interface StrategyPack {
       engines?: string[];
     };
     storyMap?: { phase: string; slide: string; question: string; rail?: string; act?: string }[];
+    credits?: Wallet;
   };
   brief: ExtractedBrief;
   doctrine: {
@@ -322,7 +323,44 @@ export interface Workfile {
   gapCount: number;
 }
 
-export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence" | "projects";
+export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence" | "projects" | "plans";
+
+export interface CreditAction {
+  credits: number;
+  label: string;
+}
+
+export interface BillingPlan {
+  id: string;
+  name: string;
+  price: number;
+  priceLabel: string;
+  interval?: string;
+  credits: number;
+  kind: string;
+  blurb: string;
+  includes: string[];
+}
+
+export interface Wallet {
+  id: string;
+  email: string;
+  plan: string;
+  planName: string;
+  credits: number;
+  granted: number;
+  periodEnd: string;
+  hasCustomer: boolean;
+  stripe: boolean;
+  sandbox: boolean;
+  actions: Record<string, CreditAction>;
+  ledger: { at: string; action: string; credits: number; note: string }[];
+}
+
+export interface BillingCatalog {
+  catalog: { plans: BillingPlan[]; packs: BillingPlan[]; actions: Record<string, CreditAction>; stripe: boolean; sandbox: boolean };
+  wallet: Wallet;
+}
 
 export type ProjectStatus = "ongoing" | "saved";
 

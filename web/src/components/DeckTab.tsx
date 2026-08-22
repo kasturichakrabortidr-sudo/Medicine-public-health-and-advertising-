@@ -10,7 +10,7 @@ const FALLBACK_SKILLS = [
   { id: "critic", name: "Critic", rule: "Kill empty shout, duplicate labels, and chrome that eats the 16:9." },
 ];
 
-export function DeckTab({ pack }: { pack: StrategyPack }) {
+export function DeckTab({ pack, onSpent }: { pack: StrategyPack; onSpent?: () => void }) {
   const [i, setI] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
@@ -30,6 +30,7 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
     setExporting(true);
     try {
       await downloadPptx(pack);
+      onSpent?.();
     } catch (err) {
       setExportError(err instanceof Error ? err.message : String(err));
     } finally {

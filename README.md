@@ -26,6 +26,18 @@ and the API (`8787`) for live reload.
 | **Evidence** | Validated citation register (DOI/PMID). The campaign lead is the highest-leverage published source, not a slogan. Uncited brief items stay gaps. PubMed hits are retrieved but cannot silently become the lead. |
 | **Strat deck** | Client-ready slides: forest plots, box plots, bars, lines, pies, impact matrix. **Download PPTX** for an editable PowerPoint (native text, tables, Office charts). Print to PDF. |
 | **Dashboard** | KPI room, funnel, evidence mix, intervention board, governance. |
+| **Plans** | Free / Practice / Agency credit allowances. Writing a working file costs 8 credits. A user PPTX costs 3. The demo is free. |
+
+### Paid plans
+
+Without Stripe keys the Plans tab can start Practice, Agency, or a 50-credit pack on this machine so the meter works. To take real cards:
+
+1. Create one Stripe Product per plan (Practice, Agency) and one for the 50-credit pack. Do not put different tiers on a single Product.
+2. Set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and optionally `STRIPE_PRICE_PRACTICE`, `STRIPE_PRICE_AGENCY`, `STRIPE_PRICE_CREDITS_50`.
+3. Point a webhook at `/api/billing/webhook` for `checkout.session.completed`, `invoice.paid`, and `customer.subscription.deleted`.
+4. Set `PUBLIC_BASE_URL` to the public site URL used in Checkout success/cancel.
+
+If you will charge US or EU customers, enable Stripe Tax and add a registration before turning tax on. Stripe collects no tax until a registration is active.
 
 The CardioShield HFrEF pack in `examples/brief.example.yaml` is an **optional demo** (button: “Open the CardioShield demo”). It does not load on startup, and it is never returned from `/api/generate`. Planning numbers are labelled illustrative until you replace them with audit / CRM baselines. All claims still need MLR.
 

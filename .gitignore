@@ -13,6 +13,8 @@ web/.netlify/
 .netlify/
 .pytest_cache/
 data/projects/
+data/wallets/
+data/stripe_catalog.json
 
 *.tsbuildinfo
 
