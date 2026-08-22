@@ -7,3 +7,10 @@ output/
 api_key.txt
 my-brief.yaml
 my-outline.txt
+node_modules/
+web/dist/
+web/.netlify/
+.netlify/
+.pytest_cache/
+*.egg-info/
+
