@@ -9,6 +9,8 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
   const gaps = ev?.gaps || pack.dashboard.evidenceGaps || [];
   const pubmed = ev?.pubmed || pack.dashboard.pubmed || [];
   const refs = pack.references || ev?.references || pack.dashboard.references || [];
+  const recordPmids = new Set(records.map((r) => String(r.pmid || "")).filter(Boolean));
+  const extraPubmed = pubmed.filter((p) => !recordPmids.has(String(p.pmid || "")));
 
   return (
     <div>
@@ -16,8 +18,9 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         <div>
           <h1>Numbered papers</h1>
           <p>
-            Every claim we are willing to lead with has a number. Uncited brief items stay
-            gaps. The full Vancouver list is at the bottom.
+            Every claim we are willing to lead with has a number. Papers come from
+            PubMed (and a curated register when the product matches). The brief is
+            not expected to contain scientific links.
           </p>
         </div>
       </div>
@@ -133,7 +136,11 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           </tbody>
         </table>
         {records.length === 0 && (
-          <p className="muted">No catalog match. Do not invent a trial name or effect size.</p>
+          <p className="muted">
+            No citable paper was retrieved for this product/indication yet. We search
+            PubMed from the brand, product, and therapy area — the brief does not need
+            to list papers.
+          </p>
         )}
       </section>
 
@@ -180,15 +187,14 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         {refs.length === 0 && <p className="muted">No numbered paper matched this brief.</p>}
       </section>
 
-      {pubmed.length > 0 && (
+      {extraPubmed.length > 0 && (
         <section className="card" style={{ marginTop: 18 }}>
-          <h3>PubMed — retrieved, not yet lead</h3>
+          <h3>PubMed — extra retrievals</h3>
           <p className="small muted">
-            Live NCBI hits for the product/indication. Confirm full text before promoting any of these
-            to the campaign lead.
+            Further NCBI hits for the product/indication. Confirm full text before promotional use.
           </p>
           <ul className="bullets">
-            {pubmed.map((p) => (
+            {extraPubmed.map((p) => (
               <li key={p.pmid}>
                 <PaperAnchor href={paperHref(p) || p.url}>{p.citation}</PaperAnchor>
               </li>
