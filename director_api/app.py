@@ -318,6 +318,26 @@ async def billing_sandbox(request: Request):
     return _with_wallet({"ok": True, "wallet": public_wallet(wallet)}, request, wallet)
 
 
+@app.post("/api/billing/claim")
+async def billing_claim(request: Request):
+    if not stripe_billing.configured():
+        raise HTTPException(503, "Stripe is not configured.")
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+    session_id = str((payload or {}).get("session_id") or "")
+    try:
+        wallet = stripe_billing.claim_session(session_id)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(502, f"Could not claim checkout: {exc}") from exc
+    if not wallet:
+        raise HTTPException(404, "Checkout did not match a wallet.")
+    return _with_wallet({"ok": True, "wallet": public_wallet(wallet)}, request, wallet)
+
+
 @app.post("/api/billing/webhook")
 async def billing_webhook(request: Request):
     payload = await request.body()

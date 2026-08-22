@@ -278,6 +278,11 @@ def apply_pack(wallet: dict, pack_id: str, *, email: str = "", customer: str = "
     )
 
 
+def note(wallet: dict, text: str) -> dict:
+    _append(wallet, "note", 0, text)
+    return save_wallet(wallet)
+
+
 def cancel_subscription(wallet: dict) -> dict:
     wallet["plan"] = "free"
     wallet["stripeSubscriptionId"] = ""

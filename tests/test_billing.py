@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 from director_api.app import app
 from director_api.billing import apply_subscription, load_wallet, spend, BillingError
-from director_api.stripe_billing import apply_checkout_session, handle_event
+from director_api.stripe_billing import apply_checkout_session, claim_session, handle_event
 
 
 client = TestClient(app)
@@ -126,6 +126,30 @@ def test_invoice_paid_is_idempotent(tmp_path, monkeypatch):
     # invoice.paid without a matching customer is ignored; replay of apply_subscription is the lock
     apply_subscription(load_wallet("wal_inv"), "practice", invoice="in_1")
     assert load_wallet("wal_inv")["credits"] == credits
+
+
+def test_claim_rejects_bad_session_id():
+    try:
+        claim_session("not-a-session")
+        assert False, "should have rejected"
+    except ValueError:
+        pass
+
+
+def test_invoice_payment_failed_notes_wallet(tmp_path, monkeypatch):
+    monkeypatch.setenv("STRATA_WALLETS_DIR", str(tmp_path / "fail"))
+    wallet = load_wallet("wal_fail")
+    wallet["stripeCustomerId"] = "cus_fail"
+    from director_api.billing import save_wallet
+    save_wallet(wallet)
+    handle_event(
+        {
+            "type": "invoice.payment_failed",
+            "data": {"object": {"customer": "cus_fail", "subscription": ""}},
+        }
+    )
+    again = load_wallet("wal_fail")
+    assert any("failed" in (row.get("note") or "").lower() for row in again["ledger"])
 
 
 def test_spend_raises_when_short(tmp_path, monkeypatch):

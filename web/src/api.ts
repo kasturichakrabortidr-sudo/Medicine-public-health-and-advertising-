@@ -174,6 +174,16 @@ export async function startPortal(): Promise<{ url: string }> {
   return res.json();
 }
 
+export async function claimCheckout(sessionId: string): Promise<{ wallet: Wallet }> {
+  const res = await fetch("/api/billing/claim", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ session_id: sessionId }),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return res.json();
+}
+
 export async function sandboxGrant(item: string): Promise<{ wallet: Wallet }> {
   const res = await fetch("/api/billing/sandbox", {
     method: "POST",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchBilling, fetchDemo, fetchWallet, saveProject } from "./api";
+import { claimCheckout, fetchBilling, fetchDemo, fetchWallet, saveProject } from "./api";
 import { BriefsTab } from "./components/BriefsTab";
 import { DashboardTab } from "./components/DashboardTab";
 import { DeckTab } from "./components/DeckTab";
@@ -95,7 +95,14 @@ export default function App() {
     const flag = params.get("billing");
     if (flag === "success" || flag === "portal") {
       setTab("plans");
-      void fetchWallet().then((wallet) => refreshWallet(wallet)).catch(() => refreshWallet());
+      const sessionId = params.get("session_id") || "";
+      if (flag === "success" && sessionId) {
+        void claimCheckout(sessionId)
+          .then((res) => refreshWallet(res.wallet))
+          .catch(() => fetchWallet().then((wallet) => refreshWallet(wallet)).catch(() => refreshWallet()));
+      } else {
+        void fetchWallet().then((wallet) => refreshWallet(wallet)).catch(() => refreshWallet());
+      }
     }
     if (flag === "cancel") setTab("plans");
   }, []);

@@ -30,12 +30,12 @@ and the API (`8787`) for live reload.
 
 ### Paid plans
 
-Without Stripe keys the Plans tab can start Practice, Agency, or a 50-credit pack on this machine so the meter works. To take real cards:
+Without Stripe keys the Plans tab can start Practice, Agency, or a 50-credit pack on this machine so the meter works. To take real cards, copy `.env.example` to `.env` (never commit it) and:
 
-1. Create one Stripe Product per plan (Practice, Agency) and one for the 50-credit pack. Do not put different tiers on a single Product.
-2. Set `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and optionally `STRIPE_PRICE_PRACTICE`, `STRIPE_PRICE_AGENCY`, `STRIPE_PRICE_CREDITS_50`.
-3. Point a webhook at `/api/billing/webhook` for `checkout.session.completed`, `invoice.paid`, and `customer.subscription.deleted`.
-4. Set `PUBLIC_BASE_URL` to the public site URL used in Checkout success/cancel.
+1. Prefer a restricted key (`rk_test_` / `rk_live_`) over a secret key. Never commit `.env`.
+2. Run `PYTHONPATH=. python scripts/bootstrap_stripe.py` to create one Product per plan and the webhook, or set `STRIPE_PRICE_PRACTICE`, `STRIPE_PRICE_AGENCY`, and `STRIPE_PRICE_CREDITS_50` yourself.
+3. Keep `STRIPE_WEBHOOK_SECRET` pointed at `/api/billing/webhook` for `checkout.session.completed`, `invoice.paid`, `invoice.payment_failed`, and `customer.subscription.deleted`.
+4. Set `PUBLIC_BASE_URL` to the public site URL used in Checkout success/cancel. After Checkout, the app also claims `session_id` so credits land even if the webhook is late.
 
 If you will charge US or EU customers, enable Stripe Tax and add a registration before turning tax on. Stripe collects no tax until a registration is active.
 

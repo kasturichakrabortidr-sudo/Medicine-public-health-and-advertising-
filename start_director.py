@@ -46,7 +46,20 @@ def ensure_web_build() -> None:
     subprocess.check_call(["npm", "run", "build"], cwd=str(WEB))
 
 
+def load_env_file() -> None:
+    path = ROOT / ".env"
+    if not path.is_file():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        raw = line.strip()
+        if not raw or raw.startswith("#") or "=" not in raw:
+            continue
+        key, _, value = raw.partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
 def main() -> None:
+    load_env_file()
     ensure_python_deps()
     env = os.environ.copy()
     env.setdefault("PYTHONUNBUFFERED", "1")

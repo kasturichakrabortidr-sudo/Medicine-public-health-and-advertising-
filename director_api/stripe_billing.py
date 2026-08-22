@@ -105,20 +105,32 @@ def start_checkout(wallet: dict, item_id: str, request_base: str) -> dict:
     params = {
         "mode": mode,
         "line_items": [{"price": price_id, "quantity": 1}],
-        "success_url": f"{_base_url(request_base)}/?billing=success",
+        "success_url": f"{_base_url(request_base)}/?billing=success&session_id={{CHECKOUT_SESSION_ID}}",
         "cancel_url": f"{_base_url(request_base)}/?billing=cancel",
         "client_reference_id": wallet["id"],
         "metadata": {"wallet": wallet["id"], "item": item_id},
         "allow_promotion_codes": True,
+        "billing_address_collection": "auto",
     }
     if wallet.get("email"):
         params["customer_email"] = wallet["email"]
     if wallet.get("stripeCustomerId"):
         params["customer"] = wallet["stripeCustomerId"]
         params.pop("customer_email", None)
+        params["customer_update"] = {"address": "auto", "name": "auto"}
     if mode == "subscription":
         params["subscription_data"] = {"metadata": {"wallet": wallet["id"], "item": item_id}}
     else:
+        if not wallet.get("stripeCustomerId"):
+            params["customer_creation"] = "always"
+        params["invoice_creation"] = {
+            "enabled": True,
+            "invoice_data": {
+                "description": f"STRATA {spec['name']}",
+                "metadata": {"wallet": wallet["id"], "item": item_id},
+                "footer": "Credits for HCP medicomarketing strategy work. Demo packs stay free.",
+            },
+        }
         params["payment_intent_data"] = {"metadata": {"wallet": wallet["id"], "item": item_id}}
     try:
         params["integration_identifier"] = f"strata-credits-{secrets.token_hex(4)}"
@@ -140,6 +152,43 @@ def start_portal(wallet: dict, request_base: str) -> dict:
         }
     )
     return {"url": session.url}
+
+
+def _session_payload(session) -> dict:
+    details = getattr(session, "customer_details", None)
+    email = ""
+    if details is not None:
+        email = getattr(details, "email", None) or ""
+    meta = session.metadata if getattr(session, "metadata", None) is not None else {}
+    if hasattr(meta, "to_dict"):
+        meta = meta.to_dict()
+    return {
+        "id": getattr(session, "id", None),
+        "status": getattr(session, "status", None),
+        "payment_status": getattr(session, "payment_status", None),
+        "metadata": dict(meta or {}),
+        "client_reference_id": getattr(session, "client_reference_id", None),
+        "customer": getattr(session, "customer", None),
+        "customer_email": getattr(session, "customer_email", None) or email,
+        "customer_details": {"email": email},
+        "subscription": getattr(session, "subscription", None),
+        "invoice": getattr(session, "invoice", None),
+        "payment_intent": getattr(session, "payment_intent", None),
+    }
+
+
+def claim_session(session_id: str) -> dict | None:
+    if not session_id or not session_id.startswith("cs_"):
+        raise ValueError("A Checkout session id is required.")
+    client = _client()
+    session = client.v1.checkout.sessions.retrieve(session_id)
+    payload = _session_payload(session)
+    if payload.get("status") != "complete" and payload.get("payment_status") not in {
+        "paid",
+        "no_payment_required",
+    }:
+        raise RuntimeError("Checkout is not complete yet.")
+    return apply_checkout_session(payload)
 
 
 def apply_checkout_session(session: dict) -> dict | None:
@@ -222,6 +271,12 @@ def handle_event(event: dict) -> dict:
     if kind == "invoice.paid":
         wallet = apply_invoice(obj)
         return {"ok": True, "handled": kind, "wallet": wallet.get("id") if wallet else None}
+    if kind == "invoice.payment_failed":
+        wallet = _wallet_by_customer(str(obj.get("customer") or ""), str(obj.get("subscription") or ""))
+        if wallet:
+            from .billing import note as wallet_note
+            wallet_note(wallet, "A Stripe invoice failed. Update the card in Manage billing.")
+            return {"ok": True, "handled": kind, "wallet": wallet["id"]}
     if kind in {"customer.subscription.deleted", "customer.subscription.canceled"}:
         wallet = _wallet_by_customer(str(obj.get("customer") or ""), str(obj.get("id") or ""))
         if wallet:
