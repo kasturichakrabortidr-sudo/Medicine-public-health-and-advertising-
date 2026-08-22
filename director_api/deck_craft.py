@@ -642,17 +642,38 @@ def _sequence_slide(story: dict) -> dict:
     }
 
 
+def _who_label(text, fallback: str = "Priority room") -> str:
+    """A complete room name that fits a bar. Never an ellipsis. Never a cut paren."""
+    raw = " ".join(str(text or "").split())
+    inside = ""
+    if "(" in raw and ")" in raw:
+        inside = raw[raw.find("(") + 1:raw.rfind(")")].strip()
+        raw = raw[:raw.find("(")].strip()
+    raw = raw.replace(" cardiologists and ", " + ").replace(" physicians with ", " · ")
+    words = raw.split()
+    if inside and 1 <= len(inside.split()) <= 5:
+        head = " ".join(words[:2]) if len(words) >= 2 else (words[0] if words else "")
+        if head and head.lower() not in inside.lower():
+            return f"{head} · {inside}"
+        return inside
+    if len(words) > 5:
+        raw = f"{words[0]} {' '.join(words[-3:])}".rstrip(",;:")
+    return raw or fallback
+
+
 def _who_slide(story: dict) -> dict:
     rooms = story.get("who") or []
     n = len(rooms) or 1
     data = []
     for i, row in enumerate(rooms[:4]):
+        full = line(row[0]) if row else f"Room {i + 1}"
         data.append({
-            "name": line(row[0], 6) if row else f"Room {i + 1}",
+            "name": _who_label(full, f"Room {i + 1}"),
+            "full": full,
             "value": n - i,
         })
     if not data:
-        data = [{"name": "Priority specialists", "value": 1}]
+        data = [{"name": "Priority specialists", "full": "Priority specialists", "value": 1}]
     return {
         "id": "who",
         "section": "Audience",

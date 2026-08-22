@@ -1249,6 +1249,13 @@ a.cite-link {
   font-size: 13px;
 }
 
+.chart-tip {
+  background: var(--cream);
+  border: 1px solid var(--line-strong);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
 @media print {
   .rail,
   .topbar .actions,

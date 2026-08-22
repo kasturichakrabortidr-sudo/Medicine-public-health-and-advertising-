@@ -127,19 +127,42 @@ export function StrategyChart({ spec, height = 260 }: { spec: ChartSpec; height?
     );
   }
 
+  const names = spec.data.map((d) => String(d.name ?? ""));
+  const wide = names.some((n) => n.length > 12);
+  const tipLabel = (_: string, rows: { payload?: Record<string, string | number> }[]) =>
+    String(rows?.[0]?.payload?.full || rows?.[0]?.payload?.name || "");
+  if (wide) {
+    const labelW = Math.min(220, Math.max(140, ...names.map((n) => Math.round(n.length * 7.2))));
+    return (
+      <div>
+        <div className="small muted">{spec.title}</div>
+        <ResponsiveContainer width="100%" height={Math.max(height, 72 * spec.data.length)}>
+          <BarChart data={spec.data} layout="vertical" margin={{ left: 4, right: 16, top: 8, bottom: 8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
+            <XAxis type="number" allowDecimals={false} />
+            <YAxis type="category" dataKey="name" width={labelW} interval={0} tick={{ fontSize: 13 }} />
+            <Tooltip labelFormatter={tipLabel} />
+            <Bar dataKey="value" fill="#c4844a" />
+          </BarChart>
+        </ResponsiveContainer>
+        {spec.note ? <div className="small muted">{spec.note}</div> : spec.unit ? <div className="small muted">{spec.unit}</div> : null}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="small muted">{spec.title}</div>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={spec.data}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
-          <XAxis dataKey="name" interval={0} angle={-18} textAnchor="end" height={56} />
+          <XAxis dataKey="name" interval={0} />
           <YAxis />
-          <Tooltip />
+          <Tooltip labelFormatter={tipLabel} />
           <Bar dataKey="value" fill="#c4844a" />
         </BarChart>
       </ResponsiveContainer>
-      {spec.unit ? <div className="small muted">{spec.unit}</div> : null}
+      {spec.note ? <div className="small muted">{spec.note}</div> : spec.unit ? <div className="small muted">{spec.unit}</div> : null}
     </div>
   );
 }

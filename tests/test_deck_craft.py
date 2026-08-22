@@ -252,6 +252,11 @@ def test_strategy_spine_uses_tables_charts_and_flow():
     who = by_id["who"]
     assert who["chart"]["kind"] == "bar"
     assert len(who["chart"]["data"]) >= 2
+    who_names = [str(d.get("name") or "") for d in who["chart"]["data"]]
+    assert all(who_names)
+    assert all("…" not in n and "..." not in n for n in who_names)
+    assert all("(" not in n or n.endswith(")") for n in who_names)
+    assert any("metro" in n.lower() or "tier" in n.lower() or "trainee" in n.lower() for n in who_names)
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
     assert {"people", "forest", "bar"} <= kinds
     tables = [s for s in pack["slides"] if s.get("table") and s["id"] != "references"]
