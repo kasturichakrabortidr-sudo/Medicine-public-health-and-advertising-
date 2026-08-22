@@ -12,6 +12,7 @@ from datetime import date
 from .cite import attach_references, mark
 from .evidence import resolve_evidence
 from .extract import ExtractedBrief
+from .paper_read import hf_catalog_pack, paper_jobs
 from .workfile import build_workfile
 
 DELAY_RE = re.compile(
@@ -418,7 +419,7 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "id": "house",
             "section": "Message",
             "kicker": "Message house",
-            "title": "One theme. Three pillars. No ornamental claims.",
+            "title": "Each numbered paper is a pillar. No reprints.",
             "narrative": p07.get("theme") or (f"Theme: {doctrine['bet']}" + (f"  {doctrine.get('scienceAnchor', '')}" if doctrine.get("scienceAnchor") else "")),
             "layout": "split",
             "table": p07.get("house") or {
@@ -574,7 +575,11 @@ def _science_slides(lead: dict, records: list[dict], gaps: list[dict]) -> list[d
             "section": "Science",
             "kicker": "Campaign lead — sourced",
             "title": "The papers decide what we lead with",
-            "subtitle": f"{mark(primary)} {primary.get('short')}" if primary else "No validated lead yet",
+            "subtitle": (
+                f"{len(cites)} numbered papers, each with a job"
+                if len(cites) > 1
+                else (f"{mark(primary)} {primary.get('short')}" if primary else "No validated lead yet")
+            ),
             "narrative": (lead.get("statement") or "No DOI/PMID-backed row matched this brief.") + (f" {lead_marks}" if lead_marks else ""),
             "layout": "insight",
             "callout": {
@@ -820,11 +825,11 @@ def _stream_mix(records: list[dict], brief: ExtractedBrief) -> list[dict]:
 
 
 def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
-    by_direct = {r.get("directs"): r for r in records}
-    start = by_direct.get("first-eligible-start")
-    guide = by_direct.get("guideline-cover")
-    outcome = by_direct.get("outcome-permission")
-    if start or guide:
+    if hf_catalog_pack(records):
+        by_direct = {r.get("directs"): r for r in records}
+        start = by_direct.get("first-eligible-start")
+        guide = by_direct.get("guideline-cover")
+        outcome = by_direct.get("outcome-permission")
         pillars = []
         if start:
             pillars.append(
@@ -848,10 +853,9 @@ def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
         else:
             pillars.append("Pillar 3 — Peer cover: someone like you already starts here.")
         return pillars
-    sourced = [r for r in records if r.get("claim_permitted")]
-    seen: set[str] = set()
     out = []
-    for r in sourced:
+    seen: set[str] = set()
+    for r in paper_jobs(records):
         claim = (r.get("claim_permitted") or "").strip()
         key = re.sub(r"[^a-z0-9]+", " ", claim.lower())[:80]
         if not claim or key in seen:
@@ -859,7 +863,7 @@ def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
         seen.add(key)
         label = r.get("roleLabel") or r.get("trial") or r.get("short") or f"Paper {len(out)+1}"
         out.append(f"Pillar {len(out)+1} — {label} {mark(r)}: {claim}")
-        if len(out) >= 3:
+        if len(out) >= 4:
             break
     return out or ["No extractable finding yet — do not lock a line."]
 

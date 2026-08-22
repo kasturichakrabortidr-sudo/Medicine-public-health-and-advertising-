@@ -11,6 +11,7 @@ from typing import Any
 
 from .cite import mark
 from .extract import ExtractedBrief
+from .paper_read import hf_catalog_pack, paper_jobs
 
 PHASE_TITLES = [
     ("01", "What the brief is really asking"),
@@ -41,9 +42,9 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
         _p05(brief, records, doctrine),
         _p06(brief, records, by_direct),
         _p07(brief, records, doctrine, lead),
-        _p08(brief, doctrine),
-        _p09(brief, doctrine),
-        _p10(brief, doctrine),
+        _p08(brief, doctrine, records),
+        _p09(brief, doctrine, records),
+        _p10(brief, doctrine, records),
         _p11(brief, doctrine, lead, records, gaps),
     ]
     return {
@@ -111,8 +112,13 @@ def _p01(brief, doctrine, records, gaps) -> dict:
         f"H1. Delay, not disbelief, is the conversion problem — from the insight “{_short(delay or 'not supplied', 90)}”.",
         f"H2. Cost is a veto in tier-2, not a footnote — from “{_short(money or 'not supplied', 90)}”.",
         "H3. In-hospital first-eligible start is the highest-leverage behaviour change, because that is the window the initiation papers actually studied."
-        if any(r.get("directs") == "first-eligible-start" for r in records)
-        else "H3. We cannot name the initiation window until a timing paper is on the register.",
+        if hf_catalog_pack(records)
+        else (
+            "H3. Each numbered paper has a job — placebo, head-to-head, durability — "
+            "and we will not reprint one finding as the whole campaign."
+            if records else
+            "H3. We cannot name a scientific lead until a paper is on the register."
+        ),
     ]
     return _phase(
         "01",
@@ -157,6 +163,7 @@ def _p03(brief, records, gaps, lead) -> dict:
         effect = _effect(r)
         rows.append([
             mark(r),
+            r.get("roleLabel") or r.get("role") or r.get("directs") or "",
             r.get("short") or "",
             r.get("stream") or "",
             f"{r.get('design') or '—'} · n={r.get('n') or '—'}",
@@ -177,7 +184,7 @@ def _p03(brief, records, gaps, lead) -> dict:
         "03",
         "Every row is a paper we can put a number on. We searched PubMed from the product and therapy area; the brief is not the source of the links. Brief lines without a number stay in the gap table. We did not give them an effect size.",
         forefront={
-            "headers": ["Ref", "Source", "Stream", "Design / N", "Published finding", "Grade", "What we may say", "Caveat"],
+            "headers": ["Ref", "Job", "Source", "Stream", "Design / N", "Published finding", "Grade", "What we may say", "Caveat"],
             "rows": rows,
         },
         assets=assets,
@@ -189,6 +196,36 @@ def _p03(brief, records, gaps, lead) -> dict:
 def _p04(brief, records, gaps) -> dict:
     insights = brief.hcp_insights or ["No HCP insight was supplied. We will not invent an advisory board."]
     concord, discord, silent = [], [], []
+    jobs = paper_jobs(records)
+    if not hf_catalog_pack(records):
+        for rec in jobs:
+            discord.append([
+                rec.get("roleLabel") or rec.get("short") or "Sourced",
+                rec.get("claim_permitted") or rec.get("finding") or "",
+                rec.get("trial") or rec.get("short") or "",
+                rec.get("spine_execute") or "Use this paper for this job. Do not reprint it as another paper.",
+            ])
+        for ins in insights:
+            low = ins.lower()
+            if any(w in low for w in ("cost", "price", "afford", "oop")):
+                silent.append([
+                    _short(ins, 120),
+                    "No health-economic paper is numbered. The clinical papers below do not answer price.",
+                ])
+            elif any(w in low for w in ("rwe", "local", "indian", "india")):
+                silent.append([
+                    _short(ins, 120),
+                    next((f"GAP: {g['item']}" for g in gaps if "rwe" in g["item"].lower() or "local" in g["item"].lower() or "indian" in g["item"].lower()),
+                         "Local RWE is in the brief and not on the register."),
+                ])
+        return _phase(
+            "04",
+            "Each numbered paper is mapped to a job. Insight lines that the papers cannot answer stay as research.",
+            inventory=insights,
+            concord={"headers": ["What they already believe", "What the papers show", "What we do"], "rows": concord or [["None yet — see the paper jobs", "—", "—"]]},
+            discord={"headers": ["This paper's job", "What the paper shows", "Source", "How we use it"], "rows": discord or [["None mapped", "—", "—", "—"]]},
+            silent={"headers": ["Insight or evidence that has no partner", "What that means"], "rows": silent or [["—", "—"]]},
+        )
     start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
     outcome = next((r for r in records if r.get("directs") == "outcome-permission"), None)
     guide = next((r for r in records if r.get("directs") == "guideline-cover"), None)
@@ -241,9 +278,10 @@ def _p04(brief, records, gaps) -> dict:
 def _p05(brief, records, doctrine) -> dict:
     insights = brief.hcp_insights or []
     cost = brief.access_and_cost or []
-    start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
-    outcome = next((r for r in records if r.get("directs") == "outcome-permission"), records[0] if records else None)
-    if start:
+    jobs = paper_jobs(records)
+    delay = next((i for i in insights if _looks_like_delay(i)), "")
+    if hf_catalog_pack(records):
+        start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
         current = delay = next((i for i in insights if _looks_like_delay(i)), "Start is later than first-eligible. The brief does not describe the current habit in so many words.")
         required = (
             f"Start {brief.brand or 'the product'} at the first eligible encounter"
@@ -257,18 +295,36 @@ def _p05(brief, records, doctrine) -> dict:
             ["A belief we can unlearn", next((i for i in insights if "monitor" in i.lower() or "renal" in i.lower()), "not named"), "The myth", "One number, one peer voice"],
         ]
     else:
-        delay = next((i for i in insights if _looks_like_delay(i)), "")
         current = insights[0] if insights else "The brief does not describe the current habit in so many words."
-        finding = (outcome.get("claim_permitted") if outcome else "") or "No extractable finding yet."
-        required = (
-            f"Put the sourced finding in the room when the doctor decides on {brief.brand or 'the product'}: {finding}"
-        )
+        if jobs:
+            required = (
+                f"When the doctor decides on {brief.brand or 'the product'}, use each numbered paper for its job — "
+                + "; ".join(
+                    f"{mark(r)} {r.get('roleLabel') or r.get('short')}: "
+                    f"{_short(r.get('claim_permitted') or r.get('finding') or '', 90)}"
+                    for r in jobs[:4]
+                )
+                + ". Do not reprint one finding as the whole argument."
+            )
+        else:
+            required = "No extractable finding yet — do not lock a scientific behaviour change."
+        barrier = current
         drivers = [
-            ["Sourced finding", mark(outcome) if outcome else "citation pending", current, "One number a peer can repeat — not a bibliography"],
-            ["Cost conversation the doctor can survive", "HE paper not on the register", "Prescriber guilt", "Assistance kit, inside code"],
-            ["Peer cover that travels down", next((mark(r) for r in records if r.get("directs") == "guideline-cover"), "guideline pending"), "Metro-only KOLs", "Protocol authorship, then tier-2 demonstration"],
-            ["A belief we can unlearn", next((i for i in insights if "monitor" in i.lower() or "renal" in i.lower()), "not named"), "The myth", "One number, one peer voice"],
-        ]
+            [
+                r.get("roleLabel") or r.get("short") or "Sourced paper",
+                mark(r),
+                barrier,
+                r.get("spine_execute") or (r.get("claim_permitted") or ""),
+            ]
+            for r in jobs[:4]
+        ] or [["Sourced finding", "citation pending", current, "Retrieve a paper before we spend."]]
+        if any(_looks_like_cost(c) for c in cost) or any(_looks_like_cost(i) for i in insights):
+            drivers.append([
+                "Cost conversation the doctor can survive",
+                "HE paper not on the register",
+                "Prescriber guilt",
+                "Assistance kit, inside code — not a reprint of the efficacy papers.",
+            ])
     concerns = []
     if any(_looks_like_cost(c) for c in cost) or any(_looks_like_cost(i) for i in insights):
         concerns.append(["Economic", next((c for c in cost if _looks_like_cost(c)), "Cost concern named in the brief"), "Opportunity — cost", "Do not hide price. Give the doctor a legal way to stay on the patient's side."])
@@ -280,7 +336,7 @@ def _p05(brief, records, doctrine) -> dict:
         concerns.append(["Professional", next(i for i in insights if "rwe" in i.lower() or "local" in i.lower()), "Motivation — peer cover", "KOLs do not go on a poster until the local paper exists."])
     return _phase(
         "05",
-        "COM-B on the actual insight and access lines. Capability is mostly intact. Opportunity (cost, ward workflow) and motivation (the wait, peer cover) are doing the damage.",
+        "COM-B on the actual insight and access lines. Each numbered paper is a driver. We do not collapse them into one finding.",
         current=current,
         required=required,
         enemy=doctrine.get("enemy") or "",
@@ -290,6 +346,37 @@ def _p05(brief, records, doctrine) -> dict:
 
 
 def _p06(brief, records, by_direct) -> dict:
+    competitors = brief.competitors or ["Standard of care"]
+    if not hf_catalog_pack(records):
+        jobs = paper_jobs(records)
+        rows = [
+            [
+                r.get("roleLabel") or r.get("short") or "Sourced",
+                r.get("claim_permitted") or r.get("finding") or "",
+                mark(r),
+                r.get("spine_means") or "Do not spend this paper as a reprint of another.",
+            ]
+            for r in jobs[:4]
+        ] or [["No numbered paper yet", "—", "—", "Retrieve papers before we stand anywhere."]]
+        position = (
+            "Each numbered paper owns one job. We stand on the set — placebo, head-to-head, "
+            "durability, replication — and we do not reprint one finding as the others. "
+            "Cost and local RWE stay silent until those papers exist."
+        )
+        roadmap = [
+            f"Keep {mark(r)} as {r.get('roleLabel') or 'this job'} — do not quote it for a different objection."
+            for r in jobs[:4]
+        ] or ["Retrieve a PMID before anyone writes a claim."]
+        if brief.access_and_cost or any(_looks_like_cost(i) for i in (brief.hcp_insights or [])):
+            roadmap.append("No health-economic paper is numbered. Do not invent a cost-offset line.")
+        return _phase(
+            "06",
+            "Standing ground is the numbered papers, each with a job. Silence is still a boundary.",
+            fourway={"headers": ["This paper's job", "Finding we may use", "Ref", "What we will not do with it"], "rows": rows},
+            competitors=competitors,
+            position=position,
+            roadmap=roadmap,
+        )
     start = by_direct.get("first-eligible-start")
     outcome = by_direct.get("outcome-permission")
     guide = by_direct.get("guideline-cover")
@@ -304,7 +391,6 @@ def _p06(brief, records, by_direct) -> dict:
         ["Local RWE / Indian patient", "Cited in the brief, no PMID", cell(local) if local else "Registry epidemiology only" + (f" {mark(local)}" if local else ""), "Evolving — HE study ongoing (uncited)", "Silent"],
         ["Cost offset", "Silent", "Silent", "Ongoing HE study is a gap", "Silent"],
     ]
-    competitors = brief.competitors or ["Standard of care"]
     position = (
         f"We stand only where the columns agree. Outcome permission {mark(outcome) if outcome else '[pending]'} "
         f"plus guideline class {mark(guide) if guide else '[pending]'} plus initiation feasibility {mark(start) if start else '[pending]'}. "
@@ -333,7 +419,7 @@ def _p07(brief, records, doctrine, lead) -> dict:
     sourced = [r for r in records if (r.get("claim_permitted") or r.get("finding"))]
     if primary is None and sourced:
         primary = sourced[0]
-    if start or guide:
+    if hf_catalog_pack(records):
         pillars = [
             [
                 "Start now",
@@ -386,7 +472,7 @@ def _p07(brief, records, doctrine, lead) -> dict:
                 mark(rec) if rec else "—",
                 rec.get("spine_means") or claim,
             ])
-            if len(pillars) >= 3:
+            if len(pillars) >= 4:
                 break
         barrier = (
             (brief.hcp_insights or brief.access_and_cost or [doctrine.get("enemy") or ""])[0]
@@ -433,7 +519,7 @@ def _p07(brief, records, doctrine, lead) -> dict:
         ]
     return _phase(
         "07",
-        "One theme. Three pillars. Each pillar carries a number or it does not ship. The objection grid says what we will not say.",
+        "One theme. Each numbered paper is a pillar. A pillar without a number does not ship.",
         theme=theme,
         scienceLead=(lead.get("statement") or "") + (" " + mark(*(lead.get("citations") or [])) if lead.get("citations") else ""),
         house={"headers": ["Pillar", "Line", "Ref", "Proof we are allowed to use"], "rows": pillars},
@@ -441,24 +527,50 @@ def _p07(brief, records, doctrine, lead) -> dict:
     )
 
 
-def _p08(brief, doctrine) -> dict:
+def _p08(brief, doctrine, records=None) -> dict:
     specialties = brief.target_specialties or ["the named specialists"]
-    stages = [
-        ["Before launch", "A handful of hospital pathway owners write the first-eligible protocol", "Medical leads. Commercial listens."],
-        ["First quarter", "One hospital live, one cost conversation kit in the bag, one myth we can actually source", "Field + medical huddle weekly."],
-        ["Adoption", "The second prescription is designed. Repeat among trialists is the tell.", "CRM is promotional. It goes through MLR."],
-        ["After the burst", "The pathway stays when the campaign money stops", "Handover into the next cycle's working file."],
-    ]
+    if hf_catalog_pack(records or []):
+        stages = [
+            ["Before launch", "A handful of hospital pathway owners write the first-eligible protocol", "Medical leads. Commercial listens."],
+            ["First quarter", "One hospital live, one cost conversation kit in the bag, one myth we can actually source", "Field + medical huddle weekly."],
+            ["Adoption", "The second prescription is designed. Repeat among trialists is the tell.", "CRM is promotional. It goes through MLR."],
+            ["After the burst", "The pathway stays when the campaign money stops", "Handover into the next cycle's working file."],
+        ]
+    else:
+        jobs = paper_jobs(records or [])
+        stages = [
+            [
+                "Before first call",
+                "Bag each numbered paper as a job: "
+                + (", ".join(f"{mark(r)} {r.get('roleLabel')}" for r in jobs[:4]) or "retrieve papers first"),
+                "Medical signs the jobs. Commercial does not pick a favourite finding.",
+            ],
+            [
+                "In the room",
+                "Placebo, head-to-head, and durability are three different answers — not one reprint.",
+                "Field uses the paper that matches the objection they actually heard.",
+            ],
+            [
+                "Cost objection",
+                "Stay on their side. Assistance mechanics. Do not spend an efficacy paper as a price argument.",
+                "Inside code. No unsourced offset.",
+            ],
+            [
+                "After the burst",
+                "Unaided recall of each paper's job, not of a mash-up number.",
+                "Handover into the next cycle's working file.",
+            ],
+        ]
     return _phase(
         "08",
-        "A doctor should feel a sequence, not a spray. We have not invented a 14-touch cadence. We have named the jobs in order.",
+        "A doctor should feel a sequence, not a spray. Each contact names a numbered paper or it does not go on the plan.",
         stages={"headers": ["When", "Job", "Who owns it"], "rows": stages},
         rule="If a contact cannot name a numbered paper or a behaviour we are trying to change, it does not go on the plan.",
         who=f"Priority: {', '.join(specialties[:3])}.",
     )
 
 
-def _p09(brief, doctrine) -> dict:
+def _p09(brief, doctrine, records=None) -> dict:
     specialties = brief.target_specialties or ["Target specialists"]
     segments = brief.hcp_segments or []
     rows = []
@@ -485,23 +597,38 @@ def _p09(brief, doctrine) -> dict:
     )
 
 
-def _p10(brief, doctrine) -> dict:
+def _p10(brief, doctrine, records=None) -> dict:
     qoq = _qoq(brief)
     goal = (brief.business_goal or "").strip() or "No numeric goal in the brief."
-    kpis = [
-        ["Parent", "Quarterly volume / revenue vs the brief", goal, "Sales / IQVIA equivalent", "If this does not move, the rest is decoration"],
-        ["Lead", "Share of eligible starts inside 48 hours of first-eligible", "Audit the baseline first. Then set a target.", "Hospital pathway log", "Kill the protocol if this is flat at week 8 in the pilot"],
-        ["Lead", "Assistance offered in eligible high-OOP starts", "Brief says the PAP is under-used.", "CRM", "If mention rises and starts do not, the kit is a pamphlet"],
-        ["Lead", "Unaided prevalence of the named myth", next((i for i in brief.hcp_insights if "40%" in i or "renal" in i.lower()), "Only if the myth is in the brief"), "Insight wave", "No drop, no second burst"],
-        ["Govern", "Assets with a numbered citation that have cleared MLR", "0 until medical says otherwise", "MLR log", "No number, no ship"],
-    ]
+    jobs = paper_jobs(records or [])
+    if hf_catalog_pack(records or []):
+        kpis = [
+            ["Parent", "Quarterly volume / revenue vs the brief", goal, "Sales / IQVIA equivalent", "If this does not move, the rest is decoration"],
+            ["Lead", "Share of eligible starts inside 48 hours of first-eligible", "Audit the baseline first. Then set a target.", "Hospital pathway log", "Kill the protocol if this is flat at week 8 in the pilot"],
+            ["Lead", "Assistance offered in eligible high-OOP starts", "Brief says the PAP is under-used.", "CRM", "If mention rises and starts do not, the kit is a pamphlet"],
+            ["Lead", "Unaided prevalence of the named myth", next((i for i in brief.hcp_insights if "40%" in i or "renal" in i.lower()), "Only if the myth is in the brief"), "Insight wave", "No drop, no second burst"],
+            ["Govern", "Assets with a numbered citation that have cleared MLR", "0 until medical says otherwise", "MLR log", "No number, no ship"],
+        ]
+    else:
+        kpis = [
+            ["Parent", "Quarterly volume / revenue vs the brief", goal, "Sales / IQVIA equivalent", "If this does not move, the rest is decoration"],
+        ]
+        for r in jobs[:4]:
+            kpis.append([
+                "Lead",
+                f"Unaided recall of {r.get('roleLabel') or r.get('short')} {mark(r)}",
+                r.get("claim_permitted") or r.get("finding") or "",
+                "Insight wave / ride-along",
+                "If they quote a different paper for this job, the set collapsed.",
+            ])
+        kpis.append(["Govern", "Assets with a numbered citation that have cleared MLR", "0 until medical says otherwise", "MLR log", "No number, no ship"])
     return _phase(
         "10",
-        "The brief's own goal is the parent metric. Everything else has to explain it. We will not put a made-up funnel % on a slide and call it research.",
+        "The brief's own goal is the parent metric. Lead indicators are recall of each paper's job, not a mash-up number.",
         parent=goal,
         qoq=qoq,
         kpis={"headers": ["Kind", "Metric", "From the brief / rule", "Source", "Kill / govern"], "rows": kpis},
-        caveat="Any initiation % we later put on a dashboard is a planning target until the audit exists.",
+        caveat="Any rate we later put on a dashboard is a planning target until the audit exists.",
     )
 
 
@@ -510,7 +637,7 @@ def _p11(brief, doctrine, lead, records, gaps) -> dict:
     ask = [
         f"Sign the bet: {doctrine.get('bet')}",
         f"Sign the scientific lead, with numbers: " + (", ".join(f"{mark(c)} {c.get('short')}" for c in cites[:4]) or "none yet — do not lock"),
-        "Name owners for the hospital pathway, the cost conversation, and the one myth we can source.",
+        "Name owners for each paper's job in the bag, the cost conversation, and MLR on the numbered claims.",
         f"Park {len(gaps)} uncited brief line(s) as research, not as copy.",
         "MLR on the numbered claims before anyone builds an asset.",
     ]
@@ -528,17 +655,20 @@ def _first_questions(brief, records, gaps) -> list[str]:
     qs = []
     if not brief.business_goal:
         qs.append("What does success look like in numbers we can audit?")
-    else:
+    elif hf_catalog_pack(records):
         qs.append("What is the current first-eligible start rate? The brief has a growth goal and no baseline.")
-    if not any(r.get("directs") == "first-eligible-start" for r in records):
+    else:
+        qs.append("Which objection in the room maps to which numbered paper — and who owns that job?")
+    if hf_catalog_pack(records) and not any(r.get("directs") == "first-eligible-start" for r in records):
         qs.append("Which paper, with a PMID, allows us to talk about when to start?")
-    if any("rwe" in (g.get("item") or "").lower() or "local" in (g.get("item") or "").lower() for g in gaps) or not brief.brand_evidence:
+    if any("rwe" in (g.get("item") or "").lower() or "local" in (g.get("item") or "").lower() for g in gaps):
         qs.append("Where is the DOI for the local RWE the brief wants KOLs to hold?")
     if brief.access_and_cost:
         qs.append("What may we actually say about cost, assistance, and health economics — in this code, with a paper?")
     if not brief.hcp_insights:
         qs.append("What do these doctors currently do at the eligible moment? We have no insight line.")
-    qs.append("Which hospital will run the first pathway, and who owns the 48-hour log?")
+    if hf_catalog_pack(records):
+        qs.append("Which hospital will run the first pathway, and who owns the 48-hour log?")
     qs.append("What will we kill in week 8 if the lead indicator has not moved?")
     return qs[:10]
 

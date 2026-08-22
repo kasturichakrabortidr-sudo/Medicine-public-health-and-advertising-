@@ -708,6 +708,7 @@ def assign_paper_jobs(records: list[dict[str, Any]], brief: Any) -> list[dict[st
                 role = "supporting"
         rec["role"] = role
         rec["roleLabel"] = ROLE_LABELS.get(role, rec.get("trial") or rec.get("short") or "Sourced")
+        rec["directs"] = role
         used.add(role)
         rec["spine_means"] = _means_for(rec)
         rec["spine_execute"] = _execute_for_role(role, brief)
@@ -717,6 +718,37 @@ def assign_paper_jobs(records: list[dict[str, Any]], brief: Any) -> list[dict[st
         )
         rec["spine_barrier"] = _barrier(brief)
     return records
+
+
+def hf_catalog_pack(records: list[dict[str, Any]] | None) -> bool:
+    """True only for the curated HF/ARNI catalog, not for PubMed hits that mention guidelines."""
+    return any(
+        r.get("matchedFrom") == "catalog"
+        and r.get("directs") in {"first-eligible-start", "guideline-cover"}
+        for r in (records or [])
+    )
+
+
+def paper_jobs(records: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+    """Numbered papers in campaign order — each row is a distinct job."""
+    role_rank = {
+        "placebo-controlled": 0,
+        "first-eligible-start": 0,
+        "head-to-head": 1,
+        "durability": 2,
+        "replication": 3,
+        "outcome-permission": 4,
+        "guideline-cover": 5,
+        "supporting": 6,
+    }
+    jobs = [r for r in (records or []) if r.get("claim_permitted") or r.get("finding")]
+    return sorted(
+        jobs,
+        key=lambda r: (
+            role_rank.get(r.get("role") or r.get("directs") or "", 8),
+            r.get("ref") or 99,
+        ),
+    )
 
 
 def _means_for(rec: dict[str, Any]) -> str:

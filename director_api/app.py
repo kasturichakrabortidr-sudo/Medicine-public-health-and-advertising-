@@ -38,7 +38,7 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-papers-jobs",
+        "build": "2026-08-22-every-paper",
     }
 
 

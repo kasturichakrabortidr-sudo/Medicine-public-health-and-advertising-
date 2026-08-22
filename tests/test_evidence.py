@@ -385,3 +385,15 @@ def test_each_paper_owns_a_distinct_strategy_line(monkeypatch):
     objections = next(p for p in pack["workfile"]["phases"] if p["id"] == "07")["objections"]["rows"]
     obj_refs = [row[2] for row in objections if row[2] not in ("gap", "pending", "brief", "—")]
     assert len(set(obj_refs)) >= 2
+    p05 = next(p for p in pack["workfile"]["phases"] if p["id"] == "05")
+    driver_refs = [row[1] for row in p05["drivers"]["rows"] if str(row[1]).startswith("[")]
+    assert len(set(driver_refs)) >= 3
+    assert "the sourced finding" not in (p05.get("required") or "").lower()
+    p06 = next(p for p in pack["workfile"]["phases"] if p["id"] == "06")
+    standing = " ".join(str(x) for row in p06["fourway"]["rows"] for x in row)
+    assert "Indian RWE" not in standing
+    assert "ACEI" not in standing
+    assert "first-eligible" not in standing.lower()
+    assert "[1]" in standing and "[2]" in standing
+    assert "74.1" in standing
+    assert "86.6" in standing or "57.1" in standing
