@@ -14,6 +14,8 @@ def test_inn_from_brand_and_dressed_product():
         "sacubitril/valsartan fixed-dose combination (illustrative example)"
     ) == "sacubitril/valsartan"
     assert inn_from_text("lumetinib") == "lumetinib"
+    assert inn_from_text("Finerenone") == "finerenone"
+    assert inn_from_text("Kerendia") == "finerenone"
     assert inn_from_text("Velmecor 10 mg / 20 mg (fictional once-daily oral therapy)") == ""
     assert inn_from_text("Cardiava™ (fictional brand)") == ""
     assert inn_from_text("CardioShield") == ""
@@ -44,6 +46,25 @@ def test_jardiance_hfpef_searches_empagliflozin():
     assert "empagliflozin" in blob
     assert "jardiance" not in blob
     assert "cardiava" not in blob
+
+
+def test_finerenone_brief_uses_inn_not_campaign_brand():
+    brief = ExtractedBrief(
+        brand="FINERVA (finerenone 10/20 mg film-coated tablets)",
+        product="Finerenone",
+        therapy_area="diabetes (CKD-T2D)",
+        indication="Cardiorenal protection",
+    )
+    assert science_name(brief) == "finerenone"
+    blob = " ".join(_pubmed_queries(brief)).lower()
+    assert "finerenone" in blob
+    assert "finerva" not in blob
+    kerendia = ExtractedBrief(
+        brand="Metro launch",
+        product="Kerendia 10 mg / 20 mg",
+        therapy_area="CKD with type 2 diabetes",
+    )
+    assert science_name(kerendia) == "finerenone"
 
 
 def test_claim_sentence_uses_inn_not_trade_name():

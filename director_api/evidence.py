@@ -1,10 +1,11 @@
 """Validated, cited evidence that sets the campaign lead.
 
-Client briefs never contain paper links. Science is sourced from (1) a curated
-catalog when the molecule/class in the brief matches a published trial, and
-(2) a live PubMed search on the INN, indication, and therapy area — never the
-campaign brand. Uncited brief items stay gaps. PubMed hits become numbered
-records with PMID/DOI but never receive an invented effect size.
+Science is sourced from (1) citations the brief already names — PMIDs, DOIs,
+PubMed URLs, and trial tokens — (2) a curated catalog when the molecule or
+named trial matches a published paper, and (3) a live PubMed search on the
+INN, indication, and therapy area — never the campaign brand. Uncited brief
+items stay gaps. PubMed hits become numbered records with PMID/DOI but never
+receive an invented effect size.
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ import urllib.request
 from typing import Any
 
 from .extract import ExtractedBrief
-from .molecule import pubmed_term, science_name
+from .molecule import pubmed_term, science_name  # pubmed_term used by harvest + queries
 from .paper_read import (
     apply_reading,
     assign_paper_jobs,
@@ -425,37 +426,166 @@ CATALOG: list[dict[str, Any]] = [
         "tags": ("nsclc", "oncology", "lung", "pembrolizumab", "pd-l1", "keynote"),
         "directs": "outcome-permission",
     },
+    {
+        "id": "fidelio-dkd-2020",
+        "stream": "Brand / pivotal",
+        "trial": "FIDELIO-DKD",
+        "short": "FIDELIO-DKD 2020",
+        "title": "Effect of finerenone on chronic kidney disease outcomes in type 2 diabetes",
+        "authors": "Bakris GL, Agarwal R, Anker SD, et al.",
+        "year": 2020,
+        "journal": "N Engl J Med",
+        "pages": "383:2219-2229",
+        "doi": "10.1056/NEJMoa2025845",
+        "pmid": "33264825",
+        "design": "RCT, double-blind",
+        "n": 5734,
+        "population": "CKD and type 2 diabetes, on RAS blockade",
+        "endpoint": "Kidney failure, sustained ≥40% eGFR decline, or renal death",
+        "effect_metric": "HR",
+        "hr": 0.82,
+        "low": 0.73,
+        "high": 0.93,
+        "grade": "A",
+        "claim_permitted": "Finerenone reduced the primary kidney composite vs placebo in CKD with type 2 diabetes (17.8% vs 21.1%; HR 0.82, 0.73–0.93).",
+        "caveat": "Hyperkalaemia-related discontinuation was higher with finerenone (2.3% vs 0.9%). Quote the composite. Local label governs.",
+        "mlr": "Stay inside the labelled CKD–T2D population. Do not transfer this kidney number onto HFpEF or an unstudied product.",
+        "tags": ("cardiorenal", "ckd", "t2d", "dkd", "finerenone", "fidelio", "nephrology"),
+        "directs": "outcome-permission",
+        "control_event": 21.1,
+        "treat_event": 17.8,
+        "arr": 3.3,
+        "nnt": 29,
+        "horizon": "median 2.6 years (NNT published at 3 years)",
+        "visual_unit": "kidney composite events per 100 patients",
+        "spine_means": "Treat 29 patients like these to prevent 1 kidney composite event over ~3 years — that is the kidney prize.",
+        "spine_barrier": "CKD–T2D is treated as a laboratory finding, not a start.",
+        "spine_execute": "Lead with the kidney-outcome pack — FIDELIO-DKD is one paper, not the whole case.",
+        "spine_measure": "Share of eligible CKD–T2D starts on an evidence-based non-steroidal MRA.",
+    },
+    {
+        "id": "figaro-dkd-2021",
+        "stream": "Brand / complementary RCT",
+        "trial": "FIGARO-DKD",
+        "short": "FIGARO-DKD 2021",
+        "title": "Cardiovascular events with finerenone in kidney disease and type 2 diabetes",
+        "authors": "Pitt B, Filippatos G, Agarwal R, et al.",
+        "year": 2021,
+        "journal": "N Engl J Med",
+        "pages": "385:2255-2263",
+        "doi": "10.1056/NEJMoa2110956",
+        "pmid": "34449181",
+        "design": "RCT, double-blind",
+        "n": 7437,
+        "population": "CKD and type 2 diabetes, earlier-stage / high CV risk than FIDELIO-DKD",
+        "endpoint": "CV death, nonfatal MI, nonfatal stroke, or HF hospitalisation",
+        "effect_metric": "HR",
+        "hr": 0.87,
+        "low": 0.76,
+        "high": 0.98,
+        "grade": "A",
+        "claim_permitted": "Finerenone reduced the primary CV composite vs placebo in CKD with type 2 diabetes (12.4% vs 14.2%; HR 0.87, 0.76–0.98).",
+        "caveat": "The kidney composite in this trial was not significant (HR 0.87, 0.76–1.01). Do not quote FIDELIO's kidney number as FIGARO's.",
+        "mlr": "This is the complementary CV trial, not a reprint of FIDELIO-DKD. Quote the CV composite.",
+        "tags": ("cardiorenal", "ckd", "t2d", "dkd", "finerenone", "figaro", "nephrology"),
+        "directs": "replication",
+        "control_event": 14.2,
+        "treat_event": 12.4,
+        "arr": 1.8,
+        "nnt": 56,
+        "horizon": "median 3.4 years",
+        "visual_unit": "CV composite events per 100 patients",
+        "spine_means": "A second RCT in a complementary CKD band found a CV benefit. One kidney paper is not the case.",
+        "spine_barrier": "A single-trial habit lets the room dismiss cardiorenal protection as unsettled.",
+        "spine_execute": "When they ask 'is that just FIDELIO?', put FIGARO-DKD next to it.",
+        "spine_measure": "Unaided recall that kidney and CV programmes agree, not one trial.",
+    },
+    {
+        "id": "fidelity-2022",
+        "stream": "Brand / pooled",
+        "trial": "FIDELITY",
+        "short": "FIDELITY 2022",
+        "title": "Cardiovascular and kidney outcomes with finerenone in patients with type 2 diabetes and chronic kidney disease: the FIDELITY pooled analysis",
+        "authors": "Agarwal R, Filippatos G, Pitt B, et al.",
+        "year": 2022,
+        "journal": "Eur Heart J",
+        "pages": "43:474-484",
+        "doi": "10.1093/eurheartj/ehab777",
+        "pmid": "35023547",
+        "design": "Prespecified pooled analysis of two RCTs",
+        "n": 13026,
+        "population": "Pooled FIDELIO-DKD and FIGARO-DKD: CKD and type 2 diabetes",
+        "endpoint": "CV death, nonfatal MI, nonfatal stroke, or HF hospitalisation",
+        "effect_metric": "HR",
+        "hr": 0.86,
+        "low": 0.78,
+        "high": 0.95,
+        "grade": "A",
+        "claim_permitted": "Pooled FIDELITY: finerenone reduced the CV composite vs placebo (12.7% vs 14.4%; HR 0.86, 0.78–0.95) and the kidney composite (5.5% vs 7.1%; HR 0.77, 0.67–0.88).",
+        "caveat": "Pooled analysis, not a third independent RCT. Quote both composites; do not invent a third trial.",
+        "mlr": "Use as the spectrum estimate across FIDELIO-DKD and FIGARO-DKD. Do not collapse the two RCTs into this one line.",
+        "tags": ("cardiorenal", "ckd", "t2d", "dkd", "finerenone", "fidelity", "nephrology"),
+        "directs": "supporting",
+        "control_event": 14.4,
+        "treat_event": 12.7,
+        "arr": 1.7,
+        "nnt": 59,
+        "horizon": "median 3.0 years",
+        "visual_unit": "CV composite events per 100 patients",
+        "spine_means": "Across the CKD spectrum the two RCTs agree on direction. The pack is the case.",
+        "spine_barrier": "Teams pick one FIDELIO reprint and leave FIGARO and the pooled estimate in the bag.",
+        "spine_execute": "Load FIDELIO-DKD, FIGARO-DKD, and FIDELITY as one numbered set.",
+        "spine_measure": "Share of materials that cite the set, not a single PMID.",
+    },
 ]
 
 
 def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str, Any]:
-    """Find citable papers for this brief. The brief is not expected to list them."""
+    """Find citable papers for this brief, keeping every reference the brief named."""
     blob = _brief_blob(brief)
     matched: list[dict[str, Any]] = []
     seen: set[str] = set()
+    seen_pmids: set[str] = set()
+
+    def _add(rec: dict[str, Any]) -> None:
+        rid = str(rec.get("id") or "")
+        pmid = str(rec.get("pmid") or "")
+        if rid and rid in seen:
+            return
+        if pmid and pmid in seen_pmids:
+            return
+        if rid:
+            seen.add(rid)
+        if pmid:
+            seen_pmids.add(pmid)
+        matched.append(rec)
+
+    for rec in harvest_cited_records(brief, pubmed=pubmed):
+        _add(rec)
+
     for entry in CATALOG:
+        if entry["id"] in seen:
+            continue
+        if str(entry.get("pmid") or "") in seen_pmids:
+            continue
         if _matches(entry, brief, blob):
-            rec = _record(entry, status="validated", matched_from="catalog")
-            matched.append(rec)
-            seen.add(entry["id"])
+            _add(_record(entry, status="validated", matched_from="catalog"))
 
     pubmed_hits: list[dict[str, Any]] = []
     if pubmed:
         pubmed_hits = _pubmed_enrich(brief, seen)
-        if len(matched) < 3:
+        if len(matched) < 4:
             pmids = [str(h.get("pmid") or "") for h in pubmed_hits if h.get("pmid")]
             readings = fetch_abstracts(pmids) if pmids else {}
             chosen = select_papers(pubmed_hits, brief, readings, limit=4)
-            catalog_pmids = {str(r.get("pmid") or "") for r in matched}
             for hit in chosen:
                 pmid = str(hit.get("pmid") or "")
-                if pmid and pmid in catalog_pmids:
+                if pmid and pmid in seen_pmids:
                     continue
-                rec = _pubmed_as_record(hit)
-                rec = apply_reading(rec, readings.get(pmid), brief)
-                matched.append(rec)
-                if pmid:
-                    catalog_pmids.add(pmid)
+                rec = apply_reading(_pubmed_as_record(hit), readings.get(pmid), brief)
+                _add(rec)
+                if len(matched) >= 4:
+                    break
 
     assign_paper_jobs(matched, brief)
     gaps = _uncited_brief_items(brief, matched)
@@ -489,6 +619,198 @@ def _brief_blob(brief: ExtractedBrief) -> str:
     return " ".join(p for p in parts if p).lower()
 
 
+PMID_IN_TEXT = re.compile(
+    r"(?:PMID[:\s#]*|https?://(?:www\.)?(?:pubmed\.ncbi\.nlm\.nih\.gov|pubmed\.gov)/(?:pubmed/)?)(\d{7,8})\b",
+    re.I,
+)
+DOI_IN_TEXT = re.compile(r"\b(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.I)
+TRIAL_TOKEN = re.compile(r"\b([A-Z][A-Z0-9]{2,}(?:-[A-Z0-9]{2,}){1,3})\b")
+
+
+def _citation_blob(brief: ExtractedBrief) -> str:
+    parts = [
+        brief.raw_text,
+        brief.notes,
+        "\n".join(brief.existing_evidence),
+        "\n".join(brief.brand_evidence),
+        "\n".join(brief.evolving_evidence),
+        "\n".join(brief.guidelines),
+    ]
+    return "\n".join(p for p in parts if p)
+
+
+def _catalog_by_trial(token: str) -> dict[str, Any] | None:
+    key = re.sub(r"[^a-z0-9]+", "", (token or "").lower())
+    if len(key) < 5:
+        return None
+    for entry in CATALOG:
+        trial = re.sub(r"[^a-z0-9]+", "", (entry.get("trial") or "").lower())
+        if not trial:
+            continue
+        if trial == key or trial.startswith(key) or key.startswith(trial):
+            return entry
+    return None
+
+
+def _pmid_stub(pmid: str) -> dict[str, Any]:
+    return {
+        "id": f"pmid-{pmid}",
+        "stream": "Independent / brief cite",
+        "trial": "",
+        "short": f"PMID {pmid}",
+        "title": f"PMID {pmid}",
+        "authors": "",
+        "year": None,
+        "journal": "",
+        "pages": "",
+        "doi": "",
+        "pmid": pmid,
+        "design": "Brief-cited PMID",
+        "n": None,
+        "population": "",
+        "endpoint": "",
+        "effect_metric": None,
+        "hr": None,
+        "low": None,
+        "high": None,
+        "grade": "retrieved",
+        "claim_permitted": f"Brief-cited PMID {pmid}. Confirm the abstract before promotional use.",
+        "caveat": "Cited from the brief. Read the paper before a promotional claim.",
+        "mlr": "Full-text and label check required before promotional use.",
+        "directs": "brief-cite",
+        "citation": f"PMID {pmid}",
+        "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
+        "status": "retrieved",
+        "matchedFrom": "brief-cite",
+    }
+
+
+def _summary_as_hit(pmid: str, doc: dict[str, Any]) -> dict[str, Any]:
+    title = doc.get("title") or ""
+    journal = doc.get("fulljournalname") or doc.get("source") or ""
+    year = _year(doc.get("pubdate") or "")
+    authors = _author_line(doc.get("authors") or [])
+    doi = _doi_from(doc)
+    pubtypes = doc.get("pubtype") or []
+    return {
+        "pmid": pmid,
+        "title": title,
+        "authors": authors,
+        "year": year,
+        "journal": journal,
+        "doi": doi,
+        "design": pubtypes[0] if pubtypes else "PubMed record",
+        "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
+        "citation": (
+            f"{authors} {title} {journal}. {year}."
+            + (f" doi:{doi}" if doi else f" PMID {pmid}")
+        ),
+        "status": "pubmed-retrieved",
+        "note": "Cited from the brief and retrieved from PubMed. Confirm full text before a promotional claim.",
+    }
+
+
+def harvest_cited_records(brief: ExtractedBrief, *, pubmed: bool = True) -> list[dict[str, Any]]:
+    """Turn PMIDs, DOIs, and trial names written in the brief into records."""
+    blob = _citation_blob(brief)
+    if not blob.strip():
+        return []
+    found: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    pending_pmids: list[str] = []
+    pending_trials: list[str] = []
+
+    def add_catalog(entry: dict[str, Any]) -> None:
+        if entry["id"] in seen:
+            return
+        seen.add(entry["id"])
+        pmid = str(entry.get("pmid") or "")
+        if pmid:
+            seen.add(pmid)
+        found.append(_record(entry, status="validated", matched_from="catalog"))
+
+    for pmid in dict.fromkeys(PMID_IN_TEXT.findall(blob)):
+        entry = next((e for e in CATALOG if str(e.get("pmid") or "") == pmid), None)
+        if entry:
+            add_catalog(entry)
+        elif pmid not in seen:
+            pending_pmids.append(pmid)
+            seen.add(pmid)
+
+    for raw_doi in DOI_IN_TEXT.findall(blob):
+        doi = raw_doi.rstrip(").,;]")
+        entry = next((e for e in CATALOG if (e.get("doi") or "").lower() == doi.lower()), None)
+        if entry:
+            add_catalog(entry)
+
+    for token in dict.fromkeys(TRIAL_TOKEN.findall(blob)):
+        entry = _catalog_by_trial(token)
+        if entry:
+            add_catalog(entry)
+        else:
+            pending_trials.append(token)
+
+    for entry in CATALOG:
+        if entry["id"] in seen:
+            continue
+        trial = (entry.get("trial") or "").strip()
+        if not trial:
+            continue
+        distinctive = ("-" in trial) or bool(re.search(r"\d", trial))
+        if distinctive and trial.lower() in blob.lower():
+            add_catalog(entry)
+        elif trial.lower() == "fidelity" and re.search(r"\bfidelity\b", blob, re.I):
+            if re.search(r"fidelio|figaro|finerenone|dkd|ckd|pooled", blob, re.I):
+                add_catalog(entry)
+
+    if pending_pmids:
+        summaries: dict[str, dict] = {}
+        readings: dict[str, dict] = {}
+        if pubmed:
+            try:
+                summaries = _esummary(pending_pmids)
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
+                summaries = {}
+            try:
+                readings = fetch_abstracts(pending_pmids)
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
+                readings = {}
+        for pmid in pending_pmids:
+            doc = summaries.get(pmid)
+            if doc:
+                rec = apply_reading(_pubmed_as_record(_summary_as_hit(pmid, doc)), readings.get(pmid), brief)
+                rec["matchedFrom"] = "brief-cite"
+                found.append(rec)
+            else:
+                found.append(_pmid_stub(pmid))
+
+    if pubmed:
+        inn = science_name(brief)
+        for token in pending_trials:
+            if len(found) >= 8:
+                break
+            focus = pubmed_term(inn)
+            query = f'"{token}"[Title]'
+            if focus:
+                query = f'{focus}[Title] AND "{token}"'
+            try:
+                ids = _esearch(query, retmax=3)
+                summaries = _esummary(ids) if ids else {}
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
+                continue
+            readings = fetch_abstracts(ids) if ids else {}
+            for pmid, doc in summaries.items():
+                if any(str(r.get("pmid") or "") == pmid for r in found):
+                    continue
+                rec = apply_reading(_pubmed_as_record(_summary_as_hit(pmid, doc)), readings.get(pmid), brief)
+                rec["matchedFrom"] = "brief-cite"
+                rec["trial"] = rec.get("trial") or token
+                found.append(rec)
+                break
+
+    return found
+
+
 GENERIC_TAGS = {
     "india",
     "indian",
@@ -513,6 +835,15 @@ CLASS_TOKENS = {
         "lcz696",
         "entresto",
         "transition",
+    ),
+    "cardiorenal": (
+        "finerenone",
+        "kerendia",
+        "fidelio",
+        "figaro",
+        "fidelity",
+        "ns-mra",
+        "mineralocorticoid",
     ),
     "oncology": (
         "pembrolizumab",
@@ -550,6 +881,8 @@ def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str) -> bool:
         return False
     if family == "hfpef" and brief_family == "hfpef":
         return True
+    if family == "cardiorenal" and brief_family == "cardiorenal":
+        return True
 
     trial = (entry.get("trial") or "").lower()
     if len(trial) >= 6 and trial in blob:
@@ -584,6 +917,8 @@ def _catalog_family(tags) -> str:
     joined = " ".join(tagset)
     if tagset & {"hfpef"} or "preserved ejection" in joined:
         return "hfpef"
+    if tagset & {"cardiorenal", "dkd", "finerenone", "fidelio", "figaro"}:
+        return "cardiorenal"
     if tagset & {"hfref", "arni", "paradigm", "pioneer", "hf"} or "heart failure" in joined:
         return "hf"
     if tagset & {"nsclc", "oncology", "pembrolizumab", "keynote"}:
@@ -601,6 +936,16 @@ def _brief_family(brief: ExtractedBrief, blob: str) -> str:
         or "heart failure with preserved" in ta
     ):
         return "hfpef"
+    inn = science_name(brief)
+    if (
+        inn == "finerenone"
+        or any(_contains_term(k, ta) for k in ("finerenone", "kerendia", "fidelio", "figaro"))
+        or (
+            re.search(r"\bfidelity\b", ta)
+            and re.search(r"fidelio|figaro|finerenone|dkd|ckd", ta)
+        )
+    ):
+        return "cardiorenal"
     if any(
         _contains_term(k, ta)
         for k in ("hfref", "arni", "sacubitril", "paradigm")
@@ -656,7 +1001,10 @@ def _uncited_brief_items(brief: ExtractedBrief, matched: list[dict]) -> list[dic
             key = item.lower()
             if any(token in cited_blob for token in _tokens(key) if len(token) > 4):
                 continue
-            if any(token in key for token in ("paradigm", "pioneer", "transition", "esc", "acc/aha", "hfsa", "keynote")):
+            if any(token in key for token in (
+                "paradigm", "pioneer", "transition", "esc", "acc/aha", "hfsa", "keynote",
+                "fidelio", "figaro", "fidelity",
+            )):
                 continue
             gaps.append({
                 "stream": stream,
@@ -698,6 +1046,9 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
         "aha-acc-hfsa-2022",
         "keynote-189-2018",
         "keynote-024-2016",
+        "fidelio-dkd-2020",
+        "figaro-dkd-2021",
+        "fidelity-2022",
     ]
     anchors = [by_id[i] for i in preferred if i in by_id]
     if not anchors:
@@ -964,6 +1315,8 @@ def _disease_clause(brief: ExtractedBrief) -> str:
             '(HFpEF OR "heart failure with preserved ejection fraction" '
             'OR "preserved ejection fraction")'
         )
+    if re.search(r"\b(ckd|dkd|chronic kidney|diabetic kidney)\b", blob, re.I):
+        return '("chronic kidney disease" OR CKD OR "diabetic kidney disease" OR DKD)'
     indication = _clean_query_bit(brief.indication)
     ta = _clean_query_bit(brief.therapy_area)
     return indication or ta

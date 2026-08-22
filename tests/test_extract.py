@@ -248,6 +248,22 @@ def test_pptx_title_and_table():
     assert brief.market == "India"
 
 
+def test_references_heading_fills_existing_evidence():
+    pasted = """
+Brand name: FINERVA
+Product: Finerenone
+Therapy area: CKD-T2D
+References:
+- FIDELIO-DKD Bakris 2020 PMID 33264825
+- FIGARO-DKD Pitt 2021
+- FIDELITY pooled analysis
+"""
+    brief = merge_into_brief([], pasted=pasted)
+    assert any("FIDELIO" in s for s in brief.existing_evidence)
+    assert any("FIGARO" in s for s in brief.existing_evidence)
+    assert any("FIDELITY" in s for s in brief.existing_evidence)
+
+
 def test_yaml_files_still_win_on_explicit_keys():
     payload = b"brand: CardioShield\ntherapy_area: Cardiology - chronic heart failure\n"
     brief = merge_into_brief([extract_one("brief.yaml", payload, "text/yaml")])

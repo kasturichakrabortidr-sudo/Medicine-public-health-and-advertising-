@@ -45,9 +45,9 @@ BRAND_TO_INN: dict[str, str] = {
 # Suffixes that mark an INN even when the brief wrapped it in a brand line.
 # Stem is {1,} so short INNs like valsartan (val + sartan) still match.
 INN_RE = re.compile(
-    r"\b(sacubitril|"
+    r"\b(sacubitril|finerenone|"
     r"[A-Za-z][A-Za-z0-9-]{1,}(?:mab|nib|tide|sartan|gliptin|gliflozin|"
-    r"olol|pril|statin|parin|xaban|fenone|glutide|ciclib|parib))\b",
+    r"olol|pril|statin|parin|xaban|fenone|renone|glutide|ciclib|parib))\b",
     re.I,
 )
 
@@ -92,7 +92,7 @@ def science_name(brief: Any) -> str:
         name = inn_from_text(labelled.group(1)) or inn_from_text(labelled.group(0))
         if name:
             return name
-    return ""
+    return inn_from_text(raw)
 
 
 def pubmed_term(name: str) -> str:
@@ -103,11 +103,6 @@ def pubmed_term(name: str) -> str:
     if len(parts) == 1:
         return parts[0]
     return "(" + " AND ".join(parts) + ")"
-    """Tokens to look for in paper titles (sacubitril, valsartan, …)."""
-    name = science_name(brief)
-    if not name:
-        return []
-    return [t for t in re.findall(r"[a-z][a-z0-9-]{3,}", name.lower()) if t not in INN_STOP]
 
 
 def _mapped_inns(text: str) -> list[str]:

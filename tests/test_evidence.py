@@ -567,3 +567,88 @@ def test_pubmed_keeps_searching_until_a_pack_is_filled(monkeypatch):
     titles = " ".join(h["title"] for h in hits).lower()
     assert "preserved" in titles
     assert not any("velmecor" in (h.get("title") or "").lower() for h in hits)
+
+
+def test_finerenone_brief_uses_named_cardiorenal_pack():
+    brief = ExtractedBrief(
+        brand="FINERVA (finerenone 10/20 mg film-coated tablets)",
+        product="Finerenone",
+        therapy_area="diabetes (CKD-T2D) is under-diagnosed and under-",
+        indication="Cardiorenal protection",
+        raw_text="References\n- FIDELIO-DKD\n- FIGARO-DKD\n- FIDELITY pooled analysis",
+        existing_evidence=["FIDELIO-DKD", "FIGARO-DKD", "FIDELITY"],
+    )
+    ledger = resolve_evidence(brief, pubmed=False)
+    ids = {r["id"] for r in ledger["records"]}
+    pmids = {r["pmid"] for r in ledger["records"]}
+    assert "fidelio-dkd-2020" in ids
+    assert "figaro-dkd-2021" in ids
+    assert "fidelity-2022" in ids
+    assert "33264825" in pmids
+    assert "34449181" in pmids
+    assert "35023547" in pmids
+    assert "paradigm-hf-2014" not in ids
+    assert "pioneer-hf-2019" not in ids
+    assert len(ledger["records"]) >= 3
+    pack = generate_pack(brief, pubmed=False)
+    assert pack["meta"]["molecule"] == "finerenone"
+    assert len(pack["references"]) >= 3
+    assert pack["doctrine"]["id"] != "first-touch"
+
+
+def test_brief_pmids_become_multiple_records(monkeypatch):
+    def fake_search(term, retmax=8):
+        return []
+
+    def fake_summary(pmids):
+        titles = {
+            "11111111": "Lumetinib versus placebo in plaque psoriasis (BEAM-1)",
+            "22222222": "Lumetinib versus secukinumab in plaque psoriasis (BEAM-HEAD)",
+            "33333333": "Long-term lumetinib open-label extension (BEAM-EXT)",
+        }
+        return {
+            pmid: {
+                "title": titles[pmid],
+                "fulljournalname": "N Engl J Med",
+                "pubdate": "2024",
+                "authors": [{"name": "Chen L"}],
+                "articleids": [{"idtype": "doi", "value": f"10.1056/{pmid}"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            }
+            for pmid in pmids
+            if pmid in titles
+        }
+
+    def fake_fetch(pmids):
+        return {
+            "11111111": {
+                "abstract": "RESULTS: PASI 90 at week 16 was 74.1% versus 5.8% placebo.",
+                "pubtypes": ["Randomized Controlled Trial"],
+            },
+            "22222222": {
+                "abstract": "RESULTS: PASI 90 at week 52 was 86.6% versus 57.1% secukinumab.",
+                "pubtypes": ["Randomized Controlled Trial"],
+            },
+            "33333333": {
+                "abstract": "RESULTS: At week 256, 85.1% of patients achieved PASI 90.",
+                "pubtypes": ["Randomized Controlled Trial"],
+            },
+        }
+
+    monkeypatch.setattr("director_api.evidence._esearch", fake_search)
+    monkeypatch.setattr("director_api.evidence._esummary", fake_summary)
+    monkeypatch.setattr("director_api.evidence.fetch_abstracts", fake_fetch)
+    brief = ExtractedBrief(
+        brand="LumenDerm",
+        product="lumetinib",
+        therapy_area="Dermatology",
+        indication="plaque psoriasis",
+        raw_text=(
+            "References: PMID 11111111; PMID 22222222; "
+            "https://pubmed.ncbi.nlm.nih.gov/33333333/"
+        ),
+    )
+    ledger = resolve_evidence(brief, pubmed=True)
+    pmids = {r["pmid"] for r in ledger["records"]}
+    assert {"11111111", "22222222", "33333333"} <= pmids
+    assert "paradigm-hf-2014" not in {r["id"] for r in ledger["records"]}

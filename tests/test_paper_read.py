@@ -171,3 +171,50 @@ def test_select_papers_prefers_numeric_rct_and_drops_duplicates():
     assert "noise" not in pmids
     assert sum(1 for p in pmids if p in {"1", "2"}) <= 1
     assert len(chosen) <= 4
+
+
+def test_select_papers_keeps_supporting_non_numeric_in_pack():
+    hits = [
+        {
+            "pmid": "num",
+            "title": "Efficacy and safety of lumetinib in moderate-to-severe plaque psoriasis (BEAM-1)",
+            "year": 2024,
+            "design": "Randomized Controlled Trial",
+        },
+        {
+            "pmid": "support",
+            "title": "Positioning lumetinib in plaque psoriasis: a narrative review",
+            "year": 2024,
+            "design": "Review",
+        },
+        {
+            "pmid": "rep",
+            "title": "Lumetinib versus secukinumab in plaque psoriasis (BEAM-HEAD)",
+            "year": 2025,
+            "design": "Randomized Controlled Trial",
+        },
+    ]
+    readings = {
+        "num": {
+            "abstract": "RESULTS: PASI 90 at week 16 was 74% versus 6% placebo.",
+            "pubtypes": ["Randomized Controlled Trial"],
+        },
+        "support": {
+            "abstract": "Lumetinib is an oral agent studied in plaque psoriasis.",
+            "pubtypes": ["Review"],
+        },
+        "rep": {
+            "abstract": "RESULTS: PASI 90 at week 52 was 86% versus 57% secukinumab.",
+            "pubtypes": ["Randomized Controlled Trial"],
+        },
+    }
+    chosen = select_papers(
+        hits,
+        ExtractedBrief(product="lumetinib", therapy_area="Dermatology"),
+        readings,
+        limit=4,
+    )
+    pmids = {h["pmid"] for h in chosen}
+    assert "num" in pmids
+    assert "rep" in pmids
+    assert "support" in pmids

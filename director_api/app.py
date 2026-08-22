@@ -51,7 +51,7 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-credits",
+        "build": "2026-08-22-brief-refs",
         "deckSkills": catalog()["skills"],
         "billing": {"stripe": billing_catalog()["stripe"], "actions": billing_catalog()["actions"]},
     }

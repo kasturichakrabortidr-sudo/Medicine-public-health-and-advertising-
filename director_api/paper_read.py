@@ -245,6 +245,7 @@ def select_papers(
         if score < 1:
             continue
         if any_numeric and not parsed.get("numeric") and chosen:
+            pending.append((score, hit, parsed))
             continue
         if require_product and not _mentions_product(
             hit.get("title") or "",
