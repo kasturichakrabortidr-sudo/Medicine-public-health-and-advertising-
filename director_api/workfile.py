@@ -52,9 +52,8 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
         "howBuilt": (
             f"We started with the brief for {brief.brand or 'this brand'}. "
             "The brief is not expected to contain paper links. "
-            f"We searched PubMed for {science_name(brief) or brief.therapy_area or 'this molecule/indication'}, "
-            "not the campaign brand. "
-            "read the abstracts, and kept a short set of load-bearing papers. "
+            f"We searched PubMed for {science_name(brief) or brief.therapy_area or 'this molecule/indication'} "
+            "(the INN when named, never the campaign brand), then read the abstracts, and kept a short set of load-bearing papers. "
             f"{len(records)} paper{'s' if len(records) != 1 else ''} have a number. "
             "One paper is not a case: load-bearing lines quote the pack, not a single PMID. "
             "Strategy lines quote findings written in those papers. "
@@ -137,7 +136,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
 
 def _p02(brief, records) -> dict:
     pop = brief.indication or brief.therapy_area or "the indicated population"
-    molecule = science_name(brief) or "the labelled molecule"
+    molecule = science_name(brief) or "the indicated class"
     pico = [
         ["Population", pop, "Taken from the brief. We will not widen it."],
         ["Intervention", f"{molecule}" + (" at the first eligible encounter" if any(r.get("directs") == "first-eligible-start" for r in records) else " as labelled"), "Eligible as labelled — not 'all comers'. Science uses the INN, not the brand."],
