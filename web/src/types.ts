@@ -6,7 +6,10 @@ export type ChartKind =
   | "box"
   | "scatter"
   | "diverging"
-  | "funnel";
+  | "funnel"
+  | "people"
+  | "compare"
+  | "spine";
 
 export interface ChartSpec {
   kind: ChartKind;
@@ -30,7 +33,7 @@ export interface Slide {
   callout?: { label: string; text: string };
   chart?: ChartSpec;
   table?: { headers: string[]; rows: string[][] };
-  layout: "title" | "insight" | "split" | "chart" | "grid" | "close";
+  layout: "title" | "insight" | "split" | "chart" | "grid" | "close" | "infographic";
 }
 
 export interface Intervention {
@@ -122,6 +125,9 @@ export interface StrategyPack {
     citations?: EvidenceRecord[];
     evidenceGaps?: { stream: string; item: string; status: string; needed: string }[];
     pubmed?: { pmid: string; title: string; citation: string; url: string }[];
+    meaning?: Record<string, string | number>[];
+    compare?: Record<string, string | number>[];
+    spine?: Record<string, string | number>[];
   };
 }
 
@@ -162,6 +168,16 @@ export interface EvidenceRecord {
   url: string;
   status: string;
   directs?: string;
+  control_event?: number | null;
+  treat_event?: number | null;
+  arr?: number | null;
+  nnt?: number | null;
+  horizon?: string;
+  visual_unit?: string;
+  spine_means?: string;
+  spine_barrier?: string;
+  spine_execute?: string;
+  spine_measure?: string;
 }
 
 export interface CampaignLead {

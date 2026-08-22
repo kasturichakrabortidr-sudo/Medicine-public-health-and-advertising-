@@ -37,6 +37,32 @@ export function DashboardTab({ pack }: { pack: StrategyPack }) {
         ))}
       </div>
 
+      {d.meaning?.length ? (
+        <section className="card" style={{ marginBottom: 16 }}>
+          <h3>Scientific prize — what we are trying to capture</h3>
+          <StrategyChart
+            spec={{
+              kind: "people",
+              title: "Published event rates per 100 patients",
+              data: d.meaning,
+            }}
+          />
+        </section>
+      ) : null}
+
+      {d.spine?.length ? (
+        <section className="card" style={{ marginBottom: 16 }}>
+          <h3>Science to solution through execution</h3>
+          <StrategyChart
+            spec={{
+              kind: "spine",
+              title: "Cited finding → campaign move → KPI",
+              data: d.spine,
+            }}
+          />
+        </section>
+      ) : null}
+
       <div className="grid-2">
         <section className="card">
           <h3>Revenue parent metric</h3>
@@ -81,6 +107,7 @@ export function DashboardTab({ pack }: { pack: StrategyPack }) {
               <th>Segment</th>
               <th>Impact</th>
               <th>Feasibility</th>
+              <th>Science anchor</th>
               <th>Kill-criterion</th>
             </tr>
           </thead>
@@ -95,6 +122,7 @@ export function DashboardTab({ pack }: { pack: StrategyPack }) {
                 <td>{iv.segment}</td>
                 <td>{iv.impact}</td>
                 <td>{iv.feasibility}</td>
+                <td className="small">{iv.evidenceAnchor || "—"}</td>
                 <td>{iv.kill}</td>
               </tr>
             ))}

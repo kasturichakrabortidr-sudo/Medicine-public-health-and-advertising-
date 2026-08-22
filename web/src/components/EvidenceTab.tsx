@@ -1,4 +1,5 @@
 import type { StrategyPack } from "../types";
+import { StrategyChart } from "./charts/StrategyChart";
 
 export function EvidenceTab({ pack }: { pack: StrategyPack }) {
   const ev = pack.evidence;
@@ -41,6 +42,46 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           ) : null}
         </section>
       )}
+
+      {(pack.dashboard.meaning?.length || pack.dashboard.compare?.length) ? (
+        <section className="card" style={{ marginBottom: 16 }}>
+          <h3>What the published rates mean</h3>
+          {pack.dashboard.meaning?.length ? (
+            <StrategyChart
+              spec={{
+                kind: "people",
+                title: "Events in a clinic of 100 — published rates, not a model",
+                data: pack.dashboard.meaning,
+              }}
+            />
+          ) : null}
+          {pack.dashboard.compare?.length ? (
+            <StrategyChart
+              spec={{
+                kind: "compare",
+                title: "Comparator vs intervention on the published scale",
+                data: pack.dashboard.compare,
+              }}
+            />
+          ) : null}
+        </section>
+      ) : null}
+
+      {pack.dashboard.spine?.length ? (
+        <section className="card" style={{ marginBottom: 16 }}>
+          <h3>Science to execution</h3>
+          <p className="small muted">
+            Each cited finding names a prize, a barrier, a campaign move, and a measure.
+          </p>
+          <StrategyChart
+            spec={{
+              kind: "spine",
+              title: "Science → means → barrier → execution → we measure",
+              data: pack.dashboard.spine,
+            }}
+          />
+        </section>
+      ) : null}
 
       <section className="card">
         <h3>Validated register</h3>

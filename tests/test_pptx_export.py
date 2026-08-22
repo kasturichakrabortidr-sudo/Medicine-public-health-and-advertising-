@@ -33,6 +33,15 @@ def test_pptx_is_editable_office_file():
     texts = [shape.text_frame.text for shape in title.shapes if shape.has_text_frame]
     assert any("CardioShield" in t for t in texts)
     assert filename_for(pack) == "CardioShield-strategy-deck.pptx"
+    meaning_idx = next(i for i, s in enumerate(pack["slides"]) if s["id"] == "science-meaning")
+    meaning_texts = [shape.text_frame.text for shape in prs.slides[meaning_idx].shapes if shape.has_text_frame]
+    joined = " ".join(meaning_texts)
+    assert "21" in joined
+    assert "25176015" in joined
+    execute_idx = next(i for i, s in enumerate(pack["slides"]) if s["id"] == "science-execute")
+    execute_texts = [shape.text_frame.text for shape in prs.slides[execute_idx].shapes if shape.has_text_frame]
+    execute_joined = " ".join(execute_texts)
+    assert "First-Touch" in execute_joined or "first-eligible" in execute_joined.lower()
 
 
 def test_export_endpoints():

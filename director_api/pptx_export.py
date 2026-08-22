@@ -176,6 +176,16 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
                  spec["subtitle"], size=16, color=body)
 
     layout = spec.get("layout")
+    if layout == "infographic":
+        top = Inches(2.05) if spec.get("subtitle") else Inches(1.75)
+        _textbox(slide, Inches(0.55), top, Inches(12.2), Inches(0.85),
+                 spec.get("narrative") or "", size=13, color=body)
+        if spec.get("chart"):
+            _add_chart(slide, spec["chart"], Inches(0.55), top + Inches(0.95), Inches(12.2), Inches(3.7))
+        if spec.get("callout"):
+            _callout(slide, Inches(0.55), Inches(6.6), Inches(12.2), Inches(0.65), spec["callout"], False)
+        return
+
     if layout in {"title", "close", "insight"}:
         top = Inches(2.25) if spec.get("subtitle") else Inches(1.9)
         _textbox(slide, Inches(0.55), top, Inches(12.1), Inches(1.6),
@@ -233,6 +243,15 @@ def _add_chart(slide, spec: dict, l, t, w, h) -> None:
         return
     if kind == "box":
         _box(slide, data, l, t, w, h)
+        return
+    if kind == "people":
+        _people(slide, data, l, t, w, h)
+        return
+    if kind == "compare":
+        _compare(slide, data, l, t, w, h)
+        return
+    if kind == "spine":
+        _spine(slide, data, l, t, w, h)
         return
     if not data:
         return
@@ -356,6 +375,151 @@ def _box(slide, rows: list[dict], l, t, w, h) -> None:
         med.line.fill.background()
         _textbox(slide, l + col_w * i, t + h - Inches(0.4), col_w, Inches(0.4),
                  str(r.get("name", "")), size=10, color=INK, align=PP_ALIGN.CENTER)
+
+
+def _solid(shape, color: RGBColor) -> None:
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = color
+    shape.line.fill.background()
+
+
+def _people(slide, rows: list[dict], l, t, w, h) -> None:
+    """100-dot event grids: comparator vs intervention, plus NNT card."""
+    if not rows:
+        return
+    row = rows[0]
+    control = int(round(_num(row.get("control"))))
+    treat = int(round(_num(row.get("treat"))))
+    arr_raw = row.get("arr")
+    arr = int(round(_num(arr_raw) if arr_raw not in (None, "") else max(0, control - treat)))
+    panel_w = int(w * 0.34)
+    nnt_w = w - panel_w * 2 - Inches(0.3)
+    _people_grid(slide, l, t, panel_w, h, control, 0, str(row.get("control_label") or "Comparator"), CRIMSON)
+    _people_grid(slide, l + panel_w + Inches(0.12), t, panel_w, h, treat, arr, str(row.get("treat_label") or "Intervention"), TEAL)
+    card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, l + panel_w * 2 + Inches(0.24), t, nnt_w, h - Inches(0.1))
+    card.adjustments[0] = 0.08
+    _solid(card, NAVY)
+    _textbox(slide, l + panel_w * 2 + Inches(0.4), t + Inches(0.15), nnt_w - Inches(0.3), Inches(0.28),
+             "NNT", size=11, color=COPPER)
+    _textbox(slide, l + panel_w * 2 + Inches(0.4), t + Inches(0.45), nnt_w - Inches(0.3), Inches(1.1),
+             str(row.get("nnt") or "—"), size=44, bold=True, color=CREAM)
+    _textbox(slide, l + panel_w * 2 + Inches(0.4), t + Inches(1.6), nnt_w - Inches(0.3), Inches(1.6),
+             f"Treat {row.get('nnt') or '—'} to prevent 1 event"
+             + (f" over {row.get('horizon')}." if row.get("horizon") else ".")
+             + f" PMID {row.get('pmid') or '—'}.",
+             size=13, color=CREAM)
+
+
+def _people_grid(slide, l, t, w, h, events: int, saved: int, label: str, accent: RGBColor) -> None:
+    panel = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, l, t, w, h - Inches(0.1))
+    panel.adjustments[0] = 0.06
+    panel.fill.solid()
+    panel.fill.fore_color.rgb = PAPER
+    panel.line.color.rgb = RGBColor(0xE0, 0xD8, 0xC8)
+    _textbox(slide, l + Inches(0.12), t + Inches(0.08), w - Inches(0.2), Inches(0.28),
+             label, size=11, color=MUTED)
+    _textbox(slide, l + Inches(0.12), t + Inches(0.32), w - Inches(0.2), Inches(0.4),
+             f"{events} / 100", size=22, bold=True, color=INK)
+    origin_l = l + Inches(0.16)
+    origin_t = t + Inches(0.8)
+    cell = min(int((w - Inches(0.32)) / 10), int((h - Inches(1.15)) / 10))
+    events = max(0, min(100, events))
+    saved = max(0, min(100 - events, saved))
+    for i in range(100):
+        r, c = divmod(i, 10)
+        x = origin_l + c * cell
+        y = origin_t + r * cell
+        dot = slide.shapes.add_shape(MSO_SHAPE.OVAL, x + 2, y + 2, cell - 4, cell - 4)
+        if i < events:
+            color = CRIMSON
+        elif i < events + saved:
+            color = TEAL
+        else:
+            color = RGBColor(0xD4, 0xCE, 0xC3)
+        _solid(dot, color)
+    _textbox(slide, l + Inches(0.12), t + h - Inches(0.38), w - Inches(0.2), Inches(0.24),
+             "event" if accent == CRIMSON else "event + avoided", size=9, color=MUTED)
+
+
+def _compare(slide, rows: list[dict], l, t, w, h) -> None:
+    if not rows:
+        return
+    row = rows[0]
+    left, right = _num(row.get("left")), _num(row.get("right"))
+    mx = max(left, right, 1)
+    col_w = int(w * 0.28)
+    mid_w = w - col_w * 2 - Inches(0.3)
+    bar_h = h - Inches(1.3)
+
+    def panel(x, value, label, color):
+        box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, t, col_w, h - Inches(0.1))
+        box.adjustments[0] = 0.06
+        box.fill.solid()
+        box.fill.fore_color.rgb = PAPER
+        box.line.color.rgb = RGBColor(0xE0, 0xD8, 0xC8)
+        _textbox(slide, x + Inches(0.1), t + Inches(0.08), col_w - Inches(0.2), Inches(0.28),
+                 str(label), size=11, color=MUTED)
+        _textbox(slide, x + Inches(0.1), t + Inches(0.36), col_w - Inches(0.2), Inches(0.45),
+                 str(int(value) if value == int(value) else value), size=28, bold=True, color=INK)
+        fill_h = max(int(bar_h * (value / mx)), Emu(25400))
+        bar = slide.shapes.add_shape(
+            MSO_SHAPE.RECTANGLE,
+            x + int(col_w * 0.35),
+            t + Inches(0.9) + (bar_h - fill_h),
+            int(col_w * 0.28),
+            fill_h,
+        )
+        _solid(bar, color)
+
+    panel(l, left, row.get("left_label") or "Comparator", CRIMSON)
+    mid = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, l + col_w + Inches(0.15), t, mid_w, h - Inches(0.1))
+    mid.adjustments[0] = 0.06
+    _solid(mid, RGBColor(0xF3, 0xE3, 0xC8))
+    delta = row.get("delta") if row.get("delta") not in (None, "") else abs(left - right)
+    _textbox(slide, l + col_w + Inches(0.3), t + Inches(0.15), mid_w - Inches(0.3), Inches(0.28),
+             "Difference", size=11, color=COPPER)
+    _textbox(slide, l + col_w + Inches(0.3), t + Inches(0.45), mid_w - Inches(0.3), Inches(0.6),
+             str(delta), size=32, bold=True, color=INK)
+    _textbox(slide, l + col_w + Inches(0.3), t + Inches(1.15), mid_w - Inches(0.3), Inches(2.2),
+             f"{row.get('claim') or ''}  PMID {row.get('pmid') or '—'}.", size=12, color=MUTED)
+    panel(l + col_w + mid_w + Inches(0.3), right, row.get("right_label") or "Intervention", TEAL)
+
+
+def _spine(slide, rows: list[dict], l, t, w, h) -> None:
+    if not rows:
+        return
+    labels = [("science", "1. Science"), ("means", "2. Means"), ("barrier", "3. Barrier"),
+              ("execute", "4. Execution"), ("measure", "5. We measure")]
+    col_w = int(w / 5)
+    _textbox(slide, l, t, w, Inches(0.22), "Science → means → barrier → execution → we measure", size=10, color=COPPER)
+    row_h = int((h - Inches(0.28)) / max(min(len(rows), 3), 1))
+    for i, row in enumerate(rows[:3]):
+        y = t + Inches(0.28) + row_h * i
+        for j, (key, label) in enumerate(labels):
+            x = l + col_w * j + Inches(0.04)
+            cell = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, col_w - Inches(0.08), row_h - Inches(0.08))
+            cell.adjustments[0] = 0.08
+            if key == "execute":
+                _solid(cell, NAVY)
+                ink, muted = CREAM, COPPER
+            elif key == "measure":
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = RGBColor(0xE8, 0xF0, 0xEE)
+                cell.line.fill.background()
+                ink, muted = INK, TEAL
+            else:
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = PAPER
+                cell.line.color.rgb = RGBColor(0xE0, 0xD8, 0xC8)
+                ink, muted = INK, MUTED
+            heading = label if key != "science" else f"{label} · {row.get('name', '')}"
+            _textbox(slide, x + Inches(0.08), y + Inches(0.06), col_w - Inches(0.2), Inches(0.28),
+                     heading, size=9, color=muted)
+            text = str(row.get(key) or "—")
+            if key == "science" and row.get("pmid"):
+                text = f"{text}  PMID {row.get('pmid')}."
+            _textbox(slide, x + Inches(0.08), y + Inches(0.32), col_w - Inches(0.2), row_h - Inches(0.42),
+                     text, size=10, color=ink)
 
 
 def _appendix_bibliography(prs, blank, pack: dict) -> None:

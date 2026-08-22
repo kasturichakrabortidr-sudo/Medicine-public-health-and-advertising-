@@ -18,12 +18,16 @@ import {
 import type { ChartSpec } from "../../types";
 import { BoxPlot } from "./BoxPlot";
 import { ForestPlot } from "./ForestPlot";
+import { Infographic } from "./Infographic";
 
 const PALETTE = ["#132037", "#c4844a", "#2a6f6f", "#8b2e2e", "#5c7a5c", "#1b2c49"];
 
 export function StrategyChart({ spec, height = 260 }: { spec: ChartSpec; height?: number }) {
   if (spec.kind === "forest") return <ForestPlot spec={spec} />;
   if (spec.kind === "box") return <BoxPlot spec={spec} />;
+  if (spec.kind === "people" || spec.kind === "compare" || spec.kind === "spine") {
+    return <Infographic spec={spec} />;
+  }
 
   if (spec.kind === "pie") {
     return (

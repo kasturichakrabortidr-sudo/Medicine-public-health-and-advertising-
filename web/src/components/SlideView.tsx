@@ -8,7 +8,25 @@ export function SlideView({ slide }: { slide: Slide }) {
       <h2>{slide.title}</h2>
       {slide.subtitle ? <p className="sub">{slide.subtitle}</p> : null}
 
-      {slide.layout === "title" || slide.layout === "close" || slide.layout === "insight" ? (
+      {slide.layout === "infographic" ? (
+        <>
+          <p className="narrative">{slide.narrative}</p>
+          {slide.chart ? <StrategyChart spec={slide.chart} height={280} /> : null}
+          {slide.bullets ? (
+            <ul className="bullets">
+              {slide.bullets.map((b) => (
+                <li key={b}>{b}</li>
+              ))}
+            </ul>
+          ) : null}
+          {slide.callout ? (
+            <div className="callout">
+              <strong>{slide.callout.label}. </strong>
+              {slide.callout.text}
+            </div>
+          ) : null}
+        </>
+      ) : slide.layout === "title" || slide.layout === "close" || slide.layout === "insight" ? (
         <>
           <p className="narrative">{slide.narrative}</p>
           {slide.bullets ? (

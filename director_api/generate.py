@@ -147,7 +147,9 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None) -
     ledger = ledger or {"lead": {}, "records": [], "gaps": [], "pubmed": []}
     lead = ledger.get("lead") or {}
     records = ledger.get("records") or []
+    moves = _interventions(brief, doctrine, ledger)
     science_slides = _science_slides(lead, records, ledger.get("gaps") or [])
+    execute_slide = _science_execute_slide(records, moves)
 
     return [
         {
@@ -348,14 +350,21 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None) -
             "bullets": _message_pillars(records, doctrine),
             "callout": {"label": "MLR", "text": "Every pillar must carry a named PMID/DOI. No pillar ships without a grade and a caveat."},
         },
+        *([execute_slide] if execute_slide else []),
         {
             "id": "interventions",
             "section": "Action",
             "kicker": "Intervention architecture",
             "title": "Five moves that retire the ritual",
-            "narrative": "Ideas are cheap. Interventions have an owner, a COM-B lever, a segment, and a kill-criterion.",
+            "narrative": (
+                "Each move is the execution of a cited finding — not a separate creative idea. "
+                "If the science row cannot name the intervention, the intervention does not ship."
+            ),
             "layout": "grid",
-            "bullets": [i["name"] + " — " + i["promise"] for i in _interventions(brief, doctrine)[:5]],
+            "bullets": [
+                f"{i['name']} — {i['promise']}  [{i.get('evidenceAnchor') or 'citation pending'}]"
+                for i in moves[:5]
+            ],
         },
         {
             "id": "matrix",
@@ -477,7 +486,9 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None) -
 def _science_slides(lead: dict, records: list[dict], gaps: list[dict]) -> list[dict]:
     cites = lead.get("citations") or []
     primary = cites[0] if cites else {}
-    return [
+    people = _people_rows(records)
+    compare = _compare_rows(records)
+    slides = [
         {
             "id": "science-lead",
             "section": "Science",
@@ -495,35 +506,193 @@ def _science_slides(lead: dict, records: list[dict], gaps: list[dict]) -> list[d
                 for c in cites[:4]
             ] or ["No validated citation — strategy stays behavioural only."],
         },
-        {
-            "id": "citation-register",
-            "section": "Science",
-            "kicker": "Evidence register",
-            "title": "Every lead claim traces to a named paper",
-            "narrative": (
-                f"{len(records)} validated records. {len(gaps)} brief items still lack a DOI/PMID "
-                "and cannot set direction."
-            ),
-            "layout": "split",
-            "table": {
-                "headers": ["Source", "Design / N", "Finding", "Grade", "PMID / DOI"],
-                "rows": [
-                    [
-                        r.get("short") or r.get("trial") or "",
-                        f"{r.get('design') or '—'} · n={r.get('n') or '—'}",
-                        (r.get("claim_permitted") or "")[:90],
-                        r.get("grade") or "",
-                        f"{r.get('pmid') or '—'} / {r.get('doi') or '—'}",
-                    ]
-                    for r in records[:8]
-                ],
-            },
-            "bullets": [
-                f"GAP · {g['stream']}: {g['item'][:110]}"
-                for g in gaps[:4]
-            ] or ["No uncited brief items."],
-        },
     ]
+    if people:
+        first = people[0]
+        nnt = first.get("nnt")
+        slides.append({
+            "id": "science-meaning",
+            "section": "Science",
+            "kicker": "What the data means",
+            "title": f"In a clinic of 100, this is the prize",
+            "subtitle": f"{first.get('name')} · PMID {first.get('pmid') or '—'}",
+            "narrative": (
+                f"{first.get('claim')} "
+                f"The HR is a statistic. The picture is {first.get('control')} events on the comparator "
+                f"versus {first.get('treat')} on the intervention"
+                + (f" — treat {nnt} to prevent 1 event." if nnt else ".")
+            ),
+            "layout": "infographic",
+            "chart": {
+                "kind": "people",
+                "title": f"{first.get('name')}: {first.get('unit')}",
+                "note": f"Published rates. PMID {first.get('pmid')}. Horizon: {first.get('horizon')}.",
+                "unit": first.get("unit"),
+                "data": people,
+            },
+            "callout": {
+                "label": "Read this, not the HR",
+                "text": (
+                    f"NNT {nnt} over {first.get('horizon')}. "
+                    "Strategy exists to capture these events, not to reprint the forest plot."
+                ) if nnt else "These dots are the published event rates, not a planning model.",
+            },
+        })
+    if compare:
+        first = compare[0]
+        slides.append({
+            "id": "science-compare",
+            "section": "Science",
+            "kicker": "What the timing data means",
+            "title": "The comparator is the delayed habit, not another molecule",
+            "subtitle": f"{first.get('name')} · PMID {first.get('pmid') or '—'}",
+            "narrative": first.get("claim") or "",
+            "layout": "infographic",
+            "chart": {
+                "kind": "compare",
+                "title": f"{first.get('name')}: {first.get('unit')}",
+                "note": f"PMID {first.get('pmid')}. {first.get('horizon')}.",
+                "unit": first.get("unit"),
+                "data": compare,
+            },
+            "callout": {
+                "label": "Implication",
+                "text": "If the larger effect lives in the in-hospital window, execution cannot wait for clinic week 6.",
+            },
+        })
+    slides.append({
+        "id": "citation-register",
+        "section": "Science",
+        "kicker": "Evidence register",
+        "title": "Every lead claim traces to a named paper",
+        "narrative": (
+            f"{len(records)} validated records. {len(gaps)} brief items still lack a DOI/PMID "
+            "and cannot set direction."
+        ),
+        "layout": "split",
+        "table": {
+            "headers": ["Source", "Design / N", "Finding", "Grade", "PMID / DOI"],
+            "rows": [
+                [
+                    r.get("short") or r.get("trial") or "",
+                    f"{r.get('design') or '—'} · n={r.get('n') or '—'}",
+                    (r.get("claim_permitted") or "")[:90],
+                    r.get("grade") or "",
+                    f"{r.get('pmid') or '—'} / {r.get('doi') or '—'}",
+                ]
+                for r in records[:8]
+            ],
+        },
+        "bullets": [
+            f"GAP · {g['stream']}: {g['item'][:110]}"
+            for g in gaps[:4]
+        ] or ["No uncited brief items."],
+    })
+    return slides
+
+
+def _science_execute_slide(records: list[dict], interventions: list[dict]) -> dict | None:
+    rows = _spine_rows(records, interventions)
+    if not rows:
+        return None
+    return {
+        "id": "science-execute",
+        "section": "Action",
+        "kicker": "Science → execution",
+        "title": "Each cited finding becomes one campaign move",
+        "narrative": (
+            "Science names the prize. The barrier names why the prize is lost. "
+            "The intervention is how we take it. The KPI is how we know."
+        ),
+        "layout": "infographic",
+        "chart": {
+            "kind": "spine",
+            "title": "Science to solution through strat execution",
+            "note": "Only rows with a PMID/DOI. Uncited brief items cannot own a move.",
+            "data": rows,
+        },
+    }
+
+
+def _people_rows(records: list[dict]) -> list[dict]:
+    rows = []
+    for r in records:
+        if r.get("control_event") is None or r.get("treat_event") is None:
+            continue
+        if r.get("nnt") is None:
+            continue
+        control = r["control_event"]
+        treat = r["treat_event"]
+        arr = r.get("arr")
+        if arr is None:
+            arr = round(float(control) - float(treat), 1)
+        rows.append({
+            "name": r.get("short") or r.get("trial"),
+            "control": control,
+            "treat": treat,
+            "arr": arr,
+            "nnt": r["nnt"],
+            "horizon": r.get("horizon") or "",
+            "unit": r.get("visual_unit") or "events per 100",
+            "pmid": r.get("pmid") or "",
+            "control_label": "Comparator",
+            "treat_label": r.get("trial") or "Intervention",
+            "claim": r.get("claim_permitted") or "",
+        })
+    return rows
+
+
+def _compare_rows(records: list[dict]) -> list[dict]:
+    rows = []
+    for r in records:
+        if r.get("control_event") is None or r.get("treat_event") is None:
+            continue
+        if r.get("nnt") is not None:
+            continue
+        rows.append({
+            "name": r.get("short") or r.get("trial"),
+            "left": r["control_event"],
+            "right": r["treat_event"],
+            "left_label": "Comparator",
+            "right_label": r.get("trial") or "Intervention",
+            "delta": r.get("arr") if r.get("arr") is not None else "",
+            "unit": r.get("visual_unit") or "",
+            "pmid": r.get("pmid") or "",
+            "claim": r.get("claim_permitted") or "",
+            "horizon": r.get("horizon") or "",
+        })
+    return rows
+
+
+def _spine_rows(records: list[dict], interventions: list[dict]) -> list[dict]:
+    mapping = {
+        "first-eligible-start": "first-touch",
+        "outcome-permission": "habit-lock",
+        "guideline-cover": "peer-cascade",
+        "segment-confidence": "myth-reset",
+        "local-context": "afford-kit",
+    }
+    rows = []
+    for r in records:
+        means = r.get("spine_means")
+        if not means:
+            continue
+        short = r.get("short") or ""
+        iv = next((i for i in interventions if short and short in (i.get("evidenceAnchor") or "")), None)
+        if iv is None:
+            want = mapping.get(r.get("directs") or "")
+            iv = next((i for i in interventions if i["id"] == want), None) if want else None
+        rows.append({
+            "name": r.get("short") or r.get("trial") or "",
+            "science": (r.get("claim_permitted") or "")[:160],
+            "means": means,
+            "barrier": r.get("spine_barrier") or "",
+            "execute": r.get("spine_execute") or (iv["name"] if iv else ""),
+            "measure": r.get("spine_measure") or (iv["kill"] if iv else ""),
+            "pmid": r.get("pmid") or "",
+            "move": iv["name"] if iv else (r.get("spine_execute") or ""),
+        })
+    return rows[:6]
 
 
 def _forest_rows(records: list[dict]) -> list[dict]:
@@ -706,6 +875,9 @@ def _dashboard(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None
         "citations": (ledger or {}).get("records") or [],
         "evidenceGaps": (ledger or {}).get("gaps") or [],
         "pubmed": (ledger or {}).get("pubmed") or [],
+        "meaning": _people_rows((ledger or {}).get("records") or []),
+        "compare": _compare_rows((ledger or {}).get("records") or []),
+        "spine": _spine_rows((ledger or {}).get("records") or [], _interventions(brief, doctrine, ledger)),
         "alerts": [
             {"level": "watch", "text": "Behavioural KPIs are planning targets. Scientific claims may only use rows with a PMID/DOI."},
             {"level": "mlr", "text": "No promotional use until MLR clears each cited claim against the local label."},
