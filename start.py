@@ -48,6 +48,7 @@ def ask_lines(question):
 def ensure_dependencies():
     try:
         import anthropic  # noqa: F401
+        import mistune  # noqa: F401
         import yaml  # noqa: F401
         return
     except ImportError:
