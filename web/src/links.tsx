@@ -2,8 +2,8 @@ import { createContext, useContext, type MouseEvent, type ReactNode } from "reac
 import type { ReferenceItem } from "./types";
 
 export type LinkableRef = {
-  n?: number;
-  ref?: number;
+  n?: number | null;
+  ref?: number | null;
   url?: string;
   pmid?: string;
   doi?: string;
