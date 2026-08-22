@@ -72,6 +72,7 @@ def ensure_price(item_id: str) -> str:
         params={
             "name": f"STRATA {spec['name']}",
             "description": spec["blurb"],
+            "tax_code": "txcd_10103001",
             "metadata": {"plan": item_id, "credits": str(spec["credits"])},
         }
     )
