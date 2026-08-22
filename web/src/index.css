@@ -1171,6 +1171,23 @@ a.cite-link {
   color: var(--muted);
 }
 
+.slide.insight .slide-visual {
+  overflow: auto;
+}
+
+.slide.insight .table {
+  font-size: 14px;
+}
+
+.slide.insight .table th,
+.slide.insight .table td {
+  padding: 10px 12px;
+}
+
+.slide.insight .table tr:nth-child(even) td {
+  background: rgba(11, 18, 32, 0.03);
+}
+
 .deck-nav {
   display: flex;
   align-items: center;

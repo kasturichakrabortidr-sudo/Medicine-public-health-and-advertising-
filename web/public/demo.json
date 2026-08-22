@@ -147,6 +147,12 @@
         },
         {
           "engine": "story",
+          "slide": "message",
+          "action": "titled",
+          "after": "Start at the first eligible visit"
+        },
+        {
+          "engine": "story",
           "slide": "house",
           "action": "titled",
           "after": "Three numbered lines we will say"
@@ -235,11 +241,6 @@
         },
         {
           "engine": "visuals",
-          "slide": "who",
-          "action": "split"
-        },
-        {
-          "engine": "visuals",
           "slide": "interventions",
           "action": "split"
         },
@@ -270,6 +271,12 @@
           "slide": "references",
           "action": "cleared narrative",
           "rule": "process-or-echo"
+        },
+        {
+          "engine": "critic",
+          "slide": "message",
+          "action": "duplicate title",
+          "rule": "unique-titles"
         }
       ],
       "engines": [
@@ -299,6 +306,20 @@
         "slide": "tension",
         "question": "What do they do versus what must change?",
         "rail": "Habit",
+        "act": "I · Open"
+      },
+      {
+        "phase": "04",
+        "slide": "cohort",
+        "question": "What does each named insight actually do to the campaign?",
+        "rail": "Cohort",
+        "act": "I · Open"
+      },
+      {
+        "phase": "05",
+        "slide": "barriers",
+        "question": "What blocks the pen?",
+        "rail": "Barriers",
         "act": "I · Open"
       },
       {
@@ -344,10 +365,24 @@
         "act": "II · Proof"
       },
       {
+        "phase": "03",
+        "slide": "gaps",
+        "question": "What can we not yet say?",
+        "rail": "Gaps",
+        "act": "II · Proof"
+      },
+      {
         "phase": "06",
         "slide": "stand",
         "question": "Where may we stand, and where are we silent?",
         "rail": "Stand",
+        "act": "III · Stand"
+      },
+      {
+        "phase": "07",
+        "slide": "message",
+        "question": "What is the one line we stand behind?",
+        "rail": "Message",
         "act": "III · Stand"
       },
       {
@@ -390,6 +425,13 @@
         "slide": "interventions",
         "question": "What do we actually do?",
         "rail": "Moves",
+        "act": "IV · Move"
+      },
+      {
+        "phase": "11",
+        "slide": "direction",
+        "question": "What is the coherent bet from here?",
+        "rail": "Path",
         "act": "IV · Move"
       },
       {
@@ -2000,6 +2042,113 @@
       ]
     },
     {
+      "id": "cohort",
+      "section": "Cohort",
+      "kicker": "named insights, classified",
+      "title": "The rooms do not share one belief.",
+      "narrative": "Spend where they disagree. Amplify agreement. Park silence as research.",
+      "layout": "insight",
+      "table": {
+        "headers": [
+          "Insight",
+          "Class",
+          "What we do"
+        ],
+        "rows": [
+          [
+            "They wait to stabilise first",
+            "Spend",
+            "The initiation papers do not require a clinic wait"
+          ],
+          [
+            "Renal burden looks heavier than it is",
+            "Spend",
+            "We do not have a renal-burden RCT on the register"
+          ],
+          [
+            "Cost is the veto at the pen",
+            "Park",
+            "The register has no health-economic paper with a PMID"
+          ],
+          [
+            "They want local evidence first",
+            "Park",
+            "GAP: Ongoing local health-economics study (readmission cost offset)."
+          ]
+        ]
+      },
+      "callout": {
+        "label": "Mix",
+        "text": "Spend 2, Park 2"
+      },
+      "bullets": [],
+      "phase": "04",
+      "question": "What does each named insight actually do to the campaign?",
+      "rail": "Cohort",
+      "skill": "story",
+      "act": "I · Open",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
+    },
+    {
+      "id": "barriers",
+      "section": "Barriers",
+      "kicker": "what blocks the pen",
+      "title": "What stops the pen.",
+      "narrative": "",
+      "layout": "insight",
+      "table": {
+        "headers": [
+          "Kind",
+          "What the brief says",
+          "COM-B lever",
+          "What we do"
+        ],
+        "rows": [
+          [
+            "Economic",
+            "Largely out-of-pocket market; monthly cost 8-10x generic ARB.",
+            "Opportunity — cost",
+            "Do not hide price."
+          ],
+          [
+            "Practical / ritual",
+            "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"",
+            "Motivation — old habit",
+            "The new start has to be easier than waiting"
+          ],
+          [
+            "Clinical myth",
+            "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+            "Capability / motivation",
+            "One sourced number, or we drop the line."
+          ],
+          [
+            "Professional",
+            "KOLs want local RWE and Indian patient data before advocating publicly",
+            "Motivation — peer cover",
+            "KOLs do not go on a poster until the local paper exists"
+          ]
+        ]
+      },
+      "bullets": [],
+      "phase": "05",
+      "question": "What blocks the pen?",
+      "rail": "Barriers",
+      "skill": "story",
+      "act": "I · Open",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
+    },
+    {
       "id": "belief",
       "section": "Belief",
       "kicker": "belief versus papers",
@@ -2313,6 +2462,45 @@
       ]
     },
     {
+      "id": "gaps",
+      "section": "Gaps",
+      "kicker": "not yet a claim",
+      "title": "These lines are not yet claims.",
+      "narrative": "",
+      "layout": "insight",
+      "table": {
+        "headers": [
+          "Stream",
+          "From the brief",
+          "Needed before it can lead"
+        ],
+        "rows": [
+          [
+            "Brand-generated",
+            "Post-hoc analyses in elderly and diabetic subgroups.",
+            "Retrieve the primary paper or registry report; do not promote until a DOI/PMID is on the ledger"
+          ],
+          [
+            "Evolving",
+            "Ongoing local health-economics study (readmission cost offset).",
+            "Retrieve the primary paper or registry report; do not promote until a DOI/PMID is on the ledger"
+          ]
+        ]
+      },
+      "bullets": [],
+      "phase": "03",
+      "question": "What can we not yet say?",
+      "rail": "Gaps",
+      "skill": "story",
+      "act": "II · Proof",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
+    },
+    {
       "id": "stand",
       "section": "Ground",
       "kicker": "shout versus silence",
@@ -2350,6 +2538,44 @@
           }
         ]
       },
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
+    },
+    {
+      "id": "message",
+      "section": "Message",
+      "kicker": "the one line",
+      "title": "Start at the first eligible visit",
+      "narrative": "",
+      "layout": "versus",
+      "versus": {
+        "mode": "hero",
+        "rows": [
+          {
+            "delta": "→",
+            "left": {
+              "kicker": "They still do this",
+              "value": "Habit",
+              "text": "The habit of waiting until the patient is 'stable' in clinic."
+            },
+            "right": {
+              "kicker": "We say this",
+              "value": "Line",
+              "text": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible."
+            }
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "07",
+      "question": "What is the one line we stand behind?",
+      "rail": "Message",
+      "skill": "story",
+      "act": "III · Stand",
       "engines": [
         "story",
         "visuals",
@@ -2510,37 +2736,38 @@
       "section": "Audience",
       "kicker": "who we activate first",
       "title": "Start with the rooms we can fund.",
-      "narrative": "",
-      "layout": "split",
+      "narrative": "Tallest bar is first. This is activation order, not an impact score.",
+      "layout": "visual",
+      "chart": {
+        "kind": "bar",
+        "title": "Activation order",
+        "note": "First room is tallest. Not a modelled impact score.",
+        "unit": "order",
+        "data": [
+          {
+            "name": "KOL academic cardiologists (metro teaching hospitals)",
+            "value": 4
+          },
+          {
+            "name": "Senior private-practice cardiologists (metro and tier-2)",
+            "value": 3
+          },
+          {
+            "name": "Early-career cardiologists and DM trainees",
+            "value": 2
+          },
+          {
+            "name": "Consultant physicians with high HF caseload",
+            "value": 1
+          }
+        ]
+      },
       "bullets": [],
       "phase": "09",
       "question": "Who do we activate first?",
       "rail": "Who",
       "skill": "story",
       "act": "IV · Move",
-      "split": {
-        "heroLabel": "First",
-        "railLabel": "Then it inherits",
-        "heroes": [
-          {
-            "kicker": "First",
-            "title": "KOL academic cardiologists",
-            "body": "Peer cascade — they author the protocol."
-          }
-        ],
-        "rail": [
-          {
-            "kicker": "Then",
-            "title": "Senior private-practice cardiologists",
-            "body": "First-eligible pathway + habit lock."
-          },
-          {
-            "kicker": "Also",
-            "title": "Early-career cardiologists and DM trainees",
-            "body": "Affordability conversation kit."
-          }
-        ]
-      },
       "engines": [
         "story",
         "visuals",
@@ -2639,6 +2866,50 @@
           }
         ]
       },
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
+    },
+    {
+      "id": "direction",
+      "section": "Direction",
+      "kicker": "the path",
+      "title": "One bet. Then the moves.",
+      "narrative": "",
+      "layout": "flow",
+      "flow": {
+        "steps": [
+          {
+            "n": "1",
+            "title": "The bet",
+            "body": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible."
+          },
+          {
+            "n": "2",
+            "title": "Where we stand",
+            "body": "We stand only where the columns agree."
+          },
+          {
+            "n": "3",
+            "title": "What we do",
+            "body": "First-Touch Protocol, Affordability Confidence Kit, Myth-Reset Asset."
+          },
+          {
+            "n": "4",
+            "title": "What we sign",
+            "body": "Sign the bet: Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible."
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "11",
+      "question": "What is the coherent bet from here?",
+      "rail": "Path",
+      "skill": "story",
+      "act": "IV · Move",
       "engines": [
         "story",
         "visuals",
@@ -2750,31 +3021,31 @@
         "rows": [
           [
             "1",
-            "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015."
+            "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure"
           ],
           [
             "2",
-            "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601."
+            "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure"
           ],
           [
             "3",
-            "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724."
+            "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge"
           ],
           [
             "4",
-            "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885."
+            "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age"
           ],
           [
             "5",
-            "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992."
+            "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure"
           ],
           [
             "6",
-            "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499."
+            "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure"
           ],
           [
             "7",
-            "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246."
+            "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India"
           ]
         ]
       },

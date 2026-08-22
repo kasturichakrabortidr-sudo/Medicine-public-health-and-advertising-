@@ -40,7 +40,7 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-engine-room-v2",
+        "build": "2026-08-22-strategy-spine",
         "deckSkills": catalog()["skills"],
     }
 

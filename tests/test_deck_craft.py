@@ -8,11 +8,12 @@ from director_api.deck_visuals import cue, line, sentence
 
 
 BANNED_IDS = {"how-built", "questions", "boxplot", "citation-register", "science-lead"}
-VISUAL_KEYS = ("chart", "board", "flow", "stat", "versus", "split")
+VISUAL_KEYS = ("chart", "board", "flow", "stat", "versus", "split", "table")
 REQUIRED_PHASES = {f"{i:02d}" for i in range(1, 12)}
 REQUIRED_SLIDES = {
-    "title", "need", "tension", "belief", "pico", "pack", "stand",
-    "house", "objections", "sequence", "who", "interventions", "measure", "close",
+    "title", "need", "tension", "cohort", "barriers", "belief", "pico", "pack",
+    "gaps", "stand", "message", "house", "objections", "sequence", "who",
+    "direction", "interventions", "measure", "close",
 }
 HANGING = re.compile(
     r"\b(the|a|an|at|in|if|to|for|of|and|or|with|on|by|from|as|than)\s*$",
@@ -57,6 +58,12 @@ def _copy_blobs(slide: dict) -> list[str]:
         for side in ("left", "right"):
             pole = row.get(side) or {}
             blobs.extend([pole.get("value") or "", pole.get("text") or ""])
+    table = slide.get("table") or {}
+    for row in table.get("rows") or []:
+        blobs.extend(str(c) for c in row)
+    if slide.get("chart"):
+        blobs.append(slide["chart"].get("title") or "")
+        blobs.append(slide["chart"].get("note") or "")
     return blobs
 
 
@@ -96,10 +103,10 @@ def test_one_visual_owns_each_content_slide():
     for slide in pack["slides"]:
         assert not (slide.get("chart") and slide.get("table")), slide["id"]
         layout = slide.get("layout")
-        if layout in {"title", "close", "references", "insight"}:
+        if layout in {"title", "close", "references"}:
             continue
         assert any(slide.get(k) for k in VISUAL_KEYS), slide["id"]
-        if slide.get("layout") in {"visual", "board", "flow", "stat", "versus", "split"}:
+        if slide.get("layout") in {"visual", "board", "flow", "stat", "versus", "split", "insight"}:
             assert not slide.get("bullets")
 
 
@@ -220,6 +227,37 @@ def test_titles_stay_short_and_complete():
         assert not HANGING.search(title.rstrip(".!?")), title
 
 
+def test_strategy_spine_uses_tables_charts_and_flow():
+    pack = _demo_pack()
+    by_id = {s["id"]: s for s in pack["slides"]}
+    cohort = by_id["cohort"]
+    assert cohort["table"]["headers"][1].lower() == "class"
+    classes = " ".join(row[1] for row in cohort["table"]["rows"])
+    assert "Spend" in classes
+    assert "Park" in classes
+    barriers = by_id["barriers"]
+    assert barriers["table"]["headers"][0] == "Kind"
+    assert any("Economic" in row[0] for row in barriers["table"]["rows"])
+    gaps = by_id["gaps"]
+    assert gaps["table"]["rows"]
+    assert any("rwe" in " ".join(row).lower() or "local" in " ".join(row).lower() or "he" in " ".join(row).lower() for row in gaps["table"]["rows"])
+    message = by_id["message"]
+    assert message.get("versus")
+    said = (message["versus"]["rows"][0]["right"].get("text") or "").lower()
+    assert "first eligible" in said or "start" in said
+    direction = by_id["direction"]
+    assert direction["layout"] == "flow"
+    assert len(direction["flow"]["steps"]) == 4
+    assert direction["flow"]["steps"][0]["title"] == "The bet"
+    who = by_id["who"]
+    assert who["chart"]["kind"] == "bar"
+    assert len(who["chart"]["data"]) >= 2
+    kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
+    assert {"people", "forest", "bar"} <= kinds
+    tables = [s for s in pack["slides"] if s.get("table") and s["id"] != "references"]
+    assert len(tables) >= 2
+
+
 def test_helix_cost_brief_still_gets_a_visual_deck():
     brief = ExtractedBrief(
         brand="HelixOne",
@@ -234,6 +272,11 @@ def test_helix_cost_brief_still_gets_a_visual_deck():
     assert "pico" in ids
     assert "pack" in ids
     assert "measure" in ids
+    assert "cohort" in ids
+    assert "barriers" in ids
+    assert "gaps" in ids
+    assert "message" in ids
+    assert "direction" in ids
     assert pack["meta"]["brand"] == "HelixOne"
     meaning = next(s for s in pack["slides"] if s["id"] == "science-meaning")
     assert meaning["chart"]["data"][0]["pmid"] == "29658856"

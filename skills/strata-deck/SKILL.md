@@ -22,6 +22,15 @@ The working file is the plan. The deck is a visual argument. If a slide
 could be a screenshot of Phase 07, it is wrong. If a line ends in an
 ellipsis, it is wrong.
 
+Every pack must also show the strategy spine, not only the science:
+
+- **cohort** — named insights classified Spend / Amplify / Park (table)
+- **barriers** — COM-B table from the brief, not a invented map
+- **gaps** — uncited brief lines, no effect sizes
+- **message** — one market line versus the habit
+- **direction** — bet → stand → moves → 30-day ask (flowchart)
+- **who** — activation-order bar chart (order, not an impact score)
+
 ## After a change
 
 `python -m pytest -q tests/test_deck_craft.py tests/test_generate.py tests/test_pptx_export.py`

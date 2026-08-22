@@ -87,19 +87,24 @@ def _story(slides: list[dict], story: dict) -> tuple[list[dict], list[dict]]:
         "title": "I · Open",
         "need": "I · Open",
         "tension": "I · Open",
+        "cohort": "I · Open",
+        "barriers": "I · Open",
         "belief": "I · Open",
         "pico": "II · Proof",
         "science-meaning": "II · Proof",
         "forest": "II · Proof",
         "science-compare": "II · Proof",
         "pack": "II · Proof",
+        "gaps": "II · Proof",
         "stand": "III · Stand",
+        "message": "III · Stand",
         "house": "III · Stand",
         "objections": "III · Stand",
         "sequence": "IV · Move",
         "who": "IV · Move",
         "science-execute": "IV · Move",
         "interventions": "IV · Move",
+        "direction": "IV · Move",
         "measure": "IV · Move",
         "close": "IV · Move",
         "references": "Sources",
@@ -152,6 +157,8 @@ def _story_titles(story: dict) -> dict[str, str]:
         "title": clip_title(story.get("headline") or "", brand),
         "need": clip_title(f"{need_stat} is the job.", f"{need_stat} is the job."),
         "tension": clip_title(habit or "They wait. We start now.", "They wait. We start now."),
+        "cohort": "The rooms do not share one belief.",
+        "barriers": "What stops the pen.",
         "belief": clip_title(
             f"They agree. {habit}" if habit else "They agree. They still wait.",
             "They agree. They still wait.",
@@ -161,6 +168,8 @@ def _story_titles(story: dict) -> dict[str, str]:
         "forest": "The numbered papers agree on one axis" if n >= 2 else "One numbered paper is not a forest.",
         "science-compare": "The next paper has a different job",
         "pack": clip_title(f"Each of {n} papers has one job." if n else "No pack yet. Do not invent one."),
+        "gaps": "These lines are not yet claims.",
+        "message": clip_title(story.get("headline") or story.get("theme") or "This is the market line.", "This is the market line."),
         "stand": clip_title(stand, "Stand only where the columns agree."),
         "house": clip_title(f"{house_word} numbered lines we will say"),
         "objections": "Answer cost and wait without dodging.",
@@ -168,6 +177,7 @@ def _story_titles(story: dict) -> dict[str, str]:
         "who": "Start with the rooms we can fund.",
         "science-execute": "From the finding to the move",
         "interventions": clip_title(f"Three {brand} moves that ship", "Three moves that ship."),
+        "direction": "One bet. Then the moves.",
         "measure": clip_title(f"If {asked_stat} is flat, kill the rest.", "If the parent metric is flat, kill the rest."),
         "close": clip_title(f"Sign {brand}. Number every claim.", "Sign the bet. Number the claims."),
     }
@@ -236,7 +246,7 @@ def _visuals(slides: list[dict], story: dict) -> tuple[list[dict], list[dict]]:
                 }
                 slide.pop("board", None)
                 report.append({"engine": "visuals", "slide": sid, "action": "split"})
-        elif sid == "who":
+        elif sid == "who" and not slide.get("chart"):
             cards = _who_cards(story)
             slide["layout"] = "split"
             slide["split"] = {
@@ -460,6 +470,9 @@ def _copy(slides: list[dict], story: dict) -> tuple[list[dict], list[dict]]:
         for step in (slide.get("flow") or {}).get("steps") or []:
             step["title"] = line(step.get("title") or "")
             step["body"] = _clean_body(step.get("body") or "")
+        table = slide.get("table") or {}
+        if table.get("rows"):
+            table["rows"] = [[_clean_body(c).rstrip(".") if isinstance(c, str) and len(str(c).split()) > 8 else line(c) for c in row] for row in table["rows"]]
         for row in (slide.get("versus") or {}).get("rows") or []:
             for side in ("left", "right"):
                 pole = row.get(side) or {}

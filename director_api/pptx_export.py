@@ -189,7 +189,7 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
     muted = RGBColor(0xF0, 0xC4, 0x8A) if dark else COPPER
     body = RGBColor(0xE8, 0xE2, 0xD6) if dark else MUTED
     layout = spec.get("layout")
-    title_h = Inches(0.85) if layout in {"visual", "board", "flow", "stat", "versus", "split", "close"} else Inches(1.05)
+    title_h = Inches(0.85) if layout in {"visual", "board", "flow", "stat", "versus", "split", "close", "insight"} else Inches(1.05)
 
     _textbox(slide, Inches(0.55), Inches(0.24), Inches(12.2), Inches(0.28),
              (spec.get("kicker") or "").upper(), size=11, color=muted, font="Calibri")

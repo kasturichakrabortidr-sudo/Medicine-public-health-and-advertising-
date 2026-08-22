@@ -44,6 +44,7 @@ def interpret_plan(
     lead = ledger.get("lead") or {}
     p01 = phase(work, "01")
     p02 = phase(work, "02")
+    p03 = phase(work, "03")
     p04 = phase(work, "04")
     p05 = phase(work, "05")
     p06 = phase(work, "06")
@@ -83,6 +84,13 @@ def interpret_plan(
         "discord": rows_of(p04.get("discord")),
         "concord": rows_of(p04.get("concord")),
         "silent": rows_of(p04.get("silent")),
+        "inventory": list(p04.get("inventory") or insights),
+        "concerns": rows_of(p05.get("concerns")),
+        "gaps": rows_of(p03.get("gaps")) or [
+            [g.get("stream") or "Gap", g.get("item") or "", g.get("needed") or "Retrieve the primary paper."]
+            for g in (ledger.get("gaps") or [])[:8]
+        ],
+        "theme": sentence(p07.get("theme") or doctrine.get("bet") or ""),
         "fourway": rows_of(p06.get("fourway")),
         "position": sentence(p06.get("position") or ""),
         "house": rows_of(p07.get("house")),
@@ -126,19 +134,24 @@ def build_deck(
         "title": lambda: _title_slide(story, doctrine, brief, records),
         "need": lambda: _need_slide(story, lead),
         "tension": lambda: _tension_slide(story, lead),
+        "cohort": lambda: _cohort_slide(story),
+        "barriers": lambda: _barriers_slide(story),
         "belief": lambda: _belief_slide(story, records),
         "pico": lambda: _pico_slide(story),
         "science-meaning": lambda: _prize_slide(people[0]) if people else None,
         "forest": lambda: _forest_slide(forest, records) if forest else None,
         "science-compare": lambda: _compare_slide(compare[0]) if compare else None,
         "pack": lambda: _pack_slide(story, records),
+        "gaps": lambda: _gaps_slide(story),
         "stand": lambda: _stand_slide(story),
+        "message": lambda: _message_slide(story),
         "house": lambda: _pillars_slide(story),
         "objections": lambda: _objections_slide(story),
         "sequence": lambda: _sequence_slide(story),
         "who": lambda: _who_slide(story),
         "science-execute": lambda: _execute_slide(spine) if spine else None,
         "interventions": lambda: _moves_slide(story),
+        "direction": lambda: _direction_slide(story),
         "measure": lambda: _measure_slide(story),
         "close": lambda: _ask_slide(story, brief),
         "references": lambda: None,
@@ -236,6 +249,142 @@ def _tension_slide(story: dict, lead: dict) -> dict:
         },
         "refs": [c.get("ref") for c in (lead.get("citations") or [])[:3] if c.get("ref")],
     }
+
+
+def _cohort_slide(story: dict) -> dict:
+    rows = _insight_class_rows(story)
+    mix = _insight_mix(rows)
+    table_rows = rows[:6] or [["No HCP insight was supplied", "Park", "Do not invent an advisory board."]]
+    return {
+        "id": "cohort",
+        "section": "Cohort",
+        "kicker": "Phase 04 · named insights, classified",
+        "title": "The rooms do not share one belief.",
+        "narrative": "Spend where they disagree. Amplify agreement. Park silence as research.",
+        "layout": "insight",
+        "table": {"headers": ["Insight", "Class", "What we do"], "rows": table_rows},
+        "callout": {
+            "label": "Mix",
+            "text": ", ".join(f"{d['name']} {d['value']}" for d in mix if d.get("value")),
+        },
+    }
+
+
+def _barriers_slide(story: dict) -> dict:
+    headers = ["Kind", "What the brief says", "COM-B lever", "What we do"]
+    rows = []
+    for row in story.get("concerns") or []:
+        kind = line(row[0]) if row else "Barrier"
+        said = sentence(row[1] if len(row) > 1 else "")
+        lever = line(row[2]) if len(row) > 2 else ""
+        action = sentence(row[3] if len(row) > 3 else "")
+        if kind in {"—", "-"} and not said:
+            continue
+        rows.append([kind, said, lever, action])
+    if not rows:
+        rows = [["None named", "The brief is thin on barriers.", "Ask the field", "Do not invent a COM-B map."]]
+    return {
+        "id": "barriers",
+        "section": "Barriers",
+        "kicker": "Phase 05 · what blocks the pen",
+        "title": "What stops the pen.",
+        "narrative": "",
+        "layout": "insight",
+        "table": {"headers": headers, "rows": rows[:4]},
+    }
+
+
+def _gaps_slide(story: dict) -> dict:
+    rows = []
+    for row in story.get("gaps") or []:
+        stream = line(row[0]) if row else "Gap"
+        item = sentence(row[1] if len(row) > 1 else "")
+        need = sentence(row[2] if len(row) > 2 else "Retrieve the primary paper.")
+        if stream in {"—", "-"} and not item:
+            continue
+        rows.append([stream, item, need])
+    if not rows:
+        rows = [["None yet", "Every brief line that must lead has a number.", "Keep it that way."]]
+    return {
+        "id": "gaps",
+        "section": "Gaps",
+        "kicker": "Phase 03 · not yet a claim",
+        "title": "These lines are not yet claims.",
+        "narrative": "",
+        "layout": "insight",
+        "table": {"headers": ["Stream", "From the brief", "Needed before it can lead"], "rows": rows[:6]},
+    }
+
+
+def _message_slide(story: dict) -> dict:
+    line_we_say = story.get("theme") or story.get("bet") or story.get("headline") or ""
+    habit = story.get("enemy") or story.get("current") or ""
+    return {
+        "id": "message",
+        "section": "Message",
+        "kicker": "Phase 07 · the one line",
+        "title": "This is the market line.",
+        "narrative": "",
+        "layout": "versus",
+        "versus": {
+            "mode": "hero",
+            "rows": [{
+                "delta": "→",
+                "left": {"kicker": "They still do this", "value": "Habit", "text": habit},
+                "right": {"kicker": "We say this", "value": "Line", "text": line_we_say},
+            }],
+        },
+    }
+
+
+def _direction_slide(story: dict) -> dict:
+    moves = story.get("moves") or []
+    move_names = ", ".join(line(m.get("name") or f"Move {i}") for i, m in enumerate(moves[:3], 1)) or "Name the moves the papers allow."
+    steps = [
+        {"n": "1", "title": "The bet", "body": story.get("bet") or story.get("headline") or "Sign the bet."},
+        {"n": "2", "title": "Where we stand", "body": story.get("position") or "Stand only where the numbered papers agree."},
+        {"n": "3", "title": "What we do", "body": sentence(move_names)},
+        {"n": "4", "title": "What we sign", "body": (story.get("ask") or ["Sign the bet."])[0]},
+    ]
+    return {
+        "id": "direction",
+        "section": "Direction",
+        "kicker": "Phase 11 · the path",
+        "title": "One bet. Then the moves.",
+        "narrative": "",
+        "layout": "flow",
+        "flow": {"steps": steps},
+    }
+
+
+def _insight_class_rows(story: dict) -> list[list[str]]:
+    rows = []
+    for row in story.get("discord") or []:
+        title = str((row or [""])[0] or "")
+        if title.lower().startswith("none"):
+            continue
+        rows.append([cue(title) or line(title, 8), "Spend", sentence(row[1] if len(row) > 1 else "The papers fight this habit.")])
+    for row in story.get("concord") or []:
+        title = str((row or [""])[0] or "")
+        if title.lower().startswith("none"):
+            continue
+        rows.append([cue(title) or line(title, 8), "Amplify", sentence(row[2] if len(row) > 2 else "Do not spend awareness here.")])
+    for row in story.get("silent") or []:
+        title = str((row or [""])[0] or "")
+        if title in {"—", "-", ""} or title.lower().startswith("none"):
+            continue
+        rows.append([cue(title) or line(title), "Park", sentence(row[1] if len(row) > 1 else "Research, not copy.")])
+    return rows
+
+
+def _insight_mix(rows: list[list[str]]) -> list[dict]:
+    counts = {"Spend": 0, "Amplify": 0, "Park": 0}
+    for row in rows:
+        key = row[1] if len(row) > 1 else ""
+        if key in counts:
+            counts[key] += 1
+    data = [{"name": name, "value": n} for name, n in counts.items() if n]
+    return data or [{"name": "No insight lines", "value": 0}]
 
 
 def _belief_slide(story: dict, records: list[dict]) -> dict:
@@ -494,25 +643,30 @@ def _sequence_slide(story: dict) -> dict:
 
 
 def _who_slide(story: dict) -> dict:
-    cards = []
-    for row in story.get("who") or []:
-        cards.append({
-            "kicker": "First",
-            "title": line(row[0]) or "Audience",
-            "body": sentence((row[1] if len(row) > 1 else "") + (f" {row[3]}" if len(row) > 3 and row[3] else "")),
+    rooms = story.get("who") or []
+    n = len(rooms) or 1
+    data = []
+    for i, row in enumerate(rooms[:4]):
+        data.append({
+            "name": line(row[0], 6) if row else f"Room {i + 1}",
+            "value": n - i,
         })
-        if len(cards) >= 3:
-            break
-    if not cards:
-        cards = [{"kicker": "Who", "title": "Priority specialists", "body": "Everyone else inherits. We do not fund a national theatre."}]
+    if not data:
+        data = [{"name": "Priority specialists", "value": 1}]
     return {
         "id": "who",
         "section": "Audience",
         "kicker": "Phase 09 · who we activate first",
         "title": "A few rooms. The rest inherit.",
-        "narrative": "",
-        "layout": "board",
-        "board": {"cards": cards[:3]},
+        "narrative": "Tallest bar is first. This is activation order, not an impact score.",
+        "layout": "visual",
+        "chart": {
+            "kind": "bar",
+            "title": "Activation order",
+            "note": "First room is tallest. Not a modelled impact score.",
+            "unit": "order",
+            "data": data,
+        },
     }
 
 
@@ -606,13 +760,14 @@ def _cite_ref(value) -> str:
 
 
 def _one_visual(slide: dict) -> dict:
-    has_visual = bool(
+    pictured = bool(
         slide.get("chart") or slide.get("board") or slide.get("flow") or slide.get("stat")
         or slide.get("versus") or slide.get("split")
     )
-    if has_visual:
+    if pictured:
         slide.pop("table", None)
-        if slide.get("layout") in {"visual", "board", "flow", "stat", "infographic", "versus", "split", "title", "close"}:
+    if pictured or slide.get("table"):
+        if slide.get("layout") in {"visual", "board", "flow", "stat", "infographic", "versus", "split", "title", "close", "insight"}:
             slide["bullets"] = []
     if slide.get("chart") and slide.get("table"):
         slide.pop("table")
