@@ -14,6 +14,7 @@ import anthropic
 
 from .config import render_brief
 from .phases import EXPAND_PROMPT, PHASES, SYSTEM_PROMPT, Phase
+from .visuals import render_charts_in_markdown
 
 DEFAULT_MODEL = "claude-opus-5"
 MAX_TOKENS = 64000
@@ -55,6 +56,7 @@ class StrategyEngine:
                 content = render_brief(self.brief) + "\n\n---\n\n" + content
                 first = False
             text = self._turn(content)
+            text = self._render_charts(text, phase.id)
             self.results[phase.id] = text
             phase_path = self.out_dir / f"{phase.id}.md"
             phase_path.write_text(f"# {phase.title}\n\n{text}\n", encoding="utf-8")
@@ -78,6 +80,7 @@ class StrategyEngine:
             if i == 1:
                 content = render_brief(self.brief) + "\n\n---\n\n" + content
             text = self._turn(content)
+            text = self._render_charts(text, f"outline-{i:02d}")
             sections.append(f"## {i}. {point}\n\n{text}")
 
         out = self.out_dir / "outline-expansion.md"
@@ -151,3 +154,14 @@ class StrategyEngine:
     def _log(self, text: str) -> None:
         if not self.quiet:
             print(text)
+
+    # ---------------------------------------------------------------- charts
+
+    def _render_charts(self, text: str, block_id: str) -> str:
+        """Turn every ```chart block in ``text`` into a rendered PNG image.
+
+        Charts are written under ``<out_dir>/charts/`` and referenced with a
+        relative path, so both the per-phase files and the combined document
+        (both written directly into ``out_dir``) display them correctly.
+        """
+        return render_charts_in_markdown(text, self.out_dir / "charts", block_id, log=self._log)
