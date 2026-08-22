@@ -5,14 +5,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from medicomarketing_agent.config import load_brief
 
 from .extract import ExtractedBrief, extract_files, merge_into_brief
 from .generate import generate_pack
+from .pptx_export import filename_for, pack_to_pptx
 
 app = FastAPI(title="STRATA Strategy Director", version="1.0.0")
 app.add_middleware(
@@ -109,6 +110,35 @@ async def generate(
         raise HTTPException(422, "Could not read a usable brief from the upload.")
 
     return generate_pack(brief, mode=mode)
+
+
+@app.get("/api/export/pptx")
+def export_demo_pptx():
+    return _pptx_response(demo())
+
+
+@app.post("/api/export/pptx")
+async def export_pptx(request: Request):
+    try:
+        pack = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, f"Body must be a JSON strategy pack: {exc}") from exc
+    if not isinstance(pack, dict) or not pack.get("slides"):
+        raise HTTPException(400, "JSON must be a strategy pack with slides.")
+    return _pptx_response(pack)
+
+
+def _pptx_response(pack: dict) -> Response:
+    data = pack_to_pptx(pack)
+    name = filename_for(pack)
+    return Response(
+        content=data,
+        media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={
+            "Content-Disposition": f'attachment; filename="{name}"',
+            "Content-Length": str(len(data)),
+        },
+    )
 
 
 @app.get("/demo.json")

@@ -52,6 +52,26 @@ export async function extractBriefs(
   return res.json();
 }
 
+export async function downloadPptx(pack: StrategyPack): Promise<void> {
+  const res = await fetch("/api/export/pptx", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pack),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  const blob = await res.blob();
+  const match = /filename="?([^"]+)"?/i.exec(res.headers.get("content-disposition") || "");
+  const name = match?.[1] || `${pack.meta.brand || "strategy"}-strategy-deck.pptx`;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export async function generatePack(args: {
   files?: File[];
   pasted?: string;

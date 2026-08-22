@@ -21,7 +21,7 @@ Opens `http://127.0.0.1:5173`
 | Tab | What it does |
 |---|---|
 | **Briefs** | Upload PDF, PPT/PPTX, DOC/DOCX, XLS/XLSX, CSV, TXT/MD, YAML/JSON, RTF, HTML, ODF, images — or paste. Extract fields, edit, generate. |
-| **Strat deck** | Client-ready slides: forest plots, box plots, bars, lines, pies, impact matrix. Print to PDF. |
+| **Strat deck** | Client-ready slides: forest plots, box plots, bars, lines, pies, impact matrix. **Download PPTX** for an editable PowerPoint (native text, tables, Office charts). Print to PDF. |
 | **Dashboard** | KPI room, funnel, evidence mix, intervention board, governance. |
 
 Demo data is the CardioShield HFrEF brief in `examples/brief.example.yaml`.
