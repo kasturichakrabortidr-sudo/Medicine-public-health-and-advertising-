@@ -51,6 +51,7 @@ def pack_to_pptx(pack: dict) -> bytes:
         _render_slide(slide, spec, dark)
         _notes(slide, spec)
 
+    _appendix_bibliography(prs, blank, pack)
     _appendix_interventions(prs, blank, pack)
     _appendix_dashboard(prs, blank, pack)
     _appendix_edit_guide(prs, blank, meta, doctrine)
@@ -355,6 +356,35 @@ def _box(slide, rows: list[dict], l, t, w, h) -> None:
         med.line.fill.background()
         _textbox(slide, l + col_w * i, t + h - Inches(0.4), col_w, Inches(0.4),
                  str(r.get("name", "")), size=10, color=INK, align=PP_ALIGN.CENTER)
+
+
+def _appendix_bibliography(prs, blank, pack: dict) -> None:
+    records = (pack.get("evidence") or {}).get("records") or pack.get("dashboard", {}).get("citations") or []
+    if not records:
+        return
+    slide = prs.slides.add_slide(blank)
+    _fill_slide(slide, CREAM)
+    _textbox(slide, Inches(0.55), Inches(0.28), Inches(12.2), Inches(0.32),
+             "APPENDIX  ·  VALIDATED SOURCES", size=11, color=COPPER)
+    lead = (pack.get("evidence") or {}).get("lead") or {}
+    _textbox(slide, Inches(0.55), Inches(0.55), Inches(12.2), Inches(0.55),
+             "Bibliography — campaign lead is the first row", size=22, bold=True, color=INK)
+    if lead.get("statement"):
+        _textbox(slide, Inches(0.55), Inches(1.1), Inches(12.2), Inches(0.7),
+                 lead["statement"], size=13, color=MUTED)
+    headers = ["Short", "Citation", "PMID", "DOI", "Grade", "What we may claim"]
+    rows = [
+        [
+            r.get("short") or "",
+            r.get("citation") or "",
+            str(r.get("pmid") or ""),
+            str(r.get("doi") or ""),
+            r.get("grade") or "",
+            r.get("claim_permitted") or "",
+        ]
+        for r in records
+    ]
+    _table(slide, Inches(0.35), Inches(1.85), Inches(12.6), Inches(5.3), headers, rows)
 
 
 def _appendix_interventions(prs, blank, pack: dict) -> None:

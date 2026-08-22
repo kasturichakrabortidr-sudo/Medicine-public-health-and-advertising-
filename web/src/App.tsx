@@ -3,6 +3,7 @@ import { fetchDemo } from "./api";
 import { BriefsTab } from "./components/BriefsTab";
 import { DashboardTab } from "./components/DashboardTab";
 import { DeckTab } from "./components/DeckTab";
+import { EvidenceTab } from "./components/EvidenceTab";
 import type { StrategyPack, TabId } from "./types";
 
 export default function App() {
@@ -41,6 +42,14 @@ export default function App() {
         <nav className="nav">
           <button type="button" className={tab === "briefs" ? "active" : ""} onClick={() => setTab("briefs")}>
             Briefs
+          </button>
+          <button
+            type="button"
+            className={tab === "evidence" ? "active" : ""}
+            onClick={() => setTab("evidence")}
+            disabled={!pack}
+          >
+            Evidence
           </button>
           <button
             type="button"
@@ -87,6 +96,7 @@ export default function App() {
             />
           </>
         )}
+        {tab === "evidence" && pack && <EvidenceTab pack={pack} />}
         {tab === "deck" && pack && <DeckTab pack={pack} />}
         {tab === "dashboard" && pack && <DashboardTab pack={pack} />}
       </main>

@@ -27,8 +27,8 @@ def test_pptx_is_editable_office_file():
         assert any(n.startswith("ppt/charts/") for n in names)
 
     prs = Presentation(io.BytesIO(data))
-    # Strategy slides + interventions + dashboard + edit guide
-    assert len(prs.slides) == len(pack["slides"]) + 3
+    # Strategy slides + bibliography + interventions + dashboard + edit guide
+    assert len(prs.slides) == len(pack["slides"]) + 4
     title = prs.slides[0]
     texts = [shape.text_frame.text for shape in title.shapes if shape.has_text_frame]
     assert any("CardioShield" in t for t in texts)

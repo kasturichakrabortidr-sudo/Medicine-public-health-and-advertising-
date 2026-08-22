@@ -44,6 +44,7 @@ export interface Intervention {
   feasibility: number;
   mlr: string;
   kill: string;
+  evidenceAnchor?: string;
 }
 
 export interface ExtractedBrief {
@@ -89,6 +90,16 @@ export interface StrategyPack {
     enemy: string;
     bet: string;
     whyNovel: string;
+    scienceLead?: string;
+    scienceAnchor?: string;
+  };
+  evidence?: {
+    lead: CampaignLead;
+    records: EvidenceRecord[];
+    gaps: { stream: string; item: string; status: string; needed: string }[];
+    pubmed: { pmid: string; title: string; citation: string; url: string; year?: number; journal?: string; doi?: string; note?: string }[];
+    validatedCount: number;
+    gapCount: number;
   };
   slides: Slide[];
   interventions: Intervention[];
@@ -107,6 +118,10 @@ export interface StrategyPack {
     evidenceMix: { name: string; value: number }[];
     alerts: { level: string; text: string }[];
     governance: { cadence: string; forum: string; looksAt: string }[];
+    campaignLead?: CampaignLead;
+    citations?: EvidenceRecord[];
+    evidenceGaps?: { stream: string; item: string; status: string; needed: string }[];
+    pubmed?: { pmid: string; title: string; citation: string; url: string }[];
   };
 }
 
@@ -120,4 +135,42 @@ export interface FilePreview {
   preview: string;
 }
 
-export type TabId = "briefs" | "deck" | "dashboard";
+export interface EvidenceRecord {
+  id: string;
+  stream: string;
+  trial: string;
+  short: string;
+  title: string;
+  authors: string;
+  year: number;
+  journal: string;
+  pages: string;
+  doi: string;
+  pmid: string;
+  design: string;
+  n: number | null;
+  population: string;
+  endpoint: string;
+  hr?: number | null;
+  low?: number | null;
+  high?: number | null;
+  grade: string;
+  claim_permitted: string;
+  caveat: string;
+  mlr: string;
+  citation: string;
+  url: string;
+  status: string;
+  directs?: string;
+}
+
+export interface CampaignLead {
+  statement: string;
+  why: string;
+  directs: string;
+  primaryId?: string;
+  citations: { id: string; short: string; pmid?: string; doi?: string; citation: string; claim: string }[];
+  doNotClaim: string[];
+}
+
+export type TabId = "briefs" | "deck" | "dashboard" | "evidence";

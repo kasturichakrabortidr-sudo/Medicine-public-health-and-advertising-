@@ -20,7 +20,7 @@ Opens `http://127.0.0.1:5173`
 
 | Tab | What it does |
 |---|---|
-| **Briefs** | Upload PDF, PPT/PPTX, DOC/DOCX, XLS/XLSX, CSV, TXT/MD, YAML/JSON, RTF, HTML, ODF, images — or paste. Extract fields, edit, generate. |
+| **Evidence** | Validated citation register (DOI/PMID). The campaign lead is the highest-leverage published source, not a slogan. Uncited brief items stay gaps. PubMed hits are retrieved but cannot silently become the lead. |
 | **Strat deck** | Client-ready slides: forest plots, box plots, bars, lines, pies, impact matrix. **Download PPTX** for an editable PowerPoint (native text, tables, Office charts). Print to PDF. |
 | **Dashboard** | KPI room, funnel, evidence mix, intervention board, governance. |
 

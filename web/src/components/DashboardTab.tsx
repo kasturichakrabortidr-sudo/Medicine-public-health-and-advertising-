@@ -15,6 +15,9 @@ export function DashboardTab({ pack }: { pack: StrategyPack }) {
         </div>
       </div>
 
+      {pack.doctrine.scienceLead && (
+        <div className="alert info">{pack.doctrine.scienceLead}</div>
+      )}
       {d.alerts.map((a) => (
         <div className={`alert ${a.level}`} key={a.text}>
           {a.text}
