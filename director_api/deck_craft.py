@@ -18,6 +18,7 @@ from .deck_visuals import (
     forest_rows,
     goal_stat,
     line,
+    listed,
     need_line,
     people_rows,
     phase,
@@ -57,7 +58,10 @@ def interpret_plan(
     insight = insights[0] if insights else ""
     primary = (lead.get("citations") or jobs or records or [{}])[0]
     asked_stat, asked = goal_stat(p01.get("restatedAsk") or brief.business_goal or "The brief does not state a goal.")
-    need_stat, need = need_line(insights, doctrine)
+    need_stat, need = need_line(
+        list(insights) + [brief.business_goal or ""] + list(brief.access_and_cost or []),
+        doctrine,
+    )
     story = {
         "headline": line(doctrine.get("name") or "Change the decision, not the reprint"),
         "bet": sentence(doctrine.get("bet") or ""),
@@ -96,6 +100,8 @@ def interpret_plan(
         "jobs": jobs[:4],
         "lead_why": sentence(lead.get("why") or ""),
         "science_lead": sentence(doctrine.get("scienceLead") or lead.get("statement") or ""),
+        "lead_nnt": next((r.get("nnt") for r in records if r.get("nnt")), None),
+        "lead_trial": next((r.get("trial") or r.get("short") for r in records if r.get("nnt") or r.get("trial")), ""),
         "skills": list(SKILL_IDS),
     }
     return story
@@ -147,8 +153,8 @@ def build_deck(
         if not made:
             continue
         slides.append(_stamp(_one_visual(made), beat))
-    slides, _report = run_room(slides, story)
-    return slides
+    slides, report = run_room(slides, story)
+    return slides, report
 
 
 def story_map(slides: list[dict]) -> list[dict]:
@@ -260,7 +266,7 @@ def _belief_slide(story: dict, records: list[dict]) -> dict:
         "section": "Belief",
         "kicker": "Phase 04 · belief versus papers",
         "title": "Agreement is not the campaign.",
-        "narrative": "Disagreement is where we spend. Silence is research, not copy.",
+        "narrative": "",
         "layout": "board",
         "board": {"cards": cards[:3]},
         "refs": [r.get("ref") for r in records[:4] if r.get("ref")],
@@ -275,7 +281,8 @@ def _pico_slide(story: dict) -> dict:
         rule = row[2] if len(row) > 2 else ""
         if name.lower().startswith("outcome"):
             title = "Published endpoints only"
-            body = sentence(definition)
+            bits = [b.strip() for b in re.split(r";", str(definition)) if b.strip()]
+            body = listed(bits) if len(bits) >= 2 else sentence(definition)
         elif len(str(definition).split()) <= 12:
             title = line(definition) or name
             body = sentence(rule or definition)
@@ -294,7 +301,7 @@ def _pico_slide(story: dict) -> dict:
         "section": "Contract",
         "kicker": "Phase 02 · how we judge the science",
         "title": "If it is not in this frame, it is not a claim.",
-        "narrative": "Population, intervention, comparator, outcomes, setting. That is the contract.",
+        "narrative": "",
         "layout": "board",
         "board": {"cards": cards[:5]},
     }
@@ -329,7 +336,7 @@ def _forest_slide(forest: list[dict], records: list[dict]) -> dict:
         "section": "Science",
         "kicker": "Phase 03 · the pack on one axis",
         "title": "Agreement is the case, not one HR.",
-        "narrative": "Only numbered papers with a published interval. We do not invent a forest.",
+        "narrative": "",
         "layout": "visual",
         "chart": {
             "kind": "forest",
@@ -430,7 +437,7 @@ def _pillars_slide(story: dict) -> dict:
         "section": "Message",
         "kicker": "Phase 07 · what we will say",
         "title": "Three lines. Each one numbered.",
-        "narrative": "A pillar without a number does not ship.",
+        "narrative": "",
         "layout": "board",
         "board": {"cards": cards[:4]},
         "refs": [],
@@ -455,7 +462,7 @@ def _objections_slide(story: dict) -> dict:
         "section": "Message",
         "kicker": "Phase 07 · what they say back",
         "title": "Answer the objection. Do not dodge it.",
-        "narrative": "What we will not say sits in the working file. It does not become a slogan.",
+        "narrative": "",
         "layout": "board",
         "board": {"cards": cards[:3]},
     }
@@ -480,7 +487,7 @@ def _sequence_slide(story: dict) -> dict:
         "section": "Contact",
         "kicker": "Phase 08 · a sequence, not a spray",
         "title": "A doctor should feel an order.",
-        "narrative": "If a contact cannot name a numbered paper, it does not go on the plan.",
+        "narrative": "",
         "layout": "flow",
         "flow": {"steps": steps[:4]},
     }
@@ -503,7 +510,7 @@ def _who_slide(story: dict) -> dict:
         "section": "Audience",
         "kicker": "Phase 09 · who we activate first",
         "title": "A few rooms. The rest inherit.",
-        "narrative": "We collapsed specialty, city, and cost to the groups this brief can actually fund.",
+        "narrative": "",
         "layout": "board",
         "board": {"cards": cards[:3]},
     }
@@ -515,7 +522,7 @@ def _execute_slide(rows: list[dict]) -> dict:
         "section": "Action",
         "kicker": "Phase 05 · science becomes a move",
         "title": "The paper names the move.",
-        "narrative": "One cited finding, one execution. We do not invent a second campaign beside the papers.",
+        "narrative": "",
         "layout": "visual",
         "chart": {
             "kind": "spine",
@@ -540,7 +547,7 @@ def _moves_slide(story: dict) -> dict:
         "section": "Action",
         "kicker": "Phase 08 · what we actually do",
         "title": "Three moves. The rest inherit.",
-        "narrative": "If a move cannot name a numbered paper, it does not ship.",
+        "narrative": "",
         "layout": "board",
         "board": {"cards": cards[:3]},
     }
@@ -565,7 +572,7 @@ def _measure_slide(story: dict) -> dict:
         "section": "Proof",
         "kicker": "Phase 10 · how we will know",
         "title": "The brief's goal is the parent metric.",
-        "narrative": "Lead indicators are recall of each paper's job, not a mash-up number. Rates stay sketches until the audit exists.",
+        "narrative": "",
         "layout": "board",
         "board": {"cards": cards[:3]},
     }
@@ -582,7 +589,7 @@ def _ask_slide(story: dict, brief: ExtractedBrief) -> dict:
         "kicker": "Phase 11 · the page we take to sign-off",
         "title": "Sign the bet. Number the claims.",
         "narrative": story["science_lead"] or story["bet"],
-        "layout": "flow",
+        "layout": "close",
         "flow": {"steps": steps[:3]},
         "callout": {"label": brief.brand or "Brand", "text": story["headline"]},
     }
@@ -599,10 +606,13 @@ def _cite_ref(value) -> str:
 
 
 def _one_visual(slide: dict) -> dict:
-    has_visual = bool(slide.get("chart") or slide.get("board") or slide.get("flow") or slide.get("stat"))
+    has_visual = bool(
+        slide.get("chart") or slide.get("board") or slide.get("flow") or slide.get("stat")
+        or slide.get("versus") or slide.get("split")
+    )
     if has_visual:
         slide.pop("table", None)
-        if slide.get("layout") in {"visual", "board", "flow", "stat", "infographic"}:
+        if slide.get("layout") in {"visual", "board", "flow", "stat", "infographic", "versus", "split", "title", "close"}:
             slide["bullets"] = []
     if slide.get("chart") and slide.get("table"):
         slide.pop("table")

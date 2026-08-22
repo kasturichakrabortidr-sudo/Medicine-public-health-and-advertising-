@@ -48,5 +48,5 @@ def catalog() -> dict:
             }
             for b in BEATS
         ],
-        "rule": "Four engines direct the pack. Visuals interpret the working file.",
+        "rule": "Four engines direct the pack. Story writes brief-specific titles. Visuals use versus and split.",
     }

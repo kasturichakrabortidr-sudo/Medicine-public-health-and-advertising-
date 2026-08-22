@@ -682,11 +682,17 @@ ROLE_LABELS = {
     "durability": "It holds",
     "replication": "A second RCT",
     "supporting": "Also sourced",
-    "outcome-permission": "The outcome",
-    "first-eligible-start": "Start now",
-    "guideline-cover": "Cover exists",
+    "outcome-permission": "Outcome proof",
+    "first-eligible-start": "Start feasibility",
+    "guideline-cover": "Guideline permission",
     "segment-confidence": "Age is not a veto",
     "local-context": "Local context",
+}
+
+ROLE_ALTS = {
+    "first-eligible-start": "Timing flexibility",
+    "guideline-cover": "Guideline foundation",
+    "outcome-permission": "Replicated outcome",
 }
 
 ACTIVE_COMPARATORS = {
@@ -725,7 +731,7 @@ def assign_paper_jobs(records: list[dict[str, Any]], brief: Any) -> list[dict[st
             role = rec.get("directs") or "outcome-permission"
             if role in used:
                 rec["role"] = "replication"
-                rec["roleLabel"] = rec.get("short") or rec.get("trial") or "A second paper"
+                rec["roleLabel"] = ROLE_ALTS.get(role, rec.get("short") or rec.get("trial") or "Also sourced")
             else:
                 rec["role"] = role
                 rec["roleLabel"] = ROLE_LABELS.get(role, rec.get("short") or "Sourced")

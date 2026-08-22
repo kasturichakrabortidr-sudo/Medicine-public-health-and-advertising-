@@ -34,8 +34,23 @@ export interface Slide {
   chart?: ChartSpec;
   table?: { headers: string[]; rows: string[][] };
   board?: { cards: { kicker?: string; title: string; body?: string; ref?: string }[] };
-  flow?: { steps: { n: string; title: string; body: string }[] };
+  flow?: { steps: { n: string; title: string; body?: string; ref?: string }[] };
   stat?: { items: { kicker?: string; value: string; label: string }[] };
+  versus?: {
+    mode?: "hero" | "compact";
+    rows: {
+      delta?: string;
+      left: { kicker?: string; value?: string; text?: string };
+      right: { kicker?: string; value?: string; text?: string; ref?: string };
+    }[];
+  };
+  split?: {
+    heroLabel?: string;
+    railLabel?: string;
+    heroes: { kicker?: string; title: string; body?: string; ref?: string }[];
+    rail: { kicker?: string; title: string; body?: string; ref?: string }[];
+  };
+  act?: string;
   refs?: (number | string)[];
   layout:
     | "title"
@@ -49,7 +64,8 @@ export interface Slide {
     | "visual"
     | "board"
     | "flow"
-    | "stat";
+    | "stat"
+    | "versus";
 }
 
 export interface Intervention {
@@ -106,6 +122,11 @@ export interface StrategyPack {
     deckSkills?: string[];
     deckSkillCards?: { id: string; name: string; rule: string }[];
     engines?: { id: string; name: string; rule: string }[];
+    engineReport?: {
+      kills?: { engine?: string; slide?: string; action?: string; rule?: string }[];
+      drafts?: { engine?: string; slide?: string; action?: string; after?: string }[];
+      engines?: string[];
+    };
     storyMap?: { phase: string; slide: string; question: string; rail?: string; act?: string }[];
   };
   brief: ExtractedBrief;

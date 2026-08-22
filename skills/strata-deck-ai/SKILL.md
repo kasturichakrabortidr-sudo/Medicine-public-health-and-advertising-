@@ -16,6 +16,9 @@ to OpenAI, Anthropic, and Gemini in parallel only when **both** are true:
 - `STRATA_DECK_AI` is `1`, `on`, or `true`
 - at least one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`
 
+Story, Visuals, Copy, and Critic always run without keys. The live
+ensemble seasons titles, narratives, and kickers when providers answer.
+
 Otherwise the directed pack is unchanged. Tests stay deterministic.
 
 ## What engines may do

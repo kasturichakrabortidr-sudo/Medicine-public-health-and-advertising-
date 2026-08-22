@@ -189,7 +189,7 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
     muted = RGBColor(0xF0, 0xC4, 0x8A) if dark else COPPER
     body = RGBColor(0xE8, 0xE2, 0xD6) if dark else MUTED
     layout = spec.get("layout")
-    title_h = Inches(0.85) if layout in {"visual", "board", "flow", "stat"} else Inches(1.05)
+    title_h = Inches(0.85) if layout in {"visual", "board", "flow", "stat", "versus", "split", "close"} else Inches(1.05)
 
     _textbox(slide, Inches(0.55), Inches(0.24), Inches(12.2), Inches(0.28),
              (spec.get("kicker") or "").upper(), size=11, color=muted, font="Calibri")
@@ -223,6 +223,10 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
                 _hyperlink_cell(shape.table.cell(i, col), href)
     elif spec.get("chart"):
         _add_chart(slide, spec["chart"], Inches(0.55), top, Inches(12.2), visual_h)
+    elif spec.get("versus"):
+        _versus(slide, spec["versus"], Inches(0.55), top, Inches(12.2), visual_h, dark, spec.get("act") or "")
+    elif spec.get("split"):
+        _split(slide, spec["split"], Inches(0.55), top, Inches(12.2), visual_h, dark, spec.get("act") or "")
     elif spec.get("board"):
         _board(slide, spec["board"].get("cards") or [], Inches(0.55), top, Inches(12.2), visual_h, dark)
     elif spec.get("flow"):
@@ -302,8 +306,102 @@ def _flow(slide, steps: list[dict], l, t, w, h, dark: bool) -> None:
                  str(step.get("n") or i + 1), size=28, bold=True, color=copper)
         _textbox(slide, x + Inches(0.2), t + Inches(0.9), step_w - Inches(0.4), Inches(0.5),
                  step.get("title") or "", size=16, bold=True, color=ink)
-        _textbox(slide, x + Inches(0.2), t + Inches(1.45), step_w - Inches(0.4), h - Inches(1.7),
+        _textbox(slide, x + Inches(0.2), t + Inches(1.45), step_w - Inches(0.4), h - Inches(1.9),
                  step.get("body") or "", size=13, color=ink)
+        if step.get("ref"):
+            _textbox(slide, x + Inches(0.2), t + h - Inches(0.36), step_w - Inches(0.4), Inches(0.24),
+                     str(step["ref"]), size=10, color=copper)
+
+
+def _act_color(act: str, dark: bool) -> RGBColor:
+    blob = (act or "").lower()
+    if "proof" in blob:
+        return TEAL
+    if "stand" in blob:
+        return CRIMSON
+    if "move" in blob:
+        return RGBColor(0xA5, 0x6A, 0x36)
+    return RGBColor(0x1B, 0x2C, 0x49) if dark else COPPER
+
+
+def _versus(slide, versus: dict, l, t, w, h, dark: bool, act: str = "") -> None:
+    rows = (versus.get("rows") or [])[:3]
+    if not rows:
+        return
+    gap = Inches(0.14)
+    row_h = int((h - gap * (len(rows) - 1)) / len(rows))
+    shout = _act_color(act, dark)
+    mid_w = Inches(0.48)
+    pole_w = int((w - mid_w - gap * 2) / 2)
+    for i, row in enumerate(rows):
+        y = t + i * (row_h + gap)
+        left = row.get("left") or {}
+        right = row.get("right") or {}
+        silent = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, l, y, pole_w, row_h)
+        silent.adjustments[0] = 0.08
+        silent.line.color.rgb = RGBColor(0xB8, 0xB2, 0xA6)
+        _solid(silent, PAPER if not dark else RGBColor(0x1B, 0x2C, 0x49))
+        _textbox(slide, l + Inches(0.18), y + Inches(0.12), pole_w - Inches(0.36), Inches(0.24),
+                 (left.get("kicker") or "").upper(), size=11, color=MUTED)
+        _textbox(slide, l + Inches(0.18), y + Inches(0.36), pole_w - Inches(0.36), Inches(0.7),
+                 str(left.get("value") or ""), size=28 if len(rows) == 1 else 18, bold=True, color=INK if not dark else CREAM)
+        _textbox(slide, l + Inches(0.18), y + Inches(1.1), pole_w - Inches(0.36), row_h - Inches(1.24),
+                 left.get("text") or "", size=12, color=MUTED)
+        _textbox(slide, l + pole_w + gap, y + int(row_h / 2) - Inches(0.16), mid_w, Inches(0.32),
+                 row.get("delta") or "→", size=16, color=MUTED, align=PP_ALIGN.CENTER)
+        rx = l + pole_w + mid_w + gap * 2
+        loud = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, rx, y, pole_w, row_h)
+        loud.adjustments[0] = 0.08
+        loud.line.fill.background()
+        _solid(loud, shout)
+        _textbox(slide, rx + Inches(0.18), y + Inches(0.12), pole_w - Inches(0.36), Inches(0.24),
+                 (right.get("kicker") or "").upper(), size=11, color=CREAM)
+        _textbox(slide, rx + Inches(0.18), y + Inches(0.36), pole_w - Inches(0.36), Inches(0.7),
+                 str(right.get("value") or ""), size=28 if len(rows) == 1 else 18, bold=True, color=WHITE)
+        _textbox(slide, rx + Inches(0.18), y + Inches(1.1), pole_w - Inches(0.36), row_h - Inches(1.24),
+                 right.get("text") or "", size=12, color=CREAM)
+
+
+def _split(slide, split: dict, l, t, w, h, dark: bool, act: str = "") -> None:
+    heroes = split.get("heroes") or []
+    rail = split.get("rail") or []
+    gap = Inches(0.18)
+    hero_w = int(w * 0.62)
+    rail_w = w - hero_w - gap
+    accent = _act_color(act, dark)
+    ink = CREAM if dark else INK
+    if heroes:
+        hero_h = int((h - gap * (len(heroes) - 1)) / max(len(heroes), 1))
+        for i, card in enumerate(heroes):
+            y = t + i * (hero_h + gap)
+            shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, l, y, hero_w, hero_h)
+            shape.adjustments[0] = 0.08
+            shape.line.fill.background()
+            _solid(shape, RGBColor(0x1B, 0x2C, 0x49) if dark else accent)
+            _textbox(slide, l + Inches(0.22), y + Inches(0.14), hero_w - Inches(0.44), Inches(0.24),
+                     (card.get("kicker") or split.get("heroLabel") or "").upper(), size=11, color=CREAM)
+            _textbox(slide, l + Inches(0.22), y + Inches(0.42), hero_w - Inches(0.44), Inches(0.7),
+                     card.get("title") or "", size=20, bold=True, color=WHITE)
+            _textbox(slide, l + Inches(0.22), y + Inches(1.16), hero_w - Inches(0.44), hero_h - Inches(1.5),
+                     card.get("body") or "", size=13, color=CREAM)
+            if card.get("ref"):
+                _textbox(slide, l + Inches(0.22), y + hero_h - Inches(0.32), hero_w - Inches(0.44), Inches(0.22),
+                         str(card["ref"]), size=10, color=RGBColor(0xF0, 0xC4, 0x8A))
+    if rail:
+        rx = l + hero_w + gap
+        rail_h = int((h - gap * (len(rail) - 1)) / max(len(rail), 1))
+        for i, card in enumerate(rail):
+            y = t + i * (rail_h + gap)
+            shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, rx, y, rail_w, rail_h)
+            shape.adjustments[0] = 0.08
+            shape.line.color.rgb = RGBColor(0xB8, 0xB2, 0xA6)
+            _solid(shape, RGBColor(0x1B, 0x2C, 0x49) if dark else PAPER)
+            _textbox(slide, rx + Inches(0.16), y + Inches(0.1), rail_w - Inches(0.32), Inches(0.22),
+                     (card.get("kicker") or "").upper(), size=10, color=MUTED if not dark else RGBColor(0xF0, 0xC4, 0x8A))
+            _textbox(slide, rx + Inches(0.16), y + Inches(0.32), rail_w - Inches(0.32), Inches(0.4),
+                     card.get("title") or "", size=13, bold=True, color=ink)
+            _textbox(slide, rx + Inches(0.16), y + Inches(0.74), rail_w - Inches(0.32), rail_h - Inches(0.9),
+                     card.get("body") or "", size=11, color=MUTED if not dark else CREAM)
 
 
 def _stat(slide, items: list[dict], l, t, w, h, dark: bool) -> None:

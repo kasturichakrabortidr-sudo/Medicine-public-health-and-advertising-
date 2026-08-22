@@ -31,10 +31,53 @@ def sentence(text, n: int = 1) -> str:
     return text
 
 
-def line(text) -> str:
+def line(text, max_words: int | None = None) -> str:
     """A complete noun phrase or short sentence for a card title. No ellipsis."""
     text = " ".join(str(text or "").split()).replace("…", "").replace("...", "")
+    if max_words:
+        words = text.replace("—", " ").split()
+        if len(words) > max_words:
+            text = " ".join(words[:max_words]).rstrip(",;:")
     return text.rstrip()
+
+
+PROCESS_SPEAK = re.compile(
+    r"if a (contact|move) cannot name|a pillar without a number|does not ship|"
+    r"does not go on the plan|we collapsed specialty|the working file|"
+    r"population, intervention, comparator|lead indicators are recall|"
+    r"one cited finding, one execution|we do not invent a forest|"
+    r"silence is (a boundary|research)|what we will not say sits|"
+    r"this brief can actually fund|rates stay sketches|"
+    r"most launch decks|how this deck was built|do not paste|"
+    r"load-bearing lines|this paper's job|each paper's job|"
+    r"until the audit exists|nothing else is a source",
+    re.I,
+)
+
+
+def is_process(text) -> bool:
+    raw = " ".join(str(text or "").split())
+    return bool(raw) and bool(PROCESS_SPEAK.search(raw))
+
+
+def listed(items, lead: str = "Published outcomes include") -> str:
+    """One complete sentence from a list. Never mid-word clip."""
+    bits = [line(i).rstrip(" .;") for i in items if str(i or "").strip()]
+    if not bits:
+        return ""
+    if len(bits) == 1:
+        return sentence(f"{lead} {bits[0]}")
+    return sentence(f"{lead} {', '.join(bits[:-1])}, and {bits[-1]}")
+
+
+def clip_title(text, fallback: str = "") -> str:
+    """A conclusion of at most 12 words. Never an ellipsis."""
+    raw = line(text) or fallback
+    raw = raw.replace("…", "").replace("...", "").strip()
+    words = [w for w in raw.replace("—", " ").split() if w]
+    if len(words) > 12:
+        raw = " ".join(words[:12]).rstrip(",;:")
+    return raw or fallback
 
 
 def cue(text) -> str:

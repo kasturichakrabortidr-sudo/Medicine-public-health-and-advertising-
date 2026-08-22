@@ -10,10 +10,10 @@ description: >
 
 Four engines run inside generate, not only in this folder:
 
-- **story** — four acts, every title a conclusion
-- **visuals** — the picture carries the room
+- **story** — four acts, every title a brief-specific conclusion
+- **visuals** — versus and split carry the room
 - **copy** — complete sentences, never `…`
-- **critic** — kill empty shout and duplicate labels
+- **critic** — kill empty shout, process notes, and duplicate labels
 
 See `strata-deck-story`, `strata-deck-visuals`, `strata-deck-copy`,
 and `strata-deck-ai`. The room lives in `director_api/deck_engines.py`.

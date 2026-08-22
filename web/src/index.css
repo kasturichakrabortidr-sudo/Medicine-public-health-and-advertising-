@@ -366,12 +366,17 @@ textarea {
   color: var(--paper);
 }
 
+.slide.act-open { --act: var(--copper); }
+.slide.act-proof { --act: var(--teal); }
+.slide.act-stand { --act: var(--crimson); }
+.slide.act-move { --act: var(--copper-2); }
+
 .slide .kicker {
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--copper);
+  color: var(--act, var(--copper));
   margin-bottom: 10px;
 }
 
@@ -588,6 +593,184 @@ textarea {
 .stat-item p {
   margin: 0;
   line-height: 1.4;
+}
+
+.slide-versus {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+
+.versus-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: stretch;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.versus-pole {
+  border-radius: 16px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.versus-pole.silent {
+  background: rgba(11, 18, 32, 0.04);
+  border: 1.5px dashed rgba(11, 18, 32, 0.22);
+  color: var(--muted);
+}
+
+.versus-pole.shout {
+  background: var(--act, var(--copper));
+  color: var(--cream);
+}
+
+.versus-pole.shout .kicker {
+  color: rgba(250, 246, 239, 0.78);
+}
+
+.versus-value {
+  font-family: var(--serif);
+  font-weight: 640;
+  line-height: 1;
+  margin: 4px 0 8px;
+}
+
+.slide-versus.hero .versus-value {
+  font-size: 64px;
+}
+
+.slide-versus.rows-2 .versus-value,
+.slide-versus.rows-3 .versus-value {
+  font-size: 28px;
+}
+
+.versus-pole p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.versus-mid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+}
+
+.versus-glyph {
+  font-family: var(--mono);
+  font-size: 22px;
+  color: var(--muted);
+}
+
+.slide-split {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.split-hero,
+.split-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.split-hero-card {
+  flex: 1;
+  background: var(--act, var(--copper));
+  color: var(--cream);
+  border-radius: 16px;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+}
+
+.split-hero-card .kicker {
+  color: rgba(250, 246, 239, 0.72);
+}
+
+.split-hero-card h3 {
+  font-family: var(--serif);
+  font-size: 22px;
+  margin: 6px 0 8px;
+}
+
+.split-hero-card p {
+  margin: 0;
+  line-height: 1.45;
+  font-size: 15px;
+}
+
+.split-rail-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.split-rail-item {
+  flex: 1;
+  background: rgba(11, 18, 32, 0.04);
+  border: 1px dashed rgba(11, 18, 32, 0.22);
+  border-radius: 12px;
+  padding: 12px 14px;
+  min-height: 0;
+}
+
+.split-rail-item h4 {
+  font-family: var(--serif);
+  font-size: 15px;
+  margin: 2px 0 6px;
+}
+
+.split-rail-item p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.slide.title .split-hero-card,
+.slide.close .split-hero-card {
+  background: rgba(244, 239, 230, 0.16);
+}
+
+.slide.title .split-rail-item,
+.slide.close .split-rail-item {
+  background: rgba(244, 239, 230, 0.06);
+  border-color: rgba(244, 239, 230, 0.18);
+  color: var(--paper);
+}
+
+.slide.title .split-rail-label,
+.slide.close .split-rail-label,
+.slide.title .split-rail-item p,
+.slide.close .split-rail-item p {
+  color: rgba(244, 239, 230, 0.72);
+}
+
+.slide.close .flow-step {
+  background: rgba(244, 239, 230, 0.08);
+  border-color: rgba(244, 239, 230, 0.16);
+  color: var(--paper);
+}
+
+.slide.close .flow-n {
+  color: #f0c48a;
 }
 
 .project-list {
@@ -1053,6 +1236,8 @@ a.cite-link {
   .rail,
   .topbar .actions,
   .deck-nav,
+  .engine-row,
+  .story-rail,
   .btn {
     display: none !important;
   }
@@ -1115,7 +1300,9 @@ a.cite-link {
   .slide-board.n5,
   .slide-flow,
   .slide-flow.n4,
-  .slide-stat.n2 {
+  .slide-stat.n2,
+  .slide-split,
+  .versus-row {
     grid-template-columns: 1fr;
   }
   .kpi-row {

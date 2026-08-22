@@ -70,7 +70,11 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
             {skill.name}
           </span>
         ))}
-        <span className="engine-note">directed this pack</span>
+        <span className="engine-note">
+          {pack.meta.engineReport?.kills?.length
+            ? `${pack.meta.engineReport.kills.length} kills on this pack`
+            : "directed this pack"}
+        </span>
       </div>
       {map.length ? (
         <ol className="story-rail">

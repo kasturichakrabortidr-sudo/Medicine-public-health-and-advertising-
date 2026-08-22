@@ -46,7 +46,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
     _bind_science(doctrine, ledger)
     work = build_workfile(brief, doctrine, ledger)
     interventions = _interventions(brief, doctrine, ledger)
-    slides = build_deck(brief, doctrine, ledger, work, interventions)
+    slides, room = build_deck(brief, doctrine, ledger, work, interventions)
 
     return {
         "meta": {
@@ -66,6 +66,11 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
             "deckSkills": list(SKILL_IDS),
             "deckSkillCards": catalog()["skills"],
             "engines": catalog()["engines"],
+            "engineReport": {
+                "kills": [r for r in room if r.get("action", "").startswith(("killed", "cleared", "deduped", "stripped", "filled"))],
+                "drafts": room,
+                "engines": list(SKILL_IDS),
+            },
             "storyMap": story_map(slides),
         },
         "brief": brief.to_dict(),

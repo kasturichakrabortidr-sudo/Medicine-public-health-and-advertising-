@@ -5,6 +5,15 @@ from director_api.generate import generate_pack
 from medicomarketing_agent.config import load_brief
 
 
+def _visual_cards(slide: dict) -> list[dict]:
+    out = list((slide.get("board") or {}).get("cards") or [])
+    split = slide.get("split") or {}
+    out.extend(split.get("heroes") or [])
+    out.extend(split.get("rail") or [])
+    out.extend((slide.get("flow") or {}).get("steps") or [])
+    return out
+
+
 def test_cardioshield_lead_is_cited_first_eligible_science():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     ledger = resolve_evidence(brief, pubmed=False)
@@ -42,7 +51,7 @@ def test_pack_exposes_science_slides_and_anchors():
     assert "[1]" in meaning["subtitle"] or "[1]" in meaning["narrative"]
     pack_slide = next(s for s in pack["slides"] if s["id"] == "pack")
     pack_text = " ".join(
-        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in (pack_slide.get("board") or {}).get("cards") or []
+        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in _visual_cards(pack_slide)
     )
     assert "[" in pack_text or "PMID" in pack_text or pack_slide.get("refs")
     refs_slide = next(s for s in pack["slides"] if s["id"] == "references")
@@ -56,7 +65,7 @@ def test_pack_exposes_science_slides_and_anchors():
     assert "PMID" in pack["doctrine"]["scienceAnchor"]
     house = next(s for s in pack["slides"] if s["id"] == "house")
     house_text = " ".join(
-        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in (house.get("board") or {}).get("cards") or []
+        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in _visual_cards(house)
     ) + " ".join(house.get("bullets") or []) + str(house.get("table") or "")
     assert "[1]" in house_text or "[2]" in house_text or "PMID" in house_text
     assert pack["interventions"][0]["evidenceAnchor"]
@@ -95,7 +104,7 @@ def test_spine_connects_pioneer_to_first_touch():
     assert compare["chart"]["data"][0]["pmid"] == "30415601"
     iv = next(s for s in pack["slides"] if s["id"] == "interventions")
     iv_text = " ".join(
-        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in (iv.get("board") or {}).get("cards") or []
+        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in _visual_cards(iv)
     ) + " ".join(iv.get("bullets") or [])
     assert "[" in iv_text and "PMID" in iv_text
 

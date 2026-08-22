@@ -8,7 +8,7 @@ from director_api.deck_visuals import cue, line, sentence
 
 
 BANNED_IDS = {"how-built", "questions", "boxplot", "citation-register", "science-lead"}
-VISUAL_KEYS = ("chart", "board", "flow", "stat")
+VISUAL_KEYS = ("chart", "board", "flow", "stat", "versus", "split")
 REQUIRED_PHASES = {f"{i:02d}" for i in range(1, 12)}
 REQUIRED_SLIDES = {
     "title", "need", "tension", "belief", "pico", "pack", "stand",
@@ -25,18 +25,38 @@ def _demo_pack(**kwargs):
     return generate_pack(brief, mode="demo", pubmed=False, **kwargs)
 
 
+def _cards(slide: dict) -> list[dict]:
+    out = list((slide.get("board") or {}).get("cards") or [])
+    split = slide.get("split") or {}
+    out.extend(split.get("heroes") or [])
+    out.extend(split.get("rail") or [])
+    for row in (slide.get("versus") or {}).get("rows") or []:
+        left, right = row.get("left") or {}, row.get("right") or {}
+        out.append({
+            "title": left.get("text") or left.get("value") or "",
+            "body": right.get("text") or "",
+            "ref": right.get("ref") or "",
+            "kicker": left.get("kicker") or "",
+        })
+    return out
+
+
 def _copy_blobs(slide: dict) -> list[str]:
     blobs = [
         slide.get("title") or "",
         slide.get("subtitle") or "",
         slide.get("narrative") or "",
     ]
-    for card in (slide.get("board") or {}).get("cards") or []:
+    for card in _cards(slide):
         blobs.extend([card.get("title") or "", card.get("body") or ""])
     for step in (slide.get("flow") or {}).get("steps") or []:
         blobs.extend([step.get("title") or "", step.get("body") or ""])
     for item in (slide.get("stat") or {}).get("items") or []:
         blobs.extend([item.get("value") or "", item.get("label") or ""])
+    for row in (slide.get("versus") or {}).get("rows") or []:
+        for side in ("left", "right"):
+            pole = row.get(side) or {}
+            blobs.extend([pole.get("value") or "", pole.get("text") or ""])
     return blobs
 
 
@@ -67,6 +87,8 @@ def test_deck_interprets_plan_not_the_file():
     assert all(row.get("slide") and row.get("question") for row in pack["meta"]["storyMap"])
     assert pack["meta"]["deckSkillCards"][0]["id"] == "story"
     assert [e["id"] for e in pack["meta"]["engines"]] == ["story", "visuals", "copy", "critic"]
+    assert pack["meta"]["engineReport"]["engines"] == ["story", "visuals", "copy", "critic"]
+    assert isinstance(pack["meta"]["engineReport"]["drafts"], list)
 
 
 def test_one_visual_owns_each_content_slide():
@@ -77,7 +99,7 @@ def test_one_visual_owns_each_content_slide():
         if layout in {"title", "close", "references", "insight"}:
             continue
         assert any(slide.get(k) for k in VISUAL_KEYS), slide["id"]
-        if slide.get("layout") in {"visual", "board", "flow", "stat"}:
+        if slide.get("layout") in {"visual", "board", "flow", "stat", "versus", "split"}:
             assert not slide.get("bullets")
 
 
@@ -99,22 +121,23 @@ def test_visuals_interpret_the_working_file():
     assert "advisory board" not in (need.get("narrative") or "").lower()
     assert need["title"] == "Delay is the job."
     assert not (need.get("narrative") or "").strip()
-    assert need["stat"]["items"][0]["value"] == "15%"
-    assert need["stat"]["items"][1]["value"] == "Delay"
+    assert need["layout"] == "versus"
+    assert need["versus"]["rows"][0]["left"]["value"] == "15%"
+    assert need["versus"]["rows"][0]["right"]["value"] == "Delay"
     stand = next(s for s in pack["slides"] if s["id"] == "stand")
-    for card in stand["board"]["cards"]:
+    for card in _cards(stand):
         assert not (card.get("body") or "").lower().startswith("supportive")
         assert (card.get("body") or "").lower() != "silent."
     who = next(s for s in pack["slides"] if s["id"] == "who")
-    for card in who["board"]["cards"]:
+    for card in _cards(who):
         assert "(" not in card["title"]
     title = next(s for s in pack["slides"] if s["id"] == "title")
-    blob = " ".join(_copy_blobs(title))
+    blob = " ".join(_copy_blobs(title)) + " " + (title.get("kicker") or "")
     assert "HFrEF" in blob
     assert "CardioShield" in blob
-    assert all("no numbered finding yet" not in (c.get("body") or "").lower() for c in stand["board"]["cards"])
+    assert all("no numbered finding yet" not in (c.get("body") or "").lower() for c in _cards(stand))
     belief = next(s for s in pack["slides"] if s["id"] == "belief")
-    titles = " ".join(c["title"] for c in belief["board"]["cards"])
+    titles = " ".join(c["title"] for c in _cards(belief))
     assert "advisory board" not in titles.lower()
     assert "stabilis" in titles.lower()
     pico = next(s for s in pack["slides"] if s["id"] == "pico")
@@ -124,8 +147,22 @@ def test_visuals_interpret_the_working_file():
     assert cards[0]["title"].lower() != cards[0]["kicker"].lower()
     assert "india" in cards[4]["title"].lower()
     assert "metro" in cards[4]["title"].lower()
+    outcomes = next(c for c in cards if (c.get("kicker") or "").lower().startswith("outcome"))
+    assert not (outcomes.get("body") or "").rstrip().endswith("con")
+    assert "consistent" in (outcomes.get("body") or "").lower()
+    assert (outcomes.get("body") or "").rstrip().endswith(".")
+    pack_slide = next(s for s in pack["slides"] if s["id"] == "pack")
+    kickers = [c.get("kicker") for c in _cards(pack_slide)]
+    assert kickers
+    assert len(set(k.lower() for k in kickers if k)) == len([k for k in kickers if k])
+    assert "this paper's job" not in " ".join(kickers).lower()
+    tension = next(s for s in pack["slides"] if s["id"] == "tension")
+    assert "wait" in (tension.get("title") or "").lower()
+    science = {s["id"]: s for s in pack["slides"]}
+    assert "CardioShield" not in (science["pico"].get("title") or "")
+    assert "sacubitril" in (science["pico"].get("title") or "").lower()
     for slide in pack["slides"]:
-        for card in (slide.get("board") or {}).get("cards") or []:
+        for card in _cards(slide):
             words = (card.get("title") or "").replace("—", " ").split()
             assert len(words) <= 12, (slide["id"], card.get("title"))
 
@@ -133,9 +170,9 @@ def test_visuals_interpret_the_working_file():
 def test_objections_keep_full_clause():
     pack = _demo_pack()
     obj = next(s for s in pack["slides"] if s["id"] == "objections")
-    titles = " ".join(c["title"] for c in obj["board"]["cards"])
+    titles = " ".join(c["title"] for c in _cards(obj))
     assert "cannot afford this" in titles.lower()
-    for card in obj["board"]["cards"]:
+    for card in _cards(obj):
         ref = (card.get("ref") or "").strip()
         if ref:
             assert "[" in ref and "]" in ref, (card["title"], ref)

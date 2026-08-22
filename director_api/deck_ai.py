@@ -22,6 +22,11 @@ def polish_story(story: dict[str, Any], brief: Any, doctrine: dict) -> dict[str,
     return story
 
 
+def ensemble_room(slides: list[dict], story: dict) -> list[dict]:
+    """Fan out to live providers when keys exist. No-op otherwise."""
+    return ensemble_titles(slides, story)
+
+
 def ensemble_titles(slides: list[dict], story: dict) -> list[dict]:
     if os.environ.get("STRATA_DECK_AI", "").lower() not in {"1", "on", "true"}:
         return slides
@@ -32,7 +37,18 @@ def ensemble_titles(slides: list[dict], story: dict) -> list[dict]:
         "headline": story.get("headline"),
         "need": story.get("need"),
         "enemy": story.get("enemy"),
+        "molecule": story.get("molecule"),
+        "brand": story.get("brand"),
         "titles": {s.get("id"): s.get("title") for s in slides if s.get("id") != "references"},
+        "kickers": {
+            s.get("id"): [
+                c.get("kicker")
+                for c in ((s.get("split") or {}).get("heroes") or []) + ((s.get("split") or {}).get("rail") or [])
+                if c.get("kicker")
+            ]
+            for s in slides
+            if s.get("split")
+        },
     }
     votes: list[dict] = []
     with ThreadPoolExecutor(max_workers=3) as pool:
@@ -52,11 +68,17 @@ def ensemble_titles(slides: list[dict], story: dict) -> list[dict]:
             if key not in merged and value:
                 merged[key] = value
     by_id = {s.get("id"): s for s in slides}
-    for sid, title in (merged.get("titles") or merged).items():
+    titles = merged.get("titles")
+    if not isinstance(titles, dict):
+        titles = {k: v for k, v in merged.items() if k not in {"titles", "narratives", "kickers"} and isinstance(v, str)}
+    for sid, title in titles.items():
         if sid in by_id and isinstance(title, str) and title.strip():
             cleaned = line(title.replace("…", "").replace("...", ""))
             if cleaned and "[" not in cleaned:
                 by_id[sid]["title"] = cleaned if not _looks_sentence(cleaned) else sentence(cleaned).rstrip(".") + ("" if cleaned.endswith((".", "!", "?")) else ".")
+    for sid, nar in (merged.get("narratives") or {}).items():
+        if sid in by_id and isinstance(nar, str) and nar.strip() and "…" not in nar:
+            by_id[sid]["narrative"] = sentence(nar, 2)
     return slides
 
 
@@ -96,9 +118,11 @@ def _providers() -> list[dict]:
 
 
 SYSTEM = (
-    "You direct a medical-affairs strategy deck. Return JSON {\"titles\": {slideId: title}}. "
+    "You direct a medical-affairs strategy deck. Return JSON "
+    "{\"titles\": {slideId: title}, \"narratives\": {slideId: line}, \"kickers\": {slideId: [labels]}}. "
     "Each title is a complete conclusion, at most 12 words. Never use ellipses. "
-    "Do not add numbers, trial names, HRs, NNTs, or PMIDs that are not already in the input."
+    "Do not add numbers, trial names, HRs, NNTs, or PMIDs that are not already in the input. "
+    "Science slides use the INN, never the campaign brand."
 )
 
 
