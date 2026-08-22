@@ -34,7 +34,12 @@ ACCEPT_HINT = (
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "service": "strata-director", "accept": ACCEPT_HINT}
+    return {
+        "ok": True,
+        "service": "strata-director",
+        "accept": ACCEPT_HINT,
+        "build": "2026-08-22-papers-jobs",
+    }
 
 
 @app.get("/api/demo")
@@ -194,10 +199,22 @@ def _web_file(path: str):
             except ValueError:
                 continue
             if candidate.is_file():
-                return FileResponse(candidate)
+                headers = {}
+                if candidate.name in {"index.html", "index.htm"}:
+                    headers = {
+                        "Cache-Control": "no-store, no-cache, must-revalidate",
+                        "Pragma": "no-cache",
+                    }
+                return FileResponse(candidate, headers=headers)
     index = DIST / "index.html"
     if index.exists():
-        return FileResponse(index)
+        return FileResponse(
+            index,
+            headers={
+                "Cache-Control": "no-store, no-cache, must-revalidate",
+                "Pragma": "no-cache",
+            },
+        )
     raise HTTPException(
         503,
         "Web build missing. From the repo root run: python start_director.py",

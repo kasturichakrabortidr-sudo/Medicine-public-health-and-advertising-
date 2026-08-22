@@ -78,6 +78,12 @@ button {
   color: rgba(244, 239, 230, 0.62);
 }
 
+.mark .build-stamp {
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: #f0c48a;
+}
+
 .nav {
   display: flex;
   flex-direction: column;
@@ -177,6 +183,12 @@ button {
   background: var(--copper);
   border-color: var(--copper);
   color: #fff;
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: rgba(244, 239, 230, 0.35);
+  color: var(--paper);
 }
 
 .grid-2 {

@@ -8,23 +8,11 @@ import { WorkingFileTab } from "./components/WorkingFileTab";
 import { RefLinksProvider } from "./links";
 import type { StrategyPack, TabId } from "./types";
 
-const USER_PACK_KEY = "strata.userPack";
+const USER_PACK_KEY = "strata.userPack.v4";
 
 function isDemoPack(pack: StrategyPack | null): boolean {
   if (!pack) return false;
   return pack.meta.mode === "demo" || pack.meta.demo === true;
-}
-
-function readSavedPack(): StrategyPack | null {
-  try {
-    const raw = sessionStorage.getItem(USER_PACK_KEY);
-    if (!raw) return null;
-    const pack = JSON.parse(raw) as StrategyPack;
-    if (!pack?.meta?.brand || isDemoPack(pack)) return null;
-    return pack;
-  } catch {
-    return null;
-  }
 }
 
 export default function App() {
@@ -67,11 +55,24 @@ export default function App() {
     }
   };
 
+  const startOver = () => {
+    setPack(null);
+    setTab("briefs");
+    setError("");
+    try {
+      sessionStorage.removeItem(USER_PACK_KEY);
+    } catch {
+      /* ignore */
+    }
+  };
+
   useEffect(() => {
-    const saved = readSavedPack();
-    if (saved) {
-      setPack(saved);
-      setTab("work");
+    // Fresh load always starts on Brief. A previous pack on this origin
+    // is the usual reason the old one-paper campaign reappears.
+    try {
+      sessionStorage.removeItem(USER_PACK_KEY);
+    } catch {
+      /* ignore */
     }
   }, []);
 
@@ -85,6 +86,7 @@ export default function App() {
         <div className="mark">
           <strong>STRATA</strong>
           <span>Working file for HCP campaigns</span>
+          <span className="build-stamp">22 Aug · each paper owns a job</span>
         </div>
         <nav className="nav">
           <button type="button" className={tab === "briefs" ? "active" : ""} onClick={() => setTab("briefs")}>
@@ -125,6 +127,9 @@ export default function App() {
         </nav>
         <button className="btn" type="button" onClick={loadDemo} disabled={busy}>
           Open the CardioShield demo
+        </button>
+        <button className="btn ghost" type="button" onClick={startOver} disabled={busy}>
+          Start over
         </button>
         <div className="doctrine-chip">
           <em>{pack ? pack.meta.brand : "Nothing read yet"}</em>

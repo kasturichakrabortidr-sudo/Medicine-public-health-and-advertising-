@@ -101,6 +101,7 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           <thead>
             <tr>
               <th>No.</th>
+              <th>This paper's job</th>
               <th>Source</th>
               <th>Citation</th>
               <th>Design / N</th>
@@ -112,6 +113,10 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
             {records.map((r) => (
               <tr key={r.id}>
                 <td>[{r.ref || "—"}]</td>
+                <td>
+                  <strong>{r.roleLabel || r.directs || "Sourced"}</strong>
+                  <div className="small muted">{r.spine_execute || r.role || ""}</div>
+                </td>
                 <td>
                   <strong>{r.short}</strong>
                   <div className="small muted">{r.stream}</div>

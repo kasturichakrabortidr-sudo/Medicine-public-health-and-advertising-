@@ -177,6 +177,8 @@ export interface EvidenceRecord {
   status: string;
   ref?: number;
   directs?: string;
+  role?: string;
+  roleLabel?: string;
   control_event?: number | null;
   treat_event?: number | null;
   arr?: number | null;
