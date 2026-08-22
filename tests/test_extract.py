@@ -132,6 +132,24 @@ Access:
     assert any("OOP" in s for s in brief.access_and_cost)
 
 
+def test_guidelines_do_not_swallow_following_table_rows():
+    pasted = """
+Brand name: HelixOne
+Product: sacubitril
+Guidelines:
+- ESC HF 2021
+Therapy area | Cardiology — HFrEF
+Market | India
+Insights | Cost is the veto at the desk
+"""
+    brief = merge_into_brief([], pasted=pasted)
+    assert brief.brand == "HelixOne"
+    assert "Cardiology" in brief.therapy_area
+    assert brief.market == "India"
+    assert brief.guidelines == ["ESC HF 2021"]
+    assert any("veto" in s.lower() for s in brief.hcp_insights)
+
+
 def test_title_only_and_table_rows():
     pasted = """
 HELIXONE

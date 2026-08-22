@@ -252,6 +252,12 @@ def _apply_labelled_blocks(brief: ExtractedBrief, blob: str) -> None:
         if not line or re.match(r"^(page|slide)\s+\d+\b", line, re.I):
             continue
         key, rest = _line_label(line)
+        if not key:
+            pipe = re.match(r"^(.{2,40}?)\s*\|\s*(.+)$", line)
+            if pipe:
+                mapped = LABEL_ALIASES.get(_normalize_key(pipe.group(1)))
+                if mapped in KNOWN_FIELDS:
+                    key, rest = mapped, pipe.group(2).strip()
         if key:
             flush()
             current = key
@@ -411,6 +417,9 @@ def _section_bullets(blob: str, needles: tuple[str, ...]) -> list[str]:
                     break
                 continue
             if _line_label(s)[0]:
+                break
+            pipe = re.match(r"^(.{2,40}?)\s*\|\s*(.+)$", s)
+            if pipe and LABEL_ALIASES.get(_normalize_key(pipe.group(1))) in KNOWN_FIELDS:
                 break
             if s.startswith(("#", "##")) and len(s.split()) <= 6:
                 break

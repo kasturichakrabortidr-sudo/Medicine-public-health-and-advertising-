@@ -465,6 +465,11 @@ def _parse_structured(raw: str) -> ExtractedBrief:
         elif label and _normalize_key(label.group(1)) in KNOWN_FIELDS:
             key = _normalize_key(label.group(1))
             rest = label.group(2).strip()
+        else:
+            pipe = re.match(r"^(.{2,40}?)\s*\|\s*(.+)$", stripped)
+            if pipe and _normalize_key(pipe.group(1)) in KNOWN_FIELDS:
+                key = _normalize_key(pipe.group(1))
+                rest = pipe.group(2).strip()
         if key and key in KNOWN_FIELDS:
             flush()
             current = key
