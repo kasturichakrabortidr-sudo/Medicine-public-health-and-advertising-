@@ -747,5 +747,16 @@ def _looks_like_cost(text: str) -> bool:
 
 
 def _short(text: str, n: int) -> str:
-    text = " ".join(text.split())
-    return text if len(text) <= n else text[: n - 1].rstrip() + "…"
+    """Fit a table cell. Never clip with an ellipsis — the deck will not inherit a cut clause."""
+    text = " ".join((text or "").split())
+    if len(text) <= n:
+        return text
+    quoted = re.findall(r'"([^"]+)"', text)
+    if quoted:
+        return quoted[-1].strip()
+    for sep in (" but ", " — ", " – ", " - "):
+        if sep in text:
+            tail = text.split(sep, 1)[-1].strip().strip('"')
+            if 8 <= len(tail) <= n + 80:
+                return tail
+    return text

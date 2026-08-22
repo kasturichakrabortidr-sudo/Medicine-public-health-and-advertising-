@@ -529,10 +529,22 @@ def _first_sentences(text: str, n: int) -> str:
 
 
 def _clip(text: str, n: int) -> str:
-    text = re.sub(r"\s+", " ", text or "").strip()
+    """Keep complete sentences. Never append an ellipsis."""
+    text = " ".join((text or "").split())
     if len(text) <= n:
         return text
-    return text[: n - 1].rstrip() + "…"
+    parts = re.split(r"(?<=[.!?])\s+", text)
+    out: list[str] = []
+    size = 0
+    for part in parts:
+        if not part:
+            continue
+        extra = len(part) + (1 if out else 0)
+        if out and size + extra > n:
+            break
+        out.append(part)
+        size += extra
+    return " ".join(out) or text
 
 
 def _trial_name(title: str, abstract: str, product: str) -> str:

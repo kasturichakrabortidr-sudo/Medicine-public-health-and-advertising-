@@ -19,6 +19,28 @@
       "copy",
       "layout"
     ],
+    "deckSkillCards": [
+      {
+        "id": "story",
+        "name": "Story",
+        "rule": "Every working-file phase has a beat. The deck is the argument, in order."
+      },
+      {
+        "id": "visuals",
+        "name": "Visuals",
+        "rule": "The picture carries the room. A slide without a visual is a failed beat."
+      },
+      {
+        "id": "copy",
+        "name": "Copy",
+        "rule": "Complete sentences only. Never an ellipsis. Never a cut clause."
+      },
+      {
+        "id": "layout",
+        "name": "Layout",
+        "rule": "One visual owns the 16:9. Refs sit in the flow. Nothing overlaps."
+      }
+    ],
     "storyMap": [
       {
         "phase": "01",
@@ -764,7 +786,7 @@
           ],
           "rows": [
             [
-              "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to…",
+              "to stabilise first",
               "If this is not actually the delay, we will spend a year fighting a habit that is not there.",
               "Field capture of the named delay vs what the numbered papers actually studied."
             ],
@@ -794,7 +816,7 @@
           "We do not have an audited first-eligible start rate for this market. Any % on a slide is a planning sketch until then."
         ],
         "hypotheses": [
-          "H1. Delay, not disbelief, is the conversion problem — from the insight “Advisory board (n=12 cardiologists) - most agree with early initiation in principle but s…”.",
+          "H1. Delay, not disbelief, is the conversion problem — from the insight “to stabilise first”.",
           "H2. Cost is a veto in tier-2, not a footnote — from “Largely out-of-pocket market; monthly cost 8-10x generic ARB”.",
           "H3. In-hospital first-eligible start is the highest-leverage behaviour change, because that is the window the initiation papers actually studied."
         ]
@@ -1001,7 +1023,7 @@
           ],
           "rows": [
             [
-              "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise…",
+              "to stabilise first",
               "The initiation papers do not require a clinic wait. [2] PIONEER-HF 2019.",
               "Habit / handover theatre",
               "This is the campaign. Not a reminder of efficacy."
@@ -1607,19 +1629,19 @@
       "section": "Need",
       "kicker": "Phase 01 · the real job",
       "title": "The goal is not the job.",
-      "narrative": "What CardioShield needs is not another reminder that the science is positive.",
+      "narrative": "The job is to stop the wait at the first eligible visit, not reprint the science.",
       "layout": "stat",
       "stat": {
         "items": [
           {
             "kicker": "The brief asked",
-            "value": "Grow",
-            "label": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation."
+            "value": "15%",
+            "label": "Grow quarterly prescription volume 15% QoQ over 4 quarters."
           },
           {
             "kicker": "The file restates",
             "value": "Delay",
-            "label": "What CardioShield needs is not another reminder that the science is positive."
+            "label": "The job is to stop the wait at the first eligible visit, not reprint the science."
           }
         ]
       },
@@ -1645,7 +1667,7 @@
           {
             "kicker": "What they do",
             "value": "Wait",
-            "label": "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"."
+            "label": "They wait to stabilise first."
           },
           {
             "kicker": "What must change",
@@ -1675,15 +1697,15 @@
         "cards": [
           {
             "kicker": "They still do this",
-            "title": "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise",
+            "title": "They wait to stabilise first",
             "body": "The initiation papers do not require a clinic wait.",
-            "ref": "Habit / handover theatre"
+            "ref": ""
           },
           {
             "kicker": "They still do this",
-            "title": "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually",
+            "title": "Renal burden looks heavier than it is",
             "body": "We do not have a renal-burden RCT on the register.",
-            "ref": "Old teaching / monitoring fear"
+            "ref": ""
           }
         ]
       },
@@ -1709,28 +1731,28 @@
         "cards": [
           {
             "kicker": "Population",
-            "title": "Population",
-            "body": "HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV."
+            "title": "HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV",
+            "body": "Taken from the brief."
           },
           {
             "kicker": "Intervention",
-            "title": "Intervention",
-            "body": "sacubitril/valsartan at the first eligible encounter."
+            "title": "sacubitril/valsartan at the first eligible encounter",
+            "body": "Eligible as labelled — not 'all comers'."
           },
           {
             "kicker": "Comparator",
-            "title": "Comparator",
-            "body": "Habitual ACEI/ARB or SoC delay."
+            "title": "Habitual ACEI/ARB or SoC delay",
+            "body": "The comparator is the current habit, not a straw man."
           },
           {
             "kicker": "Outcomes we may use",
-            "title": "Outcomes we may use",
+            "title": "Published endpoints only",
             "body": "CV death or HF hospitalisation [1]; Time-averaged proportional change in NT-proBNP [2]; Proportion achieving target dose at 10 weeks [3]; Primary composite, consistent across age [4]."
           },
           {
             "kicker": "Setting",
-            "title": "Setting",
-            "body": "India (metro + tier-2/3 cities)."
+            "title": "India (metro + tier-2/3 cities)",
+            "body": "Local label and code still govern."
           }
         ]
       },
@@ -2004,9 +2026,9 @@
           },
           {
             "kicker": "They will say",
-            "title": "The patient cannot afford",
-            "body": "Stay on their side.",
-            "ref": "gap"
+            "title": "The patient cannot afford this",
+            "body": "Stay on their side. Assistance mechanics, no price promise.",
+            "ref": ""
           },
           {
             "kicker": "They will say",
@@ -2145,19 +2167,19 @@
             "kicker": "Move 1",
             "title": "First-Touch Protocol",
             "body": "A hospital-to-clinic initiation bundle so CardioShield is started at the first eligible encounter.",
-            "ref": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10."
+            "ref": "[2] · PMID 30415601"
           },
           {
             "kicker": "Move 2",
             "title": "Affordability Confidence Kit",
             "body": "A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.",
-            "ref": "[7] Trivandrum HFR 2015 · PMID 26011246 · doi:10."
+            "ref": "[7] · PMID 26011246"
           },
           {
             "kicker": "Move 3",
             "title": "Myth-Reset Asset",
             "body": "One wrong belief, one local number, one peer voice.",
-            "ref": "[4] Jhund 2015 age · PMID 26231885 · doi:10."
+            "ref": "[4] · PMID 26231885"
           }
         ]
       },

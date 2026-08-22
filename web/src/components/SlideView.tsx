@@ -64,7 +64,7 @@ export function SlideView({ slide }: { slide: Slide }) {
 
 function Board({ cards }: { cards: NonNullable<Slide["board"]>["cards"] }) {
   return (
-    <div className={`slide-board n${Math.min(cards.length, 4)}`}>
+    <div className={`slide-board n${Math.min(cards.length, 5)}`}>
       {cards.map((card, i) => (
         <div className="slide-card" key={`${card.title}-${i}`}>
           {card.kicker ? <div className="kicker">{card.kicker}</div> : null}

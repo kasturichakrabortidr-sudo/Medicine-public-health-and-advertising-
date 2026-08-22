@@ -6,6 +6,7 @@ Visuals carry the room. The eleven phases all have a beat.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .cite import mark
@@ -13,8 +14,11 @@ from .deck_ai import polish_story
 from .deck_skills import BEATS, SKILL_IDS
 from .deck_visuals import (
     compare_rows,
+    cue,
     forest_rows,
+    goal_stat,
     line,
+    need_line,
     people_rows,
     phase,
     reference_slides,
@@ -49,18 +53,23 @@ def interpret_plan(
     p11 = phase(work, "11")
     jobs = paper_jobs(records, brief)
     molecule = science_name(brief)
-    insight = (brief.hcp_insights or [""])[0]
+    insights = brief.hcp_insights or []
+    insight = insights[0] if insights else ""
     primary = (lead.get("citations") or jobs or records or [{}])[0]
+    asked_stat, asked = goal_stat(p01.get("restatedAsk") or brief.business_goal or "The brief does not state a goal.")
+    need_stat, need = need_line(insights, doctrine)
     story = {
         "headline": line(doctrine.get("name") or "Change the decision, not the reprint"),
         "bet": sentence(doctrine.get("bet") or ""),
         "enemy": sentence(doctrine.get("enemy") or insight or "Hesitation at the pen."),
         "why": sentence(doctrine.get("whyNovel") or ""),
-        "asked": sentence(p01.get("restatedAsk") or brief.business_goal or "The brief does not state a goal."),
-        "need": sentence(p01.get("restatedNeed") or ""),
-        "current": sentence(p05.get("current") or insight or "The habit is not named."),
+        "asked": asked,
+        "asked_stat": asked_stat,
+        "need": need,
+        "need_stat": need_stat,
+        "current": sentence(cue(p05.get("current") or insight or "The habit is not named.")),
         "required": sentence(p05.get("required") or doctrine.get("bet") or ""),
-        "they_do": sentence(insight or p05.get("current") or "The habit is not named."),
+        "they_do": sentence(cue(insight or p05.get("current") or "The habit is not named.")),
         "papers_allow": sentence(primary.get("claim_permitted") or "No numbered finding yet."),
         "molecule": molecule,
         "brand": brief.brand or "This brand",
@@ -189,8 +198,8 @@ def _need_slide(story: dict, lead: dict) -> dict:
         "layout": "stat",
         "stat": {
             "items": [
-                {"kicker": "The brief asked", "value": "Grow", "label": story["asked"]},
-                {"kicker": "The file restates", "value": "Delay", "label": story["need"]},
+                {"kicker": "The brief asked", "value": story["asked_stat"], "label": story["asked"]},
+                {"kicker": "The file restates", "value": story["need_stat"], "label": story["need"]},
             ]
         },
         "refs": [c.get("ref") for c in (lead.get("citations") or [])[:3] if c.get("ref")],
@@ -220,9 +229,9 @@ def _belief_slide(story: dict, records: list[dict]) -> dict:
     for row in story.get("discord") or []:
         cards.append({
             "kicker": "They still do this",
-            "title": line(row[0]) or "Named delay",
+            "title": cue(row[0]) or "Named delay",
             "body": sentence(row[1] if len(row) > 1 else ""),
-            "ref": str(row[2] if len(row) > 2 else ""),
+            "ref": _cite_ref(row[2] if len(row) > 2 else ""),
         })
         if len(cards) >= 3:
             break
@@ -253,10 +262,22 @@ def _belief_slide(story: dict, records: list[dict]) -> dict:
 def _pico_slide(story: dict) -> dict:
     cards = []
     for row in story.get("pico") or []:
+        name = line(row[0]) or "PICO"
+        definition = row[1] if len(row) > 1 else ""
+        rule = row[2] if len(row) > 2 else ""
+        if name.lower().startswith("outcome"):
+            title = "Published endpoints only"
+            body = sentence(definition)
+        elif len(str(definition).split()) <= 12:
+            title = line(definition) or name
+            body = sentence(rule or definition)
+        else:
+            title = name
+            body = sentence(definition)
         cards.append({
-            "kicker": line(row[0]) or "PICO",
-            "title": line(row[0]) or "PICO",
-            "body": sentence(row[1] if len(row) > 1 else ""),
+            "kicker": name,
+            "title": title,
+            "body": body,
         })
     if not cards:
         cards = [{"kicker": "PICO", "title": "Contract pending", "body": "If a line is not in this frame, it is not yet a claim."}]
@@ -392,7 +413,7 @@ def _pillars_slide(story: dict) -> dict:
             "kicker": "We will say",
             "title": title,
             "body": sentence(row[1] if len(row) > 1 else ""),
-            "ref": str(row[2] if len(row) > 2 else ""),
+            "ref": _cite_ref(row[2] if len(row) > 2 else ""),
         })
     if not cards:
         cards = [{"kicker": "Theme", "title": story["headline"], "body": story["bet"]}]
@@ -414,8 +435,8 @@ def _objections_slide(story: dict) -> dict:
         cards.append({
             "kicker": "They will say",
             "title": line(row[0]) or "Objection",
-            "body": sentence(row[1] if len(row) > 1 else ""),
-            "ref": str(row[2] if len(row) > 2 else ""),
+            "body": sentence(row[1] if len(row) > 1 else "", 2),
+            "ref": _cite_ref(row[2] if len(row) > 2 else ""),
         })
         if len(cards) >= 3:
             break
@@ -504,7 +525,7 @@ def _moves_slide(story: dict) -> dict:
             "kicker": f"Move {i}",
             "title": line(move.get("name") or f"Move {i}"),
             "body": sentence(move.get("promise") or ""),
-            "ref": sentence(move.get("evidenceAnchor") or ""),
+            "ref": _cite_ref(move.get("evidenceAnchor") or ""),
         })
     return {
         "id": "interventions",
@@ -557,6 +578,16 @@ def _ask_slide(story: dict, brief: ExtractedBrief) -> dict:
         "flow": {"steps": steps[:3]},
         "callout": {"label": brief.brand or "Brand", "text": story["headline"]},
     }
+
+
+def _cite_ref(value) -> str:
+    text = str(value or "").strip()
+    marks = re.findall(r"\[\d+[a-z]?\]", text)
+    pmid = re.search(r"PMID\s+\d+", text, re.I)
+    parts = list(marks)
+    if pmid:
+        parts.append(pmid.group(0))
+    return " · ".join(parts)
 
 
 def _one_visual(slide: dict) -> dict:

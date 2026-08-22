@@ -613,6 +613,10 @@ textarea {
 }
 
 .story-rail li {
+  margin: 0;
+}
+
+.story-rail button {
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.04em;
@@ -621,12 +625,43 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 4px 8px;
+  background: transparent;
+  cursor: pointer;
 }
 
-.story-rail li.on {
+.story-rail button.on {
   color: var(--ink);
   border-color: var(--copper);
   background: rgba(196, 132, 74, 0.12);
+}
+
+.skill-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.skill-chip {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  background: var(--paper);
+}
+
+.skill-chip strong {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--copper);
+}
+
+.skill-chip span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.35;
+  margin-top: 4px;
 }
 
 .craft-line {
@@ -880,6 +915,10 @@ a.cite-link {
   .spine-head,
   .spine-row {
     grid-template-columns: 1fr;
+  }
+
+  .skill-strip {
+    grid-template-columns: 1fr 1fr;
   }
 }
 

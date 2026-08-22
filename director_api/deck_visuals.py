@@ -9,42 +9,81 @@ import re
 
 from .cite import mark
 
-HANGING = re.compile(
-    r"\b(the|a|an|at|in|if|to|for|of|and|or|with|on|by|from|as|than|that|this|is|are)\s*$",
-    re.I,
-)
 STOP = re.compile(r"[^.!?]*[.!?]")
+CUES = (
+    (re.compile(r"stabilis|stabiliz", re.I), "They wait to stabilise first"),
+    (re.compile(r"renal|monitor", re.I), "Renal burden looks heavier than it is"),
+    (re.compile(r"afford|out-of-pocket|\boop\b|monthly (?:drug )?cost", re.I), "Cost is the veto at the pen"),
+    (re.compile(r"\brwe\b|local (?:real-world|evidence)|indian patient", re.I), "They want local evidence first"),
+)
 
 
 def sentence(text, n: int = 1) -> str:
-    """First n complete sentences. Never adds an ellipsis."""
-    text = " ".join(str(text or "").split())
+    """First n complete sentences. Never adds an ellipsis. Never crops a clause."""
+    text = " ".join(str(text or "").split()).replace("…", "").replace("...", "")
     if not text:
         return ""
     found = [m.group(0).strip() for m in STOP.finditer(text)]
     if found:
         return " ".join(found[: max(1, n)])
-    cleaned = text.rstrip(" .…,;:—-")
-    if not cleaned:
-        return ""
-    if HANGING.search(cleaned):
-        cleaned = HANGING.sub("", cleaned).rstrip(" ,;:—-")
-    if not cleaned:
-        return ""
-    if cleaned[-1] not in ".!?":
-        cleaned += "."
-    return cleaned
+    if text[-1] not in ".!?":
+        return text + "."
+    return text
 
 
 def line(text) -> str:
-    """A complete noun phrase or sentence for a card title. No ellipsis."""
-    text = " ".join(str(text or "").split())
-    text = text.replace("…", "").rstrip(" .")
-    if not text:
+    """A complete noun phrase or short sentence for a card title. No ellipsis."""
+    text = " ".join(str(text or "").split()).replace("…", "").replace("...", "")
+    return text.rstrip()
+
+
+def cue(text) -> str:
+    """Turn a working-file quote into a visual title. Never paste the minutes."""
+    raw = line(text)
+    if not raw:
         return ""
-    if HANGING.search(text):
-        text = HANGING.sub("", text).rstrip(" ,;:—-")
-    return text
+    dump = len(raw.split()) > 10 or bool(
+        re.search(r"\(n\s*=|advisory board|survey|field notes", raw, re.I)
+    )
+    fragment = raw[0].islower()
+    if dump or fragment:
+        for pat, titled in CUES:
+            if pat.search(raw):
+                return titled
+        quoted = re.findall(r'"([^"]+)"', raw) or re.findall(r"'([^']+)'", raw)
+        if quoted:
+            q = quoted[-1].strip()
+            if 2 <= len(q.split()) <= 10:
+                return cue(q)
+        for sep in (" but ", " — ", " – ", " - "):
+            if sep in raw:
+                tail = raw.split(sep, 1)[-1].strip().strip('"')
+                if 3 <= len(tail.split()) <= 12:
+                    return cue(tail)
+        if dump:
+            return sentence(raw).rstrip(" .")
+    return raw.rstrip(" .")
+
+
+def goal_stat(text) -> tuple[str, str]:
+    """Big number for the asked goal, plus one complete sentence."""
+    raw = " ".join(str(text or "").split())
+    match = re.search(r"(\d+\s*%)", raw)
+    value = match.group(1).replace(" ", "") if match else ("Grow" if raw.lower().startswith("grow") else "Goal")
+    head = re.split(r"\s+by\s+", raw, maxsplit=1, flags=re.I)[0]
+    label = sentence(head if len(head.split()) >= 4 else raw)
+    return value, label
+
+
+def need_line(insights, doctrine) -> tuple[str, str]:
+    """Asked vs restated job, as a visual contrast — not the phase paragraph."""
+    blob = " ".join(str(i) for i in (insights or []))
+    bet = sentence((doctrine or {}).get("bet") or "")
+    if re.search(r"stabilis|stabiliz|delay|wait|late|second[- ]line", blob, re.I):
+        return "Delay", "The job is to stop the wait at the first eligible visit, not reprint the science."
+    if re.search(r"cost|afford|oop|price", blob, re.I):
+        return "Cost", "The job is the veto at the pen, not another reminder that the science is positive."
+    return "Need", bet or "The working file restates the job. The brief's goal is not the campaign."
 
 
 def phase(work: dict, pid: str) -> dict:

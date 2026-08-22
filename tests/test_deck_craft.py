@@ -4,7 +4,7 @@ from director_api.extract import ExtractedBrief
 from director_api.generate import generate_pack
 from medicomarketing_agent.config import load_brief
 from director_api.app import _brief_from_mapping
-from director_api.deck_visuals import sentence
+from director_api.deck_visuals import cue, line, sentence
 
 
 BANNED_IDS = {"how-built", "questions", "boxplot", "citation-register", "science-lead"}
@@ -15,7 +15,7 @@ REQUIRED_SLIDES = {
     "house", "objections", "sequence", "who", "interventions", "measure", "close",
 }
 HANGING = re.compile(
-    r"\b(the|a|an|at|in|if|to|for|of|and|or|with|on|by|from|as|than|that|this|is|are)\s*$",
+    r"\b(the|a|an|at|in|if|to|for|of|and|or|with|on|by|from|as|than)\s*$",
     re.I,
 )
 
@@ -44,7 +44,12 @@ def test_sentence_never_uses_ellipsis():
     assert "…" not in sentence("Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.")
     assert sentence("The doctors wait. Cost does the rest.") == "The doctors wait."
     assert sentence("No stop here") == "No stop here."
-    assert not sentence("Start at the").endswith("the")
+    assert sentence("The patient cannot afford this") == "The patient cannot afford this."
+    assert line("The patient cannot afford this") == "The patient cannot afford this"
+    assert cue('Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB "to stabilise first"') == "They wait to stabilise first"
+    assert cue("The patient cannot afford this") == "The patient cannot afford this"
+    assert cue("to stabilise first") == "They wait to stabilise first"
+    assert "…" not in cue("x" * 200)
 
 
 def test_deck_interprets_plan_not_the_file():
@@ -59,6 +64,8 @@ def test_deck_interprets_plan_not_the_file():
     assert pack["workfile"]["phases"][0]["id"] == "01"
     phases = {row["phase"] for row in pack["meta"]["storyMap"]}
     assert REQUIRED_PHASES <= phases
+    assert all(row.get("slide") and row.get("question") for row in pack["meta"]["storyMap"])
+    assert pack["meta"]["deckSkillCards"][0]["id"] == "story"
 
 
 def test_one_visual_owns_each_content_slide():
@@ -82,6 +89,39 @@ def test_copy_is_complete_never_clipped():
             words = blob.strip()
             if len(words.split()) >= 4:
                 assert not HANGING.search(words.rstrip(".!?")), (slide["id"], blob)
+
+
+def test_visuals_interpret_the_working_file():
+    pack = _demo_pack()
+    need = next(s for s in pack["slides"] if s["id"] == "need")
+    assert "doctors already told us" not in (need.get("narrative") or "").lower()
+    assert "advisory board" not in (need.get("narrative") or "").lower()
+    assert need["stat"]["items"][0]["value"] == "15%"
+    assert need["stat"]["items"][1]["value"] == "Delay"
+    belief = next(s for s in pack["slides"] if s["id"] == "belief")
+    titles = " ".join(c["title"] for c in belief["board"]["cards"])
+    assert "advisory board" not in titles.lower()
+    assert "stabilis" in titles.lower()
+    pico = next(s for s in pack["slides"] if s["id"] == "pico")
+    cards = pico["board"]["cards"]
+    assert len(cards) == 5
+    assert cards[0]["kicker"].lower().startswith("population")
+    assert cards[0]["title"].lower() != cards[0]["kicker"].lower()
+    for slide in pack["slides"]:
+        for card in (slide.get("board") or {}).get("cards") or []:
+            words = (card.get("title") or "").replace("—", " ").split()
+            assert len(words) <= 12, (slide["id"], card.get("title"))
+
+
+def test_objections_keep_full_clause():
+    pack = _demo_pack()
+    obj = next(s for s in pack["slides"] if s["id"] == "objections")
+    titles = " ".join(c["title"] for c in obj["board"]["cards"])
+    assert "cannot afford this" in titles.lower()
+    for card in obj["board"]["cards"]:
+        ref = (card.get("ref") or "").strip()
+        if ref:
+            assert "[" in ref and "]" in ref, (card["title"], ref)
 
 
 def test_people_grid_is_one_paper():

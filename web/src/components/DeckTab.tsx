@@ -3,12 +3,19 @@ import { downloadPptx } from "../api";
 import type { StrategyPack } from "../types";
 import { SlideView } from "./SlideView";
 
+const FALLBACK_SKILLS = [
+  { id: "story", name: "Story", rule: "Every working-file phase has a beat. The deck is the argument, in order." },
+  { id: "visuals", name: "Visuals", rule: "The picture carries the room. A slide without a visual is a failed beat." },
+  { id: "copy", name: "Copy", rule: "Complete sentences only. Never an ellipsis. Never a cut clause." },
+  { id: "layout", name: "Layout", rule: "One visual owns the 16:9. Refs sit in the flow. Nothing overlaps." },
+];
+
 export function DeckTab({ pack }: { pack: StrategyPack }) {
   const [i, setI] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
   const slide = pack.slides[i];
-  const skills = pack.meta.deckSkills || [];
+  const skills = pack.meta.deckSkillCards?.length ? pack.meta.deckSkillCards : FALLBACK_SKILLS;
   const map = pack.meta.storyMap || [];
   const present = () => {
     const el = document.querySelector(".slide-stage");
@@ -24,6 +31,10 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
     } finally {
       setExporting(false);
     }
+  };
+  const goTo = (id: string) => {
+    const idx = pack.slides.findIndex((s) => s.id === id);
+    if (idx >= 0) setI(idx);
   };
 
   return (
@@ -50,15 +61,29 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
       </div>
       {exportError ? <p className="error">{exportError}</p> : null}
       <p className="small muted craft-line">
-        Visual argument of the working file. Skills in play:{" "}
-        {skills.length ? skills.join(" · ") : "story · visuals · copy · layout"}. Complete
-        sentences. One picture per beat.
+        Visual aids drive the working file. They do not paste it. Four skills run on
+        every generate.
       </p>
+      <div className="skill-strip">
+        {skills.map((skill) => (
+          <div className="skill-chip" key={skill.id}>
+            <strong>{skill.name}</strong>
+            <span>{skill.rule}</span>
+          </div>
+        ))}
+      </div>
       {map.length ? (
         <ol className="story-rail">
           {map.map((beat) => (
-            <li key={`${beat.slide}-${beat.phase}`} className={beat.slide === slide.id ? "on" : ""}>
-              {beat.phase} {beat.slide}
+            <li key={`${beat.slide}-${beat.phase}`}>
+              <button
+                type="button"
+                className={beat.slide === slide.id ? "on" : ""}
+                title={beat.question}
+                onClick={() => goTo(beat.slide)}
+              >
+                {beat.phase} · {beat.question}
+              </button>
             </li>
           ))}
         </ol>

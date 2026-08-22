@@ -11,7 +11,7 @@ from datetime import date
 
 from .cite import attach_references, mark
 from .deck_craft import build_deck, story_map
-from .deck_skills import SKILL_IDS
+from .deck_skills import SKILL_IDS, catalog
 from .deck_visuals import compare_rows, people_rows, spine_rows
 from .evidence import resolve_evidence
 from .extract import ExtractedBrief
@@ -64,6 +64,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
             "source": ", ".join(brief.source_files) or ("pasted brief" if brief.raw_text else ""),
             "deckSkill": "strata-deck",
             "deckSkills": list(SKILL_IDS),
+            "deckSkillCards": catalog()["skills"],
             "storyMap": story_map(slides),
         },
         "brief": brief.to_dict(),
