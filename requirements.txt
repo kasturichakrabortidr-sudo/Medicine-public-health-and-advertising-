@@ -1,2 +1,3 @@
 anthropic>=0.116.0
 pyyaml>=6.0
+matplotlib>=3.8
