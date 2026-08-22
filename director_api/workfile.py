@@ -54,6 +54,7 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
             f"We searched PubMed for {brief.product or brief.therapy_area or 'this product/indication'}, "
             "read the abstracts, and kept a short set of load-bearing papers. "
             f"{len(records)} paper{'s' if len(records) != 1 else ''} have a number. "
+            "One paper is not a case: load-bearing lines quote the pack, not a single PMID. "
             "Strategy lines quote findings written in those papers. "
             f"{len(gaps)} line{'s' if len(gaps) != 1 else ''} from the brief still have no PMID or DOI. "
             "Effect sizes are taken only from the abstract or a curated source, never invented. "
@@ -181,7 +182,7 @@ def _p03(brief, records, gaps, lead) -> dict:
     ]
     return _phase(
         "03",
-        "Every row is a paper we can put a number on. We searched PubMed from the product and therapy area; the brief is not the source of the links. Brief lines without a number stay in the gap table. We did not give them an effect size.",
+            "Every row is a paper we can put a number on. We searched PubMed from the product and therapy area; the brief is not the source of the links. One paper is not a case — the lead needs a pack. Brief lines without a number stay in the gap table. We did not give them an effect size.",
         forefront={
             "headers": ["Ref", "Job", "Source", "Stream", "Design / N", "Published finding", "Grade", "What we may say", "Caveat"],
             "rows": rows,
@@ -297,7 +298,8 @@ def _p05(brief, records, doctrine) -> dict:
         current = insights[0] if insights else "The brief does not describe the current habit in so many words."
         if jobs:
             required = (
-                f"When the doctor decides on {brief.brand or 'the product'}, use each numbered paper for its job — "
+                "One paper is not a case. "
+                f"When the doctor decides on {brief.brand or 'the product'}, use the numbered pack together — "
                 + "; ".join(
                     f"{mark(r)} {r.get('roleLabel') or r.get('short')}: "
                     f"{_short(r.get('claim_permitted') or r.get('finding') or '', 90)}"
@@ -448,7 +450,15 @@ def _p07(brief, records, doctrine, lead) -> dict:
         ]
     else:
         jobs = paper_jobs(records, brief)
+        pack_mark = mark(*jobs[: min(4, len(jobs))]) if len(jobs) >= 2 else ""
         pillars = []
+        if pack_mark:
+            pillars.append([
+                "The pack",
+                "One paper is not enough to convince. A load-bearing line ships only where the numbered set agrees.",
+                pack_mark,
+                "Do not ask a customer to believe a single PMID.",
+            ])
         seen_claims: set[str] = set()
         for rec in jobs:
             claim = (rec.get("claim_permitted") or rec.get("finding") or "").strip()

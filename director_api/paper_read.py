@@ -56,7 +56,30 @@ GENERIC_TITLE = re.compile(
 )
 PRODUCT_STOP = {
     "chronic", "acute", "plaque", "severe", "moderate", "patients", "study",
+    "fictional", "illustrative", "example", "placeholder", "dummy",
+    "brand", "once", "daily", "oral", "therapy", "tablet", "capsule",
+    "product", "drug", "dose", "strength", "film", "coated",
 }
+
+ILLUSTRATIVE_RE = re.compile(
+    r"\b(fictional|illustrative|placeholder|dummy product|not a real)\b",
+    re.I,
+)
+
+
+def search_product_name(product: str) -> str:
+    """Strip fiction markers, doses, and trade-dress so PubMed is not poisoned."""
+    if not product or ILLUSTRATIVE_RE.search(product):
+        return ""
+    text = re.sub(r"[™®]", " ", product)
+    text = re.sub(r"\([^)]*\)", " ", text)
+    text = re.sub(r"\d+\s*mg\b", " ", text, flags=re.I)
+    text = re.sub(r"\b(once[-\s]?daily|oral therapy|film[-\s]?coated)\b", " ", text, flags=re.I)
+    tokens = [
+        t for t in re.findall(r"[A-Za-z][A-Za-z0-9-]{2,}", text)
+        if t.lower() not in PRODUCT_STOP
+    ]
+    return " ".join(tokens)
 
 
 def fetch_abstracts(pmids: list[str]) -> dict[str, dict[str, Any]]:
@@ -219,6 +242,14 @@ def select_papers(
     scored.sort(key=lambda row: -row[0])
 
     any_numeric = any(row[2].get("numeric") for row in scored if row[0] > 0)
+    require_product = bool(search_product_name(product)) and any(
+        _mentions_product(
+            h.get("title") or "",
+            (readings.get(str(h.get("pmid") or "")) or {}).get("abstract") or "",
+            product,
+        )
+        for h in hits
+    )
     chosen: list[dict] = []
     seen_keys: set[str] = set()
     seen_roles: set[str] = set()
@@ -228,7 +259,11 @@ def select_papers(
             continue
         if any_numeric and not parsed.get("numeric") and chosen:
             continue
-        if not _mentions_product(hit.get("title") or "", (readings.get(str(hit.get("pmid") or "")) or {}).get("abstract") or "", product):
+        if require_product and not _mentions_product(
+            hit.get("title") or "",
+            (readings.get(str(hit.get("pmid") or "")) or {}).get("abstract") or "",
+            product,
+        ):
             continue
         key = _dedupe_key(hit, parsed)
         if key in seen_keys:
@@ -555,10 +590,11 @@ def _dedupe_key(hit: dict[str, Any], parsed: dict[str, Any]) -> str:
 
 
 def _mentions_product(title: str, abstract: str, product: str) -> bool:
-    if not product:
+    name = search_product_name(product)
+    if not name:
         return True
     blob = f"{title} {abstract}".lower()
-    tokens = [t for t in re.findall(r"[a-z][a-z0-9-]{3,}", product.lower()) if t not in PRODUCT_STOP]
+    tokens = [t for t in re.findall(r"[a-z][a-z0-9-]{3,}", name.lower()) if t not in PRODUCT_STOP]
     if not tokens:
         return True
     return any(t in blob for t in tokens)
@@ -569,8 +605,9 @@ def _score(hit: dict[str, Any], product: str, reading: dict[str, Any], parsed: d
     types = " ".join([hit.get("design") or "", *(reading.get("pubtypes") or [])]).lower()
     abstract = (reading.get("abstract") or "").lower()
     s = 0
-    if not _mentions_product(hit.get("title") or "", reading.get("abstract") or "", product):
-        return -8
+    named = search_product_name(product)
+    if named and not _mentions_product(hit.get("title") or "", reading.get("abstract") or "", product):
+        s -= 2
     if parsed.get("treat_event") is not None and parsed.get("control_event") is not None:
         s += 10
     elif parsed.get("hr") is not None:
@@ -589,7 +626,7 @@ def _score(hit: dict[str, Any], product: str, reading: dict[str, Any], parsed: d
         s += 4
     elif "meta-analysis" in types:
         s += 2
-    if product and product.lower() in title:
+    if named and named.lower() in title:
         s += 5
     if GENERIC_TITLE.search(title):
         s -= 4

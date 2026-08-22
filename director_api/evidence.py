@@ -24,6 +24,7 @@ from .paper_read import (
     brief_has_delay,
     fetch_abstracts,
     paper_jobs,
+    search_product_name,
     select_papers,
 )
 
@@ -256,6 +257,111 @@ CATALOG: list[dict[str, Any]] = [
         "directs": "local-context",
     },
     {
+        "id": "emperor-preserved-2021",
+        "stream": "Independent / pivotal class",
+        "trial": "EMPEROR-Preserved",
+        "short": "EMPEROR-Preserved 2021",
+        "title": "Empagliflozin in heart failure with a preserved ejection fraction",
+        "authors": "Anker SD, Butler J, Filippatos G, et al.",
+        "year": 2021,
+        "journal": "N Engl J Med",
+        "pages": "385:1451-1461",
+        "doi": "10.1056/NEJMoa2107038",
+        "pmid": "34449189",
+        "design": "RCT, double-blind",
+        "n": 5988,
+        "population": "HFpEF / HFmrEF, LVEF >40%, with or without diabetes",
+        "endpoint": "CV death or HF hospitalisation",
+        "effect_metric": "HR",
+        "hr": 0.79,
+        "low": 0.69,
+        "high": 0.90,
+        "grade": "A",
+        "claim_permitted": "Empagliflozin reduced CV death or HF hospitalisation vs placebo in HFpEF (13.8% vs 17.1%; HR 0.79, 0.69–0.90).",
+        "caveat": "Signal driven mainly by HF hospitalisation, not CV death. Quote the composite. Local label governs.",
+        "mlr": "Class evidence in HFpEF. Do not transfer the number onto an unstudied product.",
+        "tags": ("hfpef", "sglt2", "empagliflozin", "preserved", "cardiology"),
+        "directs": "outcome-permission",
+        "control_event": 17.1,
+        "treat_event": 13.8,
+        "arr": 3.3,
+        "nnt": 30,
+        "horizon": "median 26.2 months",
+        "visual_unit": "CV death or HF hospitalisation per 100 patients",
+        "spine_means": "Treat about 30 patients like these to prevent 1 CV death or HF hospitalisation over ~26 months.",
+        "spine_barrier": "HFpEF is treated as a diagnosis without a foundational start.",
+        "spine_execute": "Lead with the HFpEF outcome pack — EMPEROR-Preserved is one paper, not the whole case.",
+        "spine_measure": "Share of eligible HFpEF starts on an evidence-based foundational therapy.",
+    },
+    {
+        "id": "deliver-2022",
+        "stream": "Independent / replication",
+        "trial": "DELIVER",
+        "short": "DELIVER 2022",
+        "title": "Dapagliflozin in heart failure with mildly reduced or preserved ejection fraction",
+        "authors": "Solomon SD, McMurray JJV, Claggett B, et al.",
+        "year": 2022,
+        "journal": "N Engl J Med",
+        "pages": "387:1089-1098",
+        "doi": "10.1056/NEJMoa2206286",
+        "pmid": "36027570",
+        "design": "RCT, double-blind",
+        "n": 6263,
+        "population": "HFmrEF / HFpEF, LVEF >40%",
+        "endpoint": "Worsening HF or CV death",
+        "effect_metric": "HR",
+        "hr": 0.82,
+        "low": 0.73,
+        "high": 0.92,
+        "grade": "A",
+        "claim_permitted": "Dapagliflozin reduced worsening HF or CV death vs placebo in HFmrEF/HFpEF (16.4% vs 19.5%; HR 0.82, 0.73–0.92).",
+        "caveat": "A second independent RCT, not a reprint of EMPEROR-Preserved. CV death alone was not significant.",
+        "mlr": "Use as replication of the HFpEF SGLT2 outcome. Do not collapse both papers into one line.",
+        "tags": ("hfpef", "sglt2", "dapagliflozin", "preserved", "cardiology"),
+        "directs": "replication",
+        "control_event": 19.5,
+        "treat_event": 16.4,
+        "arr": 3.1,
+        "nnt": 32,
+        "horizon": "median 2.3 years",
+        "visual_unit": "worsening HF or CV death per 100 patients",
+        "spine_means": "A second RCT in a separate programme found the same direction of effect. One paper is not the case.",
+        "spine_barrier": "A single-trial habit lets the room dismiss HFpEF as unsettled.",
+        "spine_execute": "When they ask 'is that just one study?', put DELIVER next to EMPEROR-Preserved.",
+        "spine_measure": "Unaided recall that two HFpEF outcome trials agree, not one.",
+    },
+    {
+        "id": "paragon-hf-2019",
+        "stream": "Independent / class caution",
+        "trial": "PARAGON-HF",
+        "short": "PARAGON-HF 2019",
+        "title": "Angiotensin–neprilysin inhibition in heart failure with preserved ejection fraction",
+        "authors": "Solomon SD, McMurray JJV, Anand IS, et al.",
+        "year": 2019,
+        "journal": "N Engl J Med",
+        "pages": "381:1609-1620",
+        "doi": "10.1056/NEJMoa1908655",
+        "pmid": "31475794",
+        "design": "RCT, double-blind",
+        "n": 4822,
+        "population": "HFpEF, LVEF ≥45%",
+        "endpoint": "Total HF hospitalisations and CV death",
+        "effect_metric": "HR",
+        "hr": 0.87,
+        "low": 0.75,
+        "high": 1.01,
+        "grade": "A",
+        "claim_permitted": "ARNI vs valsartan in HFpEF did not meet the primary endpoint (HR 0.87, 95% CI 0.75–1.01). Do not treat this as a class win.",
+        "caveat": "Missed statistical significance. Subgroup signals are not a promotional claim.",
+        "mlr": "This paper is a boundary: HFpEF is not HFrEF, and PARADIGM-HF does not transfer.",
+        "tags": ("hfpef", "arni", "sacubitril", "paragon", "preserved", "cardiology"),
+        "directs": "supporting",
+        "spine_means": "HFpEF is a different evidence problem from HFrEF. Do not borrow PARADIGM-HF.",
+        "spine_barrier": "Teams reach for the HFrEF ARNI pack because it is already in the bag.",
+        "spine_execute": "Use PARAGON-HF as the stop-line: no HFrEF reprint, no invented HFpEF ARNI win.",
+        "spine_measure": "Zero HFpEF claims that quote PARADIGM-HF or a non-significant PARAGON primary as a win.",
+    },
+    {
         "id": "keynote-189-2018",
         "stream": "Independent / pivotal class",
         "trial": "KEYNOTE-189",
@@ -441,6 +547,8 @@ def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str) -> bool:
     brief_family = _brief_family(brief, blob)
     if family and brief_family != family:
         return False
+    if family == "hfpef" and brief_family == "hfpef":
+        return True
 
     trial = (entry.get("trial") or "").lower()
     if len(trial) >= 6 and trial in blob:
@@ -473,6 +581,8 @@ def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str) -> bool:
 def _catalog_family(tags) -> str:
     tagset = {str(t).lower() for t in tags}
     joined = " ".join(tagset)
+    if tagset & {"hfpef"} or "preserved ejection" in joined:
+        return "hfpef"
     if tagset & {"hfref", "arni", "paradigm", "pioneer", "hf"} or "heart failure" in joined:
         return "hf"
     if tagset & {"nsclc", "oncology", "pembrolizumab", "keynote"}:
@@ -484,6 +594,12 @@ def _catalog_family(tags) -> str:
 
 def _brief_family(brief: ExtractedBrief, blob: str) -> str:
     ta = f"{brief.therapy_area} {brief.indication} {brief.product} {blob}".lower()
+    if (
+        _contains_term("hfpef", ta)
+        or "preserved ejection" in ta
+        or "heart failure with preserved" in ta
+    ):
+        return "hfpef"
     if any(
         _contains_term(k, ta)
         for k in ("hfref", "arni", "sacubitril", "paradigm")
@@ -638,7 +754,11 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
             f"{primary.get('finding') or primary.get('claim_permitted') or primary.get('title') or ''} "
             f"(PMID {primary.get('pmid') or '—'})."
         )
-        statement += " Each numbered paper owns one line — we do not reprint the same finding."
+        statement += (
+            " One paper is not a case — load-bearing lines need the numbered pack to agree."
+            if len(matched) >= 2
+            else " One paper is not a case. Do not lock a scientific lead on a single PMID."
+        )
         if tension:
             statement += (
                 f" The brief's conversion problem is “{_clip_lead(tension)}”. "
@@ -653,7 +773,12 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     return {
         "statement": statement,
         "why": (
-            f"{len(citations)} numbered paper{'s' if len(anchors[:4]) != 1 else ''} carry the science"
+            f"{len(citations)} numbered paper{'s' if len(citations) != 1 else ''} carry the science"
+            + (
+                " — one paper is not enough to convince"
+                if len(citations) >= 2
+                else " — one paper is not enough to convince; retrieve a pack before lock"
+            )
             + (f", led by {primary.get('short')}" if primary.get("short") else "")
             + f" (PMID {primary.get('pmid') or '—'})."
         ),
@@ -785,11 +910,10 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
                     "Confirm against the full text before it can become a promotional claim."
                 ),
             })
-        if hits:
-            break
     if not hits:
         return []
-    product_tokens = [t for t in re.findall(r"[a-z0-9-]{5,}", (brief.product or "").lower())]
+    product = search_product_name(brief.product or "")
+    product_tokens = [t for t in re.findall(r"[a-z0-9-]{5,}", product.lower())]
     if product_tokens:
         product_hits = [h for h in hits if any(t in (h.get("title") or "").lower() for t in product_tokens)]
         if product_hits:
@@ -799,43 +923,56 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
 
 
 def _pubmed_queries(brief: ExtractedBrief) -> list[str]:
-    product = _clean_query_bit(brief.product)
-    indication = _clean_query_bit(brief.indication)
-    ta = _clean_query_bit(brief.therapy_area)
-    brand = _clean_query_bit(brief.brand)
-    focus = product or brand
-    disease = indication or ta
-    if not focus and not disease:
-        return []
-    core = " ".join(p for p in (focus, disease) if p).strip()
-    if len(core) < 5:
-        return []
-    typed = (
-        f"({core}) AND ("
-        "randomized controlled trial[pt] OR clinical trial[pt] OR "
-        "guideline[pt] OR meta-analysis[pt] OR systematic review[pt]"
-        ")"
-    )
-    loose = f"({core}) AND (trial OR randomized OR guideline)"
-    queries = []
-    if product:
+    product = search_product_name(brief.product or "")
+    brand = search_product_name(brief.brand or "")
+    disease = _disease_clause(brief)
+    focus = product or (brand if disease else brand)
+    typed_core = " ".join(p for p in (focus, disease) if p).strip()
+    queries: list[str] = []
+    if product and disease:
         queries.append(
-            f"{product}[Title] AND ({disease or 'therapy'}) AND "
+            f"{product}[Title] AND ({disease}) AND "
             "(randomized OR trial OR guideline OR meta-analysis)"
         )
-    queries.append(typed)
-    queries.append(loose)
-    if product and disease and product.lower() not in disease.lower():
-        queries.append(f"{product} {disease} randomized")
+    if typed_core and len(re.sub(r"[^A-Za-z0-9]+", "", typed_core)) >= 5:
+        queries.append(
+            f"({typed_core}) AND ("
+            "randomized controlled trial[pt] OR clinical trial[pt] OR "
+            "guideline[pt] OR meta-analysis[pt] OR systematic review[pt]"
+            ")"
+        )
+        queries.append(f"({typed_core}) AND (trial OR randomized OR guideline)")
+    if disease:
+        queries.append(
+            f"({disease}) AND ("
+            "randomized controlled trial[pt] OR guideline[pt] OR meta-analysis[pt]"
+            ")"
+        )
+        queries.append(f"({disease}) AND (randomized OR trial OR guideline)")
     out: list[str] = []
     for q in queries:
-        if q not in out:
+        if q and q not in out:
             out.append(q)
     return out
 
 
+def _disease_clause(brief: ExtractedBrief) -> str:
+    blob = f"{brief.indication or ''} {brief.therapy_area or ''}"
+    if re.search(r"hfpef|preserved ejection|heart failure with preserved", blob, re.I):
+        return (
+            '(HFpEF OR "heart failure with preserved ejection fraction" '
+            'OR "preserved ejection fraction")'
+        )
+    indication = _clean_query_bit(brief.indication)
+    ta = _clean_query_bit(brief.therapy_area)
+    return indication or ta
+
+
 def _clean_query_bit(text: str) -> str:
-    cleaned = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", text or "")
+    cleaned = re.sub(r"[™®]", " ", text or "")
+    cleaned = re.sub(r"\([^)]*\)", " ", cleaned)
+    cleaned = re.sub(r"[()]", " ", cleaned)
+    cleaned = re.sub(r"[^A-Za-z0-9 +/.-]+", " ", cleaned)
     return re.sub(r"\s+", " ", cleaned).strip()
 
 
@@ -845,11 +982,19 @@ def _title_matches_brief(title: str, brief: ExtractedBrief) -> bool:
         "chronic", "acute", "area", "therapy", "care", "disease", "the", "and",
         "for", "with", "from", "specialty", "launch", "campaign", "brief",
         "first", "line", "plus", "versus", "patients",
+        "fictional", "illustrative", "example", "placeholder", "once", "daily",
+        "oral", "brand", "heart", "failure",
     }
     tokens = []
-    for field in (brief.product, brief.indication, brief.therapy_area):
-        tokens.extend(re.findall(r"[a-z0-9-]{4,}", (field or "").lower()))
+    product = search_product_name(brief.product or "")
+    tokens.extend(re.findall(r"[a-z0-9-]{4,}", product.lower()))
+    for field in (brief.indication, brief.therapy_area):
+        cleaned = _clean_query_bit(field or "")
+        tokens.extend(re.findall(r"[a-z0-9-]{4,}", cleaned.lower()))
     tokens = [t for t in tokens if t not in stop]
+    if re.search(r"hfpef|preserved ejection", f"{brief.indication} {brief.therapy_area}", re.I):
+        tokens.extend(["hfpef", "preserved"])
+    tokens = list(dict.fromkeys(tokens))
     if not tokens:
         return True
     return any(t in blob for t in tokens)

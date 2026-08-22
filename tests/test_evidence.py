@@ -430,3 +430,109 @@ def test_cost_arni_brief_does_not_clone_cardioshield_playbook():
         pubmed=False,
     )
     assert "Lead the campaign with first-eligible" in demo["evidence"]["lead"]["statement"]
+
+
+def test_fictional_hfpef_brief_gets_a_paper_pack_not_one_reprint():
+    """Cardiava / Velmecor HFpEF must not collapse to Trivandrum or a single PMID."""
+    from director_api.evidence import _pubmed_queries
+    from director_api.paper_read import search_product_name, _mentions_product
+
+    brief = ExtractedBrief(
+        brand="Cardiava™ (fictional brand)",
+        product="Velmecor 10 mg / 20 mg (fictional once-daily oral therapy)",
+        therapy_area="Heart Failure with Preserved Ejection Fraction (HFpEF",
+        hcp_insights=["simply an insight,", "or just another campaign line."],
+    )
+    assert search_product_name(brief.product) == ""
+    assert _mentions_product(
+        "Empagliflozin in Heart Failure with a Preserved Ejection Fraction",
+        "",
+        brief.product,
+    )
+    queries = _pubmed_queries(brief)
+    blob = " ".join(queries).lower()
+    assert queries
+    assert "velmecor" not in blob
+    assert "fictional" not in blob
+    assert "hfpef" in blob
+    assert "(" not in brief.product or all("(" not in q.split("AND")[0] or "HFpEF" in q for q in queries)
+
+    ledger = resolve_evidence(brief, pubmed=False)
+    ids = {r["id"] for r in ledger["records"]}
+    pmids = {r["pmid"] for r in ledger["records"]}
+    assert len(ledger["records"]) >= 3
+    assert "trivandrum-hf-2015" not in ids
+    assert "paradigm-hf-2014" not in ids
+    assert "pioneer-hf-2019" not in ids
+    assert "34449189" in pmids  # EMPEROR-Preserved
+    assert "36027570" in pmids  # DELIVER
+    assert "31475794" in pmids  # PARAGON-HF
+    lead = ledger["lead"]["statement"].lower()
+    assert "one paper is not a case" in lead
+    assert len(ledger["lead"]["citations"]) >= 3
+
+    pack = generate_pack(brief, pubmed=False)
+    assert pack["meta"]["brand"].startswith("Cardiava")
+    assert pack["doctrine"]["id"] != "first-touch"
+    assert "Lead the campaign with first-eligible" not in pack["evidence"]["lead"]["statement"]
+    house = next(p for p in pack["workfile"]["phases"] if p["id"] == "07")["house"]["rows"]
+    joined = " ".join(" ".join(str(c) for c in row) for row in house)
+    assert "not enough to convince" in joined.lower()
+    refs = [row[2] for row in house]
+    assert any("–" in str(r) or str(r).count("[") == 1 and "," in str(r) or str(r) in ("[1–3]", "[1–4]", "[1,2,3]") for r in refs) or (
+        len(set(r for r in refs if str(r).startswith("["))) >= 3
+    )
+    p05 = next(p for p in pack["workfile"]["phases"] if p["id"] == "05")
+    assert "one paper is not a case" in (p05.get("required") or "").lower()
+    standing = next(p for p in pack["workfile"]["phases"] if p["id"] == "06")
+    standing_blob = str(standing)
+    assert "ACEI" not in standing_blob
+    assert "first-eligible" not in standing_blob.lower()
+    papers = next(p for p in pack["workfile"]["phases"] if p["id"] == "03")
+    forefront = " ".join(str(x) for row in papers["forefront"]["rows"] for x in row)
+    assert "[1]" in forefront and "[2]" in forefront and "[3]" in forefront
+
+
+def test_pubmed_keeps_searching_until_a_pack_is_filled(monkeypatch):
+    calls: list[str] = []
+
+    def fake_search(term, retmax=8):
+        calls.append(term)
+        if "hfpef" in term.lower() or "preserved" in term.lower():
+            return ["999111", "999222", "999333"]
+        return []
+
+    def fake_summary(pmids):
+        catalog = {
+            "999111": "Empagliflozin in heart failure with a preserved ejection fraction (copy)",
+            "999222": "Dapagliflozin in heart failure with mildly reduced or preserved ejection fraction (copy)",
+            "999333": "Finerenone in heart failure with preserved ejection fraction",
+        }
+        return {
+            pmid: {
+                "title": catalog[pmid],
+                "fulljournalname": "N Engl J Med",
+                "pubdate": "2021",
+                "authors": [{"name": "Anker SD"}],
+                "articleids": [{"idtype": "doi", "value": "10.1056/x"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            }
+            for pmid in pmids
+            if pmid in catalog
+        }
+
+    monkeypatch.setattr("director_api.evidence._esearch", fake_search)
+    monkeypatch.setattr("director_api.evidence._esummary", fake_summary)
+    from director_api.evidence import _pubmed_enrich
+
+    brief = ExtractedBrief(
+        brand="Cardiava™ (fictional brand)",
+        product="Velmecor 10 mg / 20 mg (fictional once-daily oral therapy)",
+        therapy_area="Heart Failure with Preserved Ejection Fraction (HFpEF",
+    )
+    hits = _pubmed_enrich(brief, set())
+    assert any("hfpef" in c.lower() or "preserved" in c.lower() for c in calls)
+    assert len(calls) >= 2
+    titles = " ".join(h["title"] for h in hits).lower()
+    assert "preserved" in titles
+    assert not any("velmecor" in (h.get("title") or "").lower() for h in hits)
