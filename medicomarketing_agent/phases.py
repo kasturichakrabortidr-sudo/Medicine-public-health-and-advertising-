@@ -46,6 +46,35 @@ Operating principles you must follow in every output:
 6. Show your working process. Begin each phase output with a short
    "How this section was built" note (2-4 sentences) describing the reasoning
    steps taken, so the client can audit the process.
+7. Visualise the science. Every phase output must include the visuals that
+   phase asks for (and add more where they genuinely aid understanding) as
+   Mermaid code blocks (```mermaid ... ```), so the data is shown graphically
+   and infographically, not only in tables. Choose the form that fits the
+   data:
+   - `flowchart LR`/`flowchart TD` for causal chains, trees, and traceability
+     threads;
+   - `xychart-beta` (bar/line) for magnitudes such as effect sizes, evidence
+     volume, baselines vs. quarterly targets;
+   - `quadrantChart` for 2x2 positioning (e.g. impact vs. feasibility,
+     belief vs. evidence);
+   - `timeline` for staged journeys and campaign arcs;
+   - `pie` for share/mix breakdowns;
+   - `mindmap` for structural overviews.
+   Mermaid syntax safety rules (follow strictly so every diagram renders):
+   keep node and axis labels short (under ~40 characters); wrap every label
+   that contains spaces or punctuation in double quotes; never use
+   parentheses, square brackets, curly braces, semicolons, or the `#`
+   character inside label text; use simple alphanumeric node ids; put one
+   statement per line; do not use Mermaid comments. Introduce each visual
+   with one sentence stating what it shows and the take-away. Visuals must be
+   faithful to the evidence: chart only numbers that appear in the working
+   context, and if a magnitude is unknown, represent the item qualitatively
+   (e.g. in a flowchart or quadrant) rather than inventing a number.
+8. Keep the science-to-solution thread visible. Whenever you introduce a
+   strategic element (an insight, behavioural driver, message, engagement
+   stage, activation idea, or metric), name the upstream evidence item(s) it
+   rests on, so any reader can trace every executional choice back to the
+   science and forward to the measurable outcome it is expected to move.
 """
 
 
@@ -69,6 +98,12 @@ Deconstruct the client brief before any research is planned. Produce:
 5. **Working hypotheses** — 3-5 falsifiable hypotheses about why target HCPs
    do or do not currently adopt the product/recommendation, each linked to the
    research it will need.
+
+**Visuals for this phase** — (a) a `quadrantChart` mapping the known/unknown
+items on axes "evidence we hold" vs. "importance to the strategy", so the
+client sees at a glance where the dangerous unknowns sit; (b) a
+`flowchart LR` linking each working hypothesis to the research stream that
+will test it.
 
 This phase sets the intellectual frame every later phase must answer to.""",
     ),
@@ -100,6 +135,12 @@ Produce:
 6. **Safety and pharmacovigilance criteria** — what safety evidence must be
    captured alongside efficacy.
 
+**Visuals for this phase** — (a) a `flowchart TD` of the evidence hierarchy
+as a pyramid (top grade at the top, arrows showing how weight decreases);
+(b) a `flowchart LR` of the research process funnel: sources → search →
+screening → extraction → appraisal → synthesis, with the output artefact
+named at each step.
+
 These criteria are the contract the evidence phase must honour.""",
     ),
     Phase(
@@ -129,6 +170,18 @@ table that stacks all streams side by side. Columns:
 
 | Evidence item | Stream | Design & N | Key finding (with effect size where known) | Evidence grade | Relevance to strategy | Message potential | Gap / caveat / MLR flag |
 
+**Visuals for this phase** — the scientific data in this phase must also be
+shown graphically: (a) an `xychart-beta` bar chart of the key quantified
+findings (effect sizes, response rates, risk reductions — whatever numbers
+the evidence actually provides), clearly labelled per evidence item, so the
+client sees the magnitude of the science, not just prose (chart only numbers
+present in the working context; omit items with no stated magnitude);
+(b) a `quadrantChart` positioning each evidence item on "evidence strength"
+vs. "strategic relevance", which makes the forefront assets and the weak
+spots visible in one picture; (c) a `pie` chart of the evidence base mix by
+stream (how much of the case rests on brand-generated vs. independent vs.
+evolving vs. guideline vs. health-economic evidence).
+
 Close with: (a) the 5 strongest evidence-backed strategic assets, and
 (b) the 5 most important evidence gaps with a recommendation for each.""",
     ),
@@ -154,7 +207,14 @@ provisional insights typical for this specialty and flag them for validation):
 4. **Silent zones** — evidence the HCPs never mention (unexploited assets) and
    HCP concerns the evidence never answers (evidence gaps to escalate).
 5. **Validation plan** — which provisional insights need confirming, with whom,
-   and by what method, before major spend is committed.""",
+   and by what method, before major spend is committed.
+
+**Visuals for this phase** — a `quadrantChart` plotting each major HCP belief
+on axes "strength of HCP belief" vs. "strength of supporting evidence": the
+top-right quadrant is amplify, the top-left (strong belief, weak evidence) is
+correct, the bottom-right (weak belief, strong evidence) is educate, the
+bottom-left is monitor. This single infographic is the centrepiece of the
+perception-gap story.""",
     ),
     Phase(
         id="05-behavioural-drivers",
@@ -182,7 +242,14 @@ Capability, Opportunity, Motivation → Behaviour) and produce:
 5. **KEY BEHAVIOURAL DRIVERS** — the 4-6 levers with the highest leverage,
    each stated as: driver | evidence/insight it rests on | barrier it
    overcomes | how the campaign will pull it. These drivers must be traceable
-   to Phases 3 and 4.""",
+   to Phases 3 and 4.
+
+**Visuals for this phase** — (a) a `flowchart LR` of the COM-B model applied
+to this brief: capability, opportunity, and motivation factors as nodes
+flowing into the target behaviour, with barriers marked; (b) a
+`flowchart LR` tracing each key behavioural driver back to the named evidence
+item or insight it rests on (science on the left, driver on the right), so
+the drivers are visibly anchored in the data.""",
     ),
     Phase(
         id="06-evidence-position",
@@ -211,7 +278,13 @@ Produce:
    the defensible scientific ground the campaign will stand on.
 5. **Evidence roadmap** — data generation or publication moves (RWE, ISS,
    post-hoc, congress presence) that would strengthen the position during and
-   after the campaign.""",
+   after the campaign.
+
+**Visuals for this phase** — (a) a `quadrantChart` positioning each claim
+territory on "our evidence strength" vs. "guideline and independent support",
+so safe ground, education opportunities, and vulnerabilities are visible in
+one picture; (b) a `timeline` of the evidence roadmap showing when each data
+generation or publication move lands relative to the campaign window.""",
     ),
     Phase(
         id="07-core-messaging",
@@ -237,7 +310,12 @@ Produce:
    launch phase (breaking the old habit: triggers, education, trial
    experiences) vs. sustain phase (embedding the new habit: reinforcement,
    feedback loops, peer norms, system prompts in workflow). Map each element
-   to the COM-B lever it works on.""",
+   to the COM-B lever it works on.
+
+**Visuals for this phase** — a `flowchart TD` of the message house as an
+infographic: the core theme as the roof node, the message pillars beneath it,
+and under each pillar the named evidence items that hold it up — so the
+client sees the messaging literally standing on the science.""",
     ),
     Phase(
         id="08-hcp-engagement",
@@ -265,7 +343,12 @@ Produce a staged engagement journey:
    every touchpoint) and trigger adaptations.
 5. **Beyond-the-campaign plan** — what stays alive after the funded period:
    communities, registries/data collaborations, education platforms, and the
-   handover into the next cycle's strategy.""",
+   handover into the next cycle's strategy.
+
+**Visuals for this phase** — (a) a `timeline` of the full engagement arc from
+pre-launch to beyond-campaign with the headline activities per stage; (b) a
+`flowchart LR` of the single-HCP touchpoint journey showing the sequence of
+contacts and the feedback loop flowing back into the campaign.""",
     ),
     Phase(
         id="09-activation-ideas",
@@ -294,9 +377,15 @@ Produce:
    segments: patient-affordability communication (within code), health-economic
    evidence use, payer/formulary engagement, generics/biosimilar defence if
    relevant.
-4. **Prioritisation matrix** — impact vs. feasibility plot (as a table) across
-   all ideas, and the recommended activation mix for quarter 1 vs. quarters
-   2-4.""",
+4. **Prioritisation matrix** — impact vs. feasibility plot across all ideas:
+   present it both as a table and as a `quadrantChart` (impact on the y-axis,
+   feasibility on the x-axis, every activation idea plotted by short name),
+   and give the recommended activation mix for quarter 1 vs. quarters 2-4.
+
+**Visuals for this phase** — the impact-vs-feasibility `quadrantChart` from
+point 4 is mandatory; additionally include a `pie` chart of the recommended
+Q1 activation mix by effort/cost so the client sees where the early budget
+goes.""",
     ),
     Phase(
         id="10-measurement",
@@ -330,13 +419,57 @@ Produce:
    quarterly revenue (test-control geographies, pre-post cohorts, marketing
    mix logic), with honest notes on attribution limits.
 7. **Dashboard & governance** — the quarterly review pack: leading vs lagging
-   indicators, thresholds that trigger course-correction, and who decides.""",
+   indicators, thresholds that trigger course-correction, and who decides.
+
+**Visuals for this phase** — (a) a `flowchart TD` of the KPI tree from
+quarterly revenue growth at the top down to engagement activity metrics at
+the leaves, so every metric's parent is visible; (b) an `xychart-beta` bar
+chart of the quarterly targets Q1-Q4 for the 2-3 headline KPIs (use the
+target numbers defined in the metric table; if targets are still to be
+baselined, show only the KPIs with agreed numbers).""",
     ),
     Phase(
-        id="11-executive-summary",
+        id="11-science-to-solution",
+        title="Science-to-Solution Thread: Connecting the Evidence to the Execution",
+        prompt="""\
+Phase 11 — Connect the science to the solution through the strategy
+execution, explicitly and in one place. This phase is the strategy's
+integrity check: every executional choice must be traceable back to the
+scientific data, and every strong piece of science must have an execution
+vehicle carrying it to HCPs.
+
+Produce:
+
+1. **GOLDEN-THREAD DIAGRAM** — the centrepiece: a `flowchart LR` that runs
+   left to right in labelled columns — Evidence (Phase 3) → Insight or
+   perception gap (Phase 4) → Behavioural driver (Phase 5) → Message pillar
+   (Phase 7) → Engagement stage and activation tactic (Phases 8-9) → KPI
+   (Phase 10) → Quarterly revenue growth. Draw the 5-8 strongest threads as
+   connected paths, using the named evidence items, drivers, pillars,
+   tactics, and metrics from the earlier phases. This is the single picture
+   that shows the science becoming the solution through the execution.
+2. **Traceability matrix** — one row per thread: evidence item (named, with
+   grade) | what the science shows | insight or gap it meets | behavioural
+   driver it powers | core message it becomes | execution vehicle (stage +
+   tactic + segment) | metric that proves it worked | contribution to
+   quarterly revenue growth.
+3. **Orphan check** — two honest lists: (a) execution elements (messages,
+   tactics, metrics) that do NOT trace back to named evidence — each must be
+   re-anchored, re-scoped, or cut; (b) strong evidence assets with NO
+   execution vehicle — each gets a recommendation (activate, hold, or
+   publish first).
+4. **Thread risk register** — for each golden thread: its weakest link
+   (evidence grade, perception gap depth, tactic feasibility, or metric
+   attribution), what would break it, and the mitigation.
+
+This phase must read as proof that the strategy is one continuous chain from
+scientific data to commercial outcome, not a collection of parallel ideas.""",
+    ),
+    Phase(
+        id="12-executive-summary",
         title="Executive Strategy Summary",
         prompt="""\
-Phase 11 — Compile the executive strategy summary.
+Phase 12 — Compile the executive strategy summary.
 
 Condense the entire pipeline into a client-ready executive document
 (2-3 pages equivalent):
@@ -346,8 +479,11 @@ Condense the entire pipeline into a client-ready executive document
 3. The core theme and message house top line (Phase 7).
 4. The engagement and activation plan on one page (Phases 8, 9).
 5. The measurement commitments and quarterly targets (Phase 10).
-6. Risks, dependencies, and MLR items to clear before launch.
-7. Immediate next steps: the first 30 days.
+6. The science-to-solution golden thread (Phase 11), condensed to a single
+   `flowchart LR` showing the top 3-4 threads from evidence to revenue —
+   the one visual a CEO should remember.
+7. Risks, dependencies, and MLR items to clear before launch.
+8. Immediate next steps: the first 30 days.
 
 Write it so a client CEO and a medical director both sign off on it.""",
     ),
@@ -371,6 +507,12 @@ For the outline point below, produce a fully developed section:
 - Where it touches execution, segment by specialty, status, geography,
   patient mix, and cost sensitivity as relevant.
 - Where it touches measurement, give metric definitions, sources, and targets.
+- Include at least one Mermaid visual (chart, quadrant, flowchart, or
+  timeline per the visual operating principles) wherever the section contains
+  comparative data, magnitudes, a process, or a prioritisation — the science
+  and the plan must be shown graphically, not only described.
+- State the science-to-solution thread for this point: which named evidence
+  it rests on, and which executional element and metric it feeds.
 - End with: dependencies on other outline points, open questions for the
   strategy lead, and MLR/compliance flags.
 

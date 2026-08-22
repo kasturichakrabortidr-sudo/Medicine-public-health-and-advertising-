@@ -130,7 +130,7 @@ def build_brief():
 def choose_mode():
     say("What would you like to do?")
     say("  1. Quick test        (runs just the first step - fast and cheap, good first try)")
-    say("  2. Full strategy     (all 11 steps - the complete strategy document)")
+    say("  2. Full strategy     (all 12 steps - the complete strategy document)")
     say("  3. Expand my outline (develops each point of an outline file you wrote)")
     while True:
         choice = ask("Type 1, 2 or 3")
@@ -172,7 +172,7 @@ def main():
         say("Running the quick test (Phase 1 only). Watch it think...\n")
         engine.run_pipeline(PHASES[:1])
     elif mode == "2":
-        say("Running the full 11-phase strategy. This takes a while — each phase")
+        say("Running the full 12-phase strategy. This takes a while — each phase")
         say("streams to this window and is saved as a document.\n")
         engine.run_pipeline()
     else:
@@ -190,9 +190,16 @@ def main():
     say("")
     say("=" * 60)
     say(f"ALL DONE. Your documents are in the '{OUT_DIR.name}' folder:")
-    for f in sorted(OUT_DIR.glob("*.md")):
+    for f in sorted(OUT_DIR.glob("*.md")) + sorted(OUT_DIR.glob("*.html")):
         say(f"  - {f.name}")
-    say("Open them with any app that reads text (Word works fine).")
+    html_reports = sorted(OUT_DIR.glob("*.html"))
+    if html_reports:
+        say("")
+        say(f"TIP: double-click '{html_reports[0].name}' to open the full report in")
+        say("your web browser WITH all the charts and diagrams drawn out.")
+        say("The .md files are the same content as plain text (Word works fine).")
+    else:
+        say("Open them with any app that reads text (Word works fine).")
     say("=" * 60)
     open_folder(OUT_DIR)
 

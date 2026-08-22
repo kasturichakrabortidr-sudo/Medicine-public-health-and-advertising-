@@ -14,6 +14,7 @@ import anthropic
 
 from .config import render_brief
 from .phases import EXPAND_PROMPT, PHASES, SYSTEM_PROMPT, Phase
+from .report import write_html_report
 
 DEFAULT_MODEL = "claude-opus-5"
 MAX_TOKENS = 64000
@@ -66,6 +67,13 @@ class StrategyEngine:
             parts += [f"\n\n---\n\n## {phase.title}", "", self.results[phase.id]]
         combined.write_text("\n".join(parts), encoding="utf-8")
         self._log(f"\n\nCombined strategy written to {combined}")
+
+        report = write_html_report(
+            "\n".join(parts),
+            f"Medicomarketing Strategy: {self.brief.get('brand', '')}",
+            self.out_dir / "medicomarketing-strategy.html",
+        )
+        self._log(f"Visual report (open in a web browser) written to {report}")
         return combined
 
     def expand_outline(self, points: list[str]) -> Path:
@@ -81,11 +89,16 @@ class StrategyEngine:
             sections.append(f"## {i}. {point}\n\n{text}")
 
         out = self.out_dir / "outline-expansion.md"
-        out.write_text(
-            f"# Developed Outline: {self.brief.get('brand', '')}\n\n" + "\n\n---\n\n".join(sections) + "\n",
-            encoding="utf-8",
-        )
+        text = f"# Developed Outline: {self.brief.get('brand', '')}\n\n" + "\n\n---\n\n".join(sections) + "\n"
+        out.write_text(text, encoding="utf-8")
         self._log(f"\n\nExpanded outline written to {out}")
+
+        report = write_html_report(
+            text,
+            f"Developed Outline: {self.brief.get('brand', '')}",
+            self.out_dir / "outline-expansion.html",
+        )
+        self._log(f"Visual report (open in a web browser) written to {report}")
         return out
 
     # ----------------------------------------------------------------- turns
