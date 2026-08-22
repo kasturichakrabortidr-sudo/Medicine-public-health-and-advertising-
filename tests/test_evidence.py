@@ -27,12 +27,11 @@ def test_pack_exposes_science_slides_and_anchors():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
     ids = [s["id"] for s in pack["slides"]]
-    assert "science-lead" in ids
-    assert "citation-register" in ids
     assert "science-meaning" in ids
     assert "science-compare" in ids
     assert "science-execute" in ids
-    assert "how-built" in ids
+    assert "pack" in ids
+    assert "how-built" not in ids
     assert "references" in ids
     assert pack["workfile"]["phases"][0]["id"] == "01"
     assert len(pack["workfile"]["phases"]) == 11
@@ -41,8 +40,11 @@ def test_pack_exposes_science_slides_and_anchors():
     assert "PMID: 25176015" in pack["references"][0]["citation"]
     meaning = next(s for s in pack["slides"] if s["id"] == "science-meaning")
     assert "[1]" in meaning["subtitle"] or "[1]" in meaning["narrative"]
-    register = next(s for s in pack["slides"] if s["id"] == "citation-register")
-    assert register["table"]["rows"][0][0] == "[1]"
+    pack_slide = next(s for s in pack["slides"] if s["id"] == "pack")
+    pack_text = " ".join(
+        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in (pack_slide.get("board") or {}).get("cards") or []
+    )
+    assert "[" in pack_text or "PMID" in pack_text or pack_slide.get("refs")
     refs_slide = next(s for s in pack["slides"] if s["id"] == "references")
     assert refs_slide["layout"] == "references"
     assert "McMurray" in refs_slide["table"]["rows"][0][1]
@@ -53,7 +55,9 @@ def test_pack_exposes_science_slides_and_anchors():
     assert pack["doctrine"]["scienceAnchor"]
     assert "PMID" in pack["doctrine"]["scienceAnchor"]
     house = next(s for s in pack["slides"] if s["id"] == "house")
-    house_text = " ".join(house.get("bullets") or []) + str(house.get("table") or "")
+    house_text = " ".join(
+        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in (house.get("board") or {}).get("cards") or []
+    ) + " ".join(house.get("bullets") or []) + str(house.get("table") or "")
     assert "[1]" in house_text or "[2]" in house_text or "PMID" in house_text
     assert pack["interventions"][0]["evidenceAnchor"]
 
@@ -62,7 +66,7 @@ def test_people_infographic_uses_published_paradigm_rates():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
     meaning = next(s for s in pack["slides"] if s["id"] == "science-meaning")
-    assert meaning["layout"] == "infographic"
+    assert meaning["layout"] == "visual"
     assert meaning["chart"]["kind"] == "people"
     row = meaning["chart"]["data"][0]
     assert row["pmid"] == "25176015"
@@ -90,7 +94,10 @@ def test_spine_connects_pioneer_to_first_touch():
     assert compare["chart"]["kind"] == "compare"
     assert compare["chart"]["data"][0]["pmid"] == "30415601"
     iv = next(s for s in pack["slides"] if s["id"] == "interventions")
-    assert any("[" in b and "PMID" in b for b in iv["bullets"])
+    iv_text = " ".join(
+        f"{c.get('title')} {c.get('body')} {c.get('ref')}" for c in (iv.get("board") or {}).get("cards") or []
+    ) + " ".join(iv.get("bullets") or [])
+    assert "[" in iv_text and "PMID" in iv_text
 
 
 def test_oncology_brief_matches_keynote_not_hf():

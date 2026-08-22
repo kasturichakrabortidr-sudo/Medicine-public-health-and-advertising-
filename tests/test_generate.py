@@ -20,9 +20,9 @@ def test_first_touch_doctrine_from_stabilize_insight():
     pack = generate_pack(brief)
     assert pack["doctrine"]["id"] == "first-touch"
     assert pack["meta"]["brand"] == "CardioShield"
-    assert len(pack["slides"]) >= 12
+    assert len(pack["slides"]) >= 8
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
-    assert {"bar", "forest", "pie", "line", "scatter", "diverging", "people", "compare", "spine"} <= kinds
+    assert {"people", "forest", "spine"} <= kinds
     assert pack["dashboard"]["kpis"]
     assert len(pack["interventions"]) == 5
 
@@ -45,7 +45,8 @@ def test_example_brief_is_presentation_ready():
     assert title["layout"] == "title"
     assert "CardioShield" in title["title"]
     assert any(s["id"] == "forest" for s in pack["slides"])
-    assert any(s["id"] == "boxplot" for s in pack["slides"])
+    assert any(s["id"] == "pack" for s in pack["slides"])
+    assert all(s["id"] != "boxplot" for s in pack["slides"])
     assert pack["dashboard"]["alerts"]
     assert pack["meta"]["demo"] is True
 
