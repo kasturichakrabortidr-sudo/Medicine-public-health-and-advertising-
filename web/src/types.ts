@@ -34,7 +34,7 @@ export interface Slide {
   chart?: ChartSpec;
   table?: { headers: string[]; rows: string[][] };
   board?: { cards: { kicker?: string; title: string; body?: string; ref?: string }[] };
-  flow?: { steps: { n: string; title: string; body?: string; ref?: string }[] };
+  flow?: { steps: { n: string; title: string; body: string; ref?: string }[] };
   stat?: { items: { kicker?: string; value: string; label: string }[] };
   versus?: {
     mode?: "hero" | "compact";
