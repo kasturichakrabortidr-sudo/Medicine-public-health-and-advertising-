@@ -7,8 +7,9 @@ campaigns: pharmaceutical brands, medical products, and health services.
 
 The agent runs on the Claude API (`claude-opus-5` by default) and encodes the
 entire working process as an explicit, auditable pipeline. Every phase writes a
-client-ready Markdown document, and each phase builds on all the phases before
-it in a single continuous reasoning thread.
+client-ready Markdown document with an evidence-safe visual synthesis, and the
+combined strategy is also rendered as a visual HTML report. Each phase builds
+on all the phases before it in a single continuous reasoning thread.
 
 ---
 
@@ -38,18 +39,37 @@ step you can run, inspect, and hand to a client.
 |---|-------|------------------|
 | 1 | **Strategic framing & insightful critical thinking** | Restated challenge, first-principles questions, assumptions register, known/unknown map, falsifiable working hypotheses |
 | 2 | **Medical & scientific criteria for research** | PICO(S) research questions, evidence inclusion/exclusion criteria, evidence-grading hierarchy, and a numbered research plan with sub-steps (sources, search strings, screening, extraction, appraisal, synthesis) |
-| 3 | **Evidence analysis & collation** | Five evidence streams analysed in parallel with identical extraction fields — brand-generated, independent published, evolving/new, guidelines, health-economic — stacked into the client-facing **Evidence Forefront Table**, plus top strategic assets and evidence gaps |
+| 3 | **Evidence analysis & collation** | Five evidence streams analysed in parallel with identical extraction fields — brand-generated, independent published, evolving/new, guidelines, health-economic — stacked into the client-facing **Evidence Forefront Table**, plus scientific-data visuals, clinical meaning, top strategic assets, and evidence gaps |
 | 4 | **In-house HCP insight analysis vs. evidence** | Insight inventory, concordance map (where HCP beliefs agree with evidence), discordance map (perception gaps and their origins), silent zones, validation plan |
 | 5 | **Behaviours, concerns, motivations & key behavioural drivers** | COM-B based analysis of what target doctors do today, the change required, their clinical/practical/economic/professional concerns, ranked motivations, and the 4–6 **key behavioural drivers** for adopting the product or recommendation change |
 | 6 | **Comparative evidence position** | Four-way comparison — brand evidence vs. existing evidence within the brand vs. evolving new evidence vs. supporting guidelines — alignment analysis, competitive shadow, strategic evidence position statement, evidence roadmap |
-| 7 | **Core messaging & behaviour-change adaptation** | Core messaging theme, message house tied to named evidence and behavioural drivers, segment adaptations, objection-handling grid, and the launch-vs-sustain **behaviour-change adaptation plan** required to launch and sustain the campaign |
+| 7 | **Core messaging & behaviour-change adaptation** | Core messaging theme, message house tied to named evidence and behavioural drivers, a visual science-to-solution blueprint, segment adaptations, objection-handling grid, and the launch-vs-sustain **behaviour-change adaptation plan** required to launch and sustain the campaign |
 | 8 | **HCP engagement plan — start to end and beyond** | Staged journey (pre-launch → launch → adoption → reinforcement → beyond-campaign), touchpoint choreography, KOL/peer-influence plan, two-way feedback loops, post-campaign continuity |
 | 9 | **Activation ideas by segment** | Activation menu tailored to HCP **specialty × status × city tier × patient types encountered × cost-of-treatment concern**, with cost-concern adaptations and an impact/feasibility prioritisation for Q1 vs. Q2–Q4 |
 | 10 | **Measurement framework** | KPI tree from **quarterly revenue growth** down to engagement activity, metric definition tables with formulas/sources/targets, continuous HCP engagement metrics, **clinical popularity** and **social popularity** metrics, revenue-linkage model, and quarterly dashboard governance |
-| 11 | **Executive strategy summary** | The whole strategy condensed into a sign-off document for the client CEO and medical director |
+| 11 | **Executive strategy summary** | The whole strategy condensed into a sign-off document and one-page science-to-solution execution infographic for the client CEO and medical director |
 
 Every phase output begins with a short *"How this section was built"* note so
 the critical-thinking process behind each step stays visible and auditable.
+
+### Visual and traceability standard
+
+Every phase contains a Mermaid visual with an accessible interpretation:
+**What it shows**, **So what**, **Evidence anchors**, and **Decision enabled**.
+Quantitative charts may use only values present in the brief or retrieved
+research; where data are missing or incomparable, the output shows an explicit
+evidence-gap or causal diagram instead of inventing chart values.
+
+The strategy carries stable identifiers through one auditable execution spine:
+
+```text
+EV evidence → CM clinical meaning → HI insight / BD behavioural driver
+→ SC strategic choice → SOL solution → EX execution → KPI measure
+```
+
+This prevents an activation idea from appearing without a scientific or
+insight basis. Unsupported proposals are linked to a `GAP` identifier and
+labelled **HYPOTHESIS — REQUIRES VALIDATION**.
 
 ### Built-in guardrails
 
@@ -90,6 +110,7 @@ output/
   ...
   11-executive-summary.md
   medicomarketing-strategy.md   <- the combined strategy document
+  medicomarketing-strategy.html <- visual browser report with rendered diagrams
 ```
 
 Run only selected phases:
@@ -127,6 +148,12 @@ plus dependencies, open questions, and MLR flags. Output:
 - **One continuous conversation** — phases run as sequential turns, so Phase 7
   messaging can cite the exact evidence rows from Phase 3 and the drivers from
   Phase 5.
+- **Science-to-execution IDs** — evidence, clinical meaning, HCP insight,
+  behavioural drivers, strategic choices, solutions, executions, and KPIs stay
+  linked across phases rather than being independently generated lists.
+- **Visual HTML report** — Mermaid blocks in the editable Markdown are rendered
+  into diagrams in a print-friendly browser report. Diagram rendering loads
+  Mermaid from jsDelivr, so the first open requires an internet connection.
 - **Prompt caching** — the conversation prefix is cached between phases, so
   each phase re-reads earlier phases at ~10% of the token price.
 - **Streaming** — long outputs stream token-by-token; the pipeline handles

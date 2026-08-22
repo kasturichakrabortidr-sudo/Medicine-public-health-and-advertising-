@@ -190,11 +190,20 @@ def main():
     say("")
     say("=" * 60)
     say(f"ALL DONE. Your documents are in the '{OUT_DIR.name}' folder:")
-    for f in sorted(OUT_DIR.glob("*.md")):
+    for f in sorted(
+        path for path in OUT_DIR.iterdir() if path.suffix.lower() in {".md", ".html"}
+    ):
         say(f"  - {f.name}")
-    say("Open them with any app that reads text (Word works fine).")
+    say("The .html report is the visual version; open it in a web browser.")
+    say("The .md files preserve the editable source and Mermaid diagrams.")
     say("=" * 60)
-    open_folder(OUT_DIR)
+    visual_report = OUT_DIR / "medicomarketing-strategy.html"
+    if not visual_report.exists():
+        visual_report = OUT_DIR / "outline-expansion.html"
+    if visual_report.exists():
+        webbrowser.open(visual_report.as_uri())
+    else:
+        open_folder(OUT_DIR)
 
 
 if __name__ == "__main__":
