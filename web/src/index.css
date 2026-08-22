@@ -515,6 +515,7 @@ textarea {
     flex-direction: row;
     align-items: center;
     gap: 16px;
+    flex-wrap: wrap;
   }
   .doctrine-chip {
     display: none;
@@ -524,5 +525,31 @@ textarea {
   .kpi-row,
   .slide-body {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .main {
+    padding: 16px 14px 32px;
+  }
+  .topbar h1,
+  .slide.title h2,
+  .slide.close h2 {
+    font-size: 28px;
+  }
+  .slide {
+    aspect-ratio: auto;
+    min-height: 72vh;
+    padding: 22px 16px;
+  }
+  .slide h2 {
+    font-size: 24px;
+    max-width: none;
+  }
+  .kpi-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .thumbs {
+    max-width: 55vw;
   }
 }

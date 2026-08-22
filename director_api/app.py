@@ -7,6 +7,8 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from medicomarketing_agent.config import load_brief
 
 from .extract import ExtractedBrief, extract_files, merge_into_brief
@@ -22,6 +24,7 @@ app.add_middleware(
 
 ROOT = Path(__file__).resolve().parent.parent
 EXAMPLE_BRIEF = ROOT / "examples" / "brief.example.yaml"
+DIST = ROOT / "web" / "dist"
 
 ACCEPT_HINT = (
     ".pdf .ppt .pptx .doc .docx .xls .xlsx .csv .tsv .txt .md .rtf .yaml .yml "
@@ -106,6 +109,31 @@ async def generate(
         raise HTTPException(422, "Could not read a usable brief from the upload.")
 
     return generate_pack(brief, mode=mode)
+
+
+@app.get("/demo.json")
+def demo_file():
+    path = DIST / "demo.json"
+    if not path.exists():
+        path = ROOT / "web" / "public" / "demo.json"
+    if not path.exists():
+        raise HTTPException(404, "demo.json missing")
+    return FileResponse(path, media_type="application/json")
+
+
+@app.get("/")
+def spa_index():
+    index = DIST / "index.html"
+    if not index.exists():
+        raise HTTPException(
+            503,
+            "Web build missing. From the repo root run: cd web && npm run build",
+        )
+    return FileResponse(index)
+
+
+if (DIST / "assets").is_dir():
+    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
 
 def _brief_from_mapping(data: dict) -> ExtractedBrief:

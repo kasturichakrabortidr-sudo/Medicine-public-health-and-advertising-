@@ -5,6 +5,15 @@ from director_api.app import app
 client = TestClient(app)
 
 
+def test_spa_and_demo_json():
+    res = client.get("/")
+    assert res.status_code == 200
+    assert "STRATA" in res.text
+    demo = client.get("/demo.json")
+    assert demo.status_code == 200
+    assert demo.json()["meta"]["brand"] == "CardioShield"
+
+
 def test_health():
     res = client.get("/api/health")
     assert res.status_code == 200
