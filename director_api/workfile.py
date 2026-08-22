@@ -90,7 +90,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     assumptions = []
     for raw, why, test in [
         (delay, "If this is not actually the delay, we will spend a year fighting a habit that is not there.",
-         "Field capture of first-eligible starts vs 'stabilise first' language in the next 30 calls."),
+         "Field capture of the named delay vs what the numbered papers actually studied."),
         (money, "If cost is a veto, a science-only campaign will look clever and sell nothing.",
          "Assistance offered vs initiation in high OOP caseloads."),
         ("Local RWE is required before KOLs will advocate." if any("rwe" in i.lower() or "local" in i.lower() for i in insights) else "",
@@ -575,25 +575,42 @@ def _p09(brief, doctrine, records=None) -> dict:
     segments = brief.hcp_segments or []
     rows = []
     specs = specialties[:3]
-    names = segments[:4] or [
-        f"{specs[0]} · KOL metro" if specs else "KOL metro",
-        f"{specs[0]} · private metro" if specs else "Private metro",
-        (specs[1] if len(specs) > 1 else "Consultant") + " · tier-2",
-        "Hospital pathway owners",
-    ]
-    moves = [
-        ("Peer cascade — they author the protocol", "Low", "Cover has to travel down"),
-        ("First-eligible pathway + habit lock", "Medium", "This is where volume lives"),
-        ("Affordability conversation kit", "High", "Cost is the veto"),
-        ("Discharge initiation bundle", "Medium", "The window the papers studied"),
-    ]
+    if hf_catalog_pack(records or []):
+        names = segments[:4] or [
+            f"{specs[0]} · KOL metro" if specs else "KOL metro",
+            f"{specs[0]} · private metro" if specs else "Private metro",
+            (specs[1] if len(specs) > 1 else "Consultant") + " · tier-2",
+            "Hospital pathway owners",
+        ]
+        moves = [
+            ("Peer cascade — they author the protocol", "Low", "Cover has to travel down"),
+            ("First-eligible pathway + habit lock", "Medium", "This is where volume lives"),
+            ("Affordability conversation kit", "High", "Cost is the veto"),
+            ("Discharge initiation bundle", "Medium", "The window the papers studied"),
+        ]
+        note = "Q1 is one hospital, one kit, one sourced myth. Not a national theatre."
+    else:
+        jobs = paper_jobs(records or [])
+        names = segments[:4] or [
+            f"{specs[0]} · first calls" if specs else "Priority specialists",
+            f"{specs[0]} · competitor-loyal" if specs else "Competitor-loyal",
+            (specs[1] if len(specs) > 1 else "Consultants") + " · durability questions",
+            "Cost-sensitive rooms",
+        ]
+        job_moves = [
+            (f"{r.get('roleLabel') or r.get('short')} {mark(r)}", "Medium", r.get("spine_execute") or "This paper's job only.")
+            for r in jobs[:3]
+        ]
+        job_moves.append(("Affordability conversation kit", "High", "Cost is the veto — not an efficacy reprint."))
+        moves = job_moves[:4]
+        note = "Q1 is the set of numbered papers in the bag, one cost conversation, no mashed-up finding."
     for name, move in zip(names, moves):
         rows.append([name, move[0], move[1], move[2]])
     return _phase(
         "09",
         "We collapsed specialty × status × city × cost to the few groups this brief can actually fund. Everyone else inherits.",
         grid={"headers": ["Who", "Lead move", "Cost posture", "Why them first"], "rows": rows},
-        note="Q1 is one hospital, one kit, one sourced myth. Not a national theatre.",
+        note=note,
     )
 
 
