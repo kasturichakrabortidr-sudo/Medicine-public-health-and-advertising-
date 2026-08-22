@@ -8,6 +8,8 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
   const slide = pack.slides[i];
+  const skills = pack.meta.deckSkills || [];
+  const map = pack.meta.storyMap || [];
   const present = () => {
     const el = document.querySelector(".slide-stage");
     if (el && el.requestFullscreen) el.requestFullscreen();
@@ -47,10 +49,20 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
         </div>
       </div>
       {exportError ? <p className="error">{exportError}</p> : null}
-      <p className="small muted" style={{ marginTop: -12, marginBottom: 12 }}>
-        The PPTX is a real PowerPoint file. Each slide is one visual — not a
-        dump of the working file. Superscripts are Vancouver numbers.
+      <p className="small muted craft-line">
+        Visual argument of the working file. Skills in play:{" "}
+        {skills.length ? skills.join(" · ") : "story · visuals · copy · layout"}. Complete
+        sentences. One picture per beat.
       </p>
+      {map.length ? (
+        <ol className="story-rail">
+          {map.map((beat) => (
+            <li key={`${beat.slide}-${beat.phase}`} className={beat.slide === slide.id ? "on" : ""}>
+              {beat.phase} {beat.slide}
+            </li>
+          ))}
+        </ol>
+      ) : null}
       <div className="slide-stage">
         <SlideView slide={slide} />
         <div className="deck-nav">

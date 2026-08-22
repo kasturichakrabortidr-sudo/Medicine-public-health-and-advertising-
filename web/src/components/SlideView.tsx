@@ -85,7 +85,7 @@ function Board({ cards }: { cards: NonNullable<Slide["board"]>["cards"] }) {
 
 function Flow({ steps }: { steps: NonNullable<Slide["flow"]>["steps"] }) {
   return (
-    <ol className="slide-flow">
+    <ol className={`slide-flow n${Math.min(steps.length, 4)}`}>
       {steps.map((step) => (
         <li className="flow-step" key={`${step.n}-${step.title}`}>
           <div className="flow-n">{step.n}</div>

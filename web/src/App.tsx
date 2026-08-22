@@ -87,7 +87,7 @@ export default function App() {
         <div className="mark">
           <strong>STRATA</strong>
           <span>Working file for HCP campaigns</span>
-          <span className="build-stamp">22 Aug · visual deck, not a file dump</span>
+          <span className="build-stamp">22 Aug · visuals tell the working file</span>
         </div>
         <nav className="nav">
           <button type="button" className={tab === "briefs" ? "active" : ""} onClick={() => setTab("briefs")}>

@@ -252,7 +252,7 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
 def _board(slide, cards: list[dict], l, t, w, h, dark: bool) -> None:
     if not cards:
         return
-    n = min(len(cards), 4)
+    n = min(len(cards), 5)
     cols = 2 if n == 4 else n
     gap = Inches(0.18)
     card_w = int((w - gap * (cols - 1)) / cols)
@@ -281,7 +281,7 @@ def _board(slide, cards: list[dict], l, t, w, h, dark: bool) -> None:
 
 
 def _flow(slide, steps: list[dict], l, t, w, h, dark: bool) -> None:
-    n = min(len(steps), 3) or 1
+    n = min(len(steps), 4) or 1
     gap = Inches(0.18)
     step_w = int((w - gap * (n - 1)) / n)
     fill = RGBColor(0x1B, 0x2C, 0x49) if dark else PAPER

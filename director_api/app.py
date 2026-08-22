@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from medicomarketing_agent.config import load_brief
 
+from .deck_skills import catalog
 from .extract import ExtractedBrief, extract_files, merge_into_brief
 from .generate import generate_pack
 from .pptx_export import filename_for, pack_to_pptx
@@ -39,7 +40,8 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-deck-craft",
+        "build": "2026-08-22-visual-story",
+        "deckSkills": catalog()["skills"],
     }
 
 
@@ -171,6 +173,11 @@ async def generate(
     except (OSError, ValueError, TypeError):
         pass
     return pack
+
+
+@app.get("/api/deck-skills")
+def deck_skills():
+    return catalog()
 
 
 @app.get("/api/projects")

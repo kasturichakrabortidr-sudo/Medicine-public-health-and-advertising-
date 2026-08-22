@@ -103,6 +103,8 @@ export interface StrategyPack {
     angleId: string;
     source?: string;
     deckSkill?: string;
+    deckSkills?: string[];
+    storyMap?: { phase: string; slide: string; question: string }[];
   };
   brief: ExtractedBrief;
   doctrine: {
