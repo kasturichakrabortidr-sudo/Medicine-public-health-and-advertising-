@@ -352,9 +352,12 @@ textarea {
   background: var(--cream);
   color: var(--ink);
   border-radius: 8px;
-  padding: 36px 42px;
+  padding: 28px 36px 18px;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .slide.title,
@@ -379,16 +382,16 @@ textarea {
 
 .slide h2 {
   font-family: var(--serif);
-  font-size: 34px;
+  font-size: 28px;
   line-height: 1.15;
-  margin: 0 0 10px;
-  max-width: 18ch;
+  margin: 0 0 8px;
+  max-width: 22ch;
 }
 
 .slide.title h2,
 .slide.close h2 {
-  font-size: 46px;
-  max-width: 16ch;
+  font-size: 42px;
+  max-width: 18ch;
 }
 
 .slide .sub {
@@ -403,36 +406,183 @@ textarea {
 
 .slide .narrative {
   max-width: 68ch;
-  line-height: 1.5;
+  line-height: 1.45;
+  margin: 0;
+  font-size: 15px;
+}
+
+.slide-head {
+  flex: 0 0 auto;
+}
+
+.slide-visual {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.slide.references .slide-visual {
+  overflow: auto;
 }
 
 .slide-body {
   display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: 22px;
-  height: calc(100% - 120px);
-}
-
-.slide.chart .slide-body,
-.slide.grid .slide-body {
-  grid-template-columns: 0.85fr 1.15fr;
-}
-
-.slide.insight .slide-body {
   grid-template-columns: 1fr;
+  gap: 16px;
+  min-height: 0;
 }
 
-.slide.infographic {
-  overflow: auto;
-}
-
-.slide.infographic h2 {
+.slide.infographic h2,
+.slide.visual h2,
+.slide.board h2,
+.slide.flow h2,
+.slide.stat h2 {
   max-width: 28ch;
-  font-size: 28px;
+  font-size: 26px;
 }
 
 .slide.references h2 {
   max-width: 20ch;
+}
+
+.slide-board {
+  display: grid;
+  gap: 14px;
+  flex: 1;
+  min-height: 0;
+}
+
+.slide-board.n2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.slide-board.n3,
+.slide-board.n4 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.slide-board.n4 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.slide-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  min-height: 0;
+}
+
+.slide-card h3 {
+  font-family: var(--serif);
+  font-size: 20px;
+  margin: 4px 0 8px;
+}
+
+.slide-card p {
+  margin: 0;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+.slide.title .slide-card {
+  background: rgba(244, 239, 230, 0.08);
+  border-color: rgba(244, 239, 230, 0.16);
+  color: var(--paper);
+}
+
+.slide-flow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.flow-step {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.flow-n {
+  font-family: var(--serif);
+  font-size: 36px;
+  color: var(--copper);
+  line-height: 1;
+}
+
+.flow-step h3 {
+  font-family: var(--serif);
+  font-size: 18px;
+  margin: 8px 0;
+}
+
+.flow-step p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.slide-stat {
+  display: grid;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+.slide-stat.n2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.stat-item {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 22px;
+}
+
+.stat-value {
+  font-family: var(--serif);
+  font-size: 52px;
+  line-height: 1;
+  margin: 8px 0 12px;
+}
+
+.stat-item p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.project-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.project-card:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.project-card h3 {
+  font-family: var(--serif);
+  margin: 4px 0 6px;
 }
 
 .cite {
@@ -459,12 +609,13 @@ a.cite-link {
 }
 
 .slide-refs {
-  position: absolute;
-  left: 42px;
-  bottom: 14px;
+  position: static;
+  margin-top: auto;
+  padding-top: 10px;
   font-size: 11px;
   color: var(--muted);
   font-family: var(--mono);
+  flex: 0 0 auto;
 }
 
 .ref-list {
@@ -482,6 +633,8 @@ a.cite-link {
 
 .infographic {
   margin-top: 8px;
+  flex: 1;
+  min-height: 0;
 }
 
 .people-pair {
@@ -839,6 +992,13 @@ a.cite-link {
   .slide h2 {
     font-size: 24px;
     max-width: none;
+  }
+  .slide-board.n2,
+  .slide-board.n3,
+  .slide-board.n4,
+  .slide-flow,
+  .slide-stat.n2 {
+    grid-template-columns: 1fr;
   }
   .kpi-row {
     grid-template-columns: 1fr 1fr;

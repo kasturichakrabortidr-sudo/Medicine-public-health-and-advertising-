@@ -7,58 +7,43 @@ export function SlideView({ slide }: { slide: Slide }) {
   const refs = (slide.refs || []).filter((n) => n !== "" && n != null);
   const catalog = useRefLinks();
   const byN = new Map(catalog.map((r) => [r.n, r]));
+  const bullets = (slide.bullets || []).filter(Boolean);
+  const chart = slide.chart;
+  const table = slide.layout === "references" ? slide.table : chart ? undefined : slide.table;
+  const board = slide.board;
+  const flow = slide.flow;
+  const stat = slide.stat;
+  const visual = chart || board || flow || stat || table;
+
   return (
     <article className={`slide ${slide.layout}`}>
-      <div className="kicker">{slide.kicker}</div>
-      <h2>
-        <Cited text={slide.title} />
-      </h2>
-      {slide.subtitle ? (
-        <p className="sub">
-          <Cited text={slide.subtitle} />
-        </p>
-      ) : null}
+      <header className="slide-head">
+        <div className="kicker">{slide.kicker}</div>
+        <h2>
+          <Cited text={slide.title} />
+        </h2>
+        {slide.subtitle ? (
+          <p className="sub">
+            <Cited text={slide.subtitle} />
+          </p>
+        ) : null}
+        {slide.narrative ? (
+          <p className="narrative">
+            <Cited text={slide.narrative} />
+          </p>
+        ) : null}
+      </header>
 
-      {slide.layout === "infographic" ? (
-        <>
-          <p className="narrative">
-            <Cited text={slide.narrative} />
-          </p>
-          {slide.chart ? <StrategyChart spec={slide.chart} height={280} /> : null}
-          {slide.bullets ? <Bullets items={slide.bullets} /> : null}
-          <Callout callout={slide.callout} />
-        </>
-      ) : slide.layout === "references" ? (
-        <>
-          <p className="narrative">
-            <Cited text={slide.narrative} />
-          </p>
-          {slide.table ? <Table table={slide.table} /> : null}
-        </>
-      ) : slide.layout === "title" || slide.layout === "close" || slide.layout === "insight" ? (
-        <>
-          <p className="narrative">
-            <Cited text={slide.narrative} />
-          </p>
-          {slide.bullets ? <Bullets items={slide.bullets} /> : null}
-          <Callout callout={slide.callout} />
-        </>
-      ) : (
-        <div className="slide-body">
-          <div>
-            <p className="narrative">
-              <Cited text={slide.narrative} />
-            </p>
-            {slide.bullets ? <Bullets items={slide.bullets} /> : null}
-            <Callout callout={slide.callout} />
-            {slide.table && !slide.chart ? <Table table={slide.table} /> : null}
-          </div>
-          <div>
-            {slide.chart ? <StrategyChart spec={slide.chart} height={220} /> : null}
-            {slide.table && slide.chart ? <Table table={slide.table} /> : null}
-          </div>
-        </div>
-      )}
+      <div className="slide-visual">
+        {chart ? <StrategyChart spec={chart} height={slide.layout === "visual" ? 340 : 260} /> : null}
+        {board?.cards?.length ? <Board cards={board.cards} /> : null}
+        {flow?.steps?.length ? <Flow steps={flow.steps} /> : null}
+        {stat?.items?.length ? <Stat items={stat.items} /> : null}
+        {table ? <Table table={table} /> : null}
+        {!visual && bullets.length ? <Bullets items={bullets} /> : null}
+        <Callout callout={slide.callout} />
+      </div>
+
       {refs.length ? (
         <div className="slide-refs">
           Refs{" "}
@@ -74,6 +59,63 @@ export function SlideView({ slide }: { slide: Slide }) {
         </div>
       ) : null}
     </article>
+  );
+}
+
+function Board({ cards }: { cards: NonNullable<Slide["board"]>["cards"] }) {
+  return (
+    <div className={`slide-board n${Math.min(cards.length, 4)}`}>
+      {cards.map((card, i) => (
+        <div className="slide-card" key={`${card.title}-${i}`}>
+          {card.kicker ? <div className="kicker">{card.kicker}</div> : null}
+          <h3>
+            <Cited text={card.title} />
+          </h3>
+          {card.body ? (
+            <p>
+              <Cited text={card.body} />
+            </p>
+          ) : null}
+          {card.ref ? <div className="small muted">{card.ref}</div> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Flow({ steps }: { steps: NonNullable<Slide["flow"]>["steps"] }) {
+  return (
+    <ol className="slide-flow">
+      {steps.map((step) => (
+        <li className="flow-step" key={`${step.n}-${step.title}`}>
+          <div className="flow-n">{step.n}</div>
+          <h3>
+            <Cited text={step.title} />
+          </h3>
+          <p>
+            <Cited text={step.body} />
+          </p>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function Stat({ items }: { items: NonNullable<Slide["stat"]>["items"] }) {
+  return (
+    <div className={`slide-stat n${Math.min(items.length, 3)}`}>
+      {items.map((item, i) => (
+        <div className="stat-item" key={`${item.value}-${i}`}>
+          {item.kicker ? <div className="kicker">{item.kicker}</div> : null}
+          <div className="stat-value">
+            <Cited text={item.value} />
+          </div>
+          <p>
+            <Cited text={item.label} />
+          </p>
+        </div>
+      ))}
+    </div>
   );
 }
 

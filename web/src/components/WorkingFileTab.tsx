@@ -20,7 +20,7 @@ export function WorkingFileTab({ pack }: { pack: StrategyPack }) {
         <div>
           <h1>Working file</h1>
           <p>
-            Eleven steps, in order. The deck is this file presented — not a separate idea.
+            Eleven steps, in order. The deck interprets this file visually — it is not a screenshot of these phases.
           </p>
         </div>
       </div>

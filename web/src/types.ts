@@ -33,8 +33,23 @@ export interface Slide {
   callout?: { label: string; text: string };
   chart?: ChartSpec;
   table?: { headers: string[]; rows: string[][] };
+  board?: { cards: { kicker?: string; title: string; body?: string; ref?: string }[] };
+  flow?: { steps: { n: string; title: string; body: string }[] };
+  stat?: { items: { kicker?: string; value: string; label: string }[] };
   refs?: (number | string)[];
-  layout: "title" | "insight" | "split" | "chart" | "grid" | "close" | "infographic" | "references";
+  layout:
+    | "title"
+    | "insight"
+    | "split"
+    | "chart"
+    | "grid"
+    | "close"
+    | "infographic"
+    | "references"
+    | "visual"
+    | "board"
+    | "flow"
+    | "stat";
 }
 
 export interface Intervention {
@@ -87,6 +102,7 @@ export interface StrategyPack {
     doctrine: string;
     angleId: string;
     source?: string;
+    deckSkill?: string;
   };
   brief: ExtractedBrief;
   doctrine: {
@@ -281,4 +297,26 @@ export interface Workfile {
   gapCount: number;
 }
 
-export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence";
+export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence" | "projects";
+
+export type ProjectStatus = "ongoing" | "saved";
+
+export interface ProjectSummary {
+  id: string;
+  status: ProjectStatus;
+  title: string;
+  brand: string;
+  molecule?: string;
+  therapyArea: string;
+  market: string;
+  doctrine: string;
+  source: string;
+  papers: number;
+  slides: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectRecord extends ProjectSummary {
+  pack: StrategyPack;
+}
