@@ -32,6 +32,20 @@ def test_pack_exposes_science_slides_and_anchors():
     assert "science-meaning" in ids
     assert "science-compare" in ids
     assert "science-execute" in ids
+    assert "how-built" in ids
+    assert "references" in ids
+    assert pack["workfile"]["phases"][0]["id"] == "01"
+    assert len(pack["workfile"]["phases"]) == 11
+    assert pack["references"][0]["n"] == 1
+    assert pack["references"][0]["pmid"] == "25176015"
+    assert "PMID: 25176015" in pack["references"][0]["citation"]
+    meaning = next(s for s in pack["slides"] if s["id"] == "science-meaning")
+    assert "[1]" in meaning["subtitle"] or "[1]" in meaning["narrative"]
+    register = next(s for s in pack["slides"] if s["id"] == "citation-register")
+    assert register["table"]["rows"][0][0] == "[1]"
+    refs_slide = next(s for s in pack["slides"] if s["id"] == "references")
+    assert refs_slide["layout"] == "references"
+    assert "McMurray" in refs_slide["table"]["rows"][0][1]
     forest = next(s for s in pack["slides"] if s["id"] == "forest")
     names = [row["name"] for row in forest["chart"]["data"]]
     assert any("PARADIGM-HF" in n for n in names)
@@ -39,7 +53,8 @@ def test_pack_exposes_science_slides_and_anchors():
     assert pack["doctrine"]["scienceAnchor"]
     assert "PMID" in pack["doctrine"]["scienceAnchor"]
     house = next(s for s in pack["slides"] if s["id"] == "house")
-    assert any("PMID" in b for b in house["bullets"])
+    house_text = " ".join(house.get("bullets") or []) + str(house.get("table") or "")
+    assert "[1]" in house_text or "[2]" in house_text or "PMID" in house_text
     assert pack["interventions"][0]["evidenceAnchor"]
 
 
@@ -75,7 +90,7 @@ def test_spine_connects_pioneer_to_first_touch():
     assert compare["chart"]["kind"] == "compare"
     assert compare["chart"]["data"][0]["pmid"] == "30415601"
     iv = next(s for s in pack["slides"] if s["id"] == "interventions")
-    assert any("PMID" in b for b in iv["bullets"])
+    assert any("[" in b and "PMID" in b for b in iv["bullets"])
 
 
 def test_oncology_brief_matches_keynote_not_hf():

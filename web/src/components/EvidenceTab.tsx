@@ -7,15 +7,16 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
   const records = ev?.records || pack.dashboard.citations || [];
   const gaps = ev?.gaps || pack.dashboard.evidenceGaps || [];
   const pubmed = ev?.pubmed || pack.dashboard.pubmed || [];
+  const refs = pack.references || ev?.references || pack.dashboard.references || [];
 
   return (
     <div>
       <div className="topbar">
         <div>
-          <h1>Sourced science</h1>
+          <h1>Numbered papers</h1>
           <p>
-            The campaign lead is the highest-leverage validated citation — not a slogan.
-            Uncited brief items stay gaps.
+            Every claim we are willing to lead with has a number. Uncited brief items stay
+            gaps. The full Vancouver list is at the bottom.
           </p>
         </div>
       </div>
@@ -88,6 +89,7 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         <table className="table">
           <thead>
             <tr>
+              <th>No.</th>
               <th>Source</th>
               <th>Citation</th>
               <th>Design / N</th>
@@ -98,6 +100,7 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           <tbody>
             {records.map((r) => (
               <tr key={r.id}>
+                <td>[{r.ref || "—"}]</td>
                 <td>
                   <strong>{r.short}</strong>
                   <div className="small muted">{r.stream}</div>
@@ -149,6 +152,25 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
             </tbody>
           </table>
         )}
+      </section>
+
+      <section className="card" style={{ marginTop: 18 }}>
+        <h3>Reference list</h3>
+        <p className="small muted">Vancouver. Same numbers as the superscripts in the working file and the deck.</p>
+        <ol className="ref-list">
+          {refs.map((r) => (
+            <li key={r.n} value={r.n}>
+              {r.url ? (
+                <a href={r.url} target="_blank" rel="noreferrer">
+                  {r.citation}
+                </a>
+              ) : (
+                r.citation
+              )}
+            </li>
+          ))}
+        </ol>
+        {refs.length === 0 && <p className="muted">No numbered paper matched this brief.</p>}
       </section>
 
       {pubmed.length > 0 && (

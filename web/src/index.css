@@ -397,6 +397,41 @@ textarea {
   font-size: 28px;
 }
 
+.slide.references h2 {
+  max-width: 20ch;
+}
+
+.cite {
+  font-family: var(--sans);
+  font-size: 0.72em;
+  font-weight: 650;
+  color: var(--copper);
+  letter-spacing: 0;
+  margin-left: 1px;
+}
+
+.slide-refs {
+  position: absolute;
+  left: 42px;
+  bottom: 14px;
+  font-size: 11px;
+  color: var(--muted);
+  font-family: var(--mono);
+}
+
+.ref-list {
+  padding-left: 22px;
+  line-height: 1.45;
+}
+
+.ref-list li {
+  margin: 8px 0;
+}
+
+.work-phase h3 {
+  margin-top: 4px;
+}
+
 .infographic {
   margin-top: 8px;
 }

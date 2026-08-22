@@ -6,7 +6,7 @@
     "market": "India (metro + tier-2/3 cities)",
     "generatedAt": "2026-08-22",
     "mode": "demo",
-    "doctrine": "The First-Touch Doctrine",
+    "doctrine": "Start at the first eligible visit",
     "angleId": "first-touch",
     "campaignLead": "first-eligible-start",
     "source": "examples/brief.example.yaml"
@@ -75,13 +75,13 @@
   },
   "doctrine": {
     "id": "first-touch",
-    "name": "The First-Touch Doctrine",
-    "thesis": "The enemy of CardioShield is not the comparator molecule. It is the ritual of delay — the 'stabilise first' habit that postpones guideline therapy past the only moment that reliably converts. Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
-    "enemy": "The stabilize-first ritual",
-    "bet": "Every eligible first encounter is the guideline encounter.",
-    "whyNovel": "Most launch decks sell a better drug. This doctrine retires a clinical habit. Validated citations — not a slogan — decide what we are allowed to lead with.",
+    "name": "Start at the first eligible visit",
+    "thesis": "The doctors on this brief already accept the science. They still wait. They start something familiar first, then the eligible moment has gone. Cost does the rest. So this is not a better-molecule story for CardioShield. It is a delay we have to retire, using only papers we can number. Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
+    "enemy": "The habit of waiting until the patient is 'stable' in clinic",
+    "bet": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+    "whyNovel": "Most launch decks sell the drug again. This one spends against the wait. If we cannot number the paper that allows a line, the line does not ship.",
     "scienceLead": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
-    "scienceAnchor": "PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
+    "scienceAnchor": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
   },
   "evidence": {
     "lead": {
@@ -95,32 +95,36 @@
           "short": "PIONEER-HF 2019",
           "pmid": "30415601",
           "doi": "10.1056/NEJMoa1812851",
-          "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID 30415601",
-          "claim": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor."
+          "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
+          "claim": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+          "ref": 2
         },
         {
           "id": "transition-2019",
           "short": "TRANSITION 2019",
           "pmid": "31134724",
           "doi": "10.1002/ejhf.1498",
-          "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID 31134724",
-          "claim": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success."
+          "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
+          "claim": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+          "ref": 3
         },
         {
           "id": "esc-hf-2021",
           "short": "ESC 2021 Class I",
           "pmid": "34447992",
           "doi": "10.1093/eurheartj/ehab368",
-          "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID 34447992",
-          "claim": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan."
+          "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
+          "claim": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
+          "ref": 5
         },
         {
           "id": "paradigm-hf-2014",
           "short": "PARADIGM-HF 2014",
           "pmid": "25176015",
           "doi": "10.1056/NEJMoa1409077",
-          "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID 25176015",
-          "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+          "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
+          "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
+          "ref": 1
         }
       ],
       "doNotClaim": [
@@ -166,10 +170,11 @@
         "spine_barrier": "The prize is lost if start waits until the outpatient clinic.",
         "spine_execute": "First-Touch Protocol: initiate at first-eligible, not first-available.",
         "spine_measure": "Share of eligible starts inside 48 hours of first-eligible.",
-        "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID 25176015",
+        "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/25176015/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 1
       },
       {
         "id": "pioneer-hf-2019",
@@ -206,10 +211,11 @@
         "spine_barrier": "Ward-to-clinic handoff delays the only window that showed the NT-proBNP drop.",
         "spine_execute": "First-Touch Protocol + 48-hour eligible-start KPI.",
         "spine_measure": "NT-proBNP delta at 8 weeks among in-hospital starters vs clinic starters.",
-        "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID 30415601",
+        "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/30415601/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 2
       },
       {
         "id": "transition-2019",
@@ -246,10 +252,11 @@
         "spine_barrier": "The start-after-discharge habit still treats in-hospital initiation as optional.",
         "spine_execute": "First-Touch Protocol: pre-discharge start is a designed default.",
         "spine_measure": "Share of eligible patients leaving hospital on the foundational ARNI.",
-        "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID 31134724",
+        "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/31134724/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 3
       },
       {
         "id": "jhund-age-2015",
@@ -286,10 +293,11 @@
         "spine_barrier": "Older patients are left on ACEI 'to be safe'.",
         "spine_execute": "Myth-Reset Asset: one wrong belief, one number, one peer voice.",
         "spine_measure": "Unaided 'too old / too frail to start' prevalence in the next insight wave.",
-        "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID 26231885",
+        "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/26231885/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 4
       },
       {
         "id": "esc-hf-2021",
@@ -326,10 +334,11 @@
         "spine_barrier": "Guideline awareness without a pathway still produces late starts.",
         "spine_execute": "Peer Cascade: KOLs author the first-eligible protocol the guideline already permits.",
         "spine_measure": "Share of priority KOLs who have signed the first-eligible protocol.",
-        "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID 34447992",
+        "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/34447992/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 5
       },
       {
         "id": "aha-acc-hfsa-2022",
@@ -366,10 +375,11 @@
         "spine_barrier": "Four-pillar talk without a first-touch pathway still sequences ARNI last.",
         "spine_execute": "Peer Cascade + First-Touch: the pathway is how a Class I line becomes a start.",
         "spine_measure": "Share of hospital pathways that name ARNI at first-eligible, not at switch.",
-        "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID 35363499",
+        "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/35363499/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 6
       },
       {
         "id": "trivandrum-hf-2015",
@@ -406,10 +416,11 @@
         "spine_barrier": null,
         "spine_execute": null,
         "spine_measure": null,
-        "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID 26011246",
+        "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 7
       }
     ],
     "gaps": [
@@ -437,7 +448,8 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/35444529/",
         "citation": "Xiang Q, Wang M, Ding Y, et al. Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Systematic Review and Meta-Analysis. Frontiers in pharmacology. 2022. doi:10.3389/fphar.2022.832782",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 8
       },
       {
         "pmid": "31890858",
@@ -449,7 +461,8 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/31890858/",
         "citation": "Boehmer AA, Ehrlich JR Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played earlier? International journal of cardiology. Heart & vasculature. 2019. doi:10.1016/j.ijcha.2019.100428",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 9
       },
       {
         "pmid": "31997538",
@@ -461,7 +474,8 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/31997538/",
         "citation": "Tomasoni D, Adamo M, Lombardi CM, et al. Highlights in heart failure. ESC heart failure. 2019. doi:10.1002/ehf2.12555",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 10
       },
       {
         "pmid": "39927814",
@@ -473,80 +487,1269 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/39927814/",
         "citation": "Nguyen DV, Pham GT, Pham SN, et al. Efficacy and safety of sacubitril-valsartan in hypertension patients with end-stage kidney disease on maintenance dialysis: a meta-analysis. Journal of hypertension. 2025. doi:10.1097/HJH.0000000000003972",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 11
       }
     ],
     "validatedCount": 7,
+    "gapCount": 2,
+    "references": [
+      {
+        "n": 1,
+        "id": "paradigm-hf-2014",
+        "short": "PARADIGM-HF 2014",
+        "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
+        "pmid": "25176015",
+        "doi": "10.1056/NEJMoa1409077",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/25176015/",
+        "status": "validated",
+        "year": 2014,
+        "trial": "PARADIGM-HF"
+      },
+      {
+        "n": 2,
+        "id": "pioneer-hf-2019",
+        "short": "PIONEER-HF 2019",
+        "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
+        "pmid": "30415601",
+        "doi": "10.1056/NEJMoa1812851",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30415601/",
+        "status": "validated",
+        "year": 2019,
+        "trial": "PIONEER-HF"
+      },
+      {
+        "n": 3,
+        "id": "transition-2019",
+        "short": "TRANSITION 2019",
+        "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
+        "pmid": "31134724",
+        "doi": "10.1002/ejhf.1498",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31134724/",
+        "status": "validated",
+        "year": 2019,
+        "trial": "TRANSITION"
+      },
+      {
+        "n": 4,
+        "id": "jhund-age-2015",
+        "short": "Jhund 2015 age",
+        "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885.",
+        "pmid": "26231885",
+        "doi": "10.1093/eurheartj/ehv330",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26231885/",
+        "status": "validated",
+        "year": 2015,
+        "trial": "PARADIGM-HF age analysis"
+      },
+      {
+        "n": 5,
+        "id": "esc-hf-2021",
+        "short": "ESC 2021 Class I",
+        "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
+        "pmid": "34447992",
+        "doi": "10.1093/eurheartj/ehab368",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34447992/",
+        "status": "validated",
+        "year": 2021,
+        "trial": "ESC HF 2021"
+      },
+      {
+        "n": 6,
+        "id": "aha-acc-hfsa-2022",
+        "short": "AHA/ACC/HFSA 2022",
+        "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499.",
+        "pmid": "35363499",
+        "doi": "10.1161/CIR.0000000000001063",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35363499/",
+        "status": "validated",
+        "year": 2022,
+        "trial": "AHA/ACC/HFSA 2022"
+      },
+      {
+        "n": 7,
+        "id": "trivandrum-hf-2015",
+        "short": "Trivandrum HFR 2015",
+        "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246.",
+        "pmid": "26011246",
+        "doi": "10.1002/ejhf.283",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
+        "status": "validated",
+        "year": 2015,
+        "trial": "Trivandrum HF Registry"
+      },
+      {
+        "n": 8,
+        "id": "pubmed-35444529",
+        "short": "Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Sy",
+        "citation": "Xiang Q, Wang M, Ding Y, et al. Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Systematic Review and Meta-Analysis. Frontiers in pharmacology. 2022. doi:10.3389/fphar.2022.832782 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "35444529",
+        "doi": "10.3389/fphar.2022.832782",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35444529/",
+        "status": "retrieved",
+        "year": 2022,
+        "trial": ""
+      },
+      {
+        "n": 9,
+        "id": "pubmed-31890858",
+        "short": "Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played",
+        "citation": "Boehmer AA, Ehrlich JR Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played earlier? International journal of cardiology. Heart & vasculature. 2019. doi:10.1016/j.ijcha.2019.100428 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "31890858",
+        "doi": "10.1016/j.ijcha.2019.100428",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31890858/",
+        "status": "retrieved",
+        "year": 2019,
+        "trial": ""
+      },
+      {
+        "n": 10,
+        "id": "pubmed-31997538",
+        "short": "Highlights in heart failure.",
+        "citation": "Tomasoni D, Adamo M, Lombardi CM, et al. Highlights in heart failure. ESC heart failure. 2019. doi:10.1002/ehf2.12555 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "31997538",
+        "doi": "10.1002/ehf2.12555",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31997538/",
+        "status": "retrieved",
+        "year": 2019,
+        "trial": ""
+      },
+      {
+        "n": 11,
+        "id": "pubmed-39927814",
+        "short": "Efficacy and safety of sacubitril-valsartan in hypertension patients wit",
+        "citation": "Nguyen DV, Pham GT, Pham SN, et al. Efficacy and safety of sacubitril-valsartan in hypertension patients with end-stage kidney disease on maintenance dialysis: a meta-analysis. Journal of hypertension. 2025. doi:10.1097/HJH.0000000000003972 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "39927814",
+        "doi": "10.1097/HJH.0000000000003972",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/39927814/",
+        "status": "retrieved",
+        "year": 2025,
+        "trial": ""
+      }
+    ]
+  },
+  "workfile": {
+    "howBuilt": "We started with the brief for CardioShield, not with a deck. Each section below is one step of the working process. 7 papers have a number. 2 lines from the brief still have no PMID or DOI. Those lines cannot set a claim. The slides are this file, presented.",
+    "phases": [
+      {
+        "id": "01",
+        "title": "What the brief is really asking",
+        "howBuilt": "We separated what the client typed as a goal from what the insight and access lines actually describe. The numbered papers from the register sit under Known. Uncited brief lines sit under Unknown. We did not fill Unknown with a guess.",
+        "restatedAsk": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.",
+        "restatedNeed": "What CardioShield needs is not another reminder that the science is positive. The doctors already told us: Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\" And then: Largely out-of-pocket market; monthly cost 8-10x generic ARB So the work is Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible..",
+        "questions": [
+          "What is the current first-eligible start rate? The brief has a growth goal and no baseline.",
+          "Where is the DOI for the local RWE the brief wants KOLs to hold?",
+          "What may we actually say about cost, assistance, and health economics — in this code, with a paper?",
+          "Which hospital will run the first pathway, and who owns the 48-hour log?",
+          "What will we kill in week 8 if the lead indicator has not moved?"
+        ],
+        "assumptions": {
+          "headers": [
+            "Assumption in the brief",
+            "If we are wrong",
+            "How we will test it"
+          ],
+          "rows": [
+            [
+              "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to…",
+              "If this is not actually the delay, we will spend a year fighting a habit that is not there.",
+              "Field capture of first-eligible starts vs 'stabilise first' language in the next 30 calls."
+            ],
+            [
+              "Largely out-of-pocket market; monthly cost 8-10x generic ARB",
+              "If cost is a veto, a science-only campaign will look clever and sell nothing.",
+              "Assistance offered vs initiation in high OOP caseloads."
+            ],
+            [
+              "Local RWE is required before KOLs will advocate.",
+              "If the KOLs will not move without a DOI we do not have, we cannot put them on a poster.",
+              "Retrieve the Indian RWE paper or drop the KOL-advocacy line."
+            ]
+          ]
+        },
+        "known": [
+          "[1] PARADIGM-HF 2014: ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
+          "[2] PIONEER-HF 2019: In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+          "[3] TRANSITION 2019: Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+          "[4] Jhund 2015 age: Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay.",
+          "[5] ESC 2021 Class I: ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
+          "[6] AHA/ACC/HFSA 2022: US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'."
+        ],
+        "unknown": [
+          "Brand-generated: Post-hoc analyses in elderly and diabetic subgroups",
+          "Evolving: Ongoing local health-economics study (readmission cost offset)",
+          "We do not have an audited first-eligible start rate for this market. Any % on a slide is a planning sketch until then."
+        ],
+        "hypotheses": [
+          "H1. Delay, not disbelief, is the conversion problem — from the insight “Advisory board (n=12 cardiologists) - most agree with early initiation in principle but s…”.",
+          "H2. Cost is a veto in tier-2, not a footnote — from “Largely out-of-pocket market; monthly cost 8-10x generic ARB”.",
+          "H3. In-hospital first-eligible start is the highest-leverage behaviour change, because that is the window the initiation papers actually studied."
+        ]
+      },
+      {
+        "id": "02",
+        "title": "How we will judge the science",
+        "howBuilt": "PICO is the contract for every later claim. If a line in the brief is not in this table, it is not yet a claim.",
+        "pico": {
+          "headers": [
+            "PICO",
+            "Working definition",
+            "Rule"
+          ],
+          "rows": [
+            [
+              "Population",
+              "HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV",
+              "Taken from the brief. We will not widen it."
+            ],
+            [
+              "Intervention",
+              "sacubitril/valsartan fixed-dose combination (illustrative example) at the first eligible encounter",
+              "Eligible as labelled — not 'all comers'."
+            ],
+            [
+              "Comparator",
+              "Habitual ACEI/ARB or SoC delay",
+              "The comparator is the current habit, not a straw man."
+            ],
+            [
+              "Outcomes we may use",
+              "CV death or HF hospitalisation [1]; Time-averaged proportional change in NT-proBNP [2]; Proportion achieving target dose at 10 weeks [3]; Primary composite, consistent across age [4]",
+              "Only endpoints published in numbered papers."
+            ],
+            [
+              "Setting",
+              "India (metro + tier-2/3 cities)",
+              "Local label and code still govern."
+            ]
+          ]
+        },
+        "hierarchy": [
+          "A — RCT or society guideline with PMID/DOI on the register",
+          "B — pre-specified subgroup, open-label timing, or well-described registry",
+          "C — uncited brief item, local RWE without a paper, ongoing study — research task, not a lead"
+        ],
+        "include": "Peer-reviewed papers and society guidelines with a PMID or DOI. HFrEF/indication must match the brief.",
+        "exclude": "Invented HRs, congress rumours, competitor claims without a source, and PubMed hits we have not read."
+      },
+      {
+        "id": "03",
+        "title": "Evidence forefront",
+        "howBuilt": "Every row is a paper we can put a number on. Brief lines without a number are in the gap table. We did not give them an effect size.",
+        "forefront": {
+          "headers": [
+            "Ref",
+            "Source",
+            "Stream",
+            "Design / N",
+            "Published finding",
+            "Grade",
+            "What we may say",
+            "Caveat"
+          ],
+          "rows": [
+            [
+              "[1]",
+              "PARADIGM-HF 2014",
+              "Brand / pivotal",
+              "RCT, double-blind · n=8442",
+              "HR 0.8 (0.73–0.87); 26.5 vs 21.8 per 100; NNT 21 (median 27 months)",
+              "A",
+              "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
+              "Run-in design; hypotension and angioedema require labelled monitoring."
+            ],
+            [
+              "[2]",
+              "PIONEER-HF 2019",
+              "Evolving / initiation",
+              "RCT, in-hospital initiation · n=881",
+              "ratio 0.71 (0.63–0.81)",
+              "A",
+              "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+              "Primary endpoint is a biomarker, not mortality. Safety was comparable."
+            ],
+            [
+              "[3]",
+              "TRANSITION 2019",
+              "Evolving / initiation",
+              "RCT, open-label timing · n=1002",
+              "risk difference 0.95 (0.88–1.03)",
+              "B",
+              "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+              "Open-label; primary was dose attainment, not outcomes."
+            ],
+            [
+              "[4]",
+              "Jhund 2015 age",
+              "Brand / post-hoc",
+              "Pre-specified subgroup of RCT · n=8442",
+              "HR 0.81 (0.74–0.89)",
+              "B",
+              "Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay.",
+              "Subgroup analysis; hypotension more frequent in the elderly."
+            ],
+            [
+              "[5]",
+              "ESC 2021 Class I",
+              "Guideline",
+              "Society guideline · n=—",
+              "Class I recommendation for ARNI as foundational therapy",
+              "A",
+              "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
+              "Local label and national adaptation (e.g. CSI) still govern promotion."
+            ],
+            [
+              "[6]",
+              "AHA/ACC/HFSA 2022",
+              "Guideline",
+              "Society guideline · n=—",
+              "ARNI (or ACEI/ARB) as one of four foundational pillars",
+              "A",
+              "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'.",
+              "Pillar choice still follows label, tolerance, and access."
+            ],
+            [
+              "[7]",
+              "Trivandrum HFR 2015",
+              "Independent / epidemiology",
+              "Prospective registry · n=1205",
+              "In-hospital and 90-day outcomes; GDMT underuse",
+              "B",
+              "Indian HF presents younger and with incomplete GDMT — local epidemiology supports a first-touch, not a Western 'wait and see', posture.",
+              "Single-region registry; not a product trial."
+            ]
+          ]
+        },
+        "assets": [
+          "[2] PIONEER-HF 2019: In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+          "[3] TRANSITION 2019: Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+          "[5] ESC 2021 Class I: ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
+          "[1] PARADIGM-HF 2014: ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+        ],
+        "gaps": {
+          "headers": [
+            "Stream",
+            "From the brief",
+            "Needed before it can lead"
+          ],
+          "rows": [
+            [
+              "Brand-generated",
+              "Post-hoc analyses in elderly and diabetic subgroups",
+              "Retrieve the primary paper or registry report; do not promote until a DOI/PMID is on the ledger."
+            ],
+            [
+              "Evolving",
+              "Ongoing local health-economics study (readmission cost offset)",
+              "Retrieve the primary paper or registry report; do not promote until a DOI/PMID is on the ledger."
+            ]
+          ]
+        },
+        "leadStatement": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit."
+      },
+      {
+        "id": "04",
+        "title": "What the doctors believe vs what the papers show",
+        "howBuilt": "We mapped each insight line onto the numbered papers. Agreement is an amplifier. Disagreement is the campaign. Silence is a research task.",
+        "inventory": [
+          "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"",
+          "Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching",
+          "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+          "KOLs want local RWE and Indian patient data before advocating publicly"
+        ],
+        "concord": {
+          "headers": [
+            "What they already believe",
+            "What the papers show",
+            "What we do"
+          ],
+          "rows": [
+            [
+              "None yet",
+              "—",
+              "—"
+            ]
+          ]
+        },
+        "discord": {
+          "headers": [
+            "Belief that delays the start",
+            "What the papers actually show",
+            "Likely origin",
+            "Implication"
+          ],
+          "rows": [
+            [
+              "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise…",
+              "The initiation papers do not require a clinic wait. [2] PIONEER-HF 2019.",
+              "Habit / handover theatre",
+              "This is the campaign. Not a reminder of efficacy."
+            ],
+            [
+              "Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching",
+              "The initiation papers do not require a clinic wait. [2] PIONEER-HF 2019.",
+              "Habit / handover theatre",
+              "This is the campaign. Not a reminder of efficacy."
+            ],
+            [
+              "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+              "We do not have a renal-burden RCT on the register. Treat this as a belief to measure, not a claim to rebut with a made-up number.",
+              "Old teaching / monitoring fear",
+              "Myth-reset only with a sourced number. If we cannot source it, we do not run the line."
+            ]
+          ]
+        },
+        "silent": {
+          "headers": [
+            "Insight or evidence that has no partner",
+            "What that means"
+          ],
+          "rows": [
+            [
+              "KOLs want local RWE and Indian patient data before advocating publicly",
+              "GAP: Ongoing local health-economics study (readmission cost offset)"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "05",
+        "title": "The behaviour we have to change",
+        "howBuilt": "COM-B on the actual insight and access lines. Capability is mostly intact. Opportunity (cost, ward workflow) and motivation (the wait, peer cover) are doing the damage.",
+        "current": "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"",
+        "required": "Start CardioShield at the first eligible encounter — the window studied in [2] PIONEER-HF 2019.",
+        "enemy": "The habit of waiting until the patient is 'stable' in clinic",
+        "concerns": {
+          "headers": [
+            "Kind",
+            "What the brief actually says",
+            "COM-B lever",
+            "What that asks of us"
+          ],
+          "rows": [
+            [
+              "Economic",
+              "Largely out-of-pocket market; monthly cost 8-10x generic ARB",
+              "Opportunity — cost",
+              "Do not hide price. Give the doctor a legal way to stay on the patient's side."
+            ],
+            [
+              "Practical / ritual",
+              "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"",
+              "Motivation — old habit",
+              "The new start has to be easier than waiting."
+            ],
+            [
+              "Clinical myth",
+              "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+              "Capability / motivation",
+              "One sourced number, or we drop the line."
+            ],
+            [
+              "Professional",
+              "KOLs want local RWE and Indian patient data before advocating publicly",
+              "Motivation — peer cover",
+              "KOLs do not go on a poster until the local paper exists."
+            ]
+          ]
+        },
+        "drivers": {
+          "headers": [
+            "Driver",
+            "Rests on",
+            "Barrier it has to beat",
+            "How we pull it"
+          ],
+          "rows": [
+            [
+              "First-eligible start",
+              "[2]",
+              "The wait",
+              "Hospital pathway, not a leave-behind"
+            ],
+            [
+              "Cost conversation the doctor can survive",
+              "HE paper not on the register",
+              "Prescriber guilt",
+              "Assistance kit, inside code"
+            ],
+            [
+              "Peer cover that travels down",
+              "[5]",
+              "Metro-only KOLs",
+              "Protocol authorship, then tier-2 demonstration"
+            ],
+            [
+              "A belief we can unlearn",
+              "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+              "The myth",
+              "One number, one peer voice"
+            ]
+          ]
+        }
+      },
+      {
+        "id": "06",
+        "title": "Where we are allowed to stand",
+        "howBuilt": "Four columns: brand / independent / evolving / guideline. Alignment is the only safe shout. Silence is a boundary.",
+        "fourway": {
+          "headers": [
+            "Territory",
+            "Brand",
+            "Independent",
+            "Evolving",
+            "Guidelines"
+          ],
+          "rows": [
+            [
+              "Outcome vs SoC",
+              "Supportive [1]",
+              "Supportive [1]",
+              "Supportive where evolving rows exist",
+              "Supportive [6]"
+            ],
+            [
+              "First-eligible / in-hospital start",
+              "Supportive [3]",
+              "Neutral / not the pivotal claim",
+              "Supportive [3] timing papers",
+              "Supportive [6]"
+            ],
+            [
+              "Local RWE / Indian patient",
+              "Cited in the brief, no PMID",
+              "Supportive [7]",
+              "Evolving — HE study ongoing (uncited)",
+              "Silent"
+            ],
+            [
+              "Cost offset",
+              "Silent",
+              "Silent",
+              "Ongoing HE study is a gap",
+              "Silent"
+            ]
+          ]
+        },
+        "competitors": [
+          "Generic ACE inhibitors / ARBs (habit + low cost)",
+          "SGLT2 inhibitors competing for \"next pillar added\" mindshare"
+        ],
+        "position": "We stand only where the columns agree. Outcome permission [1] plus guideline class [6] plus initiation feasibility [3]. Cost and local RWE are silent. We will not shout there.",
+        "roadmap": [
+          "Retrieve DOI/PMID for the Indian RWE the brief mentions — or take it off the KOL script.",
+          "Retrieve the CSI position paper if we want a national-guideline line.",
+          "Do not lead with the ongoing HE study until it exists as a paper."
+        ]
+      },
+      {
+        "id": "07",
+        "title": "What we will say — and what we will not",
+        "howBuilt": "One theme. Three pillars. Each pillar carries a number or it does not ship. The objection grid says what we will not say.",
+        "theme": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+        "scienceLead": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit. [1–3,5]",
+        "house": {
+          "headers": [
+            "Pillar",
+            "Line",
+            "Ref",
+            "Proof we are allowed to use"
+          ],
+          "rows": [
+            [
+              "Start now",
+              "First eligible encounter is a guideline encounter, not a later clinic. [2]",
+              "[2]",
+              "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor."
+            ],
+            [
+              "The outcome is already earned",
+              "We are not arguing efficacy from scratch. [1]",
+              "[1]",
+              "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+            ],
+            [
+              "Cover exists",
+              "Class I / four-pillar language is permission, not a poster after the wait. [5]",
+              "[5]",
+              "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan."
+            ]
+          ]
+        },
+        "objections": {
+          "headers": [
+            "What they will say",
+            "What we say",
+            "Ref",
+            "What we will not say"
+          ],
+          "rows": [
+            [
+              "I stabilise on ACEI first",
+              "The initiation papers studied start after haemodynamic stability — not after a second clinic.",
+              "[2]",
+              "Do not say 'start everyone on day one'."
+            ],
+            [
+              "The patient cannot afford this",
+              "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.",
+              "gap",
+              "Do not imply a cost-offset we have not sourced."
+            ],
+            [
+              "They are too old / too frail",
+              "Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay.",
+              "[4]",
+              "Do not invent an elderly-only indication."
+            ]
+          ]
+        }
+      },
+      {
+        "id": "08",
+        "title": "How we will spend time with these doctors",
+        "howBuilt": "A doctor should feel a sequence, not a spray. We have not invented a 14-touch cadence. We have named the jobs in order.",
+        "stages": {
+          "headers": [
+            "When",
+            "Job",
+            "Who owns it"
+          ],
+          "rows": [
+            [
+              "Before launch",
+              "A handful of hospital pathway owners write the first-eligible protocol",
+              "Medical leads. Commercial listens."
+            ],
+            [
+              "First quarter",
+              "One hospital live, one cost conversation kit in the bag, one myth we can actually source",
+              "Field + medical huddle weekly."
+            ],
+            [
+              "Adoption",
+              "The second prescription is designed. Repeat among trialists is the tell.",
+              "CRM is promotional. It goes through MLR."
+            ],
+            [
+              "After the burst",
+              "The pathway stays when the campaign money stops",
+              "Handover into the next cycle's working file."
+            ]
+          ]
+        },
+        "rule": "If a contact cannot name a numbered paper or a behaviour we are trying to change, it does not go on the plan.",
+        "who": "Priority: Cardiologists (interventional and non-interventional), Consultant physicians managing heart failure, GP referrers in tier-2/3 cities."
+      },
+      {
+        "id": "09",
+        "title": "Who we activate first",
+        "howBuilt": "We collapsed specialty × status × city × cost to the few groups this brief can actually fund. Everyone else inherits.",
+        "grid": {
+          "headers": [
+            "Who",
+            "Lead move",
+            "Cost posture",
+            "Why them first"
+          ],
+          "rows": [
+            [
+              "KOL academic cardiologists (metro teaching hospitals)",
+              "Peer cascade — they author the protocol",
+              "Low",
+              "Cover has to travel down"
+            ],
+            [
+              "Senior private-practice cardiologists (metro and tier-2)",
+              "First-eligible pathway + habit lock",
+              "Medium",
+              "This is where volume lives"
+            ],
+            [
+              "Early-career cardiologists and DM trainees",
+              "Affordability conversation kit",
+              "High",
+              "Cost is the veto"
+            ],
+            [
+              "Consultant physicians with high HF caseload (tier-2/3)",
+              "Discharge initiation bundle",
+              "Medium",
+              "The window the papers studied"
+            ]
+          ]
+        },
+        "note": "Q1 is one hospital, one kit, one sourced myth. Not a national theatre."
+      },
+      {
+        "id": "10",
+        "title": "How we will know",
+        "howBuilt": "The brief's own goal is the parent metric. Everything else has to explain it. We will not put a made-up funnel % on a slide and call it research.",
+        "parent": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.",
+        "qoq": 15,
+        "kpis": {
+          "headers": [
+            "Kind",
+            "Metric",
+            "From the brief / rule",
+            "Source",
+            "Kill / govern"
+          ],
+          "rows": [
+            [
+              "Parent",
+              "Quarterly volume / revenue vs the brief",
+              "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.",
+              "Sales / IQVIA equivalent",
+              "If this does not move, the rest is decoration"
+            ],
+            [
+              "Lead",
+              "Share of eligible starts inside 48 hours of first-eligible",
+              "Audit the baseline first. Then set a target.",
+              "Hospital pathway log",
+              "Kill the protocol if this is flat at week 8 in the pilot"
+            ],
+            [
+              "Lead",
+              "Assistance offered in eligible high-OOP starts",
+              "Brief says the PAP is under-used.",
+              "CRM",
+              "If mention rises and starts do not, the kit is a pamphlet"
+            ],
+            [
+              "Lead",
+              "Unaided prevalence of the named myth",
+              "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+              "Insight wave",
+              "No drop, no second burst"
+            ],
+            [
+              "Govern",
+              "Assets with a numbered citation that have cleared MLR",
+              "0 until medical says otherwise",
+              "MLR log",
+              "No number, no ship"
+            ]
+          ]
+        },
+        "caveat": "Any initiation % we later put on a dashboard is a planning target until the audit exists."
+      },
+      {
+        "id": "11",
+        "title": "The page we would take to sign-off",
+        "howBuilt": "This is the page we would actually take into the room. It is a working recommendation, not an approved campaign.",
+        "bet": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+        "lead": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
+        "ask": [
+          "Sign the bet: Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+          "Sign the scientific lead, with numbers: [2] PIONEER-HF 2019, [3] TRANSITION 2019, [5] ESC 2021 Class I, [1] PARADIGM-HF 2014",
+          "Name owners for the hospital pathway, the cost conversation, and the one myth we can source.",
+          "Park 2 uncited brief line(s) as research, not as copy.",
+          "MLR on the numbered claims before anyone builds an asset."
+        ],
+        "warn": "Draft for medical, legal, and regulatory. Local code has the last word."
+      }
+    ],
+    "references": [
+      {
+        "n": 1,
+        "id": "paradigm-hf-2014",
+        "short": "PARADIGM-HF 2014",
+        "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
+        "pmid": "25176015",
+        "doi": "10.1056/NEJMoa1409077",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/25176015/",
+        "status": "validated",
+        "year": 2014,
+        "trial": "PARADIGM-HF"
+      },
+      {
+        "n": 2,
+        "id": "pioneer-hf-2019",
+        "short": "PIONEER-HF 2019",
+        "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
+        "pmid": "30415601",
+        "doi": "10.1056/NEJMoa1812851",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30415601/",
+        "status": "validated",
+        "year": 2019,
+        "trial": "PIONEER-HF"
+      },
+      {
+        "n": 3,
+        "id": "transition-2019",
+        "short": "TRANSITION 2019",
+        "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
+        "pmid": "31134724",
+        "doi": "10.1002/ejhf.1498",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31134724/",
+        "status": "validated",
+        "year": 2019,
+        "trial": "TRANSITION"
+      },
+      {
+        "n": 4,
+        "id": "jhund-age-2015",
+        "short": "Jhund 2015 age",
+        "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885.",
+        "pmid": "26231885",
+        "doi": "10.1093/eurheartj/ehv330",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26231885/",
+        "status": "validated",
+        "year": 2015,
+        "trial": "PARADIGM-HF age analysis"
+      },
+      {
+        "n": 5,
+        "id": "esc-hf-2021",
+        "short": "ESC 2021 Class I",
+        "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
+        "pmid": "34447992",
+        "doi": "10.1093/eurheartj/ehab368",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34447992/",
+        "status": "validated",
+        "year": 2021,
+        "trial": "ESC HF 2021"
+      },
+      {
+        "n": 6,
+        "id": "aha-acc-hfsa-2022",
+        "short": "AHA/ACC/HFSA 2022",
+        "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499.",
+        "pmid": "35363499",
+        "doi": "10.1161/CIR.0000000000001063",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35363499/",
+        "status": "validated",
+        "year": 2022,
+        "trial": "AHA/ACC/HFSA 2022"
+      },
+      {
+        "n": 7,
+        "id": "trivandrum-hf-2015",
+        "short": "Trivandrum HFR 2015",
+        "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246.",
+        "pmid": "26011246",
+        "doi": "10.1002/ejhf.283",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
+        "status": "validated",
+        "year": 2015,
+        "trial": "Trivandrum HF Registry"
+      },
+      {
+        "n": 8,
+        "id": "pubmed-35444529",
+        "short": "Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Sy",
+        "citation": "Xiang Q, Wang M, Ding Y, et al. Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Systematic Review and Meta-Analysis. Frontiers in pharmacology. 2022. doi:10.3389/fphar.2022.832782 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "35444529",
+        "doi": "10.3389/fphar.2022.832782",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35444529/",
+        "status": "retrieved",
+        "year": 2022,
+        "trial": ""
+      },
+      {
+        "n": 9,
+        "id": "pubmed-31890858",
+        "short": "Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played",
+        "citation": "Boehmer AA, Ehrlich JR Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played earlier? International journal of cardiology. Heart & vasculature. 2019. doi:10.1016/j.ijcha.2019.100428 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "31890858",
+        "doi": "10.1016/j.ijcha.2019.100428",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31890858/",
+        "status": "retrieved",
+        "year": 2019,
+        "trial": ""
+      },
+      {
+        "n": 10,
+        "id": "pubmed-31997538",
+        "short": "Highlights in heart failure.",
+        "citation": "Tomasoni D, Adamo M, Lombardi CM, et al. Highlights in heart failure. ESC heart failure. 2019. doi:10.1002/ehf2.12555 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "31997538",
+        "doi": "10.1002/ehf2.12555",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31997538/",
+        "status": "retrieved",
+        "year": 2019,
+        "trial": ""
+      },
+      {
+        "n": 11,
+        "id": "pubmed-39927814",
+        "short": "Efficacy and safety of sacubitril-valsartan in hypertension patients wit",
+        "citation": "Nguyen DV, Pham GT, Pham SN, et al. Efficacy and safety of sacubitril-valsartan in hypertension patients with end-stage kidney disease on maintenance dialysis: a meta-analysis. Journal of hypertension. 2025. doi:10.1097/HJH.0000000000003972 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "39927814",
+        "doi": "10.1097/HJH.0000000000003972",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/39927814/",
+        "status": "retrieved",
+        "year": 2025,
+        "trial": ""
+      }
+    ],
+    "openQuestions": [
+      "What is the current first-eligible start rate? The brief has a growth goal and no baseline.",
+      "Where is the DOI for the local RWE the brief wants KOLs to hold?",
+      "What may we actually say about cost, assistance, and health economics — in this code, with a paper?",
+      "Which hospital will run the first pathway, and who owns the 48-hour log?",
+      "What will we kill in week 8 if the lead indicator has not moved?",
+      "Uncited: Post-hoc analyses in elderly and diabetic subgroups",
+      "Uncited: Ongoing local health-economics study (readmission cost offset)"
+    ],
+    "cannotClaim": [
+      "Primary endpoint is a biomarker, not mortality. Safety was comparable.",
+      "Open-label; primary was dose attainment, not outcomes.",
+      "Local label and national adaptation (e.g. CSI) still govern promotion.",
+      "Run-in design; hypotension and angioedema require labelled monitoring."
+    ],
+    "refCount": 11,
+    "validatedCount": 7,
     "gapCount": 2
   },
+  "references": [
+    {
+      "n": 1,
+      "id": "paradigm-hf-2014",
+      "short": "PARADIGM-HF 2014",
+      "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
+      "pmid": "25176015",
+      "doi": "10.1056/NEJMoa1409077",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/25176015/",
+      "status": "validated",
+      "year": 2014,
+      "trial": "PARADIGM-HF"
+    },
+    {
+      "n": 2,
+      "id": "pioneer-hf-2019",
+      "short": "PIONEER-HF 2019",
+      "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
+      "pmid": "30415601",
+      "doi": "10.1056/NEJMoa1812851",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/30415601/",
+      "status": "validated",
+      "year": 2019,
+      "trial": "PIONEER-HF"
+    },
+    {
+      "n": 3,
+      "id": "transition-2019",
+      "short": "TRANSITION 2019",
+      "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
+      "pmid": "31134724",
+      "doi": "10.1002/ejhf.1498",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/31134724/",
+      "status": "validated",
+      "year": 2019,
+      "trial": "TRANSITION"
+    },
+    {
+      "n": 4,
+      "id": "jhund-age-2015",
+      "short": "Jhund 2015 age",
+      "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885.",
+      "pmid": "26231885",
+      "doi": "10.1093/eurheartj/ehv330",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26231885/",
+      "status": "validated",
+      "year": 2015,
+      "trial": "PARADIGM-HF age analysis"
+    },
+    {
+      "n": 5,
+      "id": "esc-hf-2021",
+      "short": "ESC 2021 Class I",
+      "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
+      "pmid": "34447992",
+      "doi": "10.1093/eurheartj/ehab368",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/34447992/",
+      "status": "validated",
+      "year": 2021,
+      "trial": "ESC HF 2021"
+    },
+    {
+      "n": 6,
+      "id": "aha-acc-hfsa-2022",
+      "short": "AHA/ACC/HFSA 2022",
+      "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499.",
+      "pmid": "35363499",
+      "doi": "10.1161/CIR.0000000000001063",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35363499/",
+      "status": "validated",
+      "year": 2022,
+      "trial": "AHA/ACC/HFSA 2022"
+    },
+    {
+      "n": 7,
+      "id": "trivandrum-hf-2015",
+      "short": "Trivandrum HFR 2015",
+      "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246.",
+      "pmid": "26011246",
+      "doi": "10.1002/ejhf.283",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
+      "status": "validated",
+      "year": 2015,
+      "trial": "Trivandrum HF Registry"
+    },
+    {
+      "n": 8,
+      "id": "pubmed-35444529",
+      "short": "Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Sy",
+      "citation": "Xiang Q, Wang M, Ding Y, et al. Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Systematic Review and Meta-Analysis. Frontiers in pharmacology. 2022. doi:10.3389/fphar.2022.832782 [PubMed retrieval — confirm full text before it can lead.]",
+      "pmid": "35444529",
+      "doi": "10.3389/fphar.2022.832782",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/35444529/",
+      "status": "retrieved",
+      "year": 2022,
+      "trial": ""
+    },
+    {
+      "n": 9,
+      "id": "pubmed-31890858",
+      "short": "Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played",
+      "citation": "Boehmer AA, Ehrlich JR Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played earlier? International journal of cardiology. Heart & vasculature. 2019. doi:10.1016/j.ijcha.2019.100428 [PubMed retrieval — confirm full text before it can lead.]",
+      "pmid": "31890858",
+      "doi": "10.1016/j.ijcha.2019.100428",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/31890858/",
+      "status": "retrieved",
+      "year": 2019,
+      "trial": ""
+    },
+    {
+      "n": 10,
+      "id": "pubmed-31997538",
+      "short": "Highlights in heart failure.",
+      "citation": "Tomasoni D, Adamo M, Lombardi CM, et al. Highlights in heart failure. ESC heart failure. 2019. doi:10.1002/ehf2.12555 [PubMed retrieval — confirm full text before it can lead.]",
+      "pmid": "31997538",
+      "doi": "10.1002/ehf2.12555",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/31997538/",
+      "status": "retrieved",
+      "year": 2019,
+      "trial": ""
+    },
+    {
+      "n": 11,
+      "id": "pubmed-39927814",
+      "short": "Efficacy and safety of sacubitril-valsartan in hypertension patients wit",
+      "citation": "Nguyen DV, Pham GT, Pham SN, et al. Efficacy and safety of sacubitril-valsartan in hypertension patients with end-stage kidney disease on maintenance dialysis: a meta-analysis. Journal of hypertension. 2025. doi:10.1097/HJH.0000000000003972 [PubMed retrieval — confirm full text before it can lead.]",
+      "pmid": "39927814",
+      "doi": "10.1097/HJH.0000000000003972",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39927814/",
+      "status": "retrieved",
+      "year": 2025,
+      "trial": ""
+    }
+  ],
   "slides": [
     {
       "id": "title",
       "section": "Open",
-      "kicker": "India (metro + tier-2/3 cities)  ·  HCP campaign  ·  Confidential",
+      "kicker": "India (metro + tier-2/3 cities)  ·  Confidential working file",
       "title": "CardioShield",
-      "subtitle": "The First-Touch Doctrine  —  a strategy for Cardiology - chronic heart failure",
-      "narrative": "The enemy of CardioShield is not the comparator molecule. It is the ritual of delay — the 'stabilise first' habit that postpones guideline therapy past the only moment that reliably converts. Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
+      "subtitle": "Start at the first eligible visit — Cardiology - chronic heart failure",
+      "narrative": "The doctors on this brief already accept the science. They still wait. They start something familiar first, then the eligible moment has gone. Cost does the rest. So this is not a better-molecule story for CardioShield. It is a delay we have to retire, using only papers we can number. Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
       "layout": "title",
       "bullets": [
         "Product: sacubitril/valsartan fixed-dose combination (illustrative example)",
         "Indication: HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV",
-        "Horizon: 4 quarters"
+        "7 numbered papers. 2 uncited brief lines."
+      ],
+      "refs": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
       ]
+    },
+    {
+      "id": "how-built",
+      "section": "Process",
+      "kicker": "How this was built",
+      "title": "The brief became a working file. The deck is that file, presented.",
+      "narrative": "We started with the brief for CardioShield, not with a deck. Each section below is one step of the working process. 7 papers have a number. 2 lines from the brief still have no PMID or DOI. Those lines cannot set a claim. The slides are this file, presented.",
+      "layout": "split",
+      "table": {
+        "headers": [
+          "Step",
+          "What we did with this brief"
+        ],
+        "rows": [
+          [
+            "01",
+            "What the brief is really asking"
+          ],
+          [
+            "02",
+            "How we will judge the science"
+          ],
+          [
+            "03",
+            "Evidence forefront"
+          ],
+          [
+            "04",
+            "What the doctors believe vs what the papers show"
+          ],
+          [
+            "05",
+            "The behaviour we have to change"
+          ],
+          [
+            "06",
+            "Where we are allowed to stand"
+          ],
+          [
+            "07",
+            "What we will say — and what we will not"
+          ],
+          [
+            "08",
+            "How we will spend time with these doctors"
+          ],
+          [
+            "09",
+            "Who we activate first"
+          ],
+          [
+            "10",
+            "How we will know"
+          ],
+          [
+            "11",
+            "The page we would take to sign-off"
+          ]
+        ]
+      },
+      "bullets": [
+        "What is the current first-eligible start rate? The brief has a growth goal and no baseline.",
+        "Where is the DOI for the local RWE the brief wants KOLs to hold?",
+        "What may we actually say about cost, assistance, and health economics — in this code, with a paper?",
+        "Which hospital will run the first pathway, and who owns the 48-hour log?"
+      ]
+    },
+    {
+      "id": "restated",
+      "section": "Working file",
+      "kicker": "Phase 1 — the real problem",
+      "title": "What you asked for, and what this brief actually needs",
+      "narrative": "What CardioShield needs is not another reminder that the science is positive. The doctors already told us: Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\" And then: Largely out-of-pocket market; monthly cost 8-10x generic ARB So the work is Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible..",
+      "layout": "insight",
+      "callout": {
+        "label": "From the brief",
+        "text": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation."
+      },
+      "bullets": [
+        "H1. Delay, not disbelief, is the conversion problem — from the insight “Advisory board (n=12 cardiologists) - most agree with early initiation in principle but s…”.",
+        "H2. Cost is a veto in tier-2, not a footnote — from “Largely out-of-pocket market; monthly cost 8-10x generic ARB”.",
+        "H3. In-hospital first-eligible start is the highest-leverage behaviour change, because that is the window the initiation papers actually studied."
+      ]
+    },
+    {
+      "id": "questions",
+      "section": "Working file",
+      "kicker": "Phase 1 — before we write copy",
+      "title": "Questions this brief cannot answer yet",
+      "narrative": "We separated what the client typed as a goal from what the insight and access lines actually describe. The numbered papers from the register sit under Known. Uncited brief lines sit under Unknown. We did not fill Unknown with a guess.",
+      "layout": "split",
+      "bullets": [
+        "What is the current first-eligible start rate? The brief has a growth goal and no baseline.",
+        "Where is the DOI for the local RWE the brief wants KOLs to hold?",
+        "What may we actually say about cost, assistance, and health economics — in this code, with a paper?",
+        "Which hospital will run the first pathway, and who owns the 48-hour log?",
+        "What will we kill in week 8 if the lead indicator has not moved?"
+      ],
+      "table": {
+        "headers": [
+          "Assumption in the brief",
+          "If we are wrong",
+          "How we will test it"
+        ],
+        "rows": [
+          [
+            "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to…",
+            "If this is not actually the delay, we will spend a year fighting a habit that is not there.",
+            "Field capture of first-eligible starts vs 'stabilise first' language in the next 30 calls."
+          ],
+          [
+            "Largely out-of-pocket market; monthly cost 8-10x generic ARB",
+            "If cost is a veto, a science-only campaign will look clever and sell nothing.",
+            "Assistance offered vs initiation in high OOP caseloads."
+          ],
+          [
+            "Local RWE is required before KOLs will advocate.",
+            "If the KOLs will not move without a DOI we do not have, we cannot put them on a poster.",
+            "Retrieve the Indian RWE paper or drop the KOL-advocacy line."
+          ]
+        ]
+      }
     },
     {
       "id": "the-bet",
       "section": "Angle",
-      "kicker": "The one-slide bet",
-      "title": "Every eligible first encounter is the guideline encounter.",
-      "subtitle": "Enemy we are actually fighting: The stabilize-first ritual",
-      "narrative": "Most launch decks sell a better drug. This doctrine retires a clinical habit. Validated citations — not a slogan — decide what we are allowed to lead with.",
+      "kicker": "The one-page bet",
+      "title": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+      "subtitle": "What we are actually fighting: The habit of waiting until the patient is 'stable' in clinic",
+      "narrative": "Most launch decks sell the drug again. This one spends against the wait. If we cannot number the paper that allows a line, the line does not ship.",
       "layout": "insight",
       "callout": {
-        "label": "Doctrine",
-        "text": "The First-Touch Doctrine"
+        "label": "Scientific lead",
+        "text": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
       },
       "bullets": [
         "Not a better-molecule story.",
-        "A behaviour-change doctrine with evidence as permission.",
-        "Interventions designed to retire a ritual, not decorate a funnel."
+        "A behaviour we can name, with papers we can number.",
+        "Uncited brief lines stay research. They do not become copy."
+      ],
+      "refs": [
+        2,
+        3,
+        5,
+        1
       ]
     },
     {
       "id": "science-lead",
       "section": "Science",
       "kicker": "Campaign lead — sourced",
-      "title": "The science decides what we lead with",
-      "subtitle": "PIONEER-HF 2019",
-      "narrative": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
+      "title": "The papers decide what we lead with",
+      "subtitle": "[2] PIONEER-HF 2019",
+      "narrative": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit. [1–3,5]",
       "layout": "insight",
       "callout": {
-        "label": "Primary source",
-        "text": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID 30415601"
+        "label": "Primary source [2]",
+        "text": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601."
       },
       "bullets": [
-        "PIONEER-HF 2019: In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
-        "TRANSITION 2019: Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
-        "ESC 2021 Class I: ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
-        "PARADIGM-HF 2014: ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+        "[2] PIONEER-HF 2019: In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+        "[3] TRANSITION 2019: Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+        "[5] ESC 2021 Class I: ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
+        "[1] PARADIGM-HF 2014: ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+      ],
+      "refs": [
+        2,
+        3,
+        5,
+        1
       ]
     },
     {
       "id": "science-meaning",
       "section": "Science",
       "kicker": "What the data means",
-      "title": "In a clinic of 100, this is the prize",
-      "subtitle": "PARADIGM-HF 2014 · PMID 25176015",
-      "narrative": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF. The HR is a statistic. The picture is 26.5 events on the comparator versus 21.8 on the intervention — treat 21 to prevent 1 event.",
+      "title": "In a clinic of 100, this is what the paper actually showed",
+      "subtitle": "[1] PARADIGM-HF 2014 · PMID 25176015",
+      "narrative": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF. [1] The HR is a statistic. The picture is 26.5 events on the comparator versus 21.8 on the intervention — treat 21 to prevent 1 event.",
       "layout": "infographic",
       "chart": {
         "kind": "people",
-        "title": "PARADIGM-HF 2014: CV death or HF hospitalisation per 100 patients",
-        "note": "Published rates. PMID 25176015. Horizon: median 27 months.",
+        "title": "[1] PARADIGM-HF 2014: CV death or HF hospitalisation per 100 patients",
+        "note": "Published rates. [1] PMID 25176015. Horizon: median 27 months.",
         "unit": "CV death or HF hospitalisation per 100 patients",
         "data": [
           {
-            "name": "PARADIGM-HF 2014",
+            "name": "[1] PARADIGM-HF 2014",
             "control": 26.5,
             "treat": 21.8,
             "arr": 4.7,
@@ -554,6 +1757,7 @@
             "horizon": "median 27 months",
             "unit": "CV death or HF hospitalisation per 100 patients",
             "pmid": "25176015",
+            "ref": 1,
             "control_label": "Comparator",
             "treat_label": "PARADIGM-HF",
             "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
@@ -562,25 +1766,28 @@
       },
       "callout": {
         "label": "Read this, not the HR",
-        "text": "NNT 21 over median 27 months. Strategy exists to capture these events, not to reprint the forest plot."
-      }
+        "text": "[1] NNT 21 over median 27 months. The campaign exists to capture these events, not to reprint the forest plot."
+      },
+      "refs": [
+        1
+      ]
     },
     {
       "id": "science-compare",
       "section": "Science",
       "kicker": "What the timing data means",
       "title": "The comparator is the delayed habit, not another molecule",
-      "subtitle": "PIONEER-HF 2019 · PMID 30415601",
-      "narrative": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+      "subtitle": "[2] PIONEER-HF 2019 · PMID 30415601",
+      "narrative": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor. [2]",
       "layout": "infographic",
       "chart": {
         "kind": "compare",
-        "title": "PIONEER-HF 2019: NT-proBNP remaining vs ACEI baseline (=100)",
-        "note": "PMID 30415601. in-hospital window.",
+        "title": "[2] PIONEER-HF 2019: NT-proBNP remaining vs ACEI baseline (=100)",
+        "note": "[2] PMID 30415601. in-hospital window.",
         "unit": "NT-proBNP remaining vs ACEI baseline (=100)",
         "data": [
           {
-            "name": "PIONEER-HF 2019",
+            "name": "[2] PIONEER-HF 2019",
             "left": 100,
             "right": 71,
             "left_label": "Comparator",
@@ -588,86 +1795,107 @@
             "delta": 29,
             "unit": "NT-proBNP remaining vs ACEI baseline (=100)",
             "pmid": "30415601",
+            "ref": 2,
             "claim": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
             "horizon": "in-hospital window"
           }
         ]
       },
       "callout": {
-        "label": "Implication",
-        "text": "If the larger effect lives in the in-hospital window, execution cannot wait for clinic week 6."
-      }
+        "label": "So we do this",
+        "text": "If the larger effect lives in the in-hospital window, we cannot wait for clinic week 6."
+      },
+      "refs": [
+        2
+      ]
     },
     {
       "id": "citation-register",
       "section": "Science",
-      "kicker": "Evidence register",
-      "title": "Every lead claim traces to a named paper",
-      "narrative": "7 validated records. 2 brief items still lack a DOI/PMID and cannot set direction.",
+      "kicker": "Evidence forefront — numbered",
+      "title": "Every lead claim traces to a numbered paper",
+      "narrative": "7 numbered papers [1–3,5]. 2 brief items still lack a DOI/PMID and cannot set direction. Full Vancouver list at the end of the deck.",
       "layout": "split",
       "table": {
         "headers": [
+          "Ref",
           "Source",
+          "Stream",
           "Design / N",
-          "Finding",
-          "Grade",
-          "PMID / DOI"
+          "Published finding",
+          "Grade"
         ],
         "rows": [
           [
+            "[1]",
             "PARADIGM-HF 2014",
+            "Brand / pivotal",
             "RCT, double-blind · n=8442",
-            "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
-            "A",
-            "25176015 / 10.1056/NEJMoa1409077"
+            "26.5 vs 21.8 per 100; NNT 21",
+            "A"
           ],
           [
+            "[2]",
             "PIONEER-HF 2019",
+            "Evolving / initiation",
             "RCT, in-hospital initiation · n=881",
-            "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP v",
-            "A",
-            "30415601 / 10.1056/NEJMoa1812851"
+            "ratio 0.71 (0.63–0.81)",
+            "A"
           ],
           [
+            "[3]",
             "TRANSITION 2019",
+            "Evolving / initiation",
             "RCT, open-label timing · n=1002",
-            "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to sta",
-            "B",
-            "31134724 / 10.1002/ejhf.1498"
+            "risk difference 0.95 (0.88–1.03)",
+            "B"
           ],
           [
+            "[4]",
             "Jhund 2015 age",
+            "Brand / post-hoc",
             "Pre-specified subgroup of RCT · n=8442",
-            "Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay.",
-            "B",
-            "26231885 / 10.1093/eurheartj/ehv330"
+            "HR 0.81 (0.74–0.89)",
+            "B"
           ],
           [
+            "[5]",
             "ESC 2021 Class I",
+            "Guideline",
             "Society guideline · n=—",
             "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline pos",
-            "A",
-            "34447992 / 10.1093/eurheartj/ehab368"
+            "A"
           ],
           [
+            "[6]",
             "AHA/ACC/HFSA 2022",
+            "Guideline",
             "Society guideline · n=—",
             "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after '",
-            "A",
-            "35363499 / 10.1161/CIR.0000000000001063"
+            "A"
           ],
           [
+            "[7]",
             "Trivandrum HFR 2015",
+            "Independent / epidemiology",
             "Prospective registry · n=1205",
             "Indian HF presents younger and with incomplete GDMT — local epidemiology supports a first-",
-            "B",
-            "26011246 / 10.1002/ejhf.283"
+            "B"
           ]
         ]
       },
       "bullets": [
         "GAP · Brand-generated: Post-hoc analyses in elderly and diabetic subgroups",
         "GAP · Evolving: Ongoing local health-economics study (readmission cost offset)"
+      ],
+      "refs": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
       ]
     },
     {
@@ -675,34 +1903,34 @@
       "section": "Situation",
       "kicker": "The real problem",
       "title": "What the brief asked vs what the brand needs",
-      "narrative": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.\n",
+      "narrative": "What CardioShield needs is not another reminder that the science is positive. The doctors already told us: Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\" And then: Largely out-of-pocket market; monthly cost 8-10x generic ARB So the work is Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible..",
       "layout": "split",
       "bullets": [
-        "Client ask: Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.\n",
-        "Strategic need: convert the stabilize-first ritual into a first-eligible action.",
-        "Constraint: every claim and tactic must clear MLR and local promotion codes."
+        "Asked: Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.",
+        "Need: stop the habit of waiting until the patient is 'stable' in clinic.",
+        "Constraint: every claim has to clear MLR and local code, and carry a number."
       ],
       "table": {
         "headers": [
           "Lens",
-          "Today",
+          "Today, from this brief",
           "Required shift"
         ],
         "rows": [
           [
             "Clinical",
-            "Eligible patients meet the product late",
+            "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but s…",
             "First eligible encounter = guideline encounter"
           ],
           [
             "Behavioural",
-            "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but st",
-            "Make the new habit easier than the old one"
+            "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but s…",
+            "Make the new start easier than the wait"
           ],
           [
             "Commercial",
-            "Growth depends on late switch",
-            "Volume from initiation, not just conversion"
+            "Largely out-of-pocket market; monthly cost 8-10x generic ARB",
+            "Volume from initiation, not only from late switch"
           ]
         ]
       }
@@ -710,34 +1938,44 @@
     {
       "id": "opportunity",
       "section": "Situation",
-      "kicker": "Where value hides",
-      "title": "The adoption gap is a sequence problem",
-      "narrative": "Value is not evenly spread across the HCP universe. It concentrates in the moments and segments where delay is a ritual and cost-concern is a veto.",
-      "layout": "chart",
-      "chart": {
-        "kind": "bar",
-        "title": "Illustrative initiation timing (eligible patients)",
-        "note": "Planning model from brief signals — replace with audit data before lock.",
-        "unit": "% of eligible starts",
-        "data": [
-          {
-            "name": "At first eligible visit",
-            "value": 18
-          },
-          {
-            "name": "After 'stabilise' delay",
-            "value": 44
-          },
-          {
-            "name": "At hospital discharge",
-            "value": 14
-          },
-          {
-            "name": "Never / stays on SoC",
-            "value": 24
-          }
+      "kicker": "Phase 4 — their words",
+      "title": "What the doctors already told us",
+      "narrative": "These lines are from the brief. They are not a market model. Agreement with the papers is an amplifier. Disagreement is the campaign.",
+      "layout": "split",
+      "table": {
+        "headers": [
+          "Belief that delays the start",
+          "What the papers actually show",
+          "Likely origin",
+          "Implication"
+        ],
+        "rows": [
+          [
+            "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise…",
+            "The initiation papers do not require a clinic wait. [2] PIONEER-HF 2019.",
+            "Habit / handover theatre",
+            "This is the campaign. Not a reminder of efficacy."
+          ],
+          [
+            "Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching",
+            "The initiation papers do not require a clinic wait. [2] PIONEER-HF 2019.",
+            "Habit / handover theatre",
+            "This is the campaign. Not a reminder of efficacy."
+          ],
+          [
+            "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+            "We do not have a renal-burden RCT on the register. Treat this as a belief to measure, not a claim to rebut with a made-up number.",
+            "Old teaching / monitoring fear",
+            "Myth-reset only with a sourced number. If we cannot source it, we do not run the line."
+          ]
         ]
-      }
+      },
+      "bullets": [
+        "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"",
+        "Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching",
+        "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+        "KOLs want local RWE and Indian patient data before advocating publicly"
+      ]
     },
     {
       "id": "forest",
@@ -749,51 +1987,60 @@
       "chart": {
         "kind": "forest",
         "title": "Validated evidence position (named trials)",
-        "note": "HR/ratio and 95% CI copied from the cited publication. Guidelines without an HR are on the register, not forced onto this plot.",
+        "note": "HR/ratio and 95% CI copied from the cited publication. Superscripts are Vancouver numbers. Full list at the end of the deck.",
         "data": [
           {
-            "name": "PARADIGM-HF 2014",
+            "name": "[1] PARADIGM-HF 2014",
             "stream": "Brand / pivotal",
             "hr": 0.8,
             "low": 0.73,
             "high": 0.87,
             "grade": "A",
-            "note": "PMID 25176015 · doi:10.1056/NEJMoa1409077"
+            "note": "[1] PMID 25176015 · doi:10.1056/NEJMoa1409077"
           },
           {
-            "name": "PIONEER-HF 2019",
+            "name": "[2] PIONEER-HF 2019",
             "stream": "Evolving / initiation",
             "hr": 0.71,
             "low": 0.63,
             "high": 0.81,
             "grade": "A",
-            "note": "PMID 30415601 · doi:10.1056/NEJMoa1812851"
+            "note": "[2] PMID 30415601 · doi:10.1056/NEJMoa1812851"
           },
           {
-            "name": "TRANSITION 2019",
+            "name": "[3] TRANSITION 2019",
             "stream": "Evolving / initiation",
             "hr": 0.95,
             "low": 0.88,
             "high": 1.03,
             "grade": "B",
-            "note": "PMID 31134724 · doi:10.1002/ejhf.1498"
+            "note": "[3] PMID 31134724 · doi:10.1002/ejhf.1498"
           },
           {
-            "name": "Jhund 2015 age",
+            "name": "[4] Jhund 2015 age",
             "stream": "Brand / post-hoc",
             "hr": 0.81,
             "low": 0.74,
             "high": 0.89,
             "grade": "B",
-            "note": "PMID 26231885 · doi:10.1093/eurheartj/ehv330"
+            "note": "[4] PMID 26231885 · doi:10.1093/eurheartj/ehv330"
           }
         ]
       },
       "bullets": [
-        "PARADIGM-HF 2014 — ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
-        "PIONEER-HF 2019 — In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
-        "TRANSITION 2019 — Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
-        "Jhund 2015 age — Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay."
+        "[1] PARADIGM-HF 2014 — ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
+        "[2] PIONEER-HF 2019 — In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+        "[3] TRANSITION 2019 — Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+        "[4] Jhund 2015 age — Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay."
+      ],
+      "refs": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
       ]
     },
     {
@@ -826,8 +2073,8 @@
         ]
       },
       "bullets": [
-        "ESC 2021 Class I · Guideline · PMID 34447992",
-        "AHA/ACC/HFSA 2022 · Guideline · PMID 35363499"
+        "[5] ESC 2021 Class I · Guideline · PMID 34447992",
+        "[6] AHA/ACC/HFSA 2022 · Guideline · PMID 35363499"
       ]
     },
     {
@@ -918,46 +2165,36 @@
       "id": "boxplot",
       "section": "Behaviour",
       "kicker": "Cost as a veto",
-      "title": "Cost-concern is not a single number. It is a distribution.",
-      "narrative": "Metro KOLs and tier-2 consultants do not live on the same cost curve. Activation that ignores the spread will look sophisticated and sell nothing.",
-      "layout": "chart",
-      "chart": {
-        "kind": "box",
-        "title": "HCP-rated patient cost concern (illustrative)",
-        "unit": "0–10 concern",
-        "data": [
-          {
-            "name": "Metro KOL",
-            "min": 2,
-            "q1": 3.2,
-            "median": 4.1,
-            "q3": 5.4,
-            "max": 7.0
-          },
-          {
-            "name": "Metro private",
-            "min": 3,
-            "q1": 4.8,
-            "median": 6.2,
-            "q3": 7.5,
-            "max": 9.0
-          },
-          {
-            "name": "Tier-2 consultant",
-            "min": 5,
-            "q1": 6.8,
-            "median": 8.1,
-            "q3": 9.0,
-            "max": 10
-          },
-          {
-            "name": "Tier-3 / GP referrer",
-            "min": 6,
-            "q1": 7.6,
-            "median": 8.8,
-            "q3": 9.5,
-            "max": 10
-          }
+      "title": "What this brief actually says about money",
+      "narrative": "We will not draw a made-up distribution and call it research. These are the access lines from the brief. A health-economic paper is not on the register yet.",
+      "layout": "split",
+      "bullets": [
+        "Largely out-of-pocket market; monthly cost 8-10x generic ARB",
+        "Patient assistance program exists but is under-used by prescribers",
+        "Limited insurance/reimbursement coverage outside metros"
+      ],
+      "table": {
+        "headers": [
+          "From the brief",
+          "What we may do",
+          "What we will not do"
+        ],
+        "rows": [
+          [
+            "Largely out-of-pocket market; monthly cost 8-10x generic ARB",
+            "Assistance mechanics, inside code",
+            "No price promise, no unsourced offset"
+          ],
+          [
+            "Patient assistance program exists but is under-used by prescribers",
+            "Assistance mechanics, inside code",
+            "No price promise, no unsourced offset"
+          ],
+          [
+            "Limited insurance/reimbursement coverage outside metros",
+            "Assistance mechanics, inside code",
+            "No price promise, no unsourced offset"
+          ]
         ]
       }
     },
@@ -1016,17 +2253,45 @@
       "section": "Message",
       "kicker": "Message house",
       "title": "One theme. Three pillars. No ornamental claims.",
-      "narrative": "Theme: Every eligible first encounter is the guideline encounter.  Science lead: PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851",
-      "layout": "grid",
-      "bullets": [
-        "Pillar 1 — Permission now (TRANSITION 2019, PMID 31134724): Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
-        "Pillar 2 — Outcome permission (PARADIGM-HF 2014, PMID 25176015): ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
-        "Pillar 3 — Guideline cover (AHA/ACC/HFSA 2022, PMID 35363499): US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'."
-      ],
+      "narrative": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+      "layout": "split",
+      "table": {
+        "headers": [
+          "Pillar",
+          "Line",
+          "Ref",
+          "Proof we are allowed to use"
+        ],
+        "rows": [
+          [
+            "Start now",
+            "First eligible encounter is a guideline encounter, not a later clinic. [2]",
+            "[2]",
+            "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor."
+          ],
+          [
+            "The outcome is already earned",
+            "We are not arguing efficacy from scratch. [1]",
+            "[1]",
+            "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+          ],
+          [
+            "Cover exists",
+            "Class I / four-pillar language is permission, not a poster after the wait. [5]",
+            "[5]",
+            "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan."
+          ]
+        ]
+      },
       "callout": {
         "label": "MLR",
-        "text": "Every pillar must carry a named PMID/DOI. No pillar ships without a grade and a caveat."
-      }
+        "text": "A pillar without a number does not ship."
+      },
+      "bullets": [
+        "Pillar 1 — Permission now [3] (TRANSITION 2019): Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+        "Pillar 2 — Outcome permission [1] (PARADIGM-HF 2014): ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
+        "Pillar 3 — Guideline cover [6] (AHA/ACC/HFSA 2022): US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'."
+      ]
     },
     {
       "id": "science-execute",
@@ -1041,63 +2306,69 @@
         "note": "Only rows with a PMID/DOI. Uncited brief items cannot own a move.",
         "data": [
           {
-            "name": "PARADIGM-HF 2014",
+            "name": "[1] PARADIGM-HF 2014",
             "science": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
             "means": "Treat 21 patients like these to prevent 1 death or HF hospitalisation over ~27 months — that is the clinical prize.",
             "barrier": "The prize is lost if start waits until the outpatient clinic.",
             "execute": "First-Touch Protocol: initiate at first-eligible, not first-available.",
             "measure": "Share of eligible starts inside 48 hours of first-eligible.",
             "pmid": "25176015",
+            "ref": 1,
             "move": "First-Touch Protocol"
           },
           {
-            "name": "PIONEER-HF 2019",
+            "name": "[2] PIONEER-HF 2019",
             "science": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
             "means": "In-hospital start is a larger decongestive effect, not a later-clinic convenience.",
             "barrier": "Ward-to-clinic handoff delays the only window that showed the NT-proBNP drop.",
             "execute": "First-Touch Protocol + 48-hour eligible-start KPI.",
             "measure": "NT-proBNP delta at 8 weeks among in-hospital starters vs clinic starters.",
             "pmid": "30415601",
+            "ref": 2,
             "move": "First-Touch Protocol"
           },
           {
-            "name": "TRANSITION 2019",
+            "name": "[3] TRANSITION 2019",
             "science": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
             "means": "Waiting until the clinic is not required for titration success.",
             "barrier": "The start-after-discharge habit still treats in-hospital initiation as optional.",
             "execute": "First-Touch Protocol: pre-discharge start is a designed default.",
             "measure": "Share of eligible patients leaving hospital on the foundational ARNI.",
             "pmid": "31134724",
+            "ref": 3,
             "move": "First-Touch Protocol"
           },
           {
-            "name": "Jhund 2015 age",
+            "name": "[4] Jhund 2015 age",
             "science": "Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay.",
             "means": "Age is not a reason to withhold the outcome benefit.",
             "barrier": "Older patients are left on ACEI 'to be safe'.",
             "execute": "Myth-Reset Asset: one wrong belief, one number, one peer voice.",
             "measure": "Unaided 'too old / too frail to start' prevalence in the next insight wave.",
             "pmid": "26231885",
+            "ref": 4,
             "move": "Myth-Reset Asset"
           },
           {
-            "name": "ESC 2021 Class I",
+            "name": "[5] ESC 2021 Class I",
             "science": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
             "means": "Class I is cover to start now, not a poster to quote after a delay.",
             "barrier": "Guideline awareness without a pathway still produces late starts.",
             "execute": "Peer Cascade: KOLs author the first-eligible protocol the guideline already permits.",
             "measure": "Share of priority KOLs who have signed the first-eligible protocol.",
             "pmid": "34447992",
+            "ref": 5,
             "move": "Peer Cascade"
           },
           {
-            "name": "AHA/ACC/HFSA 2022",
+            "name": "[6] AHA/ACC/HFSA 2022",
             "science": "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'.",
             "means": "ARNI sits in foundational four-pillar therapy, not as a late switch.",
             "barrier": "Four-pillar talk without a first-touch pathway still sequences ARNI last.",
             "execute": "Peer Cascade + First-Touch: the pathway is how a Class I line becomes a start.",
             "measure": "Share of hospital pathways that name ARNI at first-eligible, not at switch.",
             "pmid": "35363499",
+            "ref": 6,
             "move": "Peer Cascade"
           }
         ]
@@ -1111,11 +2382,11 @@
       "narrative": "Each move is the execution of a cited finding — not a separate creative idea. If the science row cannot name the intervention, the intervention does not ship.",
       "layout": "grid",
       "bullets": [
-        "First-Touch Protocol — A hospital-to-clinic initiation bundle so CardioShield is started at the first eligible encounter.  [PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851]",
-        "Affordability Confidence Kit — A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.  [Trivandrum HFR 2015 · PMID 26011246 · doi:10.1002/ejhf.283]",
-        "Myth-Reset Asset — One wrong belief, one local number, one peer voice. Unlearning, not a lecture.  [Jhund 2015 age · PMID 26231885 · doi:10.1093/eurheartj/ehv330]",
-        "Peer Cascade — Metro KOLs author the protocol; tier-2 peers demonstrate it. Cover travels down, not out as a TV ad.  [ESC 2021 Class I · PMID 34447992 · doi:10.1093/eurheartj/ehab368]",
-        "Habit-Lock CRM — The second prescription is designed, not hoped for. Prompts, feedback, peer norms.  [PARADIGM-HF 2014 · PMID 25176015 · doi:10.1056/NEJMoa1409077]"
+        "First-Touch Protocol — A hospital-to-clinic initiation bundle so CardioShield is started at the first eligible encounter.  [[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851]",
+        "Affordability Confidence Kit — A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.  [[7] Trivandrum HFR 2015 · PMID 26011246 · doi:10.1002/ejhf.283]",
+        "Myth-Reset Asset — One wrong belief, one local number, one peer voice. Unlearning, not a lecture.  [[4] Jhund 2015 age · PMID 26231885 · doi:10.1093/eurheartj/ehv330]",
+        "Peer Cascade — Metro KOLs author the protocol; tier-2 peers demonstrate it. Cover travels down, not out as a TV ad.  [[5] ESC 2021 Class I · PMID 34447992 · doi:10.1093/eurheartj/ehab368]",
+        "Habit-Lock CRM — The second prescription is designed, not hoped for. Prompts, feedback, peer norms.  [[1] PARADIGM-HF 2014 · PMID 25176015 · doi:10.1056/NEJMoa1409077]"
       ]
     },
     {
@@ -1375,19 +2646,111 @@
       "id": "close",
       "section": "Ask",
       "kicker": "The first 30 days",
-      "title": "Sign the doctrine. Instrument the gap. Build three assets.",
-      "narrative": "Days 1–10: lock the enemy and the bet. Days 11–20: hospital pathway + affordability kit briefs. Days 21–30: MLR on the first three claims.",
+      "title": "Sign the bet. Number the claims. Park the gaps.",
+      "narrative": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation. Days 1–10: lock the bet and the numbered lead. Days 11–20: one hospital pathway and one cost conversation. Days 21–30: MLR on the numbered claims.",
       "layout": "close",
       "bullets": [
-        "Approve the doctrine and the scientific lead (the cited claim, not the slogan).",
-        "MLR the lead claim against the PMID/DOI list on the evidence register.",
-        "Name owners for protocol, cost kit, and myth-reset.",
-        "Set kill-criteria before production begins."
+        "Sign the bet: Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+        "Sign the scientific lead, with numbers: [2] PIONEER-HF 2019, [3] TRANSITION 2019, [5] ESC 2021 Class I, [1] PARADIGM-HF 2014",
+        "Name owners for the hospital pathway, the cost conversation, and the one myth we can source.",
+        "Park 2 uncited brief line(s) as research, not as copy.",
+        "MLR on the numbered claims before anyone builds an asset."
       ],
       "callout": {
         "label": "CardioShield",
         "text": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit."
       }
+    },
+    {
+      "id": "references",
+      "section": "References",
+      "kicker": "Vancouver  ·  1 of 2",
+      "title": "References",
+      "narrative": "Superscripts in the deck are these numbers. PubMed retrievals are listed and flagged; they are not lead claims.",
+      "layout": "references",
+      "table": {
+        "headers": [
+          "No.",
+          "Citation"
+        ],
+        "rows": [
+          [
+            "1",
+            "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015."
+          ],
+          [
+            "2",
+            "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601."
+          ],
+          [
+            "3",
+            "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724."
+          ],
+          [
+            "4",
+            "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885."
+          ],
+          [
+            "5",
+            "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992."
+          ],
+          [
+            "6",
+            "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499."
+          ],
+          [
+            "7",
+            "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246."
+          ]
+        ]
+      },
+      "refs": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "id": "references-2",
+      "section": "References",
+      "kicker": "Vancouver  ·  2 of 2",
+      "title": "References",
+      "narrative": "Superscripts in the deck are these numbers. PubMed retrievals are listed and flagged; they are not lead claims.",
+      "layout": "references",
+      "table": {
+        "headers": [
+          "No.",
+          "Citation"
+        ],
+        "rows": [
+          [
+            "8",
+            "Xiang Q, Wang M, Ding Y, et al. Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Systematic Review and Meta-Analysis. Frontiers in pharmacology. 2022. doi:10.3389/fphar.2022.832782 [PubMed retrieval — confirm full text before it can lead.]"
+          ],
+          [
+            "9",
+            "Boehmer AA, Ehrlich JR Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played earlier? International journal of cardiology. Heart & vasculature. 2019. doi:10.1016/j.ijcha.2019.100428 [PubMed retrieval — confirm full text before it can lead.]"
+          ],
+          [
+            "10",
+            "Tomasoni D, Adamo M, Lombardi CM, et al. Highlights in heart failure. ESC heart failure. 2019. doi:10.1002/ehf2.12555 [PubMed retrieval — confirm full text before it can lead.]"
+          ],
+          [
+            "11",
+            "Nguyen DV, Pham GT, Pham SN, et al. Efficacy and safety of sacubitril-valsartan in hypertension patients with end-stage kidney disease on maintenance dialysis: a meta-analysis. Journal of hypertension. 2025. doi:10.1097/HJH.0000000000003972 [PubMed retrieval — confirm full text before it can lead.]"
+          ]
+        ]
+      },
+      "refs": [
+        8,
+        9,
+        10,
+        11
+      ]
     }
   ],
   "interventions": [
@@ -1402,7 +2765,7 @@
       "feasibility": 62,
       "mlr": "Protocol language must match label and local code. No start-all implication.",
       "kill": "If discharge initiation rate is unchanged at week 8 in the pilot site.",
-      "evidenceAnchor": "PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
+      "evidenceAnchor": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
     },
     {
       "id": "afford-kit",
@@ -1415,7 +2778,7 @@
       "feasibility": 70,
       "mlr": "No price promises. Assistance, not inducement.",
       "kill": "If PAP mention rate rises but initiation does not.",
-      "evidenceAnchor": "Trivandrum HFR 2015 · PMID 26011246 · doi:10.1002/ejhf.283"
+      "evidenceAnchor": "[7] Trivandrum HFR 2015 · PMID 26011246 · doi:10.1002/ejhf.283"
     },
     {
       "id": "myth-reset",
@@ -1428,7 +2791,7 @@
       "feasibility": 78,
       "mlr": "Comparative safety claims need the source grade on-slide.",
       "kill": "If unaided myth prevalence does not drop in the next insight wave.",
-      "evidenceAnchor": "Jhund 2015 age · PMID 26231885 · doi:10.1093/eurheartj/ehv330"
+      "evidenceAnchor": "[4] Jhund 2015 age · PMID 26231885 · doi:10.1093/eurheartj/ehv330"
     },
     {
       "id": "peer-cascade",
@@ -1441,7 +2804,7 @@
       "feasibility": 54,
       "mlr": "Fair balance. No paid-endorsement theatre.",
       "kill": "If cascade stops at the same five names by Q2.",
-      "evidenceAnchor": "ESC 2021 Class I · PMID 34447992 · doi:10.1093/eurheartj/ehab368"
+      "evidenceAnchor": "[5] ESC 2021 Class I · PMID 34447992 · doi:10.1093/eurheartj/ehab368"
     },
     {
       "id": "habit-lock",
@@ -1454,7 +2817,7 @@
       "feasibility": 80,
       "mlr": "CRM content is promotional and goes through MLR.",
       "kill": "If repeat rate among trialists is flat vs control geographies.",
-      "evidenceAnchor": "PARADIGM-HF 2014 · PMID 25176015 · doi:10.1056/NEJMoa1409077"
+      "evidenceAnchor": "[1] PARADIGM-HF 2014 · PMID 25176015 · doi:10.1056/NEJMoa1409077"
     }
   ],
   "dashboard": {
@@ -1629,32 +2992,36 @@
           "short": "PIONEER-HF 2019",
           "pmid": "30415601",
           "doi": "10.1056/NEJMoa1812851",
-          "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID 30415601",
-          "claim": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor."
+          "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
+          "claim": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+          "ref": 2
         },
         {
           "id": "transition-2019",
           "short": "TRANSITION 2019",
           "pmid": "31134724",
           "doi": "10.1002/ejhf.1498",
-          "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID 31134724",
-          "claim": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success."
+          "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
+          "claim": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
+          "ref": 3
         },
         {
           "id": "esc-hf-2021",
           "short": "ESC 2021 Class I",
           "pmid": "34447992",
           "doi": "10.1093/eurheartj/ehab368",
-          "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID 34447992",
-          "claim": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan."
+          "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
+          "claim": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
+          "ref": 5
         },
         {
           "id": "paradigm-hf-2014",
           "short": "PARADIGM-HF 2014",
           "pmid": "25176015",
           "doi": "10.1056/NEJMoa1409077",
-          "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID 25176015",
-          "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+          "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
+          "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
+          "ref": 1
         }
       ],
       "doNotClaim": [
@@ -1700,10 +3067,11 @@
         "spine_barrier": "The prize is lost if start waits until the outpatient clinic.",
         "spine_execute": "First-Touch Protocol: initiate at first-eligible, not first-available.",
         "spine_measure": "Share of eligible starts inside 48 hours of first-eligible.",
-        "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID 25176015",
+        "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/25176015/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 1
       },
       {
         "id": "pioneer-hf-2019",
@@ -1740,10 +3108,11 @@
         "spine_barrier": "Ward-to-clinic handoff delays the only window that showed the NT-proBNP drop.",
         "spine_execute": "First-Touch Protocol + 48-hour eligible-start KPI.",
         "spine_measure": "NT-proBNP delta at 8 weeks among in-hospital starters vs clinic starters.",
-        "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID 30415601",
+        "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/30415601/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 2
       },
       {
         "id": "transition-2019",
@@ -1780,10 +3149,11 @@
         "spine_barrier": "The start-after-discharge habit still treats in-hospital initiation as optional.",
         "spine_execute": "First-Touch Protocol: pre-discharge start is a designed default.",
         "spine_measure": "Share of eligible patients leaving hospital on the foundational ARNI.",
-        "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID 31134724",
+        "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/31134724/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 3
       },
       {
         "id": "jhund-age-2015",
@@ -1820,10 +3190,11 @@
         "spine_barrier": "Older patients are left on ACEI 'to be safe'.",
         "spine_execute": "Myth-Reset Asset: one wrong belief, one number, one peer voice.",
         "spine_measure": "Unaided 'too old / too frail to start' prevalence in the next insight wave.",
-        "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID 26231885",
+        "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/26231885/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 4
       },
       {
         "id": "esc-hf-2021",
@@ -1860,10 +3231,11 @@
         "spine_barrier": "Guideline awareness without a pathway still produces late starts.",
         "spine_execute": "Peer Cascade: KOLs author the first-eligible protocol the guideline already permits.",
         "spine_measure": "Share of priority KOLs who have signed the first-eligible protocol.",
-        "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID 34447992",
+        "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/34447992/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 5
       },
       {
         "id": "aha-acc-hfsa-2022",
@@ -1900,10 +3272,11 @@
         "spine_barrier": "Four-pillar talk without a first-touch pathway still sequences ARNI last.",
         "spine_execute": "Peer Cascade + First-Touch: the pathway is how a Class I line becomes a start.",
         "spine_measure": "Share of hospital pathways that name ARNI at first-eligible, not at switch.",
-        "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID 35363499",
+        "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/35363499/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 6
       },
       {
         "id": "trivandrum-hf-2015",
@@ -1940,10 +3313,11 @@
         "spine_barrier": null,
         "spine_execute": null,
         "spine_measure": null,
-        "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID 26011246",
+        "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246.",
         "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
         "status": "validated",
-        "matchedFrom": "catalog"
+        "matchedFrom": "catalog",
+        "ref": 7
       }
     ],
     "evidenceGaps": [
@@ -1971,7 +3345,8 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/35444529/",
         "citation": "Xiang Q, Wang M, Ding Y, et al. Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Systematic Review and Meta-Analysis. Frontiers in pharmacology. 2022. doi:10.3389/fphar.2022.832782",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 8
       },
       {
         "pmid": "31890858",
@@ -1983,7 +3358,8 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/31890858/",
         "citation": "Boehmer AA, Ehrlich JR Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played earlier? International journal of cardiology. Heart & vasculature. 2019. doi:10.1016/j.ijcha.2019.100428",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 9
       },
       {
         "pmid": "31997538",
@@ -1995,7 +3371,8 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/31997538/",
         "citation": "Tomasoni D, Adamo M, Lombardi CM, et al. Highlights in heart failure. ESC heart failure. 2019. doi:10.1002/ehf2.12555",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 10
       },
       {
         "pmid": "39927814",
@@ -2007,12 +3384,13 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/39927814/",
         "citation": "Nguyen DV, Pham GT, Pham SN, et al. Efficacy and safety of sacubitril-valsartan in hypertension patients with end-stage kidney disease on maintenance dialysis: a meta-analysis. Journal of hypertension. 2025. doi:10.1097/HJH.0000000000003972",
         "status": "pubmed-retrieved",
-        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
+        "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
+        "ref": 11
       }
     ],
     "meaning": [
       {
-        "name": "PARADIGM-HF 2014",
+        "name": "[1] PARADIGM-HF 2014",
         "control": 26.5,
         "treat": 21.8,
         "arr": 4.7,
@@ -2020,6 +3398,7 @@
         "horizon": "median 27 months",
         "unit": "CV death or HF hospitalisation per 100 patients",
         "pmid": "25176015",
+        "ref": 1,
         "control_label": "Comparator",
         "treat_label": "PARADIGM-HF",
         "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
@@ -2027,7 +3406,7 @@
     ],
     "compare": [
       {
-        "name": "PIONEER-HF 2019",
+        "name": "[2] PIONEER-HF 2019",
         "left": 100,
         "right": 71,
         "left_label": "Comparator",
@@ -2035,84 +3414,235 @@
         "delta": 29,
         "unit": "NT-proBNP remaining vs ACEI baseline (=100)",
         "pmid": "30415601",
+        "ref": 2,
         "claim": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
         "horizon": "in-hospital window"
       }
     ],
     "spine": [
       {
-        "name": "PARADIGM-HF 2014",
+        "name": "[1] PARADIGM-HF 2014",
         "science": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
         "means": "Treat 21 patients like these to prevent 1 death or HF hospitalisation over ~27 months — that is the clinical prize.",
         "barrier": "The prize is lost if start waits until the outpatient clinic.",
         "execute": "First-Touch Protocol: initiate at first-eligible, not first-available.",
         "measure": "Share of eligible starts inside 48 hours of first-eligible.",
         "pmid": "25176015",
+        "ref": 1,
         "move": "First-Touch Protocol"
       },
       {
-        "name": "PIONEER-HF 2019",
+        "name": "[2] PIONEER-HF 2019",
         "science": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
         "means": "In-hospital start is a larger decongestive effect, not a later-clinic convenience.",
         "barrier": "Ward-to-clinic handoff delays the only window that showed the NT-proBNP drop.",
         "execute": "First-Touch Protocol + 48-hour eligible-start KPI.",
         "measure": "NT-proBNP delta at 8 weeks among in-hospital starters vs clinic starters.",
         "pmid": "30415601",
+        "ref": 2,
         "move": "First-Touch Protocol"
       },
       {
-        "name": "TRANSITION 2019",
+        "name": "[3] TRANSITION 2019",
         "science": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
         "means": "Waiting until the clinic is not required for titration success.",
         "barrier": "The start-after-discharge habit still treats in-hospital initiation as optional.",
         "execute": "First-Touch Protocol: pre-discharge start is a designed default.",
         "measure": "Share of eligible patients leaving hospital on the foundational ARNI.",
         "pmid": "31134724",
+        "ref": 3,
         "move": "First-Touch Protocol"
       },
       {
-        "name": "Jhund 2015 age",
+        "name": "[4] Jhund 2015 age",
         "science": "Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay.",
         "means": "Age is not a reason to withhold the outcome benefit.",
         "barrier": "Older patients are left on ACEI 'to be safe'.",
         "execute": "Myth-Reset Asset: one wrong belief, one number, one peer voice.",
         "measure": "Unaided 'too old / too frail to start' prevalence in the next insight wave.",
         "pmid": "26231885",
+        "ref": 4,
         "move": "Myth-Reset Asset"
       },
       {
-        "name": "ESC 2021 Class I",
+        "name": "[5] ESC 2021 Class I",
         "science": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan.",
         "means": "Class I is cover to start now, not a poster to quote after a delay.",
         "barrier": "Guideline awareness without a pathway still produces late starts.",
         "execute": "Peer Cascade: KOLs author the first-eligible protocol the guideline already permits.",
         "measure": "Share of priority KOLs who have signed the first-eligible protocol.",
         "pmid": "34447992",
+        "ref": 5,
         "move": "Peer Cascade"
       },
       {
-        "name": "AHA/ACC/HFSA 2022",
+        "name": "[6] AHA/ACC/HFSA 2022",
         "science": "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'.",
         "means": "ARNI sits in foundational four-pillar therapy, not as a late switch.",
         "barrier": "Four-pillar talk without a first-touch pathway still sequences ARNI last.",
         "execute": "Peer Cascade + First-Touch: the pathway is how a Class I line becomes a start.",
         "measure": "Share of hospital pathways that name ARNI at first-eligible, not at switch.",
         "pmid": "35363499",
+        "ref": 6,
         "move": "Peer Cascade"
       }
     ],
+    "references": [
+      {
+        "n": 1,
+        "id": "paradigm-hf-2014",
+        "short": "PARADIGM-HF 2014",
+        "citation": "McMurray JJV, Packer M, Desai AS, et al. Angiotensin–neprilysin inhibition versus enalapril in heart failure. N Engl J Med. 2014;371:993-1004. doi:10.1056/NEJMoa1409077. PMID: 25176015.",
+        "pmid": "25176015",
+        "doi": "10.1056/NEJMoa1409077",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/25176015/",
+        "status": "validated",
+        "year": 2014,
+        "trial": "PARADIGM-HF"
+      },
+      {
+        "n": 2,
+        "id": "pioneer-hf-2019",
+        "short": "PIONEER-HF 2019",
+        "citation": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
+        "pmid": "30415601",
+        "doi": "10.1056/NEJMoa1812851",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30415601/",
+        "status": "validated",
+        "year": 2019,
+        "trial": "PIONEER-HF"
+      },
+      {
+        "n": 3,
+        "id": "transition-2019",
+        "short": "TRANSITION 2019",
+        "citation": "Wachter R, Senni M, Belohlavek J, et al. Initiation of sacubitril/valsartan in hospital or early after discharge. Eur J Heart Fail. 2019;21:998-1007. doi:10.1002/ejhf.1498. PMID: 31134724.",
+        "pmid": "31134724",
+        "doi": "10.1002/ejhf.1498",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31134724/",
+        "status": "validated",
+        "year": 2019,
+        "trial": "TRANSITION"
+      },
+      {
+        "n": 4,
+        "id": "jhund-age-2015",
+        "short": "Jhund 2015 age",
+        "citation": "Jhund PS, Fu M, Bayram E, et al. Efficacy and safety of LCZ696 (sacubitril-valsartan) according to age. Eur Heart J. 2015;36:2576-2584. doi:10.1093/eurheartj/ehv330. PMID: 26231885.",
+        "pmid": "26231885",
+        "doi": "10.1093/eurheartj/ehv330",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26231885/",
+        "status": "validated",
+        "year": 2015,
+        "trial": "PARADIGM-HF age analysis"
+      },
+      {
+        "n": 5,
+        "id": "esc-hf-2021",
+        "short": "ESC 2021 Class I",
+        "citation": "McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J. 2021;42:3599-3726. doi:10.1093/eurheartj/ehab368. PMID: 34447992.",
+        "pmid": "34447992",
+        "doi": "10.1093/eurheartj/ehab368",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/34447992/",
+        "status": "validated",
+        "year": 2021,
+        "trial": "ESC HF 2021"
+      },
+      {
+        "n": 6,
+        "id": "aha-acc-hfsa-2022",
+        "short": "AHA/ACC/HFSA 2022",
+        "citation": "Heidenreich PA, Bozkurt B, Aguilar D, et al. 2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure. Circulation. 2022;145:e895-e1032. doi:10.1161/CIR.0000000000001063. PMID: 35363499.",
+        "pmid": "35363499",
+        "doi": "10.1161/CIR.0000000000001063",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35363499/",
+        "status": "validated",
+        "year": 2022,
+        "trial": "AHA/ACC/HFSA 2022"
+      },
+      {
+        "n": 7,
+        "id": "trivandrum-hf-2015",
+        "short": "Trivandrum HFR 2015",
+        "citation": "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246.",
+        "pmid": "26011246",
+        "doi": "10.1002/ejhf.283",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
+        "status": "validated",
+        "year": 2015,
+        "trial": "Trivandrum HF Registry"
+      },
+      {
+        "n": 8,
+        "id": "pubmed-35444529",
+        "short": "Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Sy",
+        "citation": "Xiang Q, Wang M, Ding Y, et al. Qili Qiangxin Capsule Combined With Sacubitril/Valsartan for HFrEF: A Systematic Review and Meta-Analysis. Frontiers in pharmacology. 2022. doi:10.3389/fphar.2022.832782 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "35444529",
+        "doi": "10.3389/fphar.2022.832782",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/35444529/",
+        "status": "retrieved",
+        "year": 2022,
+        "trial": ""
+      },
+      {
+        "n": 9,
+        "id": "pubmed-31890858",
+        "short": "Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played",
+        "citation": "Boehmer AA, Ehrlich JR Sacubitril/valsartan in HFrEF - Should the aces up our sleeves be played earlier? International journal of cardiology. Heart & vasculature. 2019. doi:10.1016/j.ijcha.2019.100428 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "31890858",
+        "doi": "10.1016/j.ijcha.2019.100428",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31890858/",
+        "status": "retrieved",
+        "year": 2019,
+        "trial": ""
+      },
+      {
+        "n": 10,
+        "id": "pubmed-31997538",
+        "short": "Highlights in heart failure.",
+        "citation": "Tomasoni D, Adamo M, Lombardi CM, et al. Highlights in heart failure. ESC heart failure. 2019. doi:10.1002/ehf2.12555 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "31997538",
+        "doi": "10.1002/ehf2.12555",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/31997538/",
+        "status": "retrieved",
+        "year": 2019,
+        "trial": ""
+      },
+      {
+        "n": 11,
+        "id": "pubmed-39927814",
+        "short": "Efficacy and safety of sacubitril-valsartan in hypertension patients wit",
+        "citation": "Nguyen DV, Pham GT, Pham SN, et al. Efficacy and safety of sacubitril-valsartan in hypertension patients with end-stage kidney disease on maintenance dialysis: a meta-analysis. Journal of hypertension. 2025. doi:10.1097/HJH.0000000000003972 [PubMed retrieval — confirm full text before it can lead.]",
+        "pmid": "39927814",
+        "doi": "10.1097/HJH.0000000000003972",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/39927814/",
+        "status": "retrieved",
+        "year": 2025,
+        "trial": ""
+      }
+    ],
+    "openQuestions": [
+      "What is the current first-eligible start rate? The brief has a growth goal and no baseline.",
+      "Where is the DOI for the local RWE the brief wants KOLs to hold?",
+      "What may we actually say about cost, assistance, and health economics — in this code, with a paper?",
+      "Which hospital will run the first pathway, and who owns the 48-hour log?",
+      "What will we kill in week 8 if the lead indicator has not moved?",
+      "Uncited: Post-hoc analyses in elderly and diabetic subgroups",
+      "Uncited: Ongoing local health-economics study (readmission cost offset)"
+    ],
+    "howBuilt": "We started with the brief for CardioShield, not with a deck. Each section below is one step of the working process. 7 papers have a number. 2 lines from the brief still have no PMID or DOI. Those lines cannot set a claim. The slides are this file, presented.",
     "alerts": [
       {
         "level": "watch",
-        "text": "Behavioural KPIs are planning targets. Scientific claims may only use rows with a PMID/DOI."
+        "text": "Funnel and index numbers are planning sketches. Audit the baseline before anyone treats them as a current rate."
       },
       {
         "level": "mlr",
-        "text": "No promotional use until MLR clears each cited claim against the local label."
+        "text": "No promotional use until MLR clears each numbered claim against the local label."
       },
       {
         "level": "info",
-        "text": "Doctrine: The First-Touch Doctrine. Science lead: PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851."
+        "text": "Start at the first eligible visit. Lead: [2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851."
       }
     ],
     "governance": [

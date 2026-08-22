@@ -1,65 +1,53 @@
 import type { Slide } from "../types";
+import { Cited } from "./Cited";
 import { StrategyChart } from "./charts/StrategyChart";
 
 export function SlideView({ slide }: { slide: Slide }) {
+  const refs = (slide.refs || []).filter((n) => n !== "" && n != null);
   return (
     <article className={`slide ${slide.layout}`}>
       <div className="kicker">{slide.kicker}</div>
-      <h2>{slide.title}</h2>
-      {slide.subtitle ? <p className="sub">{slide.subtitle}</p> : null}
+      <h2>
+        <Cited text={slide.title} />
+      </h2>
+      {slide.subtitle ? (
+        <p className="sub">
+          <Cited text={slide.subtitle} />
+        </p>
+      ) : null}
 
       {slide.layout === "infographic" ? (
         <>
-          <p className="narrative">{slide.narrative}</p>
+          <p className="narrative">
+            <Cited text={slide.narrative} />
+          </p>
           {slide.chart ? <StrategyChart spec={slide.chart} height={280} /> : null}
-          {slide.bullets ? (
-            <ul className="bullets">
-              {slide.bullets.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-          ) : null}
-          {slide.callout ? (
-            <div className="callout">
-              <strong>{slide.callout.label}. </strong>
-              {slide.callout.text}
-            </div>
-          ) : null}
+          {slide.bullets ? <Bullets items={slide.bullets} /> : null}
+          <Callout callout={slide.callout} />
+        </>
+      ) : slide.layout === "references" ? (
+        <>
+          <p className="narrative">
+            <Cited text={slide.narrative} />
+          </p>
+          {slide.table ? <Table table={slide.table} /> : null}
         </>
       ) : slide.layout === "title" || slide.layout === "close" || slide.layout === "insight" ? (
         <>
-          <p className="narrative">{slide.narrative}</p>
-          {slide.bullets ? (
-            <ul className="bullets">
-              {slide.bullets.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-          ) : null}
-          {slide.callout ? (
-            <div className="callout">
-              <strong>{slide.callout.label}. </strong>
-              {slide.callout.text}
-            </div>
-          ) : null}
+          <p className="narrative">
+            <Cited text={slide.narrative} />
+          </p>
+          {slide.bullets ? <Bullets items={slide.bullets} /> : null}
+          <Callout callout={slide.callout} />
         </>
       ) : (
         <div className="slide-body">
           <div>
-            <p className="narrative">{slide.narrative}</p>
-            {slide.bullets ? (
-              <ul className="bullets">
-                {slide.bullets.map((b) => (
-                  <li key={b}>{b}</li>
-                ))}
-              </ul>
-            ) : null}
-            {slide.callout ? (
-              <div className="callout">
-                <strong>{slide.callout.label}. </strong>
-                {slide.callout.text}
-              </div>
-            ) : null}
+            <p className="narrative">
+              <Cited text={slide.narrative} />
+            </p>
+            {slide.bullets ? <Bullets items={slide.bullets} /> : null}
+            <Callout callout={slide.callout} />
             {slide.table && !slide.chart ? <Table table={slide.table} /> : null}
           </div>
           <div>
@@ -68,7 +56,32 @@ export function SlideView({ slide }: { slide: Slide }) {
           </div>
         </div>
       )}
+      {refs.length ? (
+        <div className="slide-refs">Refs {refs.map((n) => `[${n}]`).join(" ")} · full list at the end</div>
+      ) : null}
     </article>
+  );
+}
+
+function Bullets({ items }: { items: string[] }) {
+  return (
+    <ul className="bullets">
+      {items.map((b) => (
+        <li key={b}>
+          <Cited text={b} />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function Callout({ callout }: { callout?: { label: string; text: string } }) {
+  if (!callout) return null;
+  return (
+    <div className="callout">
+      <strong>{callout.label}. </strong>
+      <Cited text={callout.text} />
+    </div>
   );
 }
 
@@ -86,7 +99,9 @@ function Table({ table }: { table: { headers: string[]; rows: string[][] } }) {
         {table.rows.map((row, i) => (
           <tr key={i}>
             {row.map((c, j) => (
-              <td key={j}>{c}</td>
+              <td key={j}>
+                <Cited text={c} />
+              </td>
             ))}
           </tr>
         ))}

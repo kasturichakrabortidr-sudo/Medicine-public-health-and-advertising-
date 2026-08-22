@@ -116,9 +116,8 @@ export function BriefsTab({
       <section className="card">
         <h2>Upload a brief — any format</h2>
         <p className="muted small">
-          Drop client files, leave-behinds, advisory notes, or a messy paste. STRATA extracts
-          the working brief, then writes a visual doctrine. Nothing is sent to a model unless
-          you later connect an API key to the existing 11-phase engine.
+          Drop the client files, the advisory notes, a messy paste. We will pull the fields,
+          then write the eleven-step working file. We will not jump to a deck from a slogan.
         </p>
         <div
           className={`drop ${over ? "over" : ""}`}
@@ -185,7 +184,7 @@ export function BriefsTab({
             Extract fields
           </button>
           <button className="btn copper" type="button" disabled={busy} onClick={generate}>
-            {busy ? "Directing…" : "Build strategy deck"}
+            {busy ? "Reading the brief…" : "Write the working file"}
           </button>
         </div>
         {error ? <p className="error">{error}</p> : null}

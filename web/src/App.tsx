@@ -4,6 +4,7 @@ import { BriefsTab } from "./components/BriefsTab";
 import { DashboardTab } from "./components/DashboardTab";
 import { DeckTab } from "./components/DeckTab";
 import { EvidenceTab } from "./components/EvidenceTab";
+import { WorkingFileTab } from "./components/WorkingFileTab";
 import type { StrategyPack, TabId } from "./types";
 
 export default function App() {
@@ -18,7 +19,7 @@ export default function App() {
     try {
       const demo = await fetchDemo();
       setPack(demo);
-      setTab("deck");
+      setTab("work");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -28,7 +29,6 @@ export default function App() {
 
   useEffect(() => {
     loadDemo().catch(() => undefined);
-    // Show the demo doctrine on first paint so the room is never empty.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -37,11 +37,19 @@ export default function App() {
       <aside className="rail">
         <div className="mark">
           <strong>STRATA</strong>
-          <span>AI Strategy Director</span>
+          <span>Working file for HCP campaigns</span>
         </div>
         <nav className="nav">
           <button type="button" className={tab === "briefs" ? "active" : ""} onClick={() => setTab("briefs")}>
-            Briefs
+            Brief
+          </button>
+          <button
+            type="button"
+            className={tab === "work" ? "active" : ""}
+            onClick={() => setTab("work")}
+            disabled={!pack}
+          >
+            Working file
           </button>
           <button
             type="button"
@@ -49,7 +57,7 @@ export default function App() {
             onClick={() => setTab("evidence")}
             disabled={!pack}
           >
-            Evidence
+            Papers
           </button>
           <button
             type="button"
@@ -57,7 +65,7 @@ export default function App() {
             onClick={() => setTab("deck")}
             disabled={!pack}
           >
-            Strat deck
+            Deck
           </button>
           <button
             type="button"
@@ -65,15 +73,15 @@ export default function App() {
             onClick={() => setTab("dashboard")}
             disabled={!pack}
           >
-            Dashboard
+            Measurement
           </button>
         </nav>
         <button className="btn" type="button" onClick={loadDemo} disabled={busy}>
-          Load CardioShield demo
+          Open the CardioShield working file
         </button>
         <div className="doctrine-chip">
-          <em>{pack ? pack.doctrine.name : "No doctrine yet"}</em>
-          {pack ? pack.doctrine.bet : "Upload a brief in any format to open a working file."}
+          <em>{pack ? pack.doctrine.name : "Nothing read yet"}</em>
+          {pack ? pack.doctrine.bet : "Drop a brief. We will write the working file before anyone sees a slide."}
         </div>
       </aside>
       <main className="main">
@@ -82,8 +90,8 @@ export default function App() {
           <>
             <div className="topbar">
               <div>
-                <h1>Intake</h1>
-                <p>The director reads the brief before anyone writes a slide.</p>
+                <h1>The brief</h1>
+                <p>We read this first. The working file comes next. The deck is last.</p>
               </div>
             </div>
             <BriefsTab
@@ -91,11 +99,12 @@ export default function App() {
               setBusy={setBusy}
               onPack={(next) => {
                 setPack(next);
-                setTab("deck");
+                setTab("work");
               }}
             />
           </>
         )}
+        {tab === "work" && pack && <WorkingFileTab pack={pack} />}
         {tab === "evidence" && pack && <EvidenceTab pack={pack} />}
         {tab === "deck" && pack && <DeckTab pack={pack} />}
         {tab === "dashboard" && pack && <DashboardTab pack={pack} />}

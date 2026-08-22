@@ -48,8 +48,8 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
       </div>
       {exportError ? <p className="error">{exportError}</p> : null}
       <p className="small muted" style={{ marginTop: -12, marginBottom: 12 }}>
-        The PPTX is a real PowerPoint file — native text, tables, and Office charts you can edit
-        in PowerPoint or Google Slides. Forest and box plots are shapes, not pictures.
+        The PPTX is a real PowerPoint file. Superscripts are Vancouver numbers. The last
+        slides are the reference list. Forest plots and people-grids are shapes you can edit.
       </p>
       <div className="slide-stage">
         <SlideView slide={slide} />

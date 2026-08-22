@@ -18,7 +18,7 @@ def test_first_touch_doctrine_from_stabilize_insight():
     assert pack["meta"]["brand"] == "CardioShield"
     assert len(pack["slides"]) >= 12
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
-    assert {"bar", "forest", "pie", "box", "line", "scatter", "diverging", "people", "compare", "spine"} <= kinds
+    assert {"bar", "forest", "pie", "line", "scatter", "diverging", "people", "compare", "spine"} <= kinds
     assert pack["dashboard"]["kpis"]
     assert len(pack["interventions"]) == 5
 

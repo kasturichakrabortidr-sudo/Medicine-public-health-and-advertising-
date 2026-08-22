@@ -33,7 +33,8 @@ export interface Slide {
   callout?: { label: string; text: string };
   chart?: ChartSpec;
   table?: { headers: string[]; rows: string[][] };
-  layout: "title" | "insight" | "split" | "chart" | "grid" | "close" | "infographic";
+  refs?: (number | string)[];
+  layout: "title" | "insight" | "split" | "chart" | "grid" | "close" | "infographic" | "references";
 }
 
 export interface Intervention {
@@ -103,7 +104,10 @@ export interface StrategyPack {
     pubmed: { pmid: string; title: string; citation: string; url: string; year?: number; journal?: string; doi?: string; note?: string }[];
     validatedCount: number;
     gapCount: number;
+    references?: ReferenceItem[];
   };
+  workfile?: Workfile;
+  references?: ReferenceItem[];
   slides: Slide[];
   interventions: Intervention[];
   dashboard: {
@@ -128,6 +132,9 @@ export interface StrategyPack {
     meaning?: Record<string, string | number>[];
     compare?: Record<string, string | number>[];
     spine?: Record<string, string | number>[];
+    references?: ReferenceItem[];
+    openQuestions?: string[];
+    howBuilt?: string;
   };
 }
 
@@ -167,6 +174,7 @@ export interface EvidenceRecord {
   citation: string;
   url: string;
   status: string;
+  ref?: number;
   directs?: string;
   control_event?: number | null;
   treat_event?: number | null;
@@ -185,8 +193,88 @@ export interface CampaignLead {
   why: string;
   directs: string;
   primaryId?: string;
-  citations: { id: string; short: string; pmid?: string; doi?: string; citation: string; claim: string }[];
+  citations: { id: string; short: string; pmid?: string; doi?: string; citation: string; claim: string; ref?: number }[];
   doNotClaim: string[];
 }
 
-export type TabId = "briefs" | "deck" | "dashboard" | "evidence";
+export interface ReferenceItem {
+  n: number;
+  id: string;
+  short: string;
+  citation: string;
+  pmid: string;
+  doi: string;
+  url: string;
+  status: string;
+  year?: number;
+  trial?: string;
+}
+
+export interface WorkBlock {
+  kind?: string;
+  headers?: string[];
+  rows?: string[][];
+}
+
+export interface WorkPhase {
+  id: string;
+  title: string;
+  howBuilt: string;
+  restatedAsk?: string;
+  restatedNeed?: string;
+  questions?: string[];
+  hypotheses?: string[];
+  known?: string[];
+  unknown?: string[];
+  inventory?: string[];
+  current?: string;
+  required?: string;
+  enemy?: string;
+  theme?: string;
+  scienceLead?: string;
+  leadStatement?: string;
+  lead?: string;
+  bet?: string;
+  ask?: string[];
+  warn?: string;
+  rule?: string;
+  who?: string;
+  note?: string;
+  parent?: string;
+  caveat?: string;
+  include?: string;
+  exclude?: string;
+  hierarchy?: string[];
+  assets?: string[];
+  roadmap?: string[];
+  competitors?: string[];
+  position?: string;
+  pico?: WorkBlock;
+  assumptions?: WorkBlock;
+  forefront?: WorkBlock;
+  gaps?: WorkBlock;
+  concord?: WorkBlock;
+  discord?: WorkBlock;
+  silent?: WorkBlock;
+  concerns?: WorkBlock;
+  drivers?: WorkBlock;
+  fourway?: WorkBlock;
+  house?: WorkBlock;
+  objections?: WorkBlock;
+  stages?: WorkBlock;
+  grid?: WorkBlock;
+  kpis?: WorkBlock;
+}
+
+export interface Workfile {
+  howBuilt: string;
+  phases: WorkPhase[];
+  references: ReferenceItem[];
+  openQuestions: string[];
+  cannotClaim: string[];
+  refCount: number;
+  validatedCount: number;
+  gapCount: number;
+}
+
+export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence";

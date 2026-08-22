@@ -175,6 +175,14 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
         _textbox(slide, Inches(0.55), Inches(1.7), Inches(12.2), Inches(0.4),
                  spec["subtitle"], size=16, color=body)
 
+    if spec.get("refs"):
+        from .cite import format_marks
+        nums = [int(n) for n in spec["refs"] if n not in (None, "")]
+        if nums:
+            _textbox(slide, Inches(0.55), Inches(7.15), Inches(12.2), Inches(0.22),
+                     f"References {format_marks(nums)}  ·  Vancouver list at end of deck",
+                     size=10, color=MUTED)
+
     layout = spec.get("layout")
     if layout == "infographic":
         top = Inches(2.05) if spec.get("subtitle") else Inches(1.75)
@@ -184,6 +192,15 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
             _add_chart(slide, spec["chart"], Inches(0.55), top + Inches(0.95), Inches(12.2), Inches(3.7))
         if spec.get("callout"):
             _callout(slide, Inches(0.55), Inches(6.6), Inches(12.2), Inches(0.65), spec["callout"], False)
+        return
+
+    if layout == "references":
+        top = Inches(1.85)
+        _textbox(slide, Inches(0.55), top, Inches(12.2), Inches(0.55),
+                 spec.get("narrative") or "", size=13, color=body)
+        table = spec.get("table") or {}
+        _table(slide, Inches(0.55), Inches(2.5), Inches(12.2), Inches(4.5),
+               table.get("headers") or ["No.", "Citation"], table.get("rows") or [])
         return
 
     if layout in {"title", "close", "insight"}:
