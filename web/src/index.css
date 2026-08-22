@@ -643,11 +643,32 @@ textarea {
   background: rgba(196, 132, 74, 0.12);
 }
 
-.skill-strip {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+.engine-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  margin: 0 0 12px;
+  margin: -4px 0 10px;
+}
+
+.engine-pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--copper-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 8px;
+}
+
+.engine-note {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.skill-strip {
+  display: none;
 }
 
 .skill-chip {

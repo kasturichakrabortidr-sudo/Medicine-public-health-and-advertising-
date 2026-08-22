@@ -105,7 +105,8 @@ export interface StrategyPack {
     deckSkill?: string;
     deckSkills?: string[];
     deckSkillCards?: { id: string; name: string; rule: string }[];
-    storyMap?: { phase: string; slide: string; question: string }[];
+    engines?: { id: string; name: string; rule: string }[];
+    storyMap?: { phase: string; slide: string; question: string; rail?: string; act?: string }[];
   };
   brief: ExtractedBrief;
   doctrine: {

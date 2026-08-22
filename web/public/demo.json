@@ -17,125 +17,185 @@
       "story",
       "visuals",
       "copy",
-      "layout"
+      "critic"
     ],
     "deckSkillCards": [
       {
         "id": "story",
         "name": "Story",
-        "rule": "Every working-file phase has a beat. The deck is the argument, in order."
+        "rule": "The deck is one argument in four acts. Every title is a conclusion."
       },
       {
         "id": "visuals",
         "name": "Visuals",
-        "rule": "The picture carries the room. A slide without a visual is a failed beat."
+        "rule": "The picture carries the room. Contrast, not a pasted phase table."
       },
       {
         "id": "copy",
         "name": "Copy",
-        "rule": "Complete sentences only. Never an ellipsis. Never a cut clause."
+        "rule": "One complete line. Never an ellipsis. Never a glued fragment."
       },
       {
-        "id": "layout",
-        "name": "Layout",
-        "rule": "One visual owns the 16:9. Refs sit in the flow. Nothing overlaps."
+        "id": "critic",
+        "name": "Critic",
+        "rule": "Kill empty shout, duplicate labels, and chrome that eats the 16:9."
+      }
+    ],
+    "engines": [
+      {
+        "id": "story",
+        "name": "Story",
+        "rule": "The deck is one argument in four acts. Every title is a conclusion."
+      },
+      {
+        "id": "visuals",
+        "name": "Visuals",
+        "rule": "The picture carries the room. Contrast, not a pasted phase table."
+      },
+      {
+        "id": "copy",
+        "name": "Copy",
+        "rule": "One complete line. Never an ellipsis. Never a glued fragment."
+      },
+      {
+        "id": "critic",
+        "name": "Critic",
+        "rule": "Kill empty shout, duplicate labels, and chrome that eats the 16:9."
       }
     ],
     "storyMap": [
       {
         "phase": "01",
         "slide": "title",
-        "question": "Why are we in the room?"
+        "question": "Why are we in the room?",
+        "rail": "Open",
+        "act": "I · Open"
       },
       {
         "phase": "01",
         "slide": "need",
-        "question": "What is the real job?"
+        "question": "What is the real job?",
+        "rail": "Job",
+        "act": "I · Open"
       },
       {
         "phase": "05",
         "slide": "tension",
-        "question": "What do they do versus what must change?"
+        "question": "What do they do versus what must change?",
+        "rail": "Habit",
+        "act": "I · Open"
       },
       {
         "phase": "04",
         "slide": "belief",
-        "question": "Where does belief fight the papers?"
+        "question": "Where does belief fight the papers?",
+        "rail": "Belief",
+        "act": "I · Open"
       },
       {
         "phase": "02",
         "slide": "pico",
-        "question": "How will we judge the science?"
+        "question": "How will we judge the science?",
+        "rail": "PICO",
+        "act": "II · Proof"
       },
       {
         "phase": "03",
         "slide": "science-meaning",
-        "question": "What did the lead paper show in a clinic of 100?"
+        "question": "What did the lead paper show in a clinic of 100?",
+        "rail": "Prize",
+        "act": "II · Proof"
       },
       {
         "phase": "03",
         "slide": "forest",
-        "question": "Do the numbered papers agree?"
+        "question": "Do the numbered papers agree?",
+        "rail": "Forest",
+        "act": "II · Proof"
       },
       {
         "phase": "03",
         "slide": "science-compare",
-        "question": "What does the next paper add?"
+        "question": "What does the next paper add?",
+        "rail": "Second",
+        "act": "II · Proof"
       },
       {
         "phase": "03",
         "slide": "pack",
-        "question": "Why is one paper not a case?"
+        "question": "Why is one paper not a case?",
+        "rail": "Pack",
+        "act": "II · Proof"
       },
       {
         "phase": "06",
         "slide": "stand",
-        "question": "Where may we stand, and where are we silent?"
+        "question": "Where may we stand, and where are we silent?",
+        "rail": "Stand",
+        "act": "III · Stand"
       },
       {
         "phase": "07",
         "slide": "house",
-        "question": "What will we say?"
+        "question": "What will we say?",
+        "rail": "Lines",
+        "act": "III · Stand"
       },
       {
         "phase": "07",
         "slide": "objections",
-        "question": "What will they say back?"
+        "question": "What will they say back?",
+        "rail": "Pushback",
+        "act": "III · Stand"
       },
       {
         "phase": "08",
         "slide": "sequence",
-        "question": "How does contact feel over time?"
+        "question": "How does contact feel over time?",
+        "rail": "Order",
+        "act": "IV · Move"
       },
       {
         "phase": "09",
         "slide": "who",
-        "question": "Who do we activate first?"
+        "question": "Who do we activate first?",
+        "rail": "Who",
+        "act": "IV · Move"
       },
       {
         "phase": "05",
         "slide": "science-execute",
-        "question": "How does a finding become a move?"
+        "question": "How does a finding become a move?",
+        "rail": "Spine",
+        "act": "IV · Move"
       },
       {
         "phase": "08",
         "slide": "interventions",
-        "question": "What do we actually do?"
+        "question": "What do we actually do?",
+        "rail": "Moves",
+        "act": "IV · Move"
       },
       {
         "phase": "10",
         "slide": "measure",
-        "question": "How will we know?"
+        "question": "How will we know?",
+        "rail": "Score",
+        "act": "IV · Move"
       },
       {
         "phase": "11",
         "slide": "close",
-        "question": "What do we need signed in 30 days?"
+        "question": "What do we need signed in 30 days?",
+        "rail": "Ask",
+        "act": "IV · Move"
       },
       {
         "phase": "03",
         "slide": "references",
-        "question": "Where are the PMIDs?"
+        "question": "Where are the PMIDs?",
+        "rail": "Refs",
+        "act": "Sources"
       }
     ]
   },
@@ -1588,9 +1648,9 @@
     {
       "id": "title",
       "section": "Open",
-      "kicker": "India (metro + tier-2/3 cities)  ·  7 numbered papers",
-      "title": "CardioShield",
-      "subtitle": "Start at the first eligible visit",
+      "kicker": "I · Open  ·  CardioShield  ·  7 numbered papers",
+      "title": "Start at the first eligible visit",
+      "subtitle": "CardioShield",
       "narrative": "Most launch decks sell the drug again.",
       "layout": "title",
       "board": {
@@ -1622,14 +1682,22 @@
       ],
       "phase": "01",
       "question": "Why are we in the room?",
-      "skill": "story"
+      "rail": "Open",
+      "skill": "story",
+      "act": "I · Open",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "need",
       "section": "Need",
-      "kicker": "Phase 01 · the real job",
-      "title": "The goal is not the job.",
-      "narrative": "The job is to stop the wait at the first eligible visit, not reprint the science.",
+      "kicker": "I · Open  ·  the real job",
+      "title": "Delay is the job.",
+      "narrative": "",
       "layout": "stat",
       "stat": {
         "items": [
@@ -1653,14 +1721,22 @@
       "bullets": [],
       "phase": "01",
       "question": "What is the real job?",
-      "skill": "story"
+      "rail": "Job",
+      "skill": "story",
+      "act": "I · Open",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "tension",
       "section": "Tension",
-      "kicker": "Phase 05 · the behaviour",
-      "title": "Current habit versus required start.",
-      "narrative": "The habit of waiting until the patient is 'stable' in clinic.",
+      "kicker": "I · Open  ·  the behaviour",
+      "title": "They wait. The papers start now.",
+      "narrative": "",
       "layout": "stat",
       "stat": {
         "items": [
@@ -1684,25 +1760,33 @@
       "bullets": [],
       "phase": "05",
       "question": "What do they do versus what must change?",
-      "skill": "story"
+      "rail": "Habit",
+      "skill": "story",
+      "act": "I · Open",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "belief",
       "section": "Belief",
-      "kicker": "Phase 04 · belief versus papers",
-      "title": "Agreement is not the campaign.",
+      "kicker": "I · Open  ·  belief versus papers",
+      "title": "They agree in principle. They still wait.",
       "narrative": "Disagreement is where we spend. Silence is research, not copy.",
       "layout": "board",
       "board": {
         "cards": [
           {
-            "kicker": "They still do this",
+            "kicker": "They still wait",
             "title": "They wait to stabilise first",
             "body": "The initiation papers do not require a clinic wait.",
             "ref": ""
           },
           {
-            "kicker": "They still do this",
+            "kicker": "They still fear",
             "title": "Renal burden looks heavier than it is",
             "body": "We do not have a renal-burden RCT on the register.",
             "ref": ""
@@ -1718,12 +1802,20 @@
       "bullets": [],
       "phase": "04",
       "question": "Where does belief fight the papers?",
-      "skill": "story"
+      "rail": "Belief",
+      "skill": "story",
+      "act": "I · Open",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "pico",
       "section": "Contract",
-      "kicker": "Phase 02 · how we judge the science",
+      "kicker": "II · Proof  ·  how we judge the science",
       "title": "If it is not in this frame, it is not a claim.",
       "narrative": "Population, intervention, comparator, outcomes, setting. That is the contract.",
       "layout": "board",
@@ -1759,12 +1851,20 @@
       "bullets": [],
       "phase": "02",
       "question": "How will we judge the science?",
-      "skill": "story"
+      "rail": "PICO",
+      "skill": "story",
+      "act": "II · Proof",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "science-meaning",
       "section": "Science",
-      "kicker": "Phase 03 · the prize, in a clinic of 100",
+      "kicker": "II · Proof  ·  the prize, in a clinic of 100",
       "title": "Read the dots, not the hazard ratio.",
       "subtitle": "[1] PARADIGM-HF 2014 · PMID 25176015",
       "narrative": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF. Treat 21 to prevent one event over median 27 months.",
@@ -1797,12 +1897,20 @@
       "bullets": [],
       "phase": "03",
       "question": "What did the lead paper show in a clinic of 100?",
-      "skill": "story"
+      "rail": "Prize",
+      "skill": "story",
+      "act": "II · Proof",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "forest",
       "section": "Science",
-      "kicker": "Phase 03 · the pack on one axis",
+      "kicker": "II · Proof  ·  the pack on one axis",
       "title": "Agreement is the case, not one HR.",
       "narrative": "Only numbered papers with a published interval. We do not invent a forest.",
       "layout": "visual",
@@ -1858,12 +1966,20 @@
       "bullets": [],
       "phase": "03",
       "question": "Do the numbered papers agree?",
-      "skill": "story"
+      "rail": "Forest",
+      "skill": "story",
+      "act": "II · Proof",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "science-compare",
       "section": "Science",
-      "kicker": "Phase 03 · a second paper, a different job",
+      "kicker": "II · Proof  ·  a second paper, a different job",
       "title": "This paper is not a reprint of the first.",
       "subtitle": "[2] PIONEER-HF 2019",
       "narrative": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
@@ -1895,14 +2011,22 @@
       "bullets": [],
       "phase": "03",
       "question": "What does the next paper add?",
-      "skill": "story"
+      "rail": "Second",
+      "skill": "story",
+      "act": "II · Proof",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "pack",
       "section": "Science",
-      "kicker": "Phase 03 · each paper a job",
+      "kicker": "II · Proof  ·  each paper a job",
       "title": "One paper is not enough to convince.",
-      "narrative": "4 numbered papers carry the science — one paper is not enough to convince, led by PIONEER-HF 2019 (PMID 30415601).",
+      "narrative": "",
       "layout": "board",
       "board": {
         "cards": [
@@ -1913,13 +2037,13 @@
             "ref": "[2]"
           },
           {
-            "kicker": "TRANSITION 2019",
+            "kicker": "This paper's job",
             "title": "TRANSITION 2019",
             "body": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
             "ref": "[3]"
           },
           {
-            "kicker": "AHA/ACC/HFSA 2022",
+            "kicker": "This paper's job",
             "title": "AHA/ACC/HFSA 2022",
             "body": "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'.",
             "ref": "[6]"
@@ -1941,62 +2065,80 @@
       "bullets": [],
       "phase": "03",
       "question": "Why is one paper not a case?",
-      "skill": "story"
+      "rail": "Pack",
+      "skill": "story",
+      "act": "II · Proof",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "stand",
       "section": "Ground",
-      "kicker": "Phase 06 · shout versus silence",
-      "title": "We shout only where the columns agree.",
-      "narrative": "We stand only where the columns agree.",
+      "kicker": "III · Stand  ·  shout versus silence",
+      "title": "Shout where the columns agree.",
+      "narrative": "Silence is a boundary, not a slogan to fill.",
       "layout": "board",
       "board": {
         "cards": [
           {
-            "kicker": "We may stand",
+            "kicker": "We may shout",
             "title": "Outcome vs SoC",
-            "body": "Supportive [1]."
+            "body": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
+            "ref": "[1]"
           },
           {
-            "kicker": "We may stand",
+            "kicker": "We may shout",
             "title": "First-eligible / in-hospital start",
-            "body": "Supportive [3]."
+            "body": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+            "ref": "[3]"
           },
           {
-            "kicker": "Silent",
+            "kicker": "Stay silent",
             "title": "Cost offset",
-            "body": "Silent."
+            "body": "No numbered paper owns this. We do not shout it."
           }
         ]
       },
       "bullets": [],
       "phase": "06",
       "question": "Where may we stand, and where are we silent?",
-      "skill": "story"
+      "rail": "Stand",
+      "skill": "story",
+      "act": "III · Stand",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "house",
       "section": "Message",
-      "kicker": "Phase 07 · what we will say",
+      "kicker": "III · Stand  ·  what we will say",
       "title": "Three lines. Each one numbered.",
       "narrative": "A pillar without a number does not ship.",
       "layout": "board",
       "board": {
         "cards": [
           {
-            "kicker": "We will say",
+            "kicker": "Line 1",
             "title": "Start now",
             "body": "First eligible encounter is a guideline encounter, not a later clinic.",
             "ref": "[2]"
           },
           {
-            "kicker": "We will say",
+            "kicker": "Line 2",
             "title": "The outcome is already earned",
             "body": "We are not arguing efficacy from scratch.",
             "ref": "[1]"
           },
           {
-            "kicker": "We will say",
+            "kicker": "Line 3",
             "title": "Cover exists",
             "body": "Class I / four-pillar language is permission, not a poster after the wait.",
             "ref": "[5]"
@@ -2007,12 +2149,20 @@
       "bullets": [],
       "phase": "07",
       "question": "What will we say?",
-      "skill": "story"
+      "rail": "Lines",
+      "skill": "story",
+      "act": "III · Stand",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "objections",
       "section": "Message",
-      "kicker": "Phase 07 · what they say back",
+      "kicker": "III · Stand  ·  what they say back",
       "title": "Answer the objection. Do not dodge it.",
       "narrative": "What we will not say sits in the working file. It does not become a slogan.",
       "layout": "board",
@@ -2041,12 +2191,20 @@
       "bullets": [],
       "phase": "07",
       "question": "What will they say back?",
-      "skill": "story"
+      "rail": "Pushback",
+      "skill": "story",
+      "act": "III · Stand",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "sequence",
       "section": "Contact",
-      "kicker": "Phase 08 · a sequence, not a spray",
+      "kicker": "IV · Move  ·  a sequence, not a spray",
       "title": "A doctor should feel an order.",
       "narrative": "If a contact cannot name a numbered paper, it does not go on the plan.",
       "layout": "flow",
@@ -2077,12 +2235,20 @@
       "bullets": [],
       "phase": "08",
       "question": "How does contact feel over time?",
-      "skill": "story"
+      "rail": "Order",
+      "skill": "story",
+      "act": "IV · Move",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "who",
       "section": "Audience",
-      "kicker": "Phase 09 · who we activate first",
+      "kicker": "IV · Move  ·  who we activate first",
       "title": "A few rooms. The rest inherit.",
       "narrative": "We collapsed specialty, city, and cost to the groups this brief can actually fund.",
       "layout": "board",
@@ -2090,30 +2256,38 @@
         "cards": [
           {
             "kicker": "First",
-            "title": "KOL academic cardiologists (metro teaching hospitals)",
-            "body": "Peer cascade — they author the protocol Cover has to travel down."
+            "title": "KOL academic cardiologists",
+            "body": "Peer cascade — they author the protocol."
           },
           {
-            "kicker": "First",
-            "title": "Senior private-practice cardiologists (metro and tier-2)",
-            "body": "First-eligible pathway + habit lock This is where volume lives."
+            "kicker": "Then",
+            "title": "Senior private-practice cardiologists",
+            "body": "First-eligible pathway + habit lock."
           },
           {
-            "kicker": "First",
+            "kicker": "Also",
             "title": "Early-career cardiologists and DM trainees",
-            "body": "Affordability conversation kit Cost is the veto."
+            "body": "Affordability conversation kit."
           }
         ]
       },
       "bullets": [],
       "phase": "09",
       "question": "Who do we activate first?",
-      "skill": "story"
+      "rail": "Who",
+      "skill": "story",
+      "act": "IV · Move",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "science-execute",
       "section": "Action",
-      "kicker": "Phase 05 · science becomes a move",
+      "kicker": "IV · Move  ·  science becomes a move",
       "title": "The paper names the move.",
       "narrative": "One cited finding, one execution. We do not invent a second campaign beside the papers.",
       "layout": "visual",
@@ -2152,12 +2326,20 @@
       "bullets": [],
       "phase": "05",
       "question": "How does a finding become a move?",
-      "skill": "story"
+      "rail": "Spine",
+      "skill": "story",
+      "act": "IV · Move",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "interventions",
       "section": "Action",
-      "kicker": "Phase 08 · what we actually do",
+      "kicker": "IV · Move  ·  what we actually do",
       "title": "Three moves. The rest inherit.",
       "narrative": "If a move cannot name a numbered paper, it does not ship.",
       "layout": "board",
@@ -2186,13 +2368,21 @@
       "bullets": [],
       "phase": "08",
       "question": "What do we actually do?",
-      "skill": "story"
+      "rail": "Moves",
+      "skill": "story",
+      "act": "IV · Move",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "measure",
       "section": "Proof",
-      "kicker": "Phase 10 · how we will know",
-      "title": "The brief's goal is the parent metric.",
+      "kicker": "IV · Move  ·  how we will know",
+      "title": "If the parent metric is flat, kill the rest.",
       "narrative": "Lead indicators are recall of each paper's job, not a mash-up number. Rates stay sketches until the audit exists.",
       "layout": "board",
       "board": {
@@ -2208,7 +2398,7 @@
             "body": "Kill the protocol if this is flat at week 8 in the pilot."
           },
           {
-            "kicker": "Lead",
+            "kicker": "Kill",
             "title": "Assistance offered in eligible high-OOP starts",
             "body": "If mention rises and starts do not, the kit is a pamphlet."
           }
@@ -2217,12 +2407,20 @@
       "bullets": [],
       "phase": "10",
       "question": "How will we know?",
-      "skill": "story"
+      "rail": "Score",
+      "skill": "story",
+      "act": "IV · Move",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "close",
       "section": "Ask",
-      "kicker": "Phase 11 · the page we take to sign-off",
+      "kicker": "IV · Move  ·  the page we take to sign-off",
       "title": "Sign the bet. Number the claims.",
       "narrative": "Lead the campaign with first-eligible / in-hospital initiation.",
       "layout": "flow",
@@ -2252,7 +2450,15 @@
       "bullets": [],
       "phase": "11",
       "question": "What do we need signed in 30 days?",
-      "skill": "story"
+      "rail": "Ask",
+      "skill": "story",
+      "act": "IV · Move",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     },
     {
       "id": "references",
@@ -2299,7 +2505,15 @@
             "Harikrishnan S, Sanjay G, Anees T, et al. Clinical presentation, management, in-hospital and 90-day outcomes of heart failure patients in Trivandrum, Kerala, India. Eur J Heart Fail. 2015;17:794-800. doi:10.1002/ejhf.283. PMID: 26011246."
           ]
         ]
-      }
+      },
+      "rail": "Refs",
+      "act": "Sources",
+      "engines": [
+        "story",
+        "visuals",
+        "copy",
+        "critic"
+      ]
     }
   ],
   "interventions": [

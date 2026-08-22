@@ -43,7 +43,12 @@ def test_example_brief_is_presentation_ready():
     pack = generate_pack(brief, mode="demo")
     title = pack["slides"][0]
     assert title["layout"] == "title"
-    assert "CardioShield" in title["title"]
+    stamp = " ".join([
+        title.get("title") or "",
+        title.get("kicker") or "",
+        title.get("subtitle") or "",
+    ])
+    assert "CardioShield" in stamp
     assert any(s["id"] == "forest" for s in pack["slides"])
     assert any(s["id"] == "pack" for s in pack["slides"])
     assert all(s["id"] != "boxplot" for s in pack["slides"])

@@ -10,7 +10,7 @@ import re
 from typing import Any
 
 from .cite import mark
-from .deck_ai import polish_story
+from .deck_engines import run_room
 from .deck_skills import BEATS, SKILL_IDS
 from .deck_visuals import (
     compare_rows,
@@ -98,7 +98,7 @@ def interpret_plan(
         "science_lead": sentence(doctrine.get("scienceLead") or lead.get("statement") or ""),
         "skills": list(SKILL_IDS),
     }
-    return polish_story(story, brief, doctrine)
+    return story
 
 
 def build_deck(
@@ -147,13 +147,20 @@ def build_deck(
         if not made:
             continue
         slides.append(_stamp(_one_visual(made), beat))
+    slides, _report = run_room(slides, story)
     return slides
 
 
 def story_map(slides: list[dict]) -> list[dict]:
     seen = []
     for s in slides:
-        item = {"phase": s.get("phase") or "", "slide": s.get("id") or "", "question": s.get("question") or ""}
+        item = {
+            "phase": s.get("phase") or "",
+            "slide": s.get("id") or "",
+            "question": s.get("question") or "",
+            "rail": s.get("rail") or s.get("id") or "",
+            "act": s.get("act") or "",
+        }
         if item not in seen:
             seen.append(item)
     return seen
@@ -162,6 +169,7 @@ def story_map(slides: list[dict]) -> list[dict]:
 def _stamp(slide: dict, beat: dict) -> dict:
     slide["phase"] = beat["phase"]
     slide["question"] = beat["question"]
+    slide["rail"] = beat.get("rail") or beat["id"]
     slide["skill"] = "story"
     return slide
 

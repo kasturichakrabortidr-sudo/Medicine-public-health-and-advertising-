@@ -4,10 +4,10 @@ import type { StrategyPack } from "../types";
 import { SlideView } from "./SlideView";
 
 const FALLBACK_SKILLS = [
-  { id: "story", name: "Story", rule: "Every working-file phase has a beat. The deck is the argument, in order." },
-  { id: "visuals", name: "Visuals", rule: "The picture carries the room. A slide without a visual is a failed beat." },
-  { id: "copy", name: "Copy", rule: "Complete sentences only. Never an ellipsis. Never a cut clause." },
-  { id: "layout", name: "Layout", rule: "One visual owns the 16:9. Refs sit in the flow. Nothing overlaps." },
+  { id: "story", name: "Story", rule: "The deck is one argument in four acts. Every title is a conclusion." },
+  { id: "visuals", name: "Visuals", rule: "The picture carries the room. Contrast, not a pasted phase table." },
+  { id: "copy", name: "Copy", rule: "One complete line. Never an ellipsis. Never a glued fragment." },
+  { id: "critic", name: "Critic", rule: "Kill empty shout, duplicate labels, and chrome that eats the 16:9." },
 ];
 
 export function DeckTab({ pack }: { pack: StrategyPack }) {
@@ -15,7 +15,11 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
   const slide = pack.slides[i];
-  const skills = pack.meta.deckSkillCards?.length ? pack.meta.deckSkillCards : FALLBACK_SKILLS;
+  const skills = pack.meta.engines?.length
+    ? pack.meta.engines
+    : pack.meta.deckSkillCards?.length
+      ? pack.meta.deckSkillCards
+      : FALLBACK_SKILLS;
   const map = pack.meta.storyMap || [];
   const present = () => {
     const el = document.querySelector(".slide-stage");
@@ -60,17 +64,13 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
         </div>
       </div>
       {exportError ? <p className="error">{exportError}</p> : null}
-      <p className="small muted craft-line">
-        Visual aids drive the working file. They do not paste it. Four skills run on
-        every generate.
-      </p>
-      <div className="skill-strip">
+      <div className="engine-row">
         {skills.map((skill) => (
-          <div className="skill-chip" key={skill.id}>
-            <strong>{skill.name}</strong>
-            <span>{skill.rule}</span>
-          </div>
+          <span className="engine-pill" key={skill.id} title={skill.rule}>
+            {skill.name}
+          </span>
         ))}
+        <span className="engine-note">directed this pack</span>
       </div>
       {map.length ? (
         <ol className="story-rail">
@@ -82,7 +82,7 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
                 title={beat.question}
                 onClick={() => goTo(beat.slide)}
               >
-                {beat.phase} · {beat.question}
+                {beat.phase} {beat.rail || beat.slide}
               </button>
             </li>
           ))}

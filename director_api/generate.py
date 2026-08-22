@@ -65,6 +65,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
             "deckSkill": "strata-deck",
             "deckSkills": list(SKILL_IDS),
             "deckSkillCards": catalog()["skills"],
+            "engines": catalog()["engines"],
             "storyMap": story_map(slides),
         },
         "brief": brief.to_dict(),

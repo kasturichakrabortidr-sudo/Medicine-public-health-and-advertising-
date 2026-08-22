@@ -56,7 +56,7 @@ def test_deck_interprets_plan_not_the_file():
     pack = _demo_pack()
     ids = [s["id"] for s in pack["slides"]]
     assert pack["meta"]["deckSkill"] == "strata-deck"
-    assert pack["meta"]["deckSkills"] == ["story", "visuals", "copy", "layout"]
+    assert pack["meta"]["deckSkills"] == ["story", "visuals", "copy", "critic"]
     assert not (set(ids) & BANNED_IDS)
     assert ids[0] == "title"
     missing = REQUIRED_SLIDES - set(ids)
@@ -66,6 +66,7 @@ def test_deck_interprets_plan_not_the_file():
     assert REQUIRED_PHASES <= phases
     assert all(row.get("slide") and row.get("question") for row in pack["meta"]["storyMap"])
     assert pack["meta"]["deckSkillCards"][0]["id"] == "story"
+    assert [e["id"] for e in pack["meta"]["engines"]] == ["story", "visuals", "copy", "critic"]
 
 
 def test_one_visual_owns_each_content_slide():
@@ -96,8 +97,22 @@ def test_visuals_interpret_the_working_file():
     need = next(s for s in pack["slides"] if s["id"] == "need")
     assert "doctors already told us" not in (need.get("narrative") or "").lower()
     assert "advisory board" not in (need.get("narrative") or "").lower()
+    assert need["title"] == "Delay is the job."
+    assert not (need.get("narrative") or "").strip()
     assert need["stat"]["items"][0]["value"] == "15%"
     assert need["stat"]["items"][1]["value"] == "Delay"
+    stand = next(s for s in pack["slides"] if s["id"] == "stand")
+    for card in stand["board"]["cards"]:
+        assert not (card.get("body") or "").lower().startswith("supportive")
+        assert (card.get("body") or "").lower() != "silent."
+    who = next(s for s in pack["slides"] if s["id"] == "who")
+    for card in who["board"]["cards"]:
+        assert "(" not in card["title"]
+    title = next(s for s in pack["slides"] if s["id"] == "title")
+    blob = " ".join(_copy_blobs(title))
+    assert "HFrEF" in blob
+    assert "CardioShield" in blob
+    assert all("no numbered finding yet" not in (c.get("body") or "").lower() for c in stand["board"]["cards"])
     belief = next(s for s in pack["slides"] if s["id"] == "belief")
     titles = " ".join(c["title"] for c in belief["board"]["cards"])
     assert "advisory board" not in titles.lower()

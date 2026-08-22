@@ -23,7 +23,8 @@ def test_health():
     skills = client.get("/api/deck-skills")
     assert skills.status_code == 200
     names = {s["id"] for s in skills.json()["skills"]}
-    assert names == {"story", "visuals", "copy", "layout"}
+    assert names == {"story", "visuals", "copy", "critic"}
+    assert {e["id"] for e in skills.json()["engines"]} == names
     assert len(skills.json()["beats"]) >= 11
 
 

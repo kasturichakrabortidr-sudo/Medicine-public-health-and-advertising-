@@ -8,15 +8,15 @@ description: >
 
 # STRATA deck craft
 
-Four skills run inside generate, not only in this folder:
+Four engines run inside generate, not only in this folder:
 
-- **story** — all eleven phases become beats
+- **story** — four acts, every title a conclusion
 - **visuals** — the picture carries the room
 - **copy** — complete sentences, never `…`
-- **layout** — one visual, refs in flow, nothing overlaps
+- **critic** — kill empty shout and duplicate labels
 
 See `strata-deck-story`, `strata-deck-visuals`, `strata-deck-copy`,
-and `strata-deck-ai`. The generator loads `director_api/deck_skills.py`.
+and `strata-deck-ai`. The room lives in `director_api/deck_engines.py`.
 
 The working file is the plan. The deck is a visual argument. If a slide
 could be a screenshot of Phase 07, it is wrong. If a line ends in an

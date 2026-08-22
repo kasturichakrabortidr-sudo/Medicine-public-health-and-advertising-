@@ -1,40 +1,36 @@
 ---
 name: strata-deck-ai
 description: >
-  Optional LLM polish for STRATA slide headlines. Use when wiring STRATA_DECK_AI,
-  choosing a deck model, or reviewing whether copy invents numbers. Never let a
-  model write claims, HRs, or PMIDs.
+  Four-engine STRATA deck room, plus optional multi-provider title ensemble.
+  Use when wiring STRATA_DECK_AI or reviewing whether copy invents numbers.
 ---
 
-# STRATA deck AI polish
+# STRATA deck engines
 
-The craft engine (`director_api/deck_craft.py`) already interprets the working
-file into a visual argument. An LLM is optional seasoning, not the author.
+`director_api/deck_engines.py` always runs Story, Visuals, Copy, and Critic
+after the craft walk. That is the author.
 
-## When it runs
-
-`director_api/deck_ai.polish_story` fires only when **both** are true:
+`director_api/deck_ai.ensemble_titles` is optional seasoning. It fans out
+to OpenAI, Anthropic, and Gemini in parallel only when **both** are true:
 
 - `STRATA_DECK_AI` is `1`, `on`, or `true`
-- `OPENAI_API_KEY` is set (`OPENAI_BASE_URL` and `STRATA_DECK_MODEL` optional)
+- at least one of `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`
 
-Otherwise it returns the interpreted story unchanged. Tests stay deterministic.
+Otherwise the directed pack is unchanged. Tests stay deterministic.
 
-## What the model may do
+## What engines may do
 
-- Shorten `headline` and `tension` (under 12 words / two short sentences)
-- Keep the doctrine name and enemy as given
+- Write conclusion titles
+- Contrast asked vs need, wait vs start, shout vs silent
+- Split glued fragments into complete sentences
 
-## What the model must not do
+## What they must not do
 
 - Invent numbers, trial names, HRs, NNTs, or PMIDs
 - Add a paper that is not on the register
-- Rewrite the story arc or add slides
 - Paste working-file phases onto slides
+- Clip with `…`
 
-If the JSON parse fails or the request times out, keep the pre-LLM story.
+## After a change
 
-## After changing polish behaviour
-
-Run `python -m pytest -q tests/test_deck_craft.py`. Assert that with the env
-flag off, headlines equal `interpret_plan` output.
+`python -m pytest -q tests/test_deck_craft.py`
