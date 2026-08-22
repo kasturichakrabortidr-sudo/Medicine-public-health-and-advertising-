@@ -253,31 +253,36 @@ def _board(slide, cards: list[dict], l, t, w, h, dark: bool) -> None:
     if not cards:
         return
     n = min(len(cards), 5)
-    cols = 2 if n == 4 else n
+    if n == 5:
+        rows = ((0, 3), (3, 5))
+    elif n == 4:
+        rows = ((0, 2), (2, 4))
+    else:
+        rows = ((0, n),)
     gap = Inches(0.18)
-    card_w = int((w - gap * (cols - 1)) / cols)
-    rows = (n + cols - 1) // cols
-    card_h = int((h - gap * (rows - 1)) / rows)
     fill = RGBColor(0x1B, 0x2C, 0x49) if dark else PAPER
     ink = CREAM if dark else INK
     muted = RGBColor(0xF0, 0xC4, 0x8A) if dark else COPPER
-    for i, card in enumerate(cards[:n]):
-        r, c = divmod(i, cols)
-        x = l + c * (card_w + gap)
-        y = t + r * (card_h + gap)
-        shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, card_w, card_h)
-        shape.adjustments[0] = 0.08
-        shape.line.fill.background()
-        _solid(shape, fill)
-        _textbox(slide, x + Inches(0.18), y + Inches(0.12), card_w - Inches(0.36), Inches(0.28),
-                 (card.get("kicker") or "").upper(), size=11, color=muted)
-        _textbox(slide, x + Inches(0.18), y + Inches(0.4), card_w - Inches(0.36), Inches(0.7),
-                 card.get("title") or "", size=16, bold=True, color=ink)
-        _textbox(slide, x + Inches(0.18), y + Inches(1.1), card_w - Inches(0.36), card_h - Inches(1.4),
-                 card.get("body") or "", size=12, color=ink)
-        if card.get("ref"):
-            _textbox(slide, x + Inches(0.18), y + card_h - Inches(0.36), card_w - Inches(0.36), Inches(0.28),
-                     str(card["ref"]), size=10, color=muted)
+    row_h = int((h - gap * (len(rows) - 1)) / len(rows))
+    for r, (start, end) in enumerate(rows):
+        cols = end - start
+        card_w = int((w - gap * (cols - 1)) / cols)
+        y = t + r * (row_h + gap)
+        for c, card in enumerate(cards[start:end]):
+            x = l + c * (card_w + gap)
+            shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, card_w, row_h)
+            shape.adjustments[0] = 0.08
+            shape.line.fill.background()
+            _solid(shape, fill)
+            _textbox(slide, x + Inches(0.18), y + Inches(0.12), card_w - Inches(0.36), Inches(0.28),
+                     (card.get("kicker") or "").upper(), size=11, color=muted)
+            _textbox(slide, x + Inches(0.18), y + Inches(0.4), card_w - Inches(0.36), Inches(0.55),
+                     card.get("title") or "", size=16, bold=True, color=ink)
+            _textbox(slide, x + Inches(0.18), y + Inches(0.95), card_w - Inches(0.36), row_h - Inches(1.2),
+                     card.get("body") or "", size=12, color=ink)
+            if card.get("ref"):
+                _textbox(slide, x + Inches(0.18), y + row_h - Inches(0.32), card_w - Inches(0.36), Inches(0.24),
+                         str(card["ref"]), size=10, color=muted)
 
 
 def _flow(slide, steps: list[dict], l, t, w, h, dark: bool) -> None:

@@ -107,6 +107,8 @@ def test_visuals_interpret_the_working_file():
     assert len(cards) == 5
     assert cards[0]["kicker"].lower().startswith("population")
     assert cards[0]["title"].lower() != cards[0]["kicker"].lower()
+    assert "india" in cards[4]["title"].lower()
+    assert "metro" in cards[4]["title"].lower()
     for slide in pack["slides"]:
         for card in (slide.get("board") or {}).get("cards") or []:
             words = (card.get("title") or "").replace("—", " ").split()

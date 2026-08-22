@@ -263,7 +263,7 @@ def _pico_slide(story: dict) -> dict:
     cards = []
     for row in story.get("pico") or []:
         name = line(row[0]) or "PICO"
-        definition = row[1] if len(row) > 1 else ""
+        definition = re.sub(r"\s*\([^)]{30,}\)", "", str(row[1] if len(row) > 1 else "")).strip()
         rule = row[2] if len(row) > 2 else ""
         if name.lower().startswith("outcome"):
             title = "Published endpoints only"
