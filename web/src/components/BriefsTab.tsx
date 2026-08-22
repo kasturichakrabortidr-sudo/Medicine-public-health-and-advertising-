@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { ACCEPT, ACCEPT_LABELS, extractBriefs, generatePack } from "../api";
+import { useMemo, useRef, useState } from "react";
+import { ACCEPT_LABELS, extractBriefs, generatePack } from "../api";
 import type { ExtractedBrief, FilePreview, StrategyPack } from "../types";
 
 const emptyBrief = (): ExtractedBrief => ({
@@ -40,6 +40,28 @@ export function BriefsTab({
   const [brief, setBrief] = useState<ExtractedBrief>(emptyBrief);
   const [error, setError] = useState("");
   const [over, setOver] = useState(false);
+  const extractGen = useRef(0);
+
+  const runExtract = async (nextFiles: File[], nextPasted: string) => {
+    if (!nextFiles.length && !nextPasted.trim()) {
+      setPreviews([]);
+      return;
+    }
+    const gen = ++extractGen.current;
+    setError("");
+    setBusy(true);
+    try {
+      const res = await extractBriefs(nextFiles, nextPasted);
+      if (gen !== extractGen.current) return;
+      setPreviews(res.files);
+      setBrief({ ...emptyBrief(), ...res.brief });
+    } catch (err) {
+      if (gen !== extractGen.current) return;
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      if (gen === extractGen.current) setBusy(false);
+    }
+  };
 
   const addFiles = (list: FileList | File[]) => {
     const next = [...files];
@@ -47,6 +69,13 @@ export function BriefsTab({
       if (!next.some((x) => x.name === f.name && x.size === f.size)) next.push(f);
     }
     setFiles(next);
+    void runExtract(next, pasted);
+  };
+
+  const removeFile = (file: File) => {
+    const next = files.filter((x) => x !== file);
+    setFiles(next);
+    void runExtract(next, pasted);
   };
 
   const field = (key: keyof ExtractedBrief, label: string, list = false) => (
@@ -84,16 +113,7 @@ export function BriefsTab({
       setError("Upload a file or paste the brief first.");
       return;
     }
-    setBusy(true);
-    try {
-      const res = await extractBriefs(files, pasted);
-      setPreviews(res.files);
-      setBrief({ ...emptyBrief(), ...res.brief });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setBusy(false);
-    }
+    await runExtract(files, pasted);
   };
 
   const generate = async () => {
@@ -128,8 +148,9 @@ export function BriefsTab({
       <section className="card">
         <h2>Upload a brief — any format</h2>
         <p className="muted small">
-          Drop the client files, the advisory notes, a messy paste. We will pull the fields,
-          then write the eleven-step working file for <em>this</em> brief — not the CardioShield demo.
+          Drop the client PDF, Word file, or deck. Fields are pulled automatically from titles,
+          tables, and labelled lines — then the eleven-step working file is written for{" "}
+          <em>this</em> brief, not the CardioShield demo.
         </p>
         <div
           className={`drop ${over ? "over" : ""}`}
@@ -148,12 +169,7 @@ export function BriefsTab({
             <strong>Drag files here</strong> or choose from disk
           </p>
           <p className="small muted">Up to 25 MB each. Mix formats in one drop.</p>
-          <input
-            type="file"
-            multiple
-            accept={ACCEPT}
-            onChange={(e) => e.target.files && addFiles(e.target.files)}
-          />
+          <input type="file" multiple onChange={(e) => e.target.files && addFiles(e.target.files)} />
           <div className="formats">
             {ACCEPT_LABELS.map((l) => (
               <code key={l}>{l}</code>
@@ -168,11 +184,7 @@ export function BriefsTab({
                 <span>
                   {f.name} <span className="muted">· {(f.size / 1024).toFixed(1)} KB</span>
                 </span>
-                <button
-                  className="btn"
-                  type="button"
-                  onClick={() => setFiles(files.filter((x) => x !== f))}
-                >
+                <button className="btn" type="button" onClick={() => removeFile(f)}>
                   Remove
                 </button>
               </div>
@@ -187,7 +199,7 @@ export function BriefsTab({
         <textarea
           id="paste"
           value={pasted}
-          placeholder="YAML, JSON, or prose. Brand and therapy area are enough to start."
+          placeholder="Brand name, product, therapy area, market, insights — or paste the whole brief."
           onChange={(e) => setPasted(e.target.value)}
         />
 
@@ -206,13 +218,15 @@ export function BriefsTab({
             <div>
               <strong>{p.filename}</strong>
               <div className="small muted">
-                {p.chars} chars {p.pages ? `· ${p.pages} pages` : ""}
+                {p.chars} chars extracted {p.pages ? `· ${p.pages} pages` : ""}
+                {p.chars < 40 ? " · little text found" : ""}
               </div>
               {p.notes.map((n) => (
                 <div className="note" key={n}>
                   {n}
                 </div>
               ))}
+              {p.preview ? <pre className="extract-preview">{p.preview}</pre> : null}
             </div>
           </div>
         ))}
@@ -224,6 +238,15 @@ export function BriefsTab({
           Edit after extraction. Only brand and therapy area are required; gaps become
           research tasks, not invented facts.
         </p>
+        {(previews.length > 0 || Boolean(brief.raw_text)) && (!brief.brand || !brief.therapy_area) ? (
+          <div className="alert watch">
+            {!brief.brand && !brief.therapy_area
+              ? "Brand and therapy area are still empty. If the upload was a scanned PDF, paste the key lines from the brief."
+              : `Still empty: ${[!brief.brand ? "brand" : "", !brief.therapy_area ? "therapy area" : ""]
+                  .filter(Boolean)
+                  .join(" and ")}. Fill ${!brief.brand ? "brand" : "therapy area"} before writing the working file, or paste more of the brief.`}
+          </div>
+        ) : null}
         <div className="field-grid">
           {field("brand", "Brand")}
           {field("product", "Product / molecule")}
@@ -246,6 +269,12 @@ export function BriefsTab({
             ))}
           </div>
         )}
+        {brief.raw_text ? (
+          <div className="field">
+            <label htmlFor="raw_text">Text pulled from the files</label>
+            <textarea id="raw_text" className="small" rows={8} readOnly value={brief.raw_text} />
+          </div>
+        ) : null}
       </section>
     </div>
   );

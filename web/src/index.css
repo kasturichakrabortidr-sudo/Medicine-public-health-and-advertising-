@@ -284,6 +284,19 @@ textarea {
   font-size: 13px;
 }
 
+.extract-preview {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  max-height: 160px;
+  overflow: auto;
+  background: #f6f3ee;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin: 8px 0 0;
+  color: var(--ink);
+}
+
 .kpi-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
