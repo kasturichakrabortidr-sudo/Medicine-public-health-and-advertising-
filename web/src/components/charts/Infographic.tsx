@@ -5,6 +5,14 @@ function num(value: string | number | undefined, fallback = 0): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+function shown(value: string | number | undefined): string {
+  if (value === "" || value == null) return "";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return String(value);
+  const rounded = Math.round(n * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
 function dots(rate: number): number {
   return Math.max(0, Math.min(100, Math.round(rate)));
 }
@@ -88,14 +96,18 @@ function CompareVisual({ spec }: { spec: ChartSpec }) {
           <div key={String(row.name)} className="compare-row">
             <div className="compare-col">
               <div className="people-label">{row.left_label || "Comparator"}</div>
-              <div className="compare-num">{left}</div>
+              <div className="compare-num">{shown(left)}</div>
               <div className="compare-bar">
                 <span style={{ height: `${(left / max) * 100}%` }} />
               </div>
             </div>
             <div className="compare-delta">
               <div className="kicker">Difference</div>
-              <strong>{row.delta !== "" && row.delta != null ? row.delta : Math.abs(left - right)}</strong>
+              <strong>
+                {row.delta !== "" && row.delta != null
+                  ? shown(row.delta)
+                  : shown(Math.abs(left - right))}
+              </strong>
               <p>{row.claim}</p>
               <p className="small muted">
                 PMID {row.pmid || "—"} · {row.horizon || ""}
@@ -103,7 +115,7 @@ function CompareVisual({ spec }: { spec: ChartSpec }) {
             </div>
             <div className="compare-col treat">
               <div className="people-label">{row.right_label || "Intervention"}</div>
-              <div className="compare-num">{right}</div>
+              <div className="compare-num">{shown(right)}</div>
               <div className="compare-bar">
                 <span style={{ height: `${(right / max) * 100}%` }} />
               </div>
