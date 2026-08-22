@@ -50,11 +50,12 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
         "howBuilt": (
             f"We started with the brief for {brief.brand or 'this brand'}. "
             "The brief is not expected to contain paper links. "
-            f"We searched PubMed for {brief.product or brief.therapy_area or 'this product/indication'} "
-            "and numbered every hit with a PMID or DOI. "
+            f"We searched PubMed for {brief.product or brief.therapy_area or 'this product/indication'}, "
+            "read the abstracts, and kept a short set of load-bearing papers. "
             f"{len(records)} paper{'s' if len(records) != 1 else ''} have a number. "
+            "Strategy lines quote findings written in those papers. "
             f"{len(gaps)} line{'s' if len(gaps) != 1 else ''} from the brief still have no PMID or DOI. "
-            "Those lines cannot set a claim. Effect sizes are taken only from curated papers, never invented. "
+            "Effect sizes are taken only from the abstract or a curated source, never invented. "
             "The slides are this file, presented."
         ),
         "phases": phases,
@@ -104,7 +105,8 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     unknown = [
         f"{g['stream']}: {g['item']}" for g in gaps[:6]
     ] or ["No uncited brief lines."]
-    unknown.append("We do not have an audited first-eligible start rate for this market. Any % on a slide is a planning sketch until then.")
+    if any(r.get("directs") == "first-eligible-start" for r in records):
+        unknown.append("We do not have an audited first-eligible start rate for this market. Any % on a slide is a planning sketch until then.")
     hypotheses = [
         f"H1. Delay, not disbelief, is the conversion problem — from the insight “{_short(delay or 'not supplied', 90)}”.",
         f"H2. Cost is a veto in tier-2, not a footnote — from “{_short(money or 'not supplied', 90)}”.",
@@ -130,8 +132,8 @@ def _p02(brief, records) -> dict:
     product = brief.product or brief.brand or "the product"
     pico = [
         ["Population", pop, "Taken from the brief. We will not widen it."],
-        ["Intervention", f"{product} at the first eligible encounter", "Eligible as labelled — not 'all comers'."],
-        ["Comparator", "Habitual ACEI/ARB or SoC delay" if records else "Standard of care named in the brief", "The comparator is the current habit, not a straw man."],
+        ["Intervention", f"{product}" + (" at the first eligible encounter" if any(r.get("directs") == "first-eligible-start" for r in records) else " as labelled"), "Eligible as labelled — not 'all comers'."],
+        ["Comparator", "Habitual ACEI/ARB or SoC delay" if any(r.get("directs") == "first-eligible-start" for r in records) else "The comparator named in the sourced papers", "The comparator is the current habit, not a straw man."],
         ["Outcomes we may use", _outcome_line(records), "Only endpoints published in numbered papers."],
         ["Setting", brief.market or "markets named in the brief", "Local label and code still govern."],
     ]
@@ -239,13 +241,34 @@ def _p04(brief, records, gaps) -> dict:
 def _p05(brief, records, doctrine) -> dict:
     insights = brief.hcp_insights or []
     cost = brief.access_and_cost or []
-    current = delay = next((i for i in insights if _looks_like_delay(i)), "Start is later than first-eligible. The brief does not describe the current habit in so many words.")
     start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
-    required = (
-        f"Start {brief.brand or 'the product'} at the first eligible encounter"
-        + (f" — the window studied in {mark(start)} {start.get('short')}" if start else "")
-        + "."
-    )
+    outcome = next((r for r in records if r.get("directs") == "outcome-permission"), records[0] if records else None)
+    if start:
+        current = delay = next((i for i in insights if _looks_like_delay(i)), "Start is later than first-eligible. The brief does not describe the current habit in so many words.")
+        required = (
+            f"Start {brief.brand or 'the product'} at the first eligible encounter"
+            + (f" — the window studied in {mark(start)} {start.get('short')}" if start else "")
+            + "."
+        )
+        drivers = [
+            ["First-eligible start", mark(start) if start else "citation pending", "The wait", "Hospital pathway, not a leave-behind"],
+            ["Cost conversation the doctor can survive", "HE paper not on the register", "Prescriber guilt", "Assistance kit, inside code"],
+            ["Peer cover that travels down", next((mark(r) for r in records if r.get("directs") == "guideline-cover"), "guideline pending"), "Metro-only KOLs", "Protocol authorship, then tier-2 demonstration"],
+            ["A belief we can unlearn", next((i for i in insights if "monitor" in i.lower() or "renal" in i.lower()), "not named"), "The myth", "One number, one peer voice"],
+        ]
+    else:
+        delay = next((i for i in insights if _looks_like_delay(i)), "")
+        current = insights[0] if insights else "The brief does not describe the current habit in so many words."
+        finding = (outcome.get("claim_permitted") if outcome else "") or "No extractable finding yet."
+        required = (
+            f"Put the sourced finding in the room when the doctor decides on {brief.brand or 'the product'}: {finding}"
+        )
+        drivers = [
+            ["Sourced finding", mark(outcome) if outcome else "citation pending", current, "One number a peer can repeat — not a bibliography"],
+            ["Cost conversation the doctor can survive", "HE paper not on the register", "Prescriber guilt", "Assistance kit, inside code"],
+            ["Peer cover that travels down", next((mark(r) for r in records if r.get("directs") == "guideline-cover"), "guideline pending"), "Metro-only KOLs", "Protocol authorship, then tier-2 demonstration"],
+            ["A belief we can unlearn", next((i for i in insights if "monitor" in i.lower() or "renal" in i.lower()), "not named"), "The myth", "One number, one peer voice"],
+        ]
     concerns = []
     if any(_looks_like_cost(c) for c in cost) or any(_looks_like_cost(i) for i in insights):
         concerns.append(["Economic", next((c for c in cost if _looks_like_cost(c)), "Cost concern named in the brief"), "Opportunity — cost", "Do not hide price. Give the doctor a legal way to stay on the patient's side."])
@@ -255,12 +278,6 @@ def _p05(brief, records, doctrine) -> dict:
         concerns.append(["Clinical myth", next(i for i in insights if "monitor" in i.lower() or "renal" in i.lower()), "Capability / motivation", "One sourced number, or we drop the line."])
     if any("rwe" in i.lower() or "local" in i.lower() for i in insights):
         concerns.append(["Professional", next(i for i in insights if "rwe" in i.lower() or "local" in i.lower()), "Motivation — peer cover", "KOLs do not go on a poster until the local paper exists."])
-    drivers = [
-        ["First-eligible start", mark(start) if start else "citation pending", "The wait", "Hospital pathway, not a leave-behind"],
-        ["Cost conversation the doctor can survive", "HE paper not on the register" if not any("he" in (g.get("item") or "").lower() or "cost" in (g.get("item") or "").lower() for g in []) else "see gaps", "Prescriber guilt", "Assistance kit, inside code"],
-        ["Peer cover that travels down", next((mark(r) for r in records if r.get("directs") == "guideline-cover"), "guideline pending"), "Metro-only KOLs", "Protocol authorship, then tier-2 demonstration"],
-        ["A belief we can unlearn", next((i for i in insights if "monitor" in i.lower() or "renal" in i.lower()), "not named"), "The myth", "One number, one peer voice"],
-    ]
     return _phase(
         "05",
         "COM-B on the actual insight and access lines. Capability is mostly intact. Opportunity (cost, ward workflow) and motivation (the wait, peer cover) are doing the damage.",
@@ -311,34 +328,75 @@ def _p07(brief, records, doctrine, lead) -> dict:
     start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
     outcome = next((r for r in records if r.get("directs") == "outcome-permission"), None)
     guide = next((r for r in records if r.get("directs") == "guideline-cover"), None)
-    theme = doctrine.get("bet") or "Start at the first eligible visit."
-    pillars = [
-        [
-            "Start now",
-            f"First eligible encounter is a guideline encounter, not a later clinic." + (f" {mark(start)}" if start else " [citation pending]"),
-            mark(start) if start else "—",
-            (start.get("claim_permitted") if start else "Do not write this line until a timing paper is numbered."),
-        ],
-        [
-            "The outcome is already earned",
-            f"We are not arguing efficacy from scratch." + (f" {mark(outcome)}" if outcome else ""),
-            mark(outcome) if outcome else "—",
-            (outcome.get("claim_permitted") if outcome else "No outcome paper on the register."),
-        ],
-        [
-            "Cover exists",
-            f"Class I / four-pillar language is permission, not a poster after the wait." + (f" {mark(guide)}" if guide else ""),
-            mark(guide) if guide else "—",
-            (guide.get("claim_permitted") if guide else "No guideline PMID on the register."),
-        ],
-    ]
-    objections = [
-        ["I stabilise on ACEI first", "The initiation papers studied start after haemodynamic stability — not after a second clinic.", mark(start) if start else "pending", "Do not say 'start everyone on day one'."],
-        ["The patient cannot afford this", "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.", "gap", "Do not imply a cost-offset we have not sourced."],
-        ["They are too old / too frail", next((r.get("claim_permitted") for r in records if r.get("directs") == "segment-confidence"), "No age paper on the register — do not run an elderly line."),
-         mark(next((r for r in records if r.get("directs") == "segment-confidence"), None)) or "pending",
-         "Do not invent an elderly-only indication."],
-    ]
+    theme = doctrine.get("bet") or "Use the sourced finding at the decision moment."
+    primary = next((r for r in records if r.get("id") == lead.get("primaryId")), None)
+    sourced = [r for r in records if (r.get("claim_permitted") or r.get("finding"))]
+    if primary is None and sourced:
+        primary = sourced[0]
+    if start or guide:
+        pillars = [
+            [
+                "Start now",
+                f"First eligible encounter is a guideline encounter, not a later clinic." + (f" {mark(start)}" if start else " [citation pending]"),
+                mark(start) if start else "—",
+                (start.get("claim_permitted") if start else "Do not write this line until a timing paper is numbered."),
+            ],
+            [
+                "The outcome is already earned",
+                f"We are not arguing efficacy from scratch." + (f" {mark(outcome)}" if outcome else ""),
+                mark(outcome) if outcome else "—",
+                (outcome.get("claim_permitted") if outcome else "No outcome paper on the register."),
+            ],
+            [
+                "Cover exists",
+                f"Class I / four-pillar language is permission, not a poster after the wait." + (f" {mark(guide)}" if guide else ""),
+                mark(guide) if guide else "—",
+                (guide.get("claim_permitted") if guide else "No guideline PMID on the register."),
+            ],
+        ]
+        objections = [
+            ["I stabilise on ACEI first", "The initiation papers studied start after haemodynamic stability — not after a second clinic.", mark(start) if start else "pending", "Do not say 'start everyone on day one'."],
+            ["The patient cannot afford this", "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.", "gap", "Do not imply a cost-offset we have not sourced."],
+            ["They are too old / too frail", next((r.get("claim_permitted") for r in records if r.get("directs") == "segment-confidence"), "No age paper on the register — do not run an elderly line."),
+             mark(next((r for r in records if r.get("directs") == "segment-confidence"), None)) or "pending",
+             "Do not invent an elderly-only indication."],
+        ]
+    else:
+        finding = (primary.get("claim_permitted") if primary else "") or "No extractable finding yet — do not lock a line."
+        barrier = (
+            (brief.hcp_insights or brief.access_and_cost or [doctrine.get("enemy") or ""])[0]
+            or "Conviction at the decision moment is fragile."
+        )
+        execute = (primary.get("spine_execute") if primary else "") or doctrine.get("bet") or ""
+        pillars = [
+            [
+                "What the paper showed",
+                finding,
+                mark(primary) if primary else "—",
+                finding,
+            ],
+            [
+                "Why it is not converting",
+                barrier,
+                "brief",
+                "Spend against this behaviour. Do not reprint the paper as the campaign.",
+            ],
+            [
+                "How we use the finding",
+                execute,
+                mark(primary) if primary else "—",
+                (primary.get("spine_means") if primary else finding),
+            ],
+        ]
+        head_to_head = next(
+            (r.get("claim_permitted") for r in sourced if r.get("control_event") is not None),
+            finding,
+        )
+        objections = [
+            ["Is this better than what I already use?", head_to_head, mark(primary) if primary else "pending", "Do not add a number that is not in the abstract."],
+            ["The patient cannot afford this", "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.", "gap", "Do not imply a cost-offset we have not sourced."],
+            ["I want local data first", "Local RWE is a research task until it has a PMID. The campaign still uses the numbered finding.", "gap", "Do not invent an India-only efficacy line."],
+        ]
     return _phase(
         "07",
         "One theme. Three pillars. Each pillar carries a number or it does not ship. The objection grid says what we will not say.",

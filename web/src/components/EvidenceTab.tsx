@@ -7,10 +7,7 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
   const lead = ev?.lead || pack.dashboard.campaignLead;
   const records = ev?.records || pack.dashboard.citations || [];
   const gaps = ev?.gaps || pack.dashboard.evidenceGaps || [];
-  const pubmed = ev?.pubmed || pack.dashboard.pubmed || [];
   const refs = pack.references || ev?.references || pack.dashboard.references || [];
-  const recordPmids = new Set(records.map((r) => String(r.pmid || "")).filter(Boolean));
-  const extraPubmed = pubmed.filter((p) => !recordPmids.has(String(p.pmid || "")));
 
   return (
     <div>
@@ -18,9 +15,9 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         <div>
           <h1>Numbered papers</h1>
           <p>
-            Every claim we are willing to lead with has a number. Papers come from
-            PubMed (and a curated register when the product matches). The brief is
-            not expected to contain scientific links.
+            Every claim we are willing to lead with is a finding taken from a paper.
+            We search PubMed, read the abstracts, and keep the numbers and conclusions
+            that can carry a line. Unused retrievals are not listed here.
           </p>
         </div>
       </div>
@@ -186,22 +183,6 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         </ol>
         {refs.length === 0 && <p className="muted">No numbered paper matched this brief.</p>}
       </section>
-
-      {extraPubmed.length > 0 && (
-        <section className="card" style={{ marginTop: 18 }}>
-          <h3>PubMed — extra retrievals</h3>
-          <p className="small muted">
-            Further NCBI hits for the product/indication. Confirm full text before promotional use.
-          </p>
-          <ul className="bullets">
-            {extraPubmed.map((p) => (
-              <li key={p.pmid}>
-                <PaperAnchor href={paperHref(p) || p.url}>{p.citation}</PaperAnchor>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }

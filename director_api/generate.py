@@ -177,6 +177,7 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
     p01 = _phase(work, "01")
     p03 = _phase(work, "03")
     p04 = _phase(work, "04")
+    p06 = _phase(work, "06")
     p07 = _phase(work, "07")
     p10 = _phase(work, "10")
     p11 = _phase(work, "11")
@@ -208,7 +209,7 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "kicker": "How this was built",
             "title": "The brief became a working file. The deck is that file, presented.",
             "narrative": work.get("howBuilt") or (
-                "We read the brief, searched PubMed for the product and therapy area, numbered every paper with a PMID or DOI, and wrote the questions the brief cannot answer yet. Client briefs are not expected to contain scientific links."
+                "We read the brief, searched PubMed, read the abstracts, and kept the findings that can carry a line. Client briefs are not expected to contain scientific links."
             ),
             "layout": "split",
             "table": {
@@ -397,9 +398,9 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "section": "Position",
             "kicker": "Four-way compare",
             "title": "Stand only on ground all four columns can defend",
-            "narrative": "Brand evidence, independent evidence, evolving data, and guidelines. Alignment is the only safe shout.",
+            "narrative": p06.get("position") or "Brand evidence, independent evidence, evolving data, and guidelines. Alignment is the only safe shout.",
             "layout": "split",
-            "table": {
+            "table": p06.get("fourway") or {
                 "headers": ["Territory", "Brand", "Independent", "Evolving", "Guidelines"],
                 "rows": [
                     ["Outcome benefit vs SoC", "Supportive", "Supportive", "Supportive", "Supportive"],
@@ -815,32 +816,42 @@ def _stream_mix(records: list[dict], brief: ExtractedBrief) -> list[dict]:
 
 def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
     by_direct = {r.get("directs"): r for r in records}
-    start = by_direct.get("first-eligible-start") or by_direct.get("outcome-permission")
+    start = by_direct.get("first-eligible-start")
     guide = by_direct.get("guideline-cover")
     outcome = by_direct.get("outcome-permission")
-    pillars = []
-    if start:
-        pillars.append(
-            f"Pillar 1 — Permission now {mark(start)} ({start['short']}): "
-            f"{start['claim_permitted']}"
+    if start or guide:
+        pillars = []
+        if start:
+            pillars.append(
+                f"Pillar 1 — Permission now {mark(start)} ({start['short']}): "
+                f"{start['claim_permitted']}"
+            )
+        else:
+            pillars.append("Pillar 1 — Permission now: first eligible encounter (citation pending).")
+        if outcome and outcome is not start:
+            pillars.append(
+                f"Pillar 2 — Outcome permission {mark(outcome)} ({outcome['short']}): "
+                f"{outcome['claim_permitted']}"
+            )
+        else:
+            pillars.append("Pillar 2 — Practical confidence: monitoring and cost have a protocol, not a shrug.")
+        if guide:
+            pillars.append(
+                f"Pillar 3 — Guideline cover {mark(guide)} ({guide['short']}): "
+                f"{guide['claim_permitted']}"
+            )
+        else:
+            pillars.append("Pillar 3 — Peer cover: someone like you already starts here.")
+        return pillars
+    sourced = [r for r in records if r.get("claim_permitted")]
+    out = []
+    for i, r in enumerate(sourced[:2], 1):
+        out.append(
+            f"Pillar {i} — {r.get('trial') or r.get('short')}: {r.get('claim_permitted')}"
         )
-    else:
-        pillars.append("Pillar 1 — Permission now: first eligible encounter (citation pending).")
-    if outcome and outcome is not start:
-        pillars.append(
-            f"Pillar 2 — Outcome permission {mark(outcome)} ({outcome['short']}): "
-            f"{outcome['claim_permitted']}"
-        )
-    else:
-        pillars.append("Pillar 2 — Practical confidence: monitoring and cost have a protocol, not a shrug.")
-    if guide:
-        pillars.append(
-            f"Pillar 3 — Guideline cover {mark(guide)} ({guide['short']}): "
-            f"{guide['claim_permitted']}"
-        )
-    else:
-        pillars.append("Pillar 3 — Peer cover: someone like you already starts here.")
-    return pillars
+    bet = doctrine.get("bet") or "Use the sourced finding at the decision moment."
+    out.append(f"Pillar {len(out) + 1} — {bet}")
+    return out or ["No extractable finding yet — do not lock a line."]
 
 
 def _comb_title(doctrine: dict) -> str:

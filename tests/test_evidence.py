@@ -195,8 +195,23 @@ def test_brief_without_paper_links_gets_pubmed_records(monkeypatch):
             }
         }
 
+    def fake_fetch(pmids):
+        return {
+            "39001111": {
+                "abstract": (
+                    "METHODS: We randomized n=840 adults with moderate-to-severe plaque psoriasis. "
+                    "RESULTS: PASI 90 at week 16 was achieved by 74.1% of lumetinib patients versus 5.8% of placebo (p<0.001). "
+                    "CONCLUSIONS: Lumetinib was superior to placebo for PASI 90 at week 16 in plaque psoriasis."
+                ),
+                "sections": {},
+                "pubtypes": ["Randomized Controlled Trial"],
+                "pages": "12-24",
+            }
+        }
+
     monkeypatch.setattr("director_api.evidence._esearch", fake_search)
     monkeypatch.setattr("director_api.evidence._esummary", fake_summary)
+    monkeypatch.setattr("director_api.evidence.fetch_abstracts", fake_fetch)
     brief = ExtractedBrief(
         brand="LumenDerm",
         product="lumetinib",
@@ -204,19 +219,31 @@ def test_brief_without_paper_links_gets_pubmed_records(monkeypatch):
         indication="plaque psoriasis",
         market="India",
         business_goal="Grow first-line share among metro dermatologists",
+        hcp_insights=["Cost is the veto at the desk"],
     )
     ledger = resolve_evidence(brief, pubmed=True)
     pmids = {r["pmid"] for r in ledger["records"]}
     assert "39001111" in pmids
+    assert len(ledger["records"]) <= 4
+    rec = ledger["records"][0]
+    assert "PASI 90" in rec["claim_permitted"]
+    assert rec["treat_event"] == 74.1
+    assert rec["spine_means"]
+    assert "Cost is the veto" in rec["spine_barrier"]
     assert "paradigm-hf-2014" not in {r["id"] for r in ledger["records"]}
-    assert ledger["lead"]["citations"]
-    assert ledger["lead"]["citations"][0]["pmid"] == "39001111"
-    assert "paper links" in ledger["lead"]["statement"].lower()
+    assert "PASI 90" in ledger["lead"]["statement"]
+    assert "paper links" not in ledger["lead"]["statement"].lower()
     pack = generate_pack(brief, pubmed=True)
     assert pack["references"][0]["pmid"] == "39001111"
-    assert pack["references"][0]["url"].endswith("39001111/")
-    assert pack["evidence"]["records"][0]["hr"] is None
+    assert "PASI 90" in pack["evidence"]["lead"]["statement"]
     assert "CardioShield" not in pack["slides"][0]["title"]
+    house = next(p for p in pack["workfile"]["phases"] if p["id"] == "07")["house"]["rows"]
+    joined = " ".join(" ".join(str(c) for c in row) for row in house)
+    assert "PASI 90" in joined
+    assert "74.1" in joined
+    assert "guideline encounter" not in joined
+    assert "Cost is the veto" in joined
+    assert "first eligible encounter (citation pending)" not in " ".join(pack["slides"][0].get("bullets") or [])
 
 
 def test_sglt2_pubmed_does_not_steal_arni_catalog(monkeypatch):
@@ -237,6 +264,21 @@ def test_sglt2_pubmed_does_not_steal_arni_catalog(monkeypatch):
 
     monkeypatch.setattr("director_api.evidence._esearch", fake_search)
     monkeypatch.setattr("director_api.evidence._esummary", fake_summary)
+    monkeypatch.setattr(
+        "director_api.evidence.fetch_abstracts",
+        lambda pmids: {
+            "31535829": {
+                "abstract": (
+                    "METHODS: 4744 patients were randomized. "
+                    "RESULTS: The primary composite occurred in 16.3% with dapagliflozin and in 21.2% with placebo "
+                    "(hazard ratio 0.74; 95% CI 0.65 to 0.85). "
+                    "CONCLUSIONS: Dapagliflozin reduced worsening heart failure or cardiovascular death."
+                ),
+                "pubtypes": ["Randomized Controlled Trial"],
+                "pages": "",
+            }
+        },
+    )
     brief = ExtractedBrief(
         brand="GlucoHeart",
         product="dapagliflozin",
@@ -249,3 +291,8 @@ def test_sglt2_pubmed_does_not_steal_arni_catalog(monkeypatch):
     pmids = {r["pmid"] for r in ledger["records"]}
     assert "paradigm-hf-2014" not in ids
     assert "31535829" in pmids
+    rec = next(r for r in ledger["records"] if r["pmid"] == "31535829")
+    assert rec["hr"] == 0.74
+    assert "0.74" in rec["claim_permitted"]
+    assert "16.3" in rec["claim_permitted"]
+    assert "0.74" in ledger["lead"]["statement"]

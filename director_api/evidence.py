@@ -18,6 +18,7 @@ import urllib.request
 from typing import Any
 
 from .extract import ExtractedBrief
+from .paper_read import apply_reading, fetch_abstracts, select_papers
 
 # Curated, published anchors. Effect sizes are taken from the cited paper.
 # Do not add a row here unless DOI or PMID is real.
@@ -328,15 +329,20 @@ def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str,
     pubmed_hits: list[dict[str, Any]] = []
     if pubmed:
         pubmed_hits = _pubmed_enrich(brief, seen)
-        catalog_pmids = {str(r.get("pmid") or "") for r in matched}
-        for hit in pubmed_hits:
-            pmid = str(hit.get("pmid") or "")
-            if pmid and pmid in catalog_pmids:
-                continue
-            rec = _pubmed_as_record(hit)
-            matched.append(rec)
-            if pmid:
-                catalog_pmids.add(pmid)
+        if len(matched) < 3:
+            pmids = [str(h.get("pmid") or "") for h in pubmed_hits if h.get("pmid")]
+            readings = fetch_abstracts(pmids) if pmids else {}
+            chosen = select_papers(pubmed_hits, brief, readings, limit=4)
+            catalog_pmids = {str(r.get("pmid") or "") for r in matched}
+            for hit in chosen:
+                pmid = str(hit.get("pmid") or "")
+                if pmid and pmid in catalog_pmids:
+                    continue
+                rec = _pubmed_as_record(hit)
+                rec = apply_reading(rec, readings.get(pmid), brief)
+                matched.append(rec)
+                if pmid:
+                    catalog_pmids.add(pmid)
 
     gaps = _uncited_brief_items(brief, matched)
     lead = _campaign_lead(brief, matched)
@@ -554,7 +560,9 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
         }
 
     catalog = [r for r in matched if r.get("matchedFrom") == "catalog" or r.get("status") == "validated"]
-    pool = catalog or matched
+    pubmed_recs = [r for r in matched if r.get("matchedFrom") == "pubmed"]
+    catalog_core = [r for r in catalog if r.get("directs") != "local-context"]
+    pool = catalog_core or pubmed_recs or catalog or matched
     by_id = {r["id"]: r for r in pool}
     preferred = [
         "pioneer-hf-2019",
@@ -567,14 +575,13 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     ]
     anchors = [by_id[i] for i in preferred if i in by_id]
     if not anchors:
-        anchors = sorted(
-            pool,
-            key=lambda r: (0 if r.get("grade") == "A" else 1, -(r.get("year") or 0)),
-        )
+        ranked = sorted(pool, key=_lead_sort_key)
+        usable = [r for r in ranked if _usable_finding(r)]
+        anchors = usable or ranked
 
     primary = anchors[0]
     support = anchors[1:4]
-    if catalog and primary["id"] in {"pioneer-hf-2019", "transition-2019"} and "paradigm-hf-2014" in {r["id"] for r in catalog}:
+    if catalog_core and primary["id"] in {"pioneer-hf-2019", "transition-2019"} and "paradigm-hf-2014" in {r["id"] for r in catalog}:
         statement = (
             f"Lead the campaign with first-eligible / in-hospital initiation. "
             f"{primary['trial']} ({primary['year']}) shows that starting after haemodynamic "
@@ -582,22 +589,26 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
             f"not a reason to wait for a second clinic visit."
         )
         directs = "first-eligible-start"
-    elif catalog and primary["id"].startswith("keynote"):
+    elif catalog_core and primary["id"].startswith("keynote"):
         statement = (
             f"Lead with the first-line survival evidence in {primary['trial']} "
             f"(PMID {primary['pmid']}). Cost is an access problem sitting on top of settled science, "
             f"not a reason to soften the efficacy lead."
         )
         directs = "outcome-permission"
-    elif not catalog:
-        who = brief.product or brief.therapy_area or brief.brand or "this brief"
+    elif not catalog_core:
+        finding = primary.get("finding") or primary.get("claim_permitted") or primary.get("title") or ""
+        tension = (brief.hcp_insights or brief.access_and_cost or [brief.business_goal] or [""])[0]
         statement = (
-            f"The brief does not contain paper links — none were expected. "
-            f"PubMed was searched for {who}. Lead with {primary.get('short')} "
-            f"(PMID {primary.get('pmid') or '—'}). Quote only what that paper states; "
-            f"do not invent an effect size from the abstract."
+            f"{finding} (PMID {primary.get('pmid') or '—'}). "
+            "That is the science the campaign may carry — taken from the paper, not from the brief. "
         )
-        directs = "pubmed-retrieved"
+        if tension:
+            statement += (
+                f"The brief's conversion problem is “{_clip_lead(tension)}”. "
+                "We spend against that behaviour, not against reprinting the paper."
+            )
+        directs = primary.get("directs") or "outcome-permission"
     else:
         statement = (
             f"Lead with {primary['short']}: {primary['claim_permitted']}"
@@ -629,10 +640,35 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
             [c for c in (
                 primary.get("caveat") or "",
                 *(s.get("caveat") or "" for s in support),
-                "Do not invent a hazard ratio or NNT from a PubMed title.",
+                "Do not add a number that is not in the cited abstract or full text.",
             ) if c]
         )),
     }
+
+
+def _clip_lead(text: str) -> str:
+    text = re.sub(r"\s+", " ", text or "").strip()
+    return text if len(text) <= 160 else text[:157].rstrip() + "…"
+
+
+def _usable_finding(row: dict) -> bool:
+    claim = (row.get("finding") or row.get("claim_permitted") or "").strip()
+    if not claim or claim.startswith("Abstract retrieved"):
+        return False
+    if row.get("hr") is not None or row.get("treat_event") is not None:
+        return True
+    title = re.sub(r"[^a-z0-9]+", " ", (row.get("title") or "").lower()).strip()
+    body = re.sub(r"[^a-z0-9]+", " ", claim.lower()).strip()
+    return bool(body) and body != title and len(claim) > 40
+
+
+def _lead_sort_key(row: dict) -> tuple:
+    numeric = 0 if (row.get("hr") is not None or row.get("treat_event") is not None) else 1
+    paired = 0 if (row.get("treat_event") is not None and row.get("control_event") is not None) else 1
+    title = f"{row.get('title') or ''} {row.get('design') or ''}".lower()
+    ole = 1 if "extension" in title or "open-label" in title else 0
+    grade = 0 if row.get("grade") == "A" else 1
+    return (paired, numeric, ole, grade, -(row.get("year") or 0))
 
 
 def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
@@ -659,13 +695,9 @@ def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
         "low": None,
         "high": None,
         "grade": "retrieved",
-        "claim_permitted": (
-            "Cite only findings stated in this paper. Do not invent a hazard ratio, "
-            "NNT, or class recommendation from the title or abstract."
-        ),
+        "claim_permitted": (hit.get("title") or "").rstrip(".") + ".",
         "caveat": hit.get("note") or (
-            "Retrieved from PubMed for this product/indication. Confirm full text and local label "
-            "before it leads a promotional claim."
+            "Abstract not yet read. Confirm full text and local label before promotional use."
         ),
         "mlr": "Full-text and label check required before promotional use.",
         "directs": "pubmed-retrieved",

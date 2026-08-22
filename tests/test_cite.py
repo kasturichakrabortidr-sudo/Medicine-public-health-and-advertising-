@@ -28,9 +28,8 @@ def test_attach_references_numbers_in_order():
     }
     attach_references(ledger)
     assert ledger["records"][0]["ref"] == 1
-    assert ledger["pubmed"][0]["ref"] == 2
     assert ledger["lead"]["citations"][0]["ref"] == 1
-    assert ledger["references"][1]["status"] == "retrieved"
+    assert len(ledger["references"]) == 1
 
 
 def test_attach_references_does_not_double_number_promoted_pubmed():

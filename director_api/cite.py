@@ -21,17 +21,7 @@ def attach_references(ledger: dict[str, Any]) -> dict[str, Any]:
             rec = next((r for r in ledger["records"] if str(r.get("pmid") or "") == pmid), None)
             if rec and rec.get("ref") is not None:
                 hit["ref"] = rec["ref"]
-            continue
-        hit["ref"] = n
-        if not hit.get("citation"):
-            hit["citation"] = vancouver(hit)
-        refs.append({
-            **_entry(n, hit, "retrieved"),
-            "citation": f"{hit['citation']} [PubMed retrieval — confirm full text before promotional use.]",
-            "id": hit.get("id") or f"pubmed-{hit.get('pmid') or n}",
-            "short": (hit.get("title") or hit.get("short") or "PubMed hit")[:72],
-        })
-        n += 1
+        # Unpromoted PubMed extras stay off the numbered list — they are not strategy inputs.
     ledger["references"] = refs
     by_id = {r.get("id"): r for r in ledger.get("records") or []}
     for cite in (ledger.get("lead") or {}).get("citations") or []:
