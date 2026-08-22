@@ -107,46 +107,51 @@ def extract_one(filename: str, payload: bytes, mime: str = "") -> ExtractedFile:
     notes: list[str] = []
     text = ""
     pages = None
+    route = _route_suffix(suffix, payload, mime)
 
     try:
-        if suffix in {".yaml", ".yml"}:
+        if route in {".yaml", ".yml"}:
             text = _from_yaml(payload)
-        elif suffix == ".json":
+        elif route == ".json":
             text = _from_json(payload)
-        elif suffix in {".csv", ".tsv"}:
-            text = _from_csv(payload, "\t" if suffix == ".tsv" else ",")
-        elif suffix in {".html", ".htm", ".xml"}:
+        elif route in {".csv", ".tsv"}:
+            text = _from_csv(payload, "\t" if route == ".tsv" else ",")
+        elif route in {".html", ".htm", ".xml"}:
             text = _strip_markup(_decode(payload))
-        elif suffix == ".rtf":
+        elif route == ".rtf":
             text = _from_rtf(_decode(payload))
-        elif suffix == ".pdf":
+        elif route == ".pdf":
             text, pages = _from_pdf(payload)
-        elif suffix == ".docx":
+        elif route == ".docx":
             text = _from_docx(payload)
-        elif suffix == ".pptx":
+        elif route == ".pptx":
             text = _from_pptx(payload)
-        elif suffix in {".xlsx", ".xls"}:
+        elif route in {".xlsx", ".xls"}:
             text = _from_xlsx(payload)
-        elif suffix in {".odt", ".odp", ".ods"}:
+        elif route in {".odt", ".odp", ".ods"}:
             text = _from_opendocument(payload)
-        elif suffix in {".ppt", ".doc"}:
+        elif route in {".ppt", ".doc"}:
             text = _from_ole_legacy(payload)
             if not text.strip():
                 notes.append(
-                    f"{suffix} is a legacy Office binary. Convert to .{suffix[1:]}x for richer extraction."
+                    f"{route} is a legacy Office binary. Convert to .{route[1:]}x for richer extraction."
                 )
-        elif suffix in IMAGE_SUFFIXES:
+        elif route in IMAGE_SUFFIXES:
             notes.append(
                 "Image uploaded. Text was not OCR'd locally; attach a text/PDF brief for full extraction, "
                 "or keep the image as a visual reference in the working file."
             )
             text = f"[Image attachment: {filename}]"
-        elif suffix in TEXT_SUFFIXES or not suffix:
+        elif route in TEXT_SUFFIXES or not route:
             text = _decode(payload)
         else:
             text = _decode(payload)
             if not text.strip():
-                notes.append(f"No text extractor for {suffix or 'unknown type'}; stored as raw attachment.")
+                notes.append(f"No text extractor for {route or 'unknown type'}; stored as raw attachment.")
+        if route in {".pdf", ".docx", ".pptx", ".xlsx"} and len(text.strip()) < 40:
+            notes.append(
+                "This file yielded very little text. If it is a scan or image-heavy deck, paste the brief."
+            )
     except Exception as exc:  # keep the pipeline moving; record the failure
         notes.append(f"Partial extract for {filename}: {exc}")
         text = _decode(payload)
@@ -173,6 +178,14 @@ def merge_into_brief(files: list[ExtractedFile], pasted: str = "") -> ExtractedB
     brief.source_files = [f.filename for f in files]
     brief.extraction_notes = [n for f in files for n in f.notes]
     _infer_missing(brief)
+    from director_api.extract_infer import fill_from_prose
+
+    fill_from_prose(brief)
+    if raw.strip() and not brief.brand and not brief.therapy_area:
+        brief.extraction_notes.append(
+            "Could not find a brand or therapy area in this file. "
+            "Paste the key lines, or type them into the working brief."
+        )
     return brief
 
 
@@ -211,6 +224,46 @@ def _from_csv(payload: bytes, delimiter: str) -> str:
     return "\n".join(" | ".join(cell.strip() for cell in row) for row in rows if any(row))
 
 
+def _sniff_kind(payload: bytes) -> str | None:
+    if payload[:4] == b"%PDF":
+        return "pdf"
+    if payload[:8] == b"\x89PNG\r\n\x1a\n" or payload[:3] == b"\xff\xd8\xff" or payload[:6] in {b"GIF87a", b"GIF89a"}:
+        return "image"
+    if payload[:2] == b"PK":
+        try:
+            with zipfile.ZipFile(io.BytesIO(payload)) as zf:
+                names = set(zf.namelist())
+        except zipfile.BadZipFile:
+            return None
+        if any(n.startswith("word/") for n in names):
+            return "docx"
+        if any(n.startswith("ppt/") for n in names):
+            return "pptx"
+        if any(n.startswith("xl/") for n in names):
+            return "xlsx"
+        if "content.xml" in names:
+            return "odt"
+    return None
+
+
+def _route_suffix(suffix: str, payload: bytes, mime: str = "") -> str:
+    sniffed = _sniff_kind(payload)
+    mime_l = (mime or "").lower()
+    if sniffed == "pdf" or "application/pdf" in mime_l:
+        return ".pdf"
+    if sniffed == "docx" or "wordprocessingml" in mime_l:
+        return ".docx"
+    if sniffed == "pptx" or "presentationml" in mime_l:
+        return ".pptx"
+    if sniffed == "xlsx" or "spreadsheetml" in mime_l:
+        return ".xlsx"
+    if sniffed == "image":
+        return suffix if suffix in IMAGE_SUFFIXES else ".png"
+    if sniffed == "odt":
+        return suffix if suffix in {".odt", ".odp", ".ods"} else ".odt"
+    return suffix
+
+
 def _from_pdf(payload: bytes) -> tuple[str, int | None]:
     from pypdf import PdfReader
 
@@ -219,21 +272,59 @@ def _from_pdf(payload: bytes) -> tuple[str, int | None]:
     for i, page in enumerate(reader.pages, 1):
         content = page.extract_text() or ""
         if content.strip():
-            pages.append(f"## Page {i}\n{content}")
-    return "\n\n".join(pages), len(reader.pages)
+            pages.append(f"Page {i}\n{content.strip()}")
+    text = "\n\n".join(pages)
+    page_count = len(reader.pages)
+    if len(text.strip()) < 120:
+        richer = _from_pdf_pdfminer(payload)
+        if len(richer.strip()) > len(text.strip()):
+            text = richer
+    return text, page_count
+
+
+def _from_pdf_pdfminer(payload: bytes) -> str:
+    try:
+        from pdfminer.high_level import extract_text as pdfminer_extract
+    except ImportError:
+        return ""
+    try:
+        return (pdfminer_extract(io.BytesIO(payload)) or "").strip()
+    except Exception:
+        return ""
 
 
 def _from_docx(payload: bytes) -> str:
     from docx import Document
 
     doc = Document(io.BytesIO(payload))
-    parts = [p.text for p in doc.paragraphs if p.text and p.text.strip()]
+    parts = [p.text.strip() for p in doc.paragraphs if p.text and p.text.strip()]
+    for section in doc.sections:
+        for hf in (section.header, section.footer):
+            if hf is None:
+                continue
+            for p in hf.paragraphs:
+                if p.text and p.text.strip():
+                    parts.append(p.text.strip())
     for table in doc.tables:
         for row in table.rows:
-            cells = [c.text.strip() for c in row.cells if c.text.strip()]
+            cells = [c.text.strip().replace("\n", " ") for c in row.cells if c.text.strip()]
             if cells:
                 parts.append(" | ".join(cells))
-    return "\n".join(parts)
+    xml_bits = _docx_all_text_nodes(payload)
+    joined = "\n".join(parts)
+    if len(xml_bits) > len(joined) + 40:
+        joined = f"{joined}\n\n{xml_bits}".strip() if joined else xml_bits
+    return joined
+
+
+def _docx_all_text_nodes(payload: bytes) -> str:
+    try:
+        with zipfile.ZipFile(io.BytesIO(payload)) as zf:
+            xml = zf.read("word/document.xml").decode("utf-8", errors="replace")
+    except Exception:
+        return ""
+    parts = re.findall(r"<w:t[^>]*>([^<]*)</w:t>", xml)
+    return "\n".join(p.strip() for p in parts if p.strip())
 
 
 def _from_pptx(payload: bytes) -> str:
@@ -242,20 +333,39 @@ def _from_pptx(payload: bytes) -> str:
     prs = Presentation(io.BytesIO(payload))
     slides = []
     for i, slide in enumerate(prs.slides, 1):
-        bits = []
-        for shape in slide.shapes:
-            if getattr(shape, "has_text_frame", False):
-                t = shape.text_frame.text.strip()
-                if t:
-                    bits.append(t)
-            if getattr(shape, "has_table", False):
-                for row in shape.table.rows:
-                    cells = [c.text.strip() for c in row.cells if c.text.strip()]
-                    if cells:
-                        bits.append(" | ".join(cells))
+        bits = _pptx_shape_text(slide.shapes)
+        try:
+            notes_slide = slide.notes_slide
+            if notes_slide and notes_slide.notes_text_frame:
+                nt = notes_slide.notes_text_frame.text.strip()
+                if nt:
+                    bits.append("Notes: " + nt)
+        except Exception:
+            pass
         if bits:
-            slides.append(f"## Slide {i}\n" + "\n".join(bits))
+            slides.append(f"Slide {i}\n" + "\n".join(bits))
     return "\n\n".join(slides)
+
+
+def _pptx_shape_text(shapes) -> list[str]:
+    bits: list[str] = []
+    for shape in shapes:
+        if getattr(shape, "has_text_frame", False):
+            t = shape.text_frame.text.strip()
+            if t:
+                bits.append(t)
+        if getattr(shape, "has_table", False):
+            for row in shape.table.rows:
+                cells = [c.text.strip().replace("\n", " ") for c in row.cells if c.text.strip()]
+                if cells:
+                    bits.append(" | ".join(cells))
+        nested = getattr(shape, "shapes", None)
+        if nested is not None:
+            try:
+                bits.extend(_pptx_shape_text(nested))
+            except Exception:
+                pass
+    return bits
 
 
 def _from_xlsx(payload: bytes) -> str:
@@ -343,8 +453,11 @@ def _parse_structured(raw: str) -> ExtractedBrief:
         bucket = []
 
     for line in raw.splitlines():
-        heading = re.match(r"^#{1,3}\s+(.+)$", line.strip())
-        label = re.match(r"^([A-Za-z][A-Za-z0-9 /_-]{1,40}):\s*(.*)$", line.strip())
+        stripped = line.strip()
+        if re.match(r"^#{0,3}\s*(page|slide|sheet)\s+\S+", stripped, re.I):
+            continue
+        heading = re.match(r"^#{1,3}\s+(.+)$", stripped)
+        label = re.match(r"^([A-Za-z][A-Za-z0-9 /_-]{1,40}):\s*(.*)$", stripped)
         key = None
         rest = ""
         if heading:
@@ -359,23 +472,44 @@ def _parse_structured(raw: str) -> ExtractedBrief:
                 bucket.append(rest)
             continue
         if current:
-            cleaned = line.strip().lstrip("-*•").strip()
+            cleaned = stripped.lstrip("-*•").strip()
             if cleaned:
                 bucket.append(cleaned)
     flush()
     return brief
 
 
+def _looks_like_json_document(text: str) -> bool:
+    stripped = text.lstrip()
+    return stripped.startswith("{") and stripped.rstrip().endswith("}")
+
+
+def _looks_like_yaml_document(text: str) -> bool:
+    """True only for compact key: value YAML — not a 20-page Word brief."""
+    if _looks_like_json_document(text):
+        return False
+    if "\x00" in text[:200]:
+        return False
+    lines = [ln.rstrip() for ln in text.splitlines() if ln.strip()]
+    if not lines or len(lines) > 80:
+        return False
+    mappingish = 0
+    for ln in lines[:40]:
+        if re.match(r"^[\w.-]+\s*:", ln) and not ln.lstrip().startswith("#"):
+            mappingish += 1
+    return mappingish >= 2 and mappingish / max(len(lines[:40]), 1) >= 0.35
+
+
 def _try_load_mapping(raw: str) -> dict | None:
     text = raw.strip()
     data = None
-    if text.startswith("{") and text.endswith("}"):
+    if _looks_like_json_document(text):
         try:
             loaded = json.loads(text)
             data = loaded if isinstance(loaded, dict) else None
         except json.JSONDecodeError:
             data = None
-    elif yaml is not None and re.search(r"^\w+:", text, re.M):
+    elif yaml is not None and _looks_like_yaml_document(text):
         try:
             loaded = yaml.safe_load(text)
             data = loaded if isinstance(loaded, dict) else None
@@ -415,7 +549,9 @@ def _assign(brief: ExtractedBrief, key: str, value) -> None:
     elif key == "notes":
         brief.notes = _as_text(value)
     else:
-        setattr(brief, key, _as_text(value))
+        items = _as_list(value)
+        first = items[0] if items else ""
+        setattr(brief, key, first if len(first) <= 400 else first[:397].rstrip() + "…")
 
 
 def _as_list(value) -> list[str]:
@@ -453,23 +589,31 @@ def _normalize_key(label: str) -> str:
         "therapy": "therapy_area",
         "ta": "therapy_area",
         "therapy_area": "therapy_area",
+        "disease_area": "therapy_area",
         "brand_name": "brand",
+        "campaign": "brand",
+        "campaign_name": "brand",
         "product_name": "product",
         "molecule": "product",
+        "inn": "product",
         "goal": "business_goal",
         "objective": "business_goal",
+        "objectives": "business_goal",
         "specialties": "target_specialties",
+        "specialty": "target_specialties",
         "targets": "target_specialties",
         "segments": "hcp_segments",
         "evidence": "brand_evidence",
         "insights": "hcp_insights",
         "hcp_insight": "hcp_insights",
         "competitor": "competitors",
+        "competition": "competitors",
         "access": "access_and_cost",
         "cost": "access_and_cost",
         "constraint": "constraints",
         "country": "market",
         "geography": "market",
+        "region": "market",
     }
     return aliases.get(s, s)
 

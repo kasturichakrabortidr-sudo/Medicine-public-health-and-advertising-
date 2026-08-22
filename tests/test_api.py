@@ -80,3 +80,24 @@ def test_generate_prefers_uploaded_file_over_empty_form_brand():
     pack = generated.json()
     assert pack["meta"]["brand"] == "Helix"
     assert pack["meta"]["demo"] is False
+
+
+def test_extract_labelled_client_prose():
+    pasted = (
+        "Brand name: LumenDerm\nProduct: lumetinib\nTherapy area: Dermatology\n"
+        "Market: India\nInsights:\n- Cost is the veto at the desk\n"
+    )
+    res = client.post("/api/extract", data={"pasted": pasted})
+    assert res.status_code == 200
+    brief = res.json()["brief"]
+    assert brief["brand"] == "LumenDerm"
+    assert brief["product"] == "lumetinib"
+    assert "Dermatology" in brief["therapy_area"]
+    assert brief["market"] == "India"
+    assert any("veto" in s.lower() for s in brief["hcp_insights"])
+
+    pack = client.post("/api/generate", data={"pasted": pasted}).json()
+    assert pack["meta"]["brand"] == "LumenDerm"
+    assert pack["meta"]["demo"] is False
+    assert "CardioShield" not in pack["slides"][0]["title"]
+
