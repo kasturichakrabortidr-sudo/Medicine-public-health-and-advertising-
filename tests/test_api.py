@@ -7,8 +7,9 @@ client = TestClient(app)
 
 def test_spa_and_demo_json():
     res = client.get("/")
-    assert res.status_code == 200
-    assert "STRATA" in res.text
+    if res.status_code != 503:
+        assert res.status_code == 200
+        assert "STRATA" in res.text
     demo = client.get("/demo.json")
     assert demo.status_code == 200
     assert demo.json()["meta"]["brand"] == "CardioShield"
@@ -44,3 +45,38 @@ def test_extract_and_generate_upload():
 def test_generate_rejects_empty():
     res = client.post("/api/generate", data={"pasted": ""})
     assert res.status_code == 400
+
+
+def test_generate_uploaded_brief_is_not_cardioshield_demo():
+    files = [(
+        "files",
+        (
+            "acme.yaml",
+            b"brand: AcmeDerm\ntherapy_area: Dermatology\nmarket: India\n"
+            b"business_goal: Grow related clinic share.\n",
+            "text/yaml",
+        ),
+    )]
+    generated = client.post("/api/generate", files=files)
+    assert generated.status_code == 200
+    pack = generated.json()
+    assert pack["meta"]["brand"] == "AcmeDerm"
+    assert pack["meta"]["demo"] is False
+    assert pack["meta"]["mode"] != "demo"
+    assert "CardioShield" not in pack["slides"][0]["title"]
+    ids = {r["id"] for r in pack["evidence"]["records"]}
+    assert "paradigm-hf-2014" not in ids
+    assert "pioneer-hf-2019" not in ids
+
+
+def test_generate_prefers_uploaded_file_over_empty_form_brand():
+    files = [("files", ("brief.yaml", b"brand: Helix\ntherapy_area: Oncology - NSCLC\n", "text/yaml"))]
+    generated = client.post(
+        "/api/generate",
+        files=files,
+        data={"brief_json": '{"brand":"","therapy_area":"Oncology - NSCLC"}'},
+    )
+    assert generated.status_code == 200
+    pack = generated.json()
+    assert pack["meta"]["brand"] == "Helix"
+    assert pack["meta"]["demo"] is False

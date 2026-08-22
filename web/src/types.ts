@@ -82,6 +82,7 @@ export interface StrategyPack {
     market: string;
     generatedAt: string;
     mode: string;
+    demo?: boolean;
     doctrine: string;
     angleId: string;
     source?: string;

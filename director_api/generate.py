@@ -6,12 +6,26 @@ schema the web app renders: doctrine, slides, charts, interventions, dashboard.
 
 from __future__ import annotations
 
+import re
 from datetime import date
 
 from .cite import attach_references, mark
 from .evidence import resolve_evidence
 from .extract import ExtractedBrief
 from .workfile import build_workfile
+
+DELAY_RE = re.compile(
+    r"stabilis(?:e|ation)|stabiliz(?:e|ation)|second[- ]line|too late|"
+    r"late\s*/\s*second|late/second|\bdelay(?:ed|ing|s)?\b|"
+    r"wait(?:ing)? until|stabilis(?:e|e) first|stabilize first|"
+    r"start on ace",
+    re.I,
+)
+COST_RE = re.compile(
+    r"\bcosts?\b|\bafford|\boop\b|out-of-pocket|\breimburs|\bprice\b|\bpap\b",
+    re.I,
+)
+MYTH_RE = re.compile(r"\bmyth\b|\bmonitor|\bsafety\b|\brenal\b|\bperception\b|\bbelief\b", re.I)
 
 
 def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = True) -> dict:
@@ -34,9 +48,11 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
             "market": market,
             "generatedAt": date.today().isoformat(),
             "mode": mode,
+            "demo": mode == "demo",
             "doctrine": doctrine["name"],
             "angleId": doctrine["id"],
             "campaignLead": (ledger.get("lead") or {}).get("directs"),
+            "source": ", ".join(brief.source_files) or ("pasted brief" if brief.raw_text else ""),
         },
         "brief": brief.to_dict(),
         "doctrine": doctrine,
@@ -59,9 +75,9 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             " ".join(brief.competitors),
             brief.indication,
         ]
-    ).lower()
+    )
 
-    if any(w in blob for w in ("stabilise", "stabilize", "late", "second-line", "switch", "habit")):
+    if DELAY_RE.search(blob):
         return {
             "id": "first-touch",
             "name": "Start at the first eligible visit",
@@ -78,7 +94,7 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
                 "If we cannot number the paper that allows a line, the line does not ship."
             ),
         }
-    if any(w in blob for w in ("cost", "afford", "oop", "out-of-pocket", "reimburs", "price")):
+    if COST_RE.search(blob):
         return {
             "id": "affordability-confidence",
             "name": "A cost conversation the doctor can survive",
@@ -93,7 +109,7 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
                 "assistance mechanic can carry. Everything else is a research task."
             ),
         }
-    if any(w in blob for w in ("myth", "monitor", "safety", "renal", "perception", "belief")):
+    if MYTH_RE.search(blob):
         return {
             "id": "perception-reset",
             "name": "Unlearn one wrong belief",
@@ -337,8 +353,8 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "id": "comb",
             "section": "Behaviour",
             "kicker": "COM-B",
-            "title": "The behaviour is delayed initiation. The drivers are not mysterious.",
-            "narrative": "Capability is largely intact. Opportunity (cost, workflow) and reflective motivation (ritual, peer cover) are the load-bearing joints.",
+            "title": _comb_title(doctrine),
+            "narrative": _comb_narrative(doctrine),
             "layout": "chart",
             "chart": {
                 "kind": "bar",
@@ -434,11 +450,7 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
                 "xLabel": "Feasibility",
                 "yLabel": "Impact on key driver",
                 "data": [
-                    {"name": "First-Touch protocol", "x": 62, "y": 88, "z": 40},
-                    {"name": "Affordability kit", "x": 70, "y": 84, "z": 36},
-                    {"name": "Myth-reset med-ed", "x": 78, "y": 61, "z": 24},
-                    {"name": "Peer cascade", "x": 54, "y": 76, "z": 28},
-                    {"name": "CRM habit lock", "x": 80, "y": 58, "z": 18},
+                    *[{"name": i["name"], "x": i["feasibility"], "y": i["impact"], "z": 30} for i in moves[:5]],
                     {"name": "Congress theatre", "x": 40, "y": 34, "z": 30},
                 ],
             },
@@ -448,7 +460,10 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "section": "Engagement",
             "kicker": "Start to beyond",
             "title": "A single HCP should feel a designed sequence, not a spray",
-            "narrative": "Pre-launch builds peer cover. Launch installs the first-touch protocol. Adoption locks the habit. Beyond the campaign, the pathway stays.",
+            "narrative": (
+                f"Pre-launch builds peer cover. Launch installs {moves[0]['name'] if moves else 'the opening move'}. "
+                "Adoption locks the habit. Beyond the campaign, the pathway stays."
+            ),
             "layout": "chart",
             "chart": {
                 "kind": "line",
@@ -825,9 +840,39 @@ def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
     return pillars
 
 
+def _comb_title(doctrine: dict) -> str:
+    return {
+        "first-touch": "The behaviour is delayed initiation. The drivers are not mysterious.",
+        "affordability-confidence": "The behaviour is not starting because of what the patient will pay.",
+        "perception-reset": "The behaviour is withholding a start because of a wrong belief.",
+        "conviction-cascade": "The behaviour is hesitation at the moment of the pen.",
+    }.get(doctrine.get("id") or "", "The behaviour we have to change sits in this brief.")
+
+
+def _comb_narrative(doctrine: dict) -> str:
+    return {
+        "first-touch": (
+            "Capability is largely intact. Opportunity (cost, workflow) and reflective "
+            "motivation (ritual, peer cover) are the load-bearing joints."
+        ),
+        "affordability-confidence": (
+            "Capability is not the gap. Opportunity — cost, assistance, the conversation "
+            "the doctor can survive — is the load-bearing joint."
+        ),
+        "perception-reset": (
+            "A single durable myth is doing more work than a missing trial. Unlearning "
+            "beats another awareness burst."
+        ),
+        "conviction-cascade": (
+            "Scientific, peer, and practical conviction have to stack at the decision "
+            "moment. Awareness without that stack does not prescribe."
+        ),
+    }.get(doctrine.get("id") or "", "Name the behaviour from the brief. Do not import a demo habit.")
+
+
 def _interventions(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None) -> list[dict]:
     brand = brief.brand or "the brand"
-    return [
+    first_touch = [
         {
             "id": "first-touch",
             "name": "First-Touch Protocol",
@@ -894,6 +939,38 @@ def _interventions(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = 
             "evidenceAnchor": _anchor(ledger, "outcome-permission"),
         },
     ]
+    if doctrine.get("id") == "first-touch":
+        return first_touch
+    if doctrine.get("id") == "affordability-confidence":
+        kit, rest = first_touch[1], [first_touch[0], *first_touch[2:]]
+        kit = {
+            **kit,
+            "promise": (
+                f"A field-legal script and assistance mechanic so the doctor can start {brand} "
+                "without putting the patient in financial distress."
+            ),
+        }
+        return [kit, *rest]
+    if doctrine.get("id") == "perception-reset":
+        myth, rest = first_touch[2], [x for x in first_touch if x["id"] != "myth-reset"]
+        return [myth, *rest]
+    decision = {
+        "id": "first-touch",
+        "name": "Decision-moment protocol",
+        "promise": (
+            f"A specialty-specific checklist so {brand} is considered with the papers in hand, "
+            "not after the visit."
+        ),
+        "lever": "Opportunity — workflow",
+        "segment": (brief.target_specialties[0] if brief.target_specialties else "Priority specialists"),
+        "effort": "M",
+        "impact": 80,
+        "feasibility": 66,
+        "mlr": "Protocol language must match label and local code.",
+        "kill": "If first-start rate among engaged HCPs is unchanged at week 8.",
+        "evidenceAnchor": _anchor(ledger, "outcome-permission"),
+    }
+    return [decision, first_touch[1], first_touch[2], first_touch[3], first_touch[4]]
 
 
 def _anchor(ledger: dict | None, directs: str) -> str:

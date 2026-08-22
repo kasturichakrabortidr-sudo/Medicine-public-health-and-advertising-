@@ -88,28 +88,50 @@ async def generate(
     brief_json: str = Form(default=""),
     mode: str = Form(default="director"),
 ):
+    uploads = []
+    if files:
+        for f in files:
+            payload = await f.read()
+            if len(payload) > 25 * 1024 * 1024:
+                raise HTTPException(413, f"{f.filename} exceeds 25 MB")
+            uploads.append((f.filename or "upload", payload, f.content_type or ""))
+
+    file_brief = None
+    if uploads or pasted.strip():
+        file_brief = merge_into_brief(extract_files(uploads), pasted)
+
+    json_brief = None
     if brief_json.strip():
         try:
             mapping = json.loads(brief_json)
         except json.JSONDecodeError as exc:
             raise HTTPException(400, f"brief_json is not valid JSON: {exc}") from exc
-        brief = _brief_from_mapping(mapping)
+        if not isinstance(mapping, dict):
+            raise HTTPException(400, "brief_json must be an object.")
+        json_brief = _brief_from_mapping(mapping)
+
+    if json_brief and file_brief:
+        brief = _fill_empty(json_brief, file_brief)
     else:
-        uploads = []
-        if files:
-            for f in files:
-                payload = await f.read()
-                if len(payload) > 25 * 1024 * 1024:
-                    raise HTTPException(413, f"{f.filename} exceeds 25 MB")
-                uploads.append((f.filename or "upload", payload, f.content_type or ""))
-        if not uploads and not pasted.strip():
-            raise HTTPException(400, "Provide files, pasted text, or brief_json.")
-        brief = merge_into_brief(extract_files(uploads), pasted)
+        brief = json_brief or file_brief
+
+    if brief is None:
+        raise HTTPException(400, "Provide files, pasted text, or brief_json.")
 
     if not brief.brand and not brief.therapy_area and not brief.raw_text:
         raise HTTPException(422, "Could not read a usable brief from the upload.")
 
-    return generate_pack(brief, mode=mode)
+    if mode == "demo":
+        raise HTTPException(400, "Demo mode is only available from GET /api/demo.")
+
+    pack = generate_pack(brief, mode=mode)
+    pack["meta"]["demo"] = False
+    pack["meta"]["source"] = (
+        ", ".join(brief.source_files)
+        or pack["meta"].get("source")
+        or "uploaded brief"
+    )
+    return pack
 
 
 @app.get("/api/export/pptx")
@@ -174,3 +196,35 @@ def _brief_from_mapping(data: dict) -> ExtractedBrief:
     if not brief.raw_text:
         brief.raw_text = json.dumps(data, ensure_ascii=False)
     return brief
+
+
+LIST_FIELDS = {
+    "target_specialties",
+    "hcp_segments",
+    "brand_evidence",
+    "existing_evidence",
+    "evolving_evidence",
+    "guidelines",
+    "hcp_insights",
+    "competitors",
+    "access_and_cost",
+    "constraints",
+    "source_files",
+    "extraction_notes",
+}
+
+
+def _fill_empty(primary: ExtractedBrief, fallback: ExtractedBrief) -> ExtractedBrief:
+    """Keep edited form fields; fill blanks from the uploaded files."""
+    out = ExtractedBrief()
+    for key in out.to_dict():
+        pv = getattr(primary, key)
+        fv = getattr(fallback, key)
+        if key == "raw_text":
+            parts = [p for p in (pv, fv) if p]
+            setattr(out, key, "\n\n---\n\n".join(dict.fromkeys(parts)))
+        elif key in LIST_FIELDS:
+            setattr(out, key, list(pv or fv or []))
+        else:
+            setattr(out, key, pv or fv)
+    return out

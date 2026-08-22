@@ -80,6 +80,10 @@ export function BriefsTab({
 
   const extract = async () => {
     setError("");
+    if (!files.length && !pasted.trim()) {
+      setError("Upload a file or paste the brief first.");
+      return;
+    }
     setBusy(true);
     try {
       const res = await extractBriefs(files, pasted);
@@ -94,13 +98,21 @@ export function BriefsTab({
 
   const generate = async () => {
     setError("");
+    const hasBrief = Boolean(brief.brand || brief.therapy_area || brief.raw_text);
+    if (!files.length && !pasted.trim() && !hasBrief) {
+      setError("Upload or paste a brief before writing the working file. The CardioShield demo will not be used.");
+      return;
+    }
     setBusy(true);
     try {
       const pack = await generatePack({
         files,
         pasted,
-        brief: brief.brand || brief.therapy_area ? brief : undefined,
+        brief: hasBrief ? brief : undefined,
       });
+      if (pack.meta.mode === "demo" || pack.meta.demo) {
+        throw new Error("The engine returned the demo pack. Your brief was not used.");
+      }
       onPack(pack);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -117,7 +129,7 @@ export function BriefsTab({
         <h2>Upload a brief — any format</h2>
         <p className="muted small">
           Drop the client files, the advisory notes, a messy paste. We will pull the fields,
-          then write the eleven-step working file. We will not jump to a deck from a slogan.
+          then write the eleven-step working file for <em>this</em> brief — not the CardioShield demo.
         </p>
         <div
           className={`drop ${over ? "over" : ""}`}

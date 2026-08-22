@@ -357,36 +357,117 @@ def _brief_blob(brief: ExtractedBrief) -> str:
     return " ".join(p for p in parts if p).lower()
 
 
+GENERIC_TAGS = {
+    "india",
+    "indian",
+    "registry",
+    "guideline",
+    "early",
+    "initiation",
+    "age",
+    "elderly",
+    "discharge",
+    "epidemiology",
+    "cardiology",
+}
+
+CLASS_TOKENS = {
+    "hf": (
+        "arni",
+        "sacubitril",
+        "valsartan",
+        "paradigm",
+        "pioneer",
+        "lcz696",
+        "entresto",
+        "transition",
+    ),
+    "oncology": (
+        "pembrolizumab",
+        "keynote",
+        "pd-l1",
+        "pd-1",
+        "nsclc",
+        "immuno",
+    ),
+}
+
+
+def _contains_term(term: str, blob: str) -> bool:
+    """Whole-term match so 'late' does not fire inside 'related' / 'template'."""
+    term = (term or "").lower().strip()
+    blob = blob or ""
+    if not term:
+        return False
+    if " " in term or "/" in term or "-" in term:
+        return term in blob
+    return bool(re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", blob))
+
+
 def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str) -> bool:
-    tags = entry.get("tags") or ()
+    """Attach a catalog paper only when this brief is actually about that science.
+
+    Geography tags like 'india' and the word 'cardiology' are not enough to hang
+    PARADIGM-HF on an unrelated upload. The CardioShield demo still matches
+    because its product and evidence lines name ARNI / sacubitril / PARADIGM.
+    """
+    tags = tuple(str(t).lower() for t in (entry.get("tags") or ()))
     family = _catalog_family(tags)
     brief_family = _brief_family(brief, blob)
-    if family and brief_family and family != brief_family:
+    if family and brief_family != family:
         return False
-    hits = sum(1 for tag in tags if len(str(tag)) >= 4 and tag in blob)
-    if hits >= 2:
+
+    trial = (entry.get("trial") or "").lower()
+    if len(trial) >= 6 and trial in blob:
         return True
-    ta = f"{brief.therapy_area} {brief.indication} {brief.product}".lower()
-    if family == "cardiology":
-        return any(k in ta or k in blob for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm"))
-    if family == "oncology":
-        return any(k in ta or k in blob for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote"))
-    return hits >= 1
+    pmid = str(entry.get("pmid") or "")
+    if pmid and pmid in blob:
+        return True
+    doi = (entry.get("doi") or "").lower()
+    if doi and doi in blob:
+        return True
+
+    if entry.get("directs") == "local-context" and family and family == brief_family:
+        market = (brief.market or "").lower()
+        return any(_contains_term(g, blob) or _contains_term(g, market) for g in ("india", "indian"))
+
+    class_tokens = CLASS_TOKENS.get(family or "", ())
+    class_hit = any(_contains_term(t, blob) for t in class_tokens)
+    distinctive = [t for t in tags if t not in GENERIC_TAGS and len(t) >= 4]
+    tag_hits = sum(1 for t in distinctive if _contains_term(t, blob))
+    if class_hit and tag_hits >= 1:
+        return True
+
+    if family and family == brief_family:
+        societies = ("esc", "acc", "aha", "hfsa", "csi")
+        if any(_contains_term(name, blob) for name in societies if name in tags):
+            return class_hit or _contains_term("heart failure", blob) or _contains_term("nsclc", blob)
+    return False
 
 
 def _catalog_family(tags) -> str:
-    if any(t in tags for t in ("hfref", "arni", "cardiology")):
-        return "cardiology"
-    if any(t in tags for t in ("nsclc", "oncology")):
+    tagset = {str(t).lower() for t in tags}
+    joined = " ".join(tagset)
+    if tagset & {"hfref", "arni", "paradigm", "pioneer", "hf"} or "heart failure" in joined:
+        return "hf"
+    if tagset & {"nsclc", "oncology", "pembrolizumab", "keynote"}:
         return "oncology"
+    if "cardiology" in tagset:
+        return "hf"
     return ""
 
 
 def _brief_family(brief: ExtractedBrief, blob: str) -> str:
     ta = f"{brief.therapy_area} {brief.indication} {brief.product} {blob}".lower()
-    if any(k in ta for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril")):
-        return "cardiology"
-    if any(k in ta for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab")):
+    if any(
+        _contains_term(k, ta)
+        for k in ("hfref", "arni", "sacubitril", "paradigm")
+    ) or "heart failure" in ta:
+        return "hf"
+    if any(
+        _contains_term(k, ta)
+        for k in ("nsclc", "pembrolizumab", "keynote")
+    ) or "lung cancer" in ta or _contains_term("oncology", ta):
         return "oncology"
     return ""
 

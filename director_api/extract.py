@@ -368,19 +368,25 @@ def _parse_structured(raw: str) -> ExtractedBrief:
 
 def _try_load_mapping(raw: str) -> dict | None:
     text = raw.strip()
+    data = None
     if text.startswith("{") and text.endswith("}"):
         try:
-            data = json.loads(text)
-            return data if isinstance(data, dict) else None
+            loaded = json.loads(text)
+            data = loaded if isinstance(loaded, dict) else None
         except json.JSONDecodeError:
-            return None
-    if yaml is not None and re.search(r"^\w+:", text, re.M):
+            data = None
+    elif yaml is not None and re.search(r"^\w+:", text, re.M):
         try:
-            data = yaml.safe_load(text)
-            return data if isinstance(data, dict) else None
+            loaded = yaml.safe_load(text)
+            data = loaded if isinstance(loaded, dict) else None
         except Exception:
-            return None
-    return None
+            data = None
+    if not data:
+        return None
+    keys = {_normalize_key(str(k)) for k in data}
+    if "brand" not in keys and "therapy_area" not in keys:
+        return None
+    return data
 
 
 def _apply_mapping(brief: ExtractedBrief, data: dict) -> None:

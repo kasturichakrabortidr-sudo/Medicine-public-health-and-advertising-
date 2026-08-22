@@ -120,6 +120,15 @@ button {
   margin-bottom: 6px;
 }
 
+.demo-banner {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #8b2e2e;
+  color: #faf6ef;
+  font-size: 14px;
+}
+
 .main {
   padding: 28px 36px 48px;
 }

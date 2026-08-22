@@ -122,3 +122,42 @@ def test_respiratory_without_catalog_does_not_invent_trials():
     assert pack["doctrine"]["id"] == "affordability-confidence"
     assert pack["evidence"]["records"] == []
     assert "do not lock" in pack["evidence"]["lead"]["statement"].lower()
+    assert pack["meta"]["brand"] == "Aero"
+    assert pack["meta"]["demo"] is False
+    assert "CardioShield" not in pack["slides"][0]["title"]
+    assert pack["interventions"][0]["id"] == "afford-kit"
+
+
+def test_unrelated_india_brief_does_not_get_cardioshield_science():
+    brief = ExtractedBrief(
+        brand="LumenDerm",
+        therapy_area="Dermatology - psoriasis",
+        market="India",
+        business_goal="Grow related clinic starts among related specialists.",
+        hcp_insights=["Doctors want a template they can use in clinic."],
+    )
+    pack = generate_pack(brief, pubmed=False)
+    ids = {r["id"] for r in pack["evidence"]["records"]}
+    assert "paradigm-hf-2014" not in ids
+    assert "pioneer-hf-2019" not in ids
+    assert "trivandrum-hf-2015" not in ids
+    assert pack["meta"]["brand"] == "LumenDerm"
+    assert pack["doctrine"]["id"] != "first-touch"
+    assert "CardioShield" not in str(pack["doctrine"])
+    assert pack["interventions"][0]["name"] != "First-Touch Protocol"
+
+
+def test_hf_sglt2_brief_does_not_attach_arni_trials():
+    brief = ExtractedBrief(
+        brand="GlucoHeart",
+        product="dapagliflozin",
+        therapy_area="Cardiology - chronic heart failure",
+        indication="HFrEF",
+        market="India",
+        business_goal="Grow SGLT2 foundational use.",
+    )
+    ledger = resolve_evidence(brief, pubmed=False)
+    ids = {r["id"] for r in ledger["records"]}
+    assert "paradigm-hf-2014" not in ids
+    assert "pioneer-hf-2019" not in ids
+    assert "keynote-189-2018" not in ids

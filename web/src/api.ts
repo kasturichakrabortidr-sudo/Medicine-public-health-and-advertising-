@@ -20,11 +20,15 @@ export const ACCEPT_LABELS = [
 export { ACCEPT };
 
 async function readError(res: Response): Promise<string> {
+  const fallback =
+    res.status === 404
+      ? "The strategy engine is not running, so uploaded briefs cannot replace the demo. Start it with python start_director.py."
+      : res.statusText;
   try {
     const data = await res.json();
-    return data.detail || data.error || res.statusText;
+    return data.detail || data.error || fallback;
   } catch {
-    return res.statusText;
+    return fallback;
   }
 }
 
@@ -47,7 +51,14 @@ export async function extractBriefs(
   const body = new FormData();
   files.forEach((f) => body.append("files", f));
   body.append("pasted", pasted);
-  const res = await fetch("/api/extract", { method: "POST", body });
+  let res: Response;
+  try {
+    res = await fetch("/api/extract", { method: "POST", body });
+  } catch {
+    throw new Error(
+      "Could not reach the strategy engine. Start it with python start_director.py so uploaded briefs can be read.",
+    );
+  }
   if (!res.ok) throw new Error(await readError(res));
   return res.json();
 }
@@ -81,7 +92,18 @@ export async function generatePack(args: {
   (args.files || []).forEach((f) => body.append("files", f));
   body.append("pasted", args.pasted || "");
   if (args.brief) body.append("brief_json", JSON.stringify(args.brief));
-  const res = await fetch("/api/generate", { method: "POST", body });
+  let res: Response;
+  try {
+    res = await fetch("/api/generate", { method: "POST", body });
+  } catch {
+    throw new Error(
+      "Could not reach the strategy engine. Uploaded briefs cannot be turned into a strategy until python start_director.py is running.",
+    );
+  }
   if (!res.ok) throw new Error(await readError(res));
-  return res.json();
+  const pack = (await res.json()) as StrategyPack;
+  if (pack?.meta?.brand === "CardioShield" && args.brief?.brand && args.brief.brand !== "CardioShield") {
+    throw new Error("The engine returned the CardioShield demo instead of your brief. Try Write the working file again.");
+  }
+  return pack;
 }

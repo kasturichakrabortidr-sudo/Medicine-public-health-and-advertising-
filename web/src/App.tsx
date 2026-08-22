@@ -7,17 +7,56 @@ import { EvidenceTab } from "./components/EvidenceTab";
 import { WorkingFileTab } from "./components/WorkingFileTab";
 import type { StrategyPack, TabId } from "./types";
 
+const USER_PACK_KEY = "strata.userPack";
+
+function isDemoPack(pack: StrategyPack | null): boolean {
+  if (!pack) return false;
+  return pack.meta.mode === "demo" || pack.meta.demo === true;
+}
+
+function readSavedPack(): StrategyPack | null {
+  try {
+    const raw = sessionStorage.getItem(USER_PACK_KEY);
+    if (!raw) return null;
+    const pack = JSON.parse(raw) as StrategyPack;
+    if (!pack?.meta?.brand || isDemoPack(pack)) return null;
+    return pack;
+  } catch {
+    return null;
+  }
+}
+
 export default function App() {
   const [tab, setTab] = useState<TabId>("briefs");
   const [pack, setPack] = useState<StrategyPack | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  const applyPack = (next: StrategyPack, go: TabId = "work") => {
+    setPack(next);
+    setTab(go);
+    if (!isDemoPack(next)) {
+      try {
+        sessionStorage.setItem(USER_PACK_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore quota */
+      }
+    }
+  };
+
   const loadDemo = async () => {
+    if (pack && !isDemoPack(pack)) {
+      const ok = window.confirm(
+        `Replace the working file for ${pack.meta.brand} with the CardioShield demo?`,
+      );
+      if (!ok) return;
+    }
     setBusy(true);
     setError("");
     try {
       const demo = await fetchDemo();
+      demo.meta.demo = true;
+      demo.meta.mode = "demo";
       setPack(demo);
       setTab("work");
     } catch (err) {
@@ -28,9 +67,14 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadDemo().catch(() => undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const saved = readSavedPack();
+    if (saved) {
+      setPack(saved);
+      setTab("work");
+    }
   }, []);
+
+  const demo = isDemoPack(pack);
 
   return (
     <div className="app">
@@ -77,15 +121,25 @@ export default function App() {
           </button>
         </nav>
         <button className="btn" type="button" onClick={loadDemo} disabled={busy}>
-          Open the CardioShield working file
+          Open the CardioShield demo
         </button>
         <div className="doctrine-chip">
-          <em>{pack ? pack.doctrine.name : "Nothing read yet"}</em>
-          {pack ? pack.doctrine.bet : "Drop a brief. We will write the working file before anyone sees a slide."}
+          <em>{pack ? pack.meta.brand : "Nothing read yet"}</em>
+          {pack
+            ? demo
+              ? "This is the example working file. Upload your brief on the Brief tab to replace it."
+              : pack.doctrine.bet
+            : "Drop a brief. We will write the working file before anyone sees a slide."}
         </div>
       </aside>
       <main className="main">
         {error ? <p className="error">{error}</p> : null}
+        {demo && pack ? (
+          <div className="demo-banner">
+            Demo strategy for CardioShield — not from your upload. Go to Brief, drop your
+            files, then click Write the working file.
+          </div>
+        ) : null}
         {tab === "briefs" && (
           <>
             <div className="topbar">
@@ -98,8 +152,8 @@ export default function App() {
               busy={busy}
               setBusy={setBusy}
               onPack={(next) => {
-                setPack(next);
-                setTab("work");
+                setError("");
+                applyPack(next, "work");
               }}
             />
           </>

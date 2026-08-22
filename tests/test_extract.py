@@ -81,3 +81,13 @@ def test_pasted_prose_infers_market():
     brief = merge_into_brief([], pasted="A cardiology brand launch in India for HFrEF.")
     assert brief.market == "India"
     assert "cardiology" in brief.therapy_area.lower()
+
+
+def test_yaml_without_brand_does_not_swallow_prose():
+    pasted = (
+        "date: 12 May\nfrom: medical affairs\n\n"
+        "# Brand\nLumenDerm\n## Therapy Area\nDermatology\n"
+    )
+    brief = merge_into_brief([], pasted=pasted)
+    assert brief.brand == "LumenDerm"
+    assert "Dermatology" in brief.therapy_area

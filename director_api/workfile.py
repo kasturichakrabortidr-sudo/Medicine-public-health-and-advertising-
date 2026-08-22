@@ -489,8 +489,13 @@ def _qoq(brief) -> int | None:
 
 
 def _looks_like_delay(text: str) -> bool:
-    low = text.lower()
-    return any(w in low for w in ("stabilis", "stabiliz", "late", "second-line", "switch", "wait", "delay", "habit"))
+    return bool(re.search(
+        r"stabilis(?:e|ation)|stabiliz(?:e|ation)|second[- ]line|too late|"
+        r"late\s*/\s*second|late/second|\bdelay(?:ed|ing|s)?\b|"
+        r"wait(?:ing)? until|start on ace",
+        text or "",
+        re.I,
+    ))
 
 
 def _looks_like_cost(text: str) -> bool:

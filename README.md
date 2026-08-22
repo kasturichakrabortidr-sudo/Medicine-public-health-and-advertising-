@@ -20,13 +20,12 @@ Opens `http://127.0.0.1:5173`
 
 | Tab | What it does |
 |---|---|
+| **Brief** | Upload PDF/PPT/DOC/YAML or paste text. The working file is built from **your** files, not from the demo. |
 | **Evidence** | Validated citation register (DOI/PMID). The campaign lead is the highest-leverage published source, not a slogan. Uncited brief items stay gaps. PubMed hits are retrieved but cannot silently become the lead. |
 | **Strat deck** | Client-ready slides: forest plots, box plots, bars, lines, pies, impact matrix. **Download PPTX** for an editable PowerPoint (native text, tables, Office charts). Print to PDF. |
 | **Dashboard** | KPI room, funnel, evidence mix, intervention board, governance. |
 
-Demo data is the CardioShield HFrEF brief in `examples/brief.example.yaml`.
-Planning numbers are labelled illustrative until you replace them with audit /
-CRM baselines. All claims still need MLR.
+The CardioShield HFrEF pack in `examples/brief.example.yaml` is an **optional demo** (button: “Open the CardioShield demo”). It does not load on startup, and it is never returned from `/api/generate`. Planning numbers are labelled illustrative until you replace them with audit / CRM baselines. All claims still need MLR.
 
 The original 11-phase Claude pipeline (Markdown documents) is unchanged below.
 
