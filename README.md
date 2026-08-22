@@ -1,3 +1,37 @@
+# STRATA — AI Strategy Director
+
+A presentation-ready **strategy director** for HCP medicomarketing. Upload a
+client brief in **any format**, extract the working file, and get a visual
+strategy deck plus a measurement dashboard.
+
+The director does not write a generic funnel. It picks a **doctrine** from the
+tension in the brief — for the CardioShield example, **The First-Touch
+Doctrine**: the enemy is the *stabilise-first* ritual, not the comparator
+molecule. Interventions, charts, and kill-criteria all serve that bet.
+
+### Run the app
+
+```bash
+pip install -r requirements.txt
+python start_director.py
+```
+
+Opens `http://127.0.0.1:5173`
+
+| Tab | What it does |
+|---|---|
+| **Briefs** | Upload PDF, PPT/PPTX, DOC/DOCX, XLS/XLSX, CSV, TXT/MD, YAML/JSON, RTF, HTML, ODF, images — or paste. Extract fields, edit, generate. |
+| **Strat deck** | Client-ready slides: forest plots, box plots, bars, lines, pies, impact matrix. Print to PDF. |
+| **Dashboard** | KPI room, funnel, evidence mix, intervention board, governance. |
+
+Demo data is the CardioShield HFrEF brief in `examples/brief.example.yaml`.
+Planning numbers are labelled illustrative until you replace them with audit /
+CRM baselines. All claims still need MLR.
+
+The original 11-phase Claude pipeline (Markdown documents) is unchanged below.
+
+---
+
 # Medicomarketing Strategy Agent
 
 An AI agent that builds a complete, evidence-led **medicomarketing strategy from

@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/api.ts","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/components/BriefsTab.tsx","./src/components/DashboardTab.tsx","./src/components/DeckTab.tsx","./src/components/SlideView.tsx","./src/components/charts/BoxPlot.tsx","./src/components/charts/ForestPlot.tsx","./src/components/charts/StrategyChart.tsx"],"version":"5.9.3"}

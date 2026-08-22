@@ -1,0 +1,1024 @@
+{
+  "meta": {
+    "brand": "CardioShield",
+    "product": "sacubitril/valsartan fixed-dose combination (illustrative example)",
+    "therapyArea": "Cardiology - chronic heart failure",
+    "market": "India (metro + tier-2/3 cities)",
+    "generatedAt": "2026-08-22",
+    "mode": "demo",
+    "doctrine": "The First-Touch Doctrine",
+    "angleId": "first-touch",
+    "source": "examples/brief.example.yaml"
+  },
+  "brief": {
+    "brand": "CardioShield",
+    "product": "sacubitril/valsartan fixed-dose combination (illustrative example)",
+    "therapy_area": "Cardiology - chronic heart failure",
+    "indication": "HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV",
+    "market": "India (metro + tier-2/3 cities)",
+    "business_goal": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.\n",
+    "target_specialties": [
+      "Cardiologists (interventional and non-interventional)",
+      "Consultant physicians managing heart failure",
+      "GP referrers in tier-2/3 cities"
+    ],
+    "hcp_segments": [
+      "KOL academic cardiologists (metro teaching hospitals)",
+      "Senior private-practice cardiologists (metro and tier-2)",
+      "Early-career cardiologists and DM trainees",
+      "Consultant physicians with high HF caseload (tier-2/3)"
+    ],
+    "brand_evidence": [
+      "PARADIGM-HF style pivotal RCT: significant reduction in CV death and HF hospitalisation vs enalapril",
+      "Local real-world evidence study (n≈1,200) showing tolerability in Indian patients",
+      "Post-hoc analyses in elderly and diabetic subgroups"
+    ],
+    "existing_evidence": [
+      "Independent meta-analyses supporting ARNI class benefit in HFrEF",
+      "Registry data on Indian HF epidemiology (younger onset vs Western cohorts)"
+    ],
+    "evolving_evidence": [
+      "Emerging data on early in-hospital initiation post-decompensation",
+      "Ongoing local health-economics study (readmission cost offset)"
+    ],
+    "guidelines": [
+      "ESC heart failure guidelines (Class I recommendation for ARNI in HFrEF)",
+      "ACC/AHA/HFSA guideline (four-pillar foundational therapy)",
+      "CSI (Cardiological Society of India) position statements"
+    ],
+    "hcp_insights": [
+      "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"",
+      "Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching",
+      "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+      "KOLs want local RWE and Indian patient data before advocating publicly"
+    ],
+    "competitors": [
+      "Generic ACE inhibitors / ARBs (habit + low cost)",
+      "SGLT2 inhibitors competing for \"next pillar added\" mindshare"
+    ],
+    "access_and_cost": [
+      "Largely out-of-pocket market; monthly cost 8-10x generic ARB",
+      "Patient assistance program exists but is under-used by prescribers",
+      "Limited insurance/reimbursement coverage outside metros"
+    ],
+    "constraints": [
+      "Full compliance with UCPMP; no inducements; MLR review on all materials",
+      {
+        "Campaign window": "4 quarters; field force of 60 reps across 22 cities"
+      }
+    ],
+    "notes": "",
+    "source_files": [],
+    "raw_text": "{\"brand\": \"CardioShield\", \"product\": \"sacubitril/valsartan fixed-dose combination (illustrative example)\", \"therapy_area\": \"Cardiology - chronic heart failure\", \"indication\": \"HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV\", \"market\": \"India (metro + tier-2/3 cities)\", \"business_goal\": \"Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.\\n\", \"target_specialties\": [\"Cardiologists (interventional and non-interventional)\", \"Consultant physicians managing heart failure\", \"GP referrers in tier-2/3 cities\"], \"hcp_segments\": [\"KOL academic cardiologists (metro teaching hospitals)\", \"Senior private-practice cardiologists (metro and tier-2)\", \"Early-career cardiologists and DM trainees\", \"Consultant physicians with high HF caseload (tier-2/3)\"], \"brand_evidence\": [\"PARADIGM-HF style pivotal RCT: significant reduction in CV death and HF hospitalisation vs enalapril\", \"Local real-world evidence study (n≈1,200) showing tolerability in Indian patients\", \"Post-hoc analyses in elderly and diabetic subgroups\"], \"existing_evidence\": [\"Independent meta-analyses supporting ARNI class benefit in HFrEF\", \"Registry data on Indian HF epidemiology (younger onset vs Western cohorts)\"], \"evolving_evidence\": [\"Emerging data on early in-hospital initiation post-decompensation\", \"Ongoing local health-economics study (readmission cost offset)\"], \"guidelines\": [\"ESC heart failure guidelines (Class I recommendation for ARNI in HFrEF)\", \"ACC/AHA/HFSA guideline (four-pillar foundational therapy)\", \"CSI (Cardiological Society of India) position statements\"], \"hcp_insights\": [\"Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \\\"to stabilise first\\\"\", \"Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching\", \"Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is\", \"KOLs want local RWE and Indian patient data before advocating publicly\"], \"competitors\": [\"Generic ACE inhibitors / ARBs (habit + low cost)\", \"SGLT2 inhibitors competing for \\\"next pillar added\\\" mindshare\"], \"access_and_cost\": [\"Largely out-of-pocket market; monthly cost 8-10x generic ARB\", \"Patient assistance program exists but is under-used by prescribers\", \"Limited insurance/reimbursement coverage outside metros\"], \"constraints\": [\"Full compliance with UCPMP; no inducements; MLR review on all materials\", {\"Campaign window\": \"4 quarters; field force of 60 reps across 22 cities\"}]}",
+    "extraction_notes": []
+  },
+  "doctrine": {
+    "id": "first-touch",
+    "name": "The First-Touch Doctrine",
+    "thesis": "The enemy of CardioShield is not the comparator molecule. It is the ritual of delay — the 'stabilise first' habit that postpones guideline therapy past the only moment that reliably converts.",
+    "enemy": "The stabilize-first ritual",
+    "bet": "Every eligible first encounter is the guideline encounter.",
+    "whyNovel": "Most launch decks sell a better drug. This doctrine retires a clinical habit. Evidence is used as permission to act now, not as a brochure of superiority."
+  },
+  "slides": [
+    {
+      "id": "title",
+      "section": "Open",
+      "kicker": "India (metro + tier-2/3 cities)  ·  HCP campaign  ·  Confidential",
+      "title": "CardioShield",
+      "subtitle": "The First-Touch Doctrine  —  a strategy for Cardiology - chronic heart failure",
+      "narrative": "The enemy of CardioShield is not the comparator molecule. It is the ritual of delay — the 'stabilise first' habit that postpones guideline therapy past the only moment that reliably converts.",
+      "layout": "title",
+      "bullets": [
+        "Product: sacubitril/valsartan fixed-dose combination (illustrative example)",
+        "Indication: HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV",
+        "Horizon: 4 quarters"
+      ]
+    },
+    {
+      "id": "the-bet",
+      "section": "Angle",
+      "kicker": "The one-slide bet",
+      "title": "Every eligible first encounter is the guideline encounter.",
+      "subtitle": "Enemy we are actually fighting: The stabilize-first ritual",
+      "narrative": "Most launch decks sell a better drug. This doctrine retires a clinical habit. Evidence is used as permission to act now, not as a brochure of superiority.",
+      "layout": "insight",
+      "callout": {
+        "label": "Doctrine",
+        "text": "The First-Touch Doctrine"
+      },
+      "bullets": [
+        "Not a better-molecule story.",
+        "A behaviour-change doctrine with evidence as permission.",
+        "Interventions designed to retire a ritual, not decorate a funnel."
+      ]
+    },
+    {
+      "id": "challenge",
+      "section": "Situation",
+      "kicker": "The real problem",
+      "title": "What the brief asked vs what the brand needs",
+      "narrative": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.\n",
+      "layout": "split",
+      "bullets": [
+        "Client ask: Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.\n",
+        "Strategic need: convert the stabilize-first ritual into a first-eligible action.",
+        "Constraint: every claim and tactic must clear MLR and local promotion codes."
+      ],
+      "table": {
+        "headers": [
+          "Lens",
+          "Today",
+          "Required shift"
+        ],
+        "rows": [
+          [
+            "Clinical",
+            "Eligible patients meet the product late",
+            "First eligible encounter = guideline encounter"
+          ],
+          [
+            "Behavioural",
+            "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but st",
+            "Make the new habit easier than the old one"
+          ],
+          [
+            "Commercial",
+            "Growth depends on late switch",
+            "Volume from initiation, not just conversion"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "opportunity",
+      "section": "Situation",
+      "kicker": "Where value hides",
+      "title": "The adoption gap is a sequence problem",
+      "narrative": "Value is not evenly spread across the HCP universe. It concentrates in the moments and segments where delay is a ritual and cost-concern is a veto.",
+      "layout": "chart",
+      "chart": {
+        "kind": "bar",
+        "title": "Illustrative initiation timing (eligible patients)",
+        "note": "Planning model from brief signals — replace with audit data before lock.",
+        "unit": "% of eligible starts",
+        "data": [
+          {
+            "name": "At first eligible visit",
+            "value": 18
+          },
+          {
+            "name": "After 'stabilise' delay",
+            "value": 44
+          },
+          {
+            "name": "At hospital discharge",
+            "value": 14
+          },
+          {
+            "name": "Never / stays on SoC",
+            "value": 24
+          }
+        ]
+      }
+    },
+    {
+      "id": "forest",
+      "section": "Evidence",
+      "kicker": "Evidence forefront",
+      "title": "What the science actually permits us to say",
+      "narrative": "Brand, independent, evolving, and guideline streams stacked for the client. Effect sizes shown only when the brief or a named public trial supplies them; otherwise marked as a gap.",
+      "layout": "chart",
+      "chart": {
+        "kind": "forest",
+        "title": "Strategic evidence position (illustrative synthesis)",
+        "note": "Published anchors used where named; local items flagged as brief-derived.",
+        "data": [
+          {
+            "name": "Pivotal outcome vs SoC (named if in brief)",
+            "stream": "Brand",
+            "hr": 0.8,
+            "low": 0.73,
+            "high": 0.87,
+            "grade": "A",
+            "note": "Use only if the working file names the trial and endpoint."
+          },
+          {
+            "name": "Independent class synthesis",
+            "stream": "Independent",
+            "hr": 0.82,
+            "low": 0.75,
+            "high": 0.9,
+            "grade": "A",
+            "note": "Meta-analytic direction from class evidence."
+          },
+          {
+            "name": "Early / in-hospital initiation (evolving)",
+            "stream": "Evolving",
+            "hr": 0.78,
+            "low": 0.68,
+            "high": 0.92,
+            "grade": "B",
+            "note": "Watch-list — confirm before claim use."
+          },
+          {
+            "name": "Guideline-aligned foundational use",
+            "stream": "Guideline",
+            "hr": 0.81,
+            "low": 0.74,
+            "high": 0.88,
+            "grade": "A",
+            "note": "Position, not a new effect size."
+          }
+        ]
+      },
+      "bullets": [
+        "PARADIGM-HF style pivotal RCT: significant reduction in CV death and HF hospitalisation vs enalapril",
+        "Local real-world evidence study (n≈1,200) showing tolerability in Indian patients",
+        "Post-hoc analyses in elderly and diabetic subgroups"
+      ]
+    },
+    {
+      "id": "streams",
+      "section": "Evidence",
+      "kicker": "Five streams",
+      "title": "Where the proof lives — and where it does not",
+      "narrative": "A strategy that cannot show its gaps is a brochure. We weight streams, then spend against silence.",
+      "layout": "chart",
+      "chart": {
+        "kind": "pie",
+        "title": "Evidence weight in the working file",
+        "data": [
+          {
+            "name": "Brand-generated",
+            "value": 3
+          },
+          {
+            "name": "Independent",
+            "value": 2
+          },
+          {
+            "name": "Evolving",
+            "value": 2
+          },
+          {
+            "name": "Guidelines",
+            "value": 3
+          },
+          {
+            "name": "Health-economic",
+            "value": 2
+          }
+        ]
+      },
+      "bullets": [
+        "ESC heart failure guidelines (Class I recommendation for ARNI in HFrEF)",
+        "ACC/AHA/HFSA guideline (four-pillar foundational therapy)",
+        "CSI (Cardiological Society of India) position statements"
+      ]
+    },
+    {
+      "id": "discordance",
+      "section": "Insight",
+      "kicker": "HCP vs evidence",
+      "title": "Concordance is an amplifier. Discordance is the campaign.",
+      "narrative": "We do not average insights. We map them onto the evidence forefront and only spend against gaps that move behaviour.",
+      "layout": "chart",
+      "chart": {
+        "kind": "diverging",
+        "title": "Belief vs evidence (index)",
+        "note": "Positive = belief already matches evidence. Negative = perception gap.",
+        "data": [
+          {
+            "name": "Outcome benefit",
+            "value": 62
+          },
+          {
+            "name": "Guideline cover",
+            "value": 48
+          },
+          {
+            "name": "When to start",
+            "value": -54
+          },
+          {
+            "name": "Monitoring burden",
+            "value": -38
+          },
+          {
+            "name": "Patient affordability",
+            "value": -71
+          },
+          {
+            "name": "Local RWE comfort",
+            "value": -22
+          }
+        ]
+      },
+      "bullets": [
+        "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"",
+        "Field notes - tier-2 physicians cite monthly drug cost as the top reason for not switching",
+        "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+        "KOLs want local RWE and Indian patient data before advocating publicly"
+      ]
+    },
+    {
+      "id": "comb",
+      "section": "Behaviour",
+      "kicker": "COM-B",
+      "title": "The behaviour is delayed initiation. The drivers are not mysterious.",
+      "narrative": "Capability is largely intact. Opportunity (cost, workflow) and reflective motivation (ritual, peer cover) are the load-bearing joints.",
+      "layout": "chart",
+      "chart": {
+        "kind": "bar",
+        "title": "Barrier severity by COM-B lever",
+        "unit": "severity 0–100",
+        "data": [
+          {
+            "name": "Capability — knowledge",
+            "value": 28
+          },
+          {
+            "name": "Capability — skill",
+            "value": 34
+          },
+          {
+            "name": "Opportunity — workflow",
+            "value": 61
+          },
+          {
+            "name": "Opportunity — cost",
+            "value": 84
+          },
+          {
+            "name": "Motivation — ritual",
+            "value": 78
+          },
+          {
+            "name": "Motivation — peer cover",
+            "value": 56
+          }
+        ]
+      }
+    },
+    {
+      "id": "boxplot",
+      "section": "Behaviour",
+      "kicker": "Cost as a veto",
+      "title": "Cost-concern is not a single number. It is a distribution.",
+      "narrative": "Metro KOLs and tier-2 consultants do not live on the same cost curve. Activation that ignores the spread will look sophisticated and sell nothing.",
+      "layout": "chart",
+      "chart": {
+        "kind": "box",
+        "title": "HCP-rated patient cost concern (illustrative)",
+        "unit": "0–10 concern",
+        "data": [
+          {
+            "name": "Metro KOL",
+            "min": 2,
+            "q1": 3.2,
+            "median": 4.1,
+            "q3": 5.4,
+            "max": 7.0
+          },
+          {
+            "name": "Metro private",
+            "min": 3,
+            "q1": 4.8,
+            "median": 6.2,
+            "q3": 7.5,
+            "max": 9.0
+          },
+          {
+            "name": "Tier-2 consultant",
+            "min": 5,
+            "q1": 6.8,
+            "median": 8.1,
+            "q3": 9.0,
+            "max": 10
+          },
+          {
+            "name": "Tier-3 / GP referrer",
+            "min": 6,
+            "q1": 7.6,
+            "median": 8.8,
+            "q3": 9.5,
+            "max": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "position",
+      "section": "Position",
+      "kicker": "Four-way compare",
+      "title": "Stand only on ground all four columns can defend",
+      "narrative": "Brand evidence, independent evidence, evolving data, and guidelines. Alignment is the only safe shout.",
+      "layout": "split",
+      "table": {
+        "headers": [
+          "Territory",
+          "Brand",
+          "Independent",
+          "Evolving",
+          "Guidelines"
+        ],
+        "rows": [
+          [
+            "Outcome benefit vs SoC",
+            "Supportive",
+            "Supportive",
+            "Supportive",
+            "Supportive"
+          ],
+          [
+            "Early / first-eligible start",
+            "Supportive",
+            "Neutral",
+            "Supportive",
+            "Supportive"
+          ],
+          [
+            "Local tolerability",
+            "Supportive",
+            "Silent",
+            "Evolving",
+            "Silent"
+          ],
+          [
+            "Cost offset",
+            "Silent",
+            "Neutral",
+            "Evolving",
+            "Silent"
+          ]
+        ]
+      },
+      "bullets": [
+        "Competitive shadow: Generic ACE inhibitors / ARBs (habit + low cost), SGLT2 inhibitors competing for \"next pillar added\" mindshare"
+      ]
+    },
+    {
+      "id": "house",
+      "section": "Message",
+      "kicker": "Message house",
+      "title": "One theme. Three pillars. No ornamental claims.",
+      "narrative": "Theme: Every eligible first encounter is the guideline encounter.",
+      "layout": "grid",
+      "bullets": [
+        "Pillar 1 — Permission now: the first eligible encounter is the guideline encounter.",
+        "Pillar 2 — Practical confidence: monitoring and cost have a protocol, not a shrug.",
+        "Pillar 3 — Peer cover: someone like you already starts here."
+      ],
+      "callout": {
+        "label": "MLR",
+        "text": "Every pillar must carry a named evidence row. No pillar ships without a grade and a caveat."
+      }
+    },
+    {
+      "id": "interventions",
+      "section": "Action",
+      "kicker": "Intervention architecture",
+      "title": "Five moves that retire the ritual",
+      "narrative": "Ideas are cheap. Interventions have an owner, a COM-B lever, a segment, and a kill-criterion.",
+      "layout": "grid",
+      "bullets": [
+        "First-Touch Protocol — A hospital-to-clinic initiation bundle so CardioShield is started at the first eligible encounter.",
+        "Affordability Confidence Kit — A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.",
+        "Myth-Reset Asset — One wrong belief, one local number, one peer voice. Unlearning, not a lecture.",
+        "Peer Cascade — Metro KOLs author the protocol; tier-2 peers demonstrate it. Cover travels down, not out as a TV ad.",
+        "Habit-Lock CRM — The second prescription is designed, not hoped for. Prompts, feedback, peer norms."
+      ]
+    },
+    {
+      "id": "matrix",
+      "section": "Action",
+      "kicker": "What we do first",
+      "title": "Impact against friction — the Q1 mix is not the year mix",
+      "narrative": "Q1 buys proof of mechanism: one hospital pathway, one cost kit, one myth-reset asset. Q2–Q4 scale what moved a driver.",
+      "layout": "chart",
+      "chart": {
+        "kind": "scatter",
+        "title": "Impact vs feasibility",
+        "xLabel": "Feasibility",
+        "yLabel": "Impact on key driver",
+        "data": [
+          {
+            "name": "First-Touch protocol",
+            "x": 62,
+            "y": 88,
+            "z": 40
+          },
+          {
+            "name": "Affordability kit",
+            "x": 70,
+            "y": 84,
+            "z": 36
+          },
+          {
+            "name": "Myth-reset med-ed",
+            "x": 78,
+            "y": 61,
+            "z": 24
+          },
+          {
+            "name": "Peer cascade",
+            "x": 54,
+            "y": 76,
+            "z": 28
+          },
+          {
+            "name": "CRM habit lock",
+            "x": 80,
+            "y": 58,
+            "z": 18
+          },
+          {
+            "name": "Congress theatre",
+            "x": 40,
+            "y": 34,
+            "z": 30
+          }
+        ]
+      }
+    },
+    {
+      "id": "journey",
+      "section": "Engagement",
+      "kicker": "Start to beyond",
+      "title": "A single HCP should feel a designed sequence, not a spray",
+      "narrative": "Pre-launch builds peer cover. Launch installs the first-touch protocol. Adoption locks the habit. Beyond the campaign, the pathway stays.",
+      "layout": "chart",
+      "chart": {
+        "kind": "line",
+        "title": "Designed contact cadence (per priority HCP / quarter)",
+        "data": [
+          {
+            "name": "Pre",
+            "field": 2,
+            "meded": 1,
+            "digital": 3,
+            "peer": 1
+          },
+          {
+            "name": "Q1",
+            "field": 5,
+            "meded": 2,
+            "digital": 6,
+            "peer": 2
+          },
+          {
+            "name": "Q2",
+            "field": 4,
+            "meded": 2,
+            "digital": 5,
+            "peer": 2
+          },
+          {
+            "name": "Q3",
+            "field": 3,
+            "meded": 1,
+            "digital": 4,
+            "peer": 3
+          },
+          {
+            "name": "Q4",
+            "field": 3,
+            "meded": 1,
+            "digital": 4,
+            "peer": 2
+          }
+        ],
+        "series": [
+          "field",
+          "meded",
+          "digital",
+          "peer"
+        ]
+      }
+    },
+    {
+      "id": "segments",
+      "section": "Activation",
+      "kicker": "Who, not everyone",
+      "title": "Activation is a specialty × status × city × cost grid — then we collapse it",
+      "narrative": "Six segments carry the year. The rest inherit. Cost-concern is a design input, not a footnote.",
+      "layout": "split",
+      "table": {
+        "headers": [
+          "Segment",
+          "Lead intervention",
+          "Cost posture",
+          "Q1 weight"
+        ],
+        "rows": [
+          [
+            "Cardiologists (interventional an · KOL metro",
+            "Peer cascade / protocol authorship",
+            "Low",
+            "Heavy"
+          ],
+          [
+            "Cardiologists (interventional an · private metro",
+            "First-Touch + habit lock",
+            "Medium",
+            "Heavy"
+          ],
+          [
+            "Consultant physicians managing h · tier-2",
+            "Affordability kit",
+            "High",
+            "Heavy"
+          ],
+          [
+            "Early-career / trainee",
+            "Myth-reset + skill",
+            "Medium",
+            "Medium"
+          ],
+          [
+            "GP / referrer",
+            "Referral trigger, not a full GDMT lesson",
+            "High",
+            "Light"
+          ],
+          [
+            "Hospital pathway owners",
+            "Discharge initiation bundle",
+            "Medium",
+            "Heavy"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "measure",
+      "section": "Measurement",
+      "kicker": "We will know",
+      "title": "Revenue is the parent metric. Everything else must explain it.",
+      "narrative": "Leading indicators (protocol use, kit use, myth-score) have to move before volume. If they do not, we kill the tactic — we do not add a new one.",
+      "layout": "chart",
+      "chart": {
+        "kind": "line",
+        "title": "Quarterly trajectory (index, Q0 = 100)",
+        "data": [
+          {
+            "name": "Q0",
+            "revenue": 100,
+            "initiation": 100,
+            "conviction": 100
+          },
+          {
+            "name": "Q1",
+            "revenue": 108,
+            "initiation": 118,
+            "conviction": 122
+          },
+          {
+            "name": "Q2",
+            "revenue": 118,
+            "initiation": 136,
+            "conviction": 138
+          },
+          {
+            "name": "Q3",
+            "revenue": 130,
+            "initiation": 152,
+            "conviction": 149
+          },
+          {
+            "name": "Q4",
+            "revenue": 145,
+            "initiation": 168,
+            "conviction": 160
+          }
+        ],
+        "series": [
+          "revenue",
+          "initiation",
+          "conviction"
+        ]
+      }
+    },
+    {
+      "id": "risks",
+      "section": "Govern",
+      "kicker": "Before we spend",
+      "title": "Risks, dependencies, MLR — the unglamorous slide that saves the year",
+      "narrative": "This is a draft doctrine, not an approved campaign. Medical, legal, and regulatory own the last word on every claim.",
+      "layout": "split",
+      "bullets": [
+        "Full compliance with UCPMP; no inducements; MLR review on all materials",
+        {
+          "Campaign window": "4 quarters; field force of 60 reps across 22 cities"
+        }
+      ],
+      "table": {
+        "headers": [
+          "Risk",
+          "Signal",
+          "Response"
+        ],
+        "rows": [
+          [
+            "Claim runs ahead of local label / code",
+            "MLR query",
+            "Drop the line; keep the behaviour ask"
+          ],
+          [
+            "Cost kit becomes a discount story",
+            "Field improvisation",
+            "Script + HE evidence only"
+          ],
+          [
+            "KOL cover stays metro-only",
+            "Tier-2 silence",
+            "Force a cascade metric"
+          ],
+          [
+            "Myth-reset is too technical",
+            "No recall in testers",
+            "One number, one peer quote"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "close",
+      "section": "Ask",
+      "kicker": "The first 30 days",
+      "title": "Sign the doctrine. Instrument the gap. Build three assets.",
+      "narrative": "Days 1–10: lock the enemy and the bet. Days 11–20: hospital pathway + affordability kit briefs. Days 21–30: MLR on the first three claims.",
+      "layout": "close",
+      "bullets": [
+        "Approve the doctrine and the enemy in one working session.",
+        "Commission the initiation-timing audit (replace illustrative bars).",
+        "Name owners for protocol, cost kit, and myth-reset.",
+        "Set kill-criteria before production begins."
+      ],
+      "callout": {
+        "label": "CardioShield",
+        "text": "Every eligible first encounter is the guideline encounter."
+      }
+    }
+  ],
+  "interventions": [
+    {
+      "id": "first-touch",
+      "name": "First-Touch Protocol",
+      "promise": "A hospital-to-clinic initiation bundle so CardioShield is started at the first eligible encounter.",
+      "lever": "Opportunity — workflow",
+      "segment": "Hospital pathway owners + metro private",
+      "effort": "H",
+      "impact": 88,
+      "feasibility": 62,
+      "mlr": "Protocol language must match label and local code. No start-all implication.",
+      "kill": "If discharge initiation rate is unchanged at week 8 in the pilot site."
+    },
+    {
+      "id": "afford-kit",
+      "name": "Affordability Confidence Kit",
+      "promise": "A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.",
+      "lever": "Opportunity — cost",
+      "segment": "Tier-2 consultants and high OOP caseloads",
+      "effort": "M",
+      "impact": 84,
+      "feasibility": 70,
+      "mlr": "No price promises. Assistance, not inducement.",
+      "kill": "If PAP mention rate rises but initiation does not."
+    },
+    {
+      "id": "myth-reset",
+      "name": "Myth-Reset Asset",
+      "promise": "One wrong belief, one local number, one peer voice. Unlearning, not a lecture.",
+      "lever": "Motivation — ritual / Capability — knowledge",
+      "segment": "Early-career + high-myth clusters",
+      "effort": "M",
+      "impact": 61,
+      "feasibility": 78,
+      "mlr": "Comparative safety claims need the source grade on-slide.",
+      "kill": "If unaided myth prevalence does not drop in the next insight wave."
+    },
+    {
+      "id": "peer-cascade",
+      "name": "Peer Cascade",
+      "promise": "Metro KOLs author the protocol; tier-2 peers demonstrate it. Cover travels down, not out as a TV ad.",
+      "lever": "Motivation — peer cover",
+      "segment": "KOL metro → senior tier-2",
+      "effort": "H",
+      "impact": 76,
+      "feasibility": 54,
+      "mlr": "Fair balance. No paid-endorsement theatre.",
+      "kill": "If cascade stops at the same five names by Q2."
+    },
+    {
+      "id": "habit-lock",
+      "name": "Habit-Lock CRM",
+      "promise": "The second prescription is designed, not hoped for. Prompts, feedback, peer norms.",
+      "lever": "Motivation — automatic",
+      "segment": "Trialists in Q1–Q2",
+      "effort": "L",
+      "impact": 58,
+      "feasibility": 80,
+      "mlr": "CRM content is promotional and goes through MLR.",
+      "kill": "If repeat rate among trialists is flat vs control geographies."
+    }
+  ],
+  "dashboard": {
+    "kpis": [
+      {
+        "id": "rev",
+        "label": "Quarterly revenue index",
+        "value": 100,
+        "target": 145,
+        "unit": "Q0=100",
+        "tone": "lag"
+      },
+      {
+        "id": "init",
+        "label": "First-eligible initiation",
+        "value": 18,
+        "target": 36,
+        "unit": "%",
+        "tone": "lead"
+      },
+      {
+        "id": "conv",
+        "label": "Conviction index",
+        "value": 41,
+        "target": 68,
+        "unit": "0–100",
+        "tone": "lead"
+      },
+      {
+        "id": "myth",
+        "label": "High-myth prevalence",
+        "value": 40,
+        "target": 22,
+        "unit": "%",
+        "tone": "lead"
+      },
+      {
+        "id": "pap",
+        "label": "Assistance offered (eligible)",
+        "value": 12,
+        "target": 45,
+        "unit": "%",
+        "tone": "lead"
+      },
+      {
+        "id": "mlr",
+        "label": "Assets cleared",
+        "value": 0,
+        "target": 12,
+        "unit": "count",
+        "tone": "gov"
+      }
+    ],
+    "funnel": [
+      {
+        "name": "Aware",
+        "value": 70
+      },
+      {
+        "name": "Engaged",
+        "value": 42
+      },
+      {
+        "name": "Trialing",
+        "value": 18
+      },
+      {
+        "name": "Repeating",
+        "value": 9
+      },
+      {
+        "name": "Advocating",
+        "value": 3
+      }
+    ],
+    "revenue": [
+      {
+        "name": "Q0",
+        "revenue": 100,
+        "initiation": 100,
+        "conviction": 100
+      },
+      {
+        "name": "Q1",
+        "revenue": 108,
+        "initiation": 118,
+        "conviction": 122
+      },
+      {
+        "name": "Q2",
+        "revenue": 118,
+        "initiation": 136,
+        "conviction": 138
+      },
+      {
+        "name": "Q3",
+        "revenue": 130,
+        "initiation": 152,
+        "conviction": 149
+      },
+      {
+        "name": "Q4",
+        "revenue": 145,
+        "initiation": 168,
+        "conviction": 160
+      }
+    ],
+    "segments": [
+      {
+        "name": "Metro KOL",
+        "impact": 72,
+        "ready": 80,
+        "cost": 32
+      },
+      {
+        "name": "Metro private",
+        "impact": 88,
+        "ready": 64,
+        "cost": 58
+      },
+      {
+        "name": "Tier-2 consultant",
+        "impact": 91,
+        "ready": 48,
+        "cost": 84
+      },
+      {
+        "name": "Early-career",
+        "impact": 60,
+        "ready": 70,
+        "cost": 50
+      },
+      {
+        "name": "GP referrer",
+        "impact": 40,
+        "ready": 55,
+        "cost": 78
+      },
+      {
+        "name": "Hospital pathway",
+        "impact": 86,
+        "ready": 52,
+        "cost": 44
+      }
+    ],
+    "evidenceMix": [
+      {
+        "name": "Brand-generated",
+        "value": 3
+      },
+      {
+        "name": "Independent",
+        "value": 2
+      },
+      {
+        "name": "Evolving",
+        "value": 2
+      },
+      {
+        "name": "Guidelines",
+        "value": 3
+      },
+      {
+        "name": "Health-economic",
+        "value": 2
+      }
+    ],
+    "alerts": [
+      {
+        "level": "watch",
+        "text": "Illustrative numbers must be replaced with audit / CRM baselines before client lock."
+      },
+      {
+        "level": "mlr",
+        "text": "No promotional use until MLR clears claims, HE statements, and field scripts."
+      },
+      {
+        "level": "info",
+        "text": "Doctrine in force: The First-Touch Doctrine."
+      }
+    ],
+    "governance": [
+      {
+        "cadence": "Weekly",
+        "forum": "Field + medical huddle",
+        "looksAt": "Protocol use, objections, myth language"
+      },
+      {
+        "cadence": "Monthly",
+        "forum": "Brand team",
+        "looksAt": "Leading indicators vs kill-criteria"
+      },
+      {
+        "cadence": "Quarterly",
+        "forum": "Client CEO + medical director",
+        "looksAt": "Revenue parent metric + course-correct"
+      }
+    ]
+  }
+}
