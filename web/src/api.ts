@@ -107,3 +107,35 @@ export async function generatePack(args: {
   }
   return pack;
 }
+
+export async function listProjects(): Promise<import("./types").ProjectSummary[]> {
+  const res = await fetch("/api/projects");
+  if (!res.ok) throw new Error(await readError(res));
+  const data = await res.json();
+  return data.projects || [];
+}
+
+export async function loadProject(id: string): Promise<import("./types").ProjectRecord> {
+  const res = await fetch(`/api/projects/${encodeURIComponent(id)}`);
+  if (!res.ok) throw new Error(await readError(res));
+  return res.json();
+}
+
+export async function saveProject(
+  pack: StrategyPack,
+  status: import("./types").ProjectStatus,
+  id?: string,
+): Promise<import("./types").ProjectRecord> {
+  const res = await fetch("/api/projects", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pack, status, id }),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return res.json();
+}
+
+export async function deleteProject(id: string): Promise<void> {
+  const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(await readError(res));
+}

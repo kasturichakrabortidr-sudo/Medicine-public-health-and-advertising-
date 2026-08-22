@@ -12,6 +12,7 @@ web/dist/
 web/.netlify/
 .netlify/
 .pytest_cache/
-*.egg-info/
+data/projects/
+
 *.tsbuildinfo
 

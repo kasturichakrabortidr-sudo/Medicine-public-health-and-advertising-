@@ -13,6 +13,7 @@ from medicomarketing_agent.config import load_brief
 from .extract import ExtractedBrief, extract_files, merge_into_brief
 from .generate import generate_pack
 from .pptx_export import filename_for, pack_to_pptx
+from .projects import delete_project, get_project, list_projects, save_project, upsert_ongoing
 
 app = FastAPI(title="STRATA Strategy Director", version="1.0.0")
 app.add_middleware(
@@ -38,7 +39,7 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-inn-not-brand",
+        "build": "2026-08-22-deck-craft",
     }
 
 
@@ -165,7 +166,56 @@ async def generate(
         )
     except OSError:
         pass
+    try:
+        upsert_ongoing(pack)
+    except (OSError, ValueError, TypeError):
+        pass
     return pack
+
+
+@app.get("/api/projects")
+def projects_list():
+    return {"projects": list_projects()}
+
+
+@app.post("/api/projects")
+async def projects_save(request: Request):
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, f"Body must be JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(400, "Body must be an object.")
+    pack = payload.get("pack")
+    if not isinstance(pack, dict) or not pack.get("slides"):
+        raise HTTPException(400, "A project must include a strategy pack with slides.")
+    try:
+        if payload.get("id"):
+            record = save_project(payload)
+        elif payload.get("status") == "saved":
+            record = save_project(payload)
+        else:
+            record = upsert_ongoing(pack)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except OSError as exc:
+        raise HTTPException(500, f"Could not save the project: {exc}") from exc
+    return record
+
+
+@app.get("/api/projects/{pid}")
+def projects_get(pid: str):
+    record = get_project(pid)
+    if not record:
+        raise HTTPException(404, "Project not found.")
+    return record
+
+
+@app.delete("/api/projects/{pid}")
+def projects_delete(pid: str):
+    if not delete_project(pid):
+        raise HTTPException(404, "Project not found.")
+    return {"ok": True, "id": pid}
 
 
 @app.get("/api/export/pptx")

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { fetchDemo } from "./api";
+import { fetchDemo, saveProject } from "./api";
 import { BriefsTab } from "./components/BriefsTab";
 import { DashboardTab } from "./components/DashboardTab";
 import { DeckTab } from "./components/DeckTab";
 import { EvidenceTab } from "./components/EvidenceTab";
+import { ProjectsTab } from "./components/ProjectsTab";
 import { WorkingFileTab } from "./components/WorkingFileTab";
 import { RefLinksProvider } from "./links";
 import type { StrategyPack, TabId } from "./types";
@@ -86,11 +87,14 @@ export default function App() {
         <div className="mark">
           <strong>STRATA</strong>
           <span>Working file for HCP campaigns</span>
-          <span className="build-stamp">22 Aug · science uses the INN, not the brand</span>
+          <span className="build-stamp">22 Aug · visual deck, not a file dump</span>
         </div>
         <nav className="nav">
           <button type="button" className={tab === "briefs" ? "active" : ""} onClick={() => setTab("briefs")}>
             Brief
+          </button>
+          <button type="button" className={tab === "projects" ? "active" : ""} onClick={() => setTab("projects")}>
+            Projects
           </button>
           <button
             type="button"
@@ -162,9 +166,24 @@ export default function App() {
               onPack={(next) => {
                 setError("");
                 applyPack(next, "work");
+                if (!isDemoPack(next)) {
+                  void saveProject(next, "ongoing").catch((err) => {
+                    setError(err instanceof Error ? err.message : String(err));
+                  });
+                }
               }}
             />
           </>
+        )}
+        {tab === "projects" && (
+          <ProjectsTab
+            pack={pack}
+            onOpen={(next) => {
+              setError("");
+              applyPack(next, "work");
+            }}
+            onError={setError}
+          />
         )}
         {tab === "work" && pack && <WorkingFileTab pack={pack} />}
         {tab === "evidence" && pack && <EvidenceTab pack={pack} />}
