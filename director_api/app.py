@@ -142,6 +142,7 @@ async def generate(
                 {
                     "brand": brief.brand,
                     "product": brief.product,
+                    "molecule": (pack.get("meta") or {}).get("molecule"),
                     "therapy_area": brief.therapy_area,
                     "indication": brief.indication,
                     "insights": brief.hcp_insights,
