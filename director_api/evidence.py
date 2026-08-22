@@ -18,7 +18,7 @@ import urllib.request
 from typing import Any
 
 from .extract import ExtractedBrief
-from .paper_read import apply_reading, fetch_abstracts, select_papers
+from .paper_read import apply_reading, assign_paper_jobs, fetch_abstracts, select_papers
 
 # Curated, published anchors. Effect sizes are taken from the cited paper.
 # Do not add a row here unless DOI or PMID is real.
@@ -344,6 +344,7 @@ def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str,
                 if pmid:
                     catalog_pmids.add(pmid)
 
+    assign_paper_jobs(matched, brief)
     gaps = _uncited_brief_items(brief, matched)
     lead = _campaign_lead(brief, matched)
     return {
@@ -578,6 +579,19 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
         ranked = sorted(pool, key=_lead_sort_key)
         usable = [r for r in ranked if _usable_finding(r)]
         anchors = usable or ranked
+    if not catalog_core:
+        role_rank = {
+            "placebo-controlled": 0,
+            "first-eligible-start": 0,
+            "head-to-head": 1,
+            "durability": 2,
+            "guideline-cover": 3,
+            "replication": 4,
+        }
+        anchors = sorted(
+            anchors,
+            key=lambda r: (role_rank.get(r.get("role") or "", 8), _lead_sort_key(r)),
+        )
 
     primary = anchors[0]
     support = anchors[1:4]
@@ -597,16 +611,23 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
         )
         directs = "outcome-permission"
     elif not catalog_core:
-        finding = primary.get("finding") or primary.get("claim_permitted") or primary.get("title") or ""
         tension = (brief.hcp_insights or brief.access_and_cost or [brief.business_goal] or [""])[0]
-        statement = (
-            f"{finding} (PMID {primary.get('pmid') or '—'}). "
-            "That is the science the campaign may carry — taken from the paper, not from the brief. "
+        bits = []
+        for rec in anchors[:4]:
+            finding = rec.get("finding") or rec.get("claim_permitted") or rec.get("title") or ""
+            label = rec.get("roleLabel") or rec.get("trial") or rec.get("short") or "Paper"
+            bits.append(
+                f"{label} — {_clip_lead(finding, 180)} (PMID {rec.get('pmid') or '—'})."
+            )
+        statement = " ".join(bits) if bits else (
+            f"{primary.get('finding') or primary.get('claim_permitted') or primary.get('title') or ''} "
+            f"(PMID {primary.get('pmid') or '—'})."
         )
+        statement += " Each numbered paper owns one line — we do not reprint the same finding."
         if tension:
             statement += (
-                f"The brief's conversion problem is “{_clip_lead(tension)}”. "
-                "We spend against that behaviour, not against reprinting the paper."
+                f" The brief's conversion problem is “{_clip_lead(tension)}”. "
+                "We spend against that behaviour, using the set."
             )
         directs = primary.get("directs") or "outcome-permission"
     else:
@@ -619,9 +640,9 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     return {
         "statement": statement,
         "why": (
-            f"Highest-leverage sourced row is {primary.get('short')} "
-            f"({primary.get('journal') or 'journal'} {primary.get('year') or ''}; "
-            f"PMID {primary.get('pmid') or '—'})."
+            f"{len(citations)} numbered paper{'s' if len(anchors[:4]) != 1 else ''} carry the science"
+            + (f", led by {primary.get('short')}" if primary.get("short") else "")
+            + f" (PMID {primary.get('pmid') or '—'})."
         ),
         "directs": directs,
         "primaryId": primary["id"],
@@ -646,9 +667,9 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     }
 
 
-def _clip_lead(text: str) -> str:
+def _clip_lead(text: str, limit: int = 160) -> str:
     text = re.sub(r"\s+", " ", text or "").strip()
-    return text if len(text) <= 160 else text[:157].rstrip() + "…"
+    return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
 
 
 def _usable_finding(row: dict) -> bool:

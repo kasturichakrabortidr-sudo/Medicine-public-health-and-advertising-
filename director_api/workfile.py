@@ -362,40 +362,74 @@ def _p07(brief, records, doctrine, lead) -> dict:
              "Do not invent an elderly-only indication."],
         ]
     else:
-        finding = (primary.get("claim_permitted") if primary else "") or "No extractable finding yet — do not lock a line."
+        jobs = [r for r in records if r.get("claim_permitted") or r.get("finding")]
+        role_rank = {
+            "placebo-controlled": 0,
+            "head-to-head": 1,
+            "durability": 2,
+            "replication": 3,
+            "first-eligible-start": 0,
+            "guideline-cover": 4,
+        }
+        jobs = sorted(jobs, key=lambda r: role_rank.get(r.get("role") or "", 8))
+        pillars = []
+        seen_claims: set[str] = set()
+        for rec in jobs:
+            claim = (rec.get("claim_permitted") or rec.get("finding") or "").strip()
+            key = re.sub(r"[^a-z0-9]+", " ", claim.lower())[:80]
+            if not claim or key in seen_claims:
+                continue
+            seen_claims.add(key)
+            pillars.append([
+                rec.get("roleLabel") or rec.get("trial") or rec.get("short") or "Sourced finding",
+                claim,
+                mark(rec) if rec else "—",
+                rec.get("spine_means") or claim,
+            ])
+            if len(pillars) >= 3:
+                break
         barrier = (
             (brief.hcp_insights or brief.access_and_cost or [doctrine.get("enemy") or ""])[0]
             or "Conviction at the decision moment is fragile."
         )
-        execute = (primary.get("spine_execute") if primary else "") or doctrine.get("bet") or ""
-        pillars = [
-            [
-                "What the paper showed",
-                finding,
-                mark(primary) if primary else "—",
-                finding,
-            ],
-            [
+        if len(pillars) < 3:
+            pillars.append([
                 "Why it is not converting",
                 barrier,
                 "brief",
-                "Spend against this behaviour. Do not reprint the paper as the campaign.",
+                "Spend against this behaviour. Do not collapse the papers into one reprint.",
+            ])
+        if len(pillars) < 3:
+            pillars.append([
+                "How we use the set",
+                "Each numbered paper answers a different objection.",
+                mark(*jobs) if jobs else "—",
+                "Do not quote the same finding three times.",
+            ])
+        plc = next((r for r in jobs if r.get("role") == "placebo-controlled"), jobs[0] if jobs else None)
+        h2h = next((r for r in jobs if r.get("role") == "head-to-head"), None)
+        dur = next((r for r in jobs if r.get("role") == "durability"), None)
+        better = h2h or plc
+        lasts = dur or next((r for r in jobs if r is not better), plc)
+        objections = [
+            [
+                "Is this better than what I already use?",
+                (better.get("claim_permitted") if better else "No head-to-head paper on the register."),
+                mark(better) if better else "pending",
+                "Do not add a number that is not in the abstract.",
             ],
             [
-                "How we use the finding",
-                execute,
-                mark(primary) if primary else "—",
-                (primary.get("spine_means") if primary else finding),
+                "Will the response last?",
+                (lasts.get("claim_permitted") if lasts else "No durability paper on the register."),
+                mark(lasts) if lasts else "pending",
+                "Do not invent a duration claim.",
             ],
-        ]
-        head_to_head = next(
-            (r.get("claim_permitted") for r in sourced if r.get("control_event") is not None),
-            finding,
-        )
-        objections = [
-            ["Is this better than what I already use?", head_to_head, mark(primary) if primary else "pending", "Do not add a number that is not in the abstract."],
-            ["The patient cannot afford this", "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.", "gap", "Do not imply a cost-offset we have not sourced."],
-            ["I want local data first", "Local RWE is a research task until it has a PMID. The campaign still uses the numbered finding.", "gap", "Do not invent an India-only efficacy line."],
+            [
+                "The patient cannot afford this",
+                "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.",
+                "gap",
+                "Do not imply a cost-offset we have not sourced.",
+            ],
         ]
     return _phase(
         "07",

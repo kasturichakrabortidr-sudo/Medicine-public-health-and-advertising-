@@ -16,8 +16,8 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           <h1>Numbered papers</h1>
           <p>
             Every claim we are willing to lead with is a finding taken from a paper.
-            We search PubMed, read the abstracts, and keep the numbers and conclusions
-            that can carry a line. Unused retrievals are not listed here.
+            Each numbered paper owns one line — placebo, head-to-head, durability —
+            so the campaign does not reprint the same result.
           </p>
         </div>
       </div>

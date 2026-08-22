@@ -151,7 +151,10 @@ def _bind_science(doctrine: dict, ledger: dict) -> None:
         return
     primary = cites[0]
     doctrine["scienceLead"] = lead.get("statement") or ""
-    doctrine["scienceAnchor"] = (
+    doctrine["scienceAnchor"] = " · ".join(
+        f"{mark(c)} {c.get('short') or c.get('id')} · PMID {c.get('pmid') or '—'}"
+        for c in cites[:4]
+    ) or (
         f"{mark(primary)} {primary.get('short')} · PMID {primary.get('pmid') or '—'} · doi:{primary.get('doi') or '—'}"
     )
     doctrine["thesis"] = doctrine["thesis"] + " " + (lead.get("statement") or "")
@@ -625,9 +628,11 @@ def _science_slides(lead: dict, records: list[dict], gaps: list[dict]) -> list[d
             "id": "science-compare",
             "section": "Science",
             "kicker": "What the timing data means",
-            "title": "The comparator is the delayed habit, not another molecule",
-            "subtitle": f"{first.get('name')} · PMID {first.get('pmid') or '—'}",
-            "narrative": f"{first.get('claim') or ''} {tag}",
+            "title": "Published rates from each numbered paper",
+            "subtitle": f"{len(compare)} sourced comparisons",
+            "narrative": " ".join(
+                f"{row.get('name')}: {row.get('claim')}" for row in compare[:4]
+            ) or (first.get("claim") or ""),
             "layout": "infographic",
             "chart": {
                 "kind": "compare",
@@ -637,10 +642,10 @@ def _science_slides(lead: dict, records: list[dict], gaps: list[dict]) -> list[d
                 "data": compare,
             },
             "callout": {
-                "label": "So we do this",
-                "text": "If the larger effect lives in the in-hospital window, we cannot wait for clinic week 6.",
+                "label": "Each paper a different job",
+                "text": "Placebo, head-to-head, and durability are not interchangeable reprints of one result.",
             },
-            "refs": [first.get("ref")] if first.get("ref") else [],
+            "refs": [row.get("ref") for row in compare if row.get("ref")],
         })
     slides.append({
         "id": "citation-register",
@@ -844,13 +849,18 @@ def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
             pillars.append("Pillar 3 — Peer cover: someone like you already starts here.")
         return pillars
     sourced = [r for r in records if r.get("claim_permitted")]
+    seen: set[str] = set()
     out = []
-    for i, r in enumerate(sourced[:2], 1):
-        out.append(
-            f"Pillar {i} — {r.get('trial') or r.get('short')}: {r.get('claim_permitted')}"
-        )
-    bet = doctrine.get("bet") or "Use the sourced finding at the decision moment."
-    out.append(f"Pillar {len(out) + 1} — {bet}")
+    for r in sourced:
+        claim = (r.get("claim_permitted") or "").strip()
+        key = re.sub(r"[^a-z0-9]+", " ", claim.lower())[:80]
+        if not claim or key in seen:
+            continue
+        seen.add(key)
+        label = r.get("roleLabel") or r.get("trial") or r.get("short") or f"Paper {len(out)+1}"
+        out.append(f"Pillar {len(out)+1} — {label} {mark(r)}: {claim}")
+        if len(out) >= 3:
+            break
     return out or ["No extractable finding yet — do not lock a line."]
 
 

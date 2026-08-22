@@ -296,3 +296,92 @@ def test_sglt2_pubmed_does_not_steal_arni_catalog(monkeypatch):
     assert "0.74" in rec["claim_permitted"]
     assert "16.3" in rec["claim_permitted"]
     assert "0.74" in ledger["lead"]["statement"]
+
+
+def test_each_paper_owns_a_distinct_strategy_line(monkeypatch):
+    def fake_search(term, retmax=8):
+        return ["111", "222", "333"]
+
+    def fake_summary(pmids):
+        return {
+            "111": {
+                "title": "Lumetinib versus placebo in plaque psoriasis (BEAM-1)",
+                "fulljournalname": "N Engl J Med",
+                "pubdate": "2024",
+                "authors": [{"name": "Chen L"}],
+                "articleids": [{"idtype": "doi", "value": "10.1056/a"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            },
+            "222": {
+                "title": "Lumetinib versus secukinumab in plaque psoriasis (BEAM-HEAD)",
+                "fulljournalname": "Br J Dermatol",
+                "pubdate": "2025",
+                "authors": [{"name": "Rao P"}],
+                "articleids": [{"idtype": "doi", "value": "10.1111/b"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            },
+            "333": {
+                "title": "Long-term lumetinib open-label extension (BEAM-EXT)",
+                "fulljournalname": "J Am Acad Dermatol",
+                "pubdate": "2025",
+                "authors": [{"name": "Singh A"}],
+                "articleids": [{"idtype": "doi", "value": "10.1016/c"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            },
+        }
+
+    def fake_fetch(pmids):
+        return {
+            "111": {
+                "abstract": (
+                    "METHODS: BEAM-1 randomized 840 adults. "
+                    "RESULTS: PASI 90 at week 16 was 74.1% versus 5.8% placebo. "
+                    "CONCLUSIONS: Lumetinib was superior to placebo."
+                ),
+                "pubtypes": ["Randomized Controlled Trial"],
+            },
+            "222": {
+                "abstract": (
+                    "METHODS: BEAM-HEAD compared lumetinib with secukinumab. "
+                    "RESULTS: PASI 90 at week 52 was 86.6% versus 57.1% secukinumab. "
+                    "CONCLUSIONS: Lumetinib was superior to secukinumab."
+                ),
+                "pubtypes": ["Randomized Controlled Trial"],
+            },
+            "333": {
+                "abstract": (
+                    "METHODS: BEAM-EXT open-label extension enrolled 897 patients. "
+                    "RESULTS: At week 256, 85.1%/52.3% of patients achieved PASI 90/100. "
+                    "CONCLUSIONS: Durable PASI 90 responses were maintained."
+                ),
+                "pubtypes": ["Randomized Controlled Trial"],
+            },
+        }
+
+    monkeypatch.setattr("director_api.evidence._esearch", fake_search)
+    monkeypatch.setattr("director_api.evidence._esummary", fake_summary)
+    monkeypatch.setattr("director_api.evidence.fetch_abstracts", fake_fetch)
+    brief = ExtractedBrief(
+        brand="LumenDerm",
+        product="lumetinib",
+        therapy_area="Dermatology",
+        indication="plaque psoriasis",
+        hcp_insights=["Cost is the veto at the desk"],
+    )
+    pack = generate_pack(brief, pubmed=True)
+    lead = pack["evidence"]["lead"]["statement"]
+    assert "74.1" in lead
+    assert "86.6" in lead or "57.1" in lead
+    assert "85.1" in lead
+    assert lead.count("74.1") == 1
+    house = next(p for p in pack["workfile"]["phases"] if p["id"] == "07")["house"]["rows"]
+    lines = [row[1] for row in house]
+    assert any("74.1" in str(line) for line in lines)
+    assert any("86.6" in str(line) or "57.1" in str(line) for line in lines)
+    assert any("85.1" in str(line) for line in lines)
+    assert len({str(line) for line in lines}) == len(lines)
+    executes = {r.get("spine_execute") for r in pack["evidence"]["records"]}
+    assert len(executes) >= 2
+    objections = next(p for p in pack["workfile"]["phases"] if p["id"] == "07")["objections"]["rows"]
+    obj_refs = [row[2] for row in objections if row[2] not in ("gap", "pending", "brief", "—")]
+    assert len(set(obj_refs)) >= 2

@@ -221,6 +221,8 @@ def select_papers(
     any_numeric = any(row[2].get("numeric") for row in scored if row[0] > 0)
     chosen: list[dict] = []
     seen_keys: set[str] = set()
+    seen_roles: set[str] = set()
+    pending: list[tuple[int, dict, dict]] = []
     for score, hit, parsed in scored:
         if score < 1:
             continue
@@ -231,10 +233,23 @@ def select_papers(
         key = _dedupe_key(hit, parsed)
         if key in seen_keys:
             continue
+        role = guess_role(hit, parsed)
+        if chosen and role in seen_roles:
+            pending.append((score, hit, parsed))
+            continue
         seen_keys.add(key)
+        seen_roles.add(role)
         chosen.append(hit)
         if len(chosen) >= limit:
             break
+    for score, hit, parsed in pending:
+        if len(chosen) >= limit:
+            break
+        key = _dedupe_key(hit, parsed)
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+        chosen.append(hit)
     if not chosen:
         for score, hit, parsed in scored:
             key = _dedupe_key(hit, parsed)
@@ -294,9 +309,9 @@ def apply_reading(
             record["visual_unit"] = "response rate (%) from abstract"
     record["grade"] = _grade(design, parsed)
     record["directs"] = _directs(title, abstract, design)
-    barrier = _barrier(brief)
+    record["comparator"] = parsed.get("comparator") or record.get("comparator") or ""
+    record["spine_barrier"] = _barrier(brief)
     record["spine_means"] = parsed["claim"]
-    record["spine_barrier"] = barrier
     record["spine_execute"] = _execute_for(record["directs"], brief)
     record["spine_measure"] = (
         f"Unaided recall of the sourced finding ({parsed['endpoint'] or 'the numbered result'})"
@@ -623,6 +638,115 @@ def _barrier(brief: Any) -> str:
     if goal:
         return goal
     return "Conviction at the decision moment is fragile."
+
+
+ROLE_LABELS = {
+    "placebo-controlled": "Vs placebo",
+    "head-to-head": "Vs the current choice",
+    "durability": "It holds",
+    "replication": "A second RCT",
+    "supporting": "Also sourced",
+    "outcome-permission": "The outcome",
+    "first-eligible-start": "Start now",
+    "guideline-cover": "Cover exists",
+    "segment-confidence": "Age is not a veto",
+    "local-context": "Local context",
+}
+
+ACTIVE_COMPARATORS = {
+    "ustekinumab", "secukinumab", "adalimumab", "etanercept", "guselkumab",
+    "ixekizumab", "brodalumab", "tildrakizumab", "enalapril",
+}
+
+
+def guess_role(hit: dict[str, Any], parsed: dict[str, Any] | None = None) -> str:
+    parsed = parsed or {}
+    blob = f"{hit.get('title') or ''} {hit.get('design') or ''} {hit.get('trial') or ''} {(parsed.get('trial') or '')}".lower()
+    abstract = ((hit.get("abstract") or "") + " " + (parsed.get("claim") or "")).lower()
+    if any(w in blob for w in ("open-label extension", "long-term", "limmitless", "extension study")):
+        return "durability"
+    if any(w in blob for w in ("in-hospital", "pre-discharge", "early after discharge")):
+        return "first-eligible-start"
+    if "guideline" in blob:
+        return "guideline-cover"
+    comp = (parsed.get("comparator") or hit.get("comparator") or "").lower()
+    if comp in ACTIVE_COMPARATORS or (comp and comp not in ("placebo", "the comparator", "")):
+        return "head-to-head"
+    if parsed.get("control_event") is not None and (comp == "placebo" or "placebo" in abstract or "placebo" in blob):
+        return "placebo-controlled"
+    if parsed.get("control_event") is not None:
+        return "head-to-head"
+    if parsed.get("treat_event") is not None and parsed.get("control_event") is None:
+        return "durability"
+    return "outcome-permission"
+
+
+def assign_paper_jobs(records: list[dict[str, Any]], brief: Any) -> list[dict[str, Any]]:
+    """Give each paper a distinct job so strategy does not reprint one finding."""
+    used: set[str] = set()
+    for rec in records:
+        if rec.get("matchedFrom") == "catalog":
+            role = rec.get("directs") or "outcome-permission"
+            rec["role"] = role
+            rec["roleLabel"] = ROLE_LABELS.get(role, rec.get("short") or "Sourced")
+            used.add(role)
+            continue
+        role = guess_role(rec, {
+            "trial": rec.get("trial"),
+            "claim": rec.get("claim_permitted"),
+            "comparator": rec.get("comparator"),
+            "treat_event": rec.get("treat_event"),
+            "control_event": rec.get("control_event"),
+        })
+        if role in used:
+            role = {
+                "placebo-controlled": "replication",
+                "head-to-head": "supporting",
+                "durability": "supporting",
+            }.get(role, "supporting")
+            if role in used:
+                role = "supporting"
+        rec["role"] = role
+        rec["roleLabel"] = ROLE_LABELS.get(role, rec.get("trial") or rec.get("short") or "Sourced")
+        used.add(role)
+        rec["spine_means"] = _means_for(rec)
+        rec["spine_execute"] = _execute_for_role(role, brief)
+        rec["spine_measure"] = (
+            f"Unaided recall of {rec.get('endpoint') or 'this paper\'s finding'} "
+            f"({rec.get('trial') or rec.get('short') or 'this paper'})"
+        )
+        rec["spine_barrier"] = _barrier(brief)
+    return records
+
+
+def _means_for(rec: dict[str, Any]) -> str:
+    role = rec.get("role") or ""
+    claim = rec.get("claim_permitted") or rec.get("finding") or ""
+    if role == "placebo-controlled":
+        return "Permission versus untreated disease — that is this paper's job, not a slogan."
+    if role == "head-to-head":
+        return "When they name the competitor, this paper is the answer — not a reprint of the placebo RCT."
+    if role == "durability":
+        return "Clearance that holds is this paper's job. Do not spend it as another week-16 reprint."
+    if role == "replication":
+        return "A second RCT, a second number. Not a paraphrase of the first."
+    return claim
+
+
+def _execute_for_role(role: str, brief: Any) -> str:
+    if role in ("placebo-controlled", "outcome-permission"):
+        return "Bag the vs-placebo number. That is permission to start, not the whole campaign."
+    if role == "head-to-head":
+        return "When they stay on the competitor, quote this head-to-head finding — one number, one paper."
+    if role == "durability":
+        return "The 'will it last' objection gets this durability number, not another efficacy reprint."
+    if role == "replication":
+        return "A second RCT in the bag so the first number is not a one-study story."
+    if role == "first-eligible-start":
+        return "First-Touch Protocol: initiate at first-eligible, not first-available."
+    if role == "guideline-cover":
+        return "Peer Cascade: KOLs author the protocol the guideline already permits."
+    return _execute_for(role, brief)
 
 
 def _execute_for(directs: str, brief: Any) -> str:
