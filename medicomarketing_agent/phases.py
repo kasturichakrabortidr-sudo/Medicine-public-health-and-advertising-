@@ -46,6 +46,57 @@ Operating principles you must follow in every output:
 6. Show your working process. Begin each phase output with a short
    "How this section was built" note (2-4 sentences) describing the reasoning
    steps taken, so the client can audit the process.
+7. Visualise the data, don't just describe it. Whenever a phase instructs you
+   to produce a chart, include it as a machine-readable chart spec (see CHART
+   SPEC FORMAT below), placed directly after the table or section it
+   visualises. A chart must encode the exact same real labels and numbers as
+   the surrounding text — never a generic, placeholder, or decorative
+   diagram. If the working context genuinely lacks enough detail to populate
+   a required chart honestly, still output it using your best evidence-based
+   estimate, and add one line directly above it: "*Chart uses provisional
+   estimates pending confirmed data — see gap register.*" Never skip a
+   required chart silently — a client-ready strategy is judged on its
+   visuals as much as its tables and prose.
+
+CHART SPEC FORMAT
+Whenever a phase asks for a chart, emit it as a fenced code block whose
+language tag is exactly `chart`, containing exactly one JSON object and
+nothing else (no comments, no trailing commas, no surrounding prose inside
+the block). A downstream Python renderer turns this JSON into a real PNG
+image, so it must match one of these five schemas exactly:
+
+- bar      {"type":"bar","id":"kebab-id","title":"...","x_label":"...",
+            "y_label":"...","categories":["A","B",...],
+            "series":[{"name":"...","values":[n,n,...]}, ...]}
+            (every series' values array must be the same length as
+            categories; use one series for a simple bar chart, several for a
+            grouped comparison)
+- pie      {"type":"pie","id":"kebab-id","title":"...",
+            "labels":["A","B",...],"values":[n,n,...]}
+- quadrant {"type":"quadrant","id":"kebab-id","title":"...",
+            "x_label":"what low..high means","y_label":"what low..high means",
+            "x_range":[0,10],"y_range":[0,10],
+            "quadrant_labels":{"top_left":"...","top_right":"...",
+                                 "bottom_left":"...","bottom_right":"..."},
+            "points":[{"label":"...","x":n,"y":n}, ...]}
+- funnel   {"type":"funnel","id":"kebab-id","title":"...",
+            "stages":[{"label":"...","value":n}, ...]}
+            (ordered top to bottom; value is a count or a percentage)
+- tree     {"type":"tree","id":"kebab-id","title":"...",
+            "orientation":"vertical"|"horizontal",
+            "nodes":[{"id":"a","label":"...","level":0}, ...],
+            "edges":[{"from":"a","to":"b"}, ...]}
+            (edges are optional — omitting them auto-connects every node at
+            level N to every node at level N+1, which is only correct for a
+            simple chain; supply explicit edges whenever the real
+            relationships are not a full mesh, which is the normal case,
+            e.g. a KPI tree, a message house, or an evidence-to-execution
+            bridge)
+
+Use short, unique, kebab-case `id` values within each chart. Keep every
+chart to the smallest, clearest slice of real data that makes the point —
+4-10 categories/points/nodes is normally right; never fabricate extra ones
+just to fill the chart.
 """
 
 
@@ -66,7 +117,12 @@ Deconstruct the client brief before any research is planned. Produce:
    assumption | why it matters | risk if wrong | how we will test it.
 4. **Known / unknown map** — what we know with evidence, what we believe
    without evidence, what we don't know at all.
-5. **Working hypotheses** — 3-5 falsifiable hypotheses about why target HCPs
+5. **Known/unknown snapshot chart** — a `bar` chart (see CHART SPEC FORMAT)
+   with one category per bucket in point 4 (know with evidence / believe
+   without evidence / don't know at all) and the number of items you placed
+   in each, so the client can see at a glance how evidence-backed the
+   starting position really is.
+6. **Working hypotheses** — 3-5 falsifiable hypotheses about why target HCPs
    do or do not currently adopt the product/recommendation, each linked to the
    research it will need.
 
@@ -99,6 +155,10 @@ Produce:
    scope and why.
 6. **Safety and pharmacovigilance criteria** — what safety evidence must be
    captured alongside efficacy.
+7. **Evidence hierarchy chart** — a `tree` chart (orientation vertical) with
+   one node per grading level from point 3, level 0 = strongest, increasing
+   level number as strength decreases, chained top to bottom, so the grading
+   scheme itself reads as a diagram, not only a sentence.
 
 These criteria are the contract the evidence phase must honour.""",
     ),
@@ -130,7 +190,17 @@ table that stacks all streams side by side. Columns:
 | Evidence item | Stream | Design & N | Key finding (with effect size where known) | Evidence grade | Relevance to strategy | Message potential | Gap / caveat / MLR flag |
 
 Close with: (a) the 5 strongest evidence-backed strategic assets, and
-(b) the 5 most important evidence gaps with a recommendation for each.""",
+(b) the 5 most important evidence gaps with a recommendation for each.
+
+Then add two charts built from the real rows of the table you just produced
+(see CHART SPEC FORMAT):
+
+1. A `pie` chart titled "Evidence grade distribution" — one slice per
+   evidence grade you used, sized by how many table rows carry that grade.
+2. A `bar` chart titled "Evidence volume by stream" — one category per
+   stream (A-E), one series, valued by how many items you collated in that
+   stream. This is the first graphical picture of how the scientific data is
+   actually distributed, not just a table of it.""",
     ),
     Phase(
         id="04-hcp-insights",
@@ -154,7 +224,17 @@ provisional insights typical for this specialty and flag them for validation):
 4. **Silent zones** — evidence the HCPs never mention (unexploited assets) and
    HCP concerns the evidence never answers (evidence gaps to escalate).
 5. **Validation plan** — which provisional insights need confirming, with whom,
-   and by what method, before major spend is committed.""",
+   and by what method, before major spend is committed.
+6. **Concordance/discordance chart** — a `quadrant` chart plotting every
+   insight from the inventory: x = strength of the evidence behind the
+   related claim (0 = none/contradicted, 10 = strong independent + guideline
+   support), y = strength/consistency of the HCP signal (0 = isolated/weak,
+   10 = near-universal and consistent). Label the four quadrants with what a
+   point landing there means, e.g. top-right = "confirmed belief — amplify",
+   bottom-right = "evidence exists, HCPs unaware — silent zone to close",
+   top-left = "strong belief, weak evidence — perception gap to correct",
+   bottom-left = "low current priority". This turns the concordance and
+   discordance maps into one picture instead of two separate lists.""",
     ),
     Phase(
         id="05-behavioural-drivers",
@@ -182,7 +262,17 @@ Capability, Opportunity, Motivation → Behaviour) and produce:
 5. **KEY BEHAVIOURAL DRIVERS** — the 4-6 levers with the highest leverage,
    each stated as: driver | evidence/insight it rests on | barrier it
    overcomes | how the campaign will pull it. These drivers must be traceable
-   to Phases 3 and 4.""",
+   to Phases 3 and 4.
+6. **COM-B driver map chart** — a `tree` chart (orientation vertical),
+   level 0 = the three COM-B levers (Capability, Opportunity, Motivation),
+   level 1 = the key behavioural drivers from point 5, level 2 = the single
+   target-behaviour-change node. Use explicit `edges` connecting each driver
+   only to the lever(s) it genuinely operates on and on to the target
+   behaviour — not a full mesh — so the diagram shows real mechanism, not
+   decoration.
+7. **Driver leverage chart** — a `bar` chart, one category per key
+   behavioural driver from point 5, one series scoring its leverage/priority
+   (highest first), so the ranking in point 5 is also visible at a glance.""",
     ),
     Phase(
         id="06-evidence-position",
@@ -211,7 +301,14 @@ Produce:
    the defensible scientific ground the campaign will stand on.
 5. **Evidence roadmap** — data generation or publication moves (RWE, ISS,
    post-hoc, congress presence) that would strengthen the position during and
-   after the campaign.""",
+   after the campaign.
+6. **Alignment scorecard chart** — a `bar` chart, one category per key
+   clinical question/claim territory from the four-way comparison table,
+   with four series (Brand, Independent, Evolving, Guidelines) each scored
+   numerically for that row (supportive = 1, neutral = 0, unsupportive = -1,
+   silent = 0 — and say in the text which cells were silent so the zero isn't
+   mistaken for neutrality), so the alignment pattern across all four sources
+   is visible as one chart instead of only a table.""",
     ),
     Phase(
         id="07-core-messaging",
@@ -237,7 +334,12 @@ Produce:
    launch phase (breaking the old habit: triggers, education, trial
    experiences) vs. sustain phase (embedding the new habit: reinforcement,
    feedback loops, peer norms, system prompts in workflow). Map each element
-   to the COM-B lever it works on.""",
+   to the COM-B lever it works on.
+6. **Message house chart** — a `tree` chart (orientation vertical),
+   level 0 = the core messaging theme, level 1 = the message pillars from
+   point 2, level 2 = the single lead proof point for each pillar. This makes
+   the campaign's argument structure visible as one diagram, directly reusing
+   the real pillar names and proof points from point 2.""",
     ),
     Phase(
         id="08-hcp-engagement",
@@ -265,7 +367,12 @@ Produce a staged engagement journey:
    every touchpoint) and trigger adaptations.
 5. **Beyond-the-campaign plan** — what stays alive after the funded period:
    communities, registries/data collaborations, education platforms, and the
-   handover into the next cycle's strategy.""",
+   handover into the next cycle's strategy.
+6. **Engagement arc chart** — a `tree` chart (orientation horizontal), one
+   node per stage from point 1 in order (Pre-launch → Launch → Adoption →
+   Reinforcement → Beyond campaign), with `edges` chaining each stage to the
+   next, so the journey reads left to right as a single flow diagram rather
+   than only a table row.""",
     ),
     Phase(
         id="09-activation-ideas",
@@ -296,7 +403,13 @@ Produce:
    relevant.
 4. **Prioritisation matrix** — impact vs. feasibility plot (as a table) across
    all ideas, and the recommended activation mix for quarter 1 vs. quarters
-   2-4.""",
+   2-4.
+5. **Prioritisation chart** — the same impact-vs-feasibility view as a
+   `quadrant` chart: one point per activation idea (label = short idea name),
+   x = feasibility (0-10), y = impact (0-10). Quadrant labels:
+   top_right = "do now", top_left = "hard wins — needs investment",
+   bottom_right = "quick wins — lower impact", bottom_left = "deprioritise".
+   This gives the client a genuine plotted matrix, not only a text table.""",
     ),
     Phase(
         id="10-measurement",
@@ -330,13 +443,69 @@ Produce:
    quarterly revenue (test-control geographies, pre-post cohorts, marketing
    mix logic), with honest notes on attribution limits.
 7. **Dashboard & governance** — the quarterly review pack: leading vs lagging
-   indicators, thresholds that trigger course-correction, and who decides.""",
+   indicators, thresholds that trigger course-correction, and who decides.
+8. **Adoption funnel chart** — a `funnel` chart with one stage per step of
+   the HCP adoption funnel from point 1 (aware → engaged → trialling →
+   repeating → advocating), valued with your best current-state or Q4-target
+   estimate for each, so the funnel is a real picture, not only a phrase.
+9. **KPI tree chart** — a `tree` chart (orientation horizontal) mirroring
+   point 1: level 0 = quarterly revenue growth, level 1 = prescription/
+   recommendation volume & share, level 2 = the adoption funnel stages,
+   level 3 = the engagement activity metrics that feed them. Use explicit
+   `edges` to show the true causal parents of each metric, not a full mesh.""",
     ),
     Phase(
-        id="11-executive-summary",
+        id="11-science-to-execution-bridge",
+        title="Science-to-Solution Bridge: Evidence → Strategy → Execution Traceability",
+        prompt="""\
+Phase 11 — Build the explicit bridge that connects the science to the
+solution through the strategy's execution. Every earlier phase produced one
+link in this chain; this phase makes the whole chain visible and auditable
+in a single place, so no strategic or executional element is left floating
+free of the evidence that is supposed to justify it.
+
+Produce:
+
+1. **Traceability matrix** — one row per key evidence item carried into the
+   Evidence Forefront Table (Phase 3). Columns: evidence item | strategic
+   evidence position it supports (Phase 6) | behavioural driver it fuels
+   (Phase 5) | message pillar it proves (Phase 7) | engagement stage(s) that
+   carry it to HCPs (Phase 8) | activation tactic(s) that operationalise it
+   (Phase 9) | the KPI it should move (Phase 10). If a cell has no honest
+   answer, write "no link yet" and add it to the broken-link register in
+   point 4 — never invent a link just to fill the cell.
+2. **Reverse check** — for every activation tactic (Phase 9) and every
+   message pillar (Phase 7), confirm it traces back to at least one named
+   evidence item, or flag it "evidence-light — tone/credibility risk, needs
+   MLR and medical sign-off before use."
+3. **Bridge diagram** — a `tree` chart (orientation horizontal) with level 0
+   = the evidence streams/items driving the strategy, level 1 = the
+   strategic evidence position statement, level 2 = the key behavioural
+   drivers, level 3 = the core message pillars, level 4 = the activation
+   tactics that carry them to HCPs, level 5 = the KPI each ultimately moves.
+   Use real, named labels taken from the phases above (never generic
+   placeholders like "Evidence 1") and explicit `edges` so the diagram shows
+   the true chain for each item, not a full mesh between every node in
+   adjacent levels.
+4. **Broken-link register** — every place in the traceability matrix or the
+   reverse check where the chain is missing, weak, or evidence-light, with a
+   recommendation: generate more evidence, soften the claim, re-route to a
+   better-supported message/tactic, or hold for MLR review.
+5. **One-paragraph bridge statement** — in plain language, how the science in
+   this brief becomes the specific tactics on the ground and the revenue
+   result the client is asking for. This paragraph is the direct answer to
+   "how does the evidence actually turn into the campaign and the number."
+
+This phase is the spine of the whole document: everything before it is
+science and strategy; everything after it (the executive summary) is the
+sign-off. Nothing in the executive summary may claim a connection that this
+phase's traceability matrix does not support.""",
+    ),
+    Phase(
+        id="12-executive-summary",
         title="Executive Strategy Summary",
         prompt="""\
-Phase 11 — Compile the executive strategy summary.
+Phase 12 — Compile the executive strategy summary.
 
 Condense the entire pipeline into a client-ready executive document
 (2-3 pages equivalent):
@@ -346,10 +515,18 @@ Condense the entire pipeline into a client-ready executive document
 3. The core theme and message house top line (Phase 7).
 4. The engagement and activation plan on one page (Phases 8, 9).
 5. The measurement commitments and quarterly targets (Phase 10).
-6. Risks, dependencies, and MLR items to clear before launch.
-7. Immediate next steps: the first 30 days.
+6. **Strategy-on-a-page chart** — a single condensed `tree` chart
+   (orientation horizontal), 4-6 nodes per level, distilling the Phase 11
+   bridge diagram down to only the headline evidence, the strategic
+   position, the core theme, the lead activation motion, and the top KPI —
+   the one visual a CEO could screenshot and remember.
+7. Risks, dependencies, and MLR items to clear before launch, drawn from the
+   Phase 11 broken-link register as well as compliance considerations.
+8. Immediate next steps: the first 30 days.
 
-Write it so a client CEO and a medical director both sign off on it.""",
+Write it so a client CEO and a medical director both sign off on it, and so
+neither of them has to take the evidence-to-execution connection on faith —
+point them at Phase 11 for the full traceability if they want to audit it.""",
     ),
 ]
 
@@ -371,6 +548,15 @@ For the outline point below, produce a fully developed section:
 - Where it touches execution, segment by specialty, status, geography,
   patient mix, and cost sensitivity as relevant.
 - Where it touches measurement, give metric definitions, sources, and targets.
+- Wherever the point has comparative, hierarchical, sequential, or
+  quantitative content, add at least one chart in the CHART SPEC FORMAT
+  defined in the system prompt (bar / pie / quadrant / funnel / tree) built
+  from the real data in this section — never a decorative placeholder.
+- If the point sits between science and execution (evidence, insight, or
+  behavioural content feeding into a tactic, message, or metric), make that
+  link explicit in the text: name which evidence/insight justifies which
+  tactic, and show that link in the chart wherever a `tree` chart is the
+  right fit for it.
 - End with: dependencies on other outline points, open questions for the
   strategy lead, and MLR/compliance flags.
 
