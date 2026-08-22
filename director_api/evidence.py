@@ -359,16 +359,36 @@ def _brief_blob(brief: ExtractedBrief) -> str:
 
 def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str) -> bool:
     tags = entry.get("tags") or ()
-    hits = sum(1 for tag in tags if tag in blob)
+    family = _catalog_family(tags)
+    brief_family = _brief_family(brief, blob)
+    if family and brief_family and family != brief_family:
+        return False
+    hits = sum(1 for tag in tags if len(str(tag)) >= 4 and tag in blob)
     if hits >= 2:
         return True
-    # Therapy-area gate: cardiology catalog should not leak into oncology briefs.
     ta = f"{brief.therapy_area} {brief.indication} {brief.product}".lower()
-    if "cardiology" in tags or "hfref" in tags or "arni" in tags:
+    if family == "cardiology":
         return any(k in ta or k in blob for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm"))
-    if "nsclc" in tags or "oncology" in tags:
-        return any(k in ta or k in blob for k in ("nsclc", "lung", "oncology", "pembrolizumab", "io"))
+    if family == "oncology":
+        return any(k in ta or k in blob for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote"))
     return hits >= 1
+
+
+def _catalog_family(tags) -> str:
+    if any(t in tags for t in ("hfref", "arni", "cardiology")):
+        return "cardiology"
+    if any(t in tags for t in ("nsclc", "oncology")):
+        return "oncology"
+    return ""
+
+
+def _brief_family(brief: ExtractedBrief, blob: str) -> str:
+    ta = f"{brief.therapy_area} {brief.indication} {brief.product} {blob}".lower()
+    if any(k in ta for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril")):
+        return "cardiology"
+    if any(k in ta for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab")):
+        return "oncology"
+    return ""
 
 
 def _record(entry: dict[str, Any], *, status: str, matched_from: str) -> dict[str, Any]:

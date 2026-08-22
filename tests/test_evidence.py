@@ -17,6 +17,8 @@ def test_cardioshield_lead_is_cited_first_eligible_science():
         c["id"] == "paradigm-hf-2014" or c["id"] == "pioneer-hf-2019" for c in ledger["lead"]["citations"]
     )
     assert all(r.get("doi") and r.get("citation") for r in ledger["records"])
+    assert "keynote-189-2018" not in {r["id"] for r in ledger["records"]}
+    assert "keynote-024-2016" not in {r["id"] for r in ledger["records"]}
     assert any("local" in g["item"].lower() or "rwe" in g["item"].lower() or "indian" in g["item"].lower()
                for g in ledger["gaps"]) or ledger["gaps"]
 

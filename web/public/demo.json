@@ -410,86 +410,6 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
         "status": "validated",
         "matchedFrom": "catalog"
-      },
-      {
-        "id": "keynote-189-2018",
-        "stream": "Independent / pivotal class",
-        "trial": "KEYNOTE-189",
-        "short": "KEYNOTE-189 2018",
-        "title": "Pembrolizumab plus chemotherapy in metastatic non–small-cell lung cancer",
-        "authors": "Gandhi L, Rodríguez-Abreu D, Gadgeel S, et al.",
-        "year": 2018,
-        "journal": "N Engl J Med",
-        "pages": "378:2078-2092",
-        "doi": "10.1056/NEJMoa1801005",
-        "pmid": "29658856",
-        "design": "RCT",
-        "n": 616,
-        "population": "Metastatic nonsquamous NSCLC, first-line, no EGFR/ALK",
-        "endpoint": "Overall survival",
-        "effect_metric": "HR",
-        "hr": 0.49,
-        "low": 0.38,
-        "high": 0.64,
-        "grade": "A",
-        "claim_permitted": "First-line PD-1 plus platinum pemetrexed improved OS vs chemo alone.",
-        "caveat": "IO-chemo cost and toxicity are the access problem, not the OS signal.",
-        "mlr": "Stay inside the exact labelled combination and line of therapy.",
-        "directs": "outcome-permission",
-        "control_event": 50.6,
-        "treat_event": 30.8,
-        "arr": 19.8,
-        "nnt": 5,
-        "horizon": "12-month OS complement (published OS 69.2% vs 49.4%)",
-        "visual_unit": "deaths per 100 patients at 12 months",
-        "spine_means": "About 1 in 5 extra patients is alive at 12 months versus chemo alone.",
-        "spine_barrier": "PD-L1-first sequencing can withhold the combination that produced the OS gain.",
-        "spine_execute": "Biomarker-last sequencing so combination is not delayed for a test result.",
-        "spine_measure": "Share of eligible patients starting combination before a PD-L1 wait.",
-        "citation": "Gandhi L, Rodríguez-Abreu D, Gadgeel S, et al. Pembrolizumab plus chemotherapy in metastatic non–small-cell lung cancer. N Engl J Med. 2018;378:2078-2092. doi:10.1056/NEJMoa1801005. PMID 29658856",
-        "url": "https://pubmed.ncbi.nlm.nih.gov/29658856/",
-        "status": "validated",
-        "matchedFrom": "catalog"
-      },
-      {
-        "id": "keynote-024-2016",
-        "stream": "Independent / pivotal class",
-        "trial": "KEYNOTE-024",
-        "short": "KEYNOTE-024 2016",
-        "title": "Pembrolizumab versus chemotherapy for PD-L1–positive non–small-cell lung cancer",
-        "authors": "Reck M, Rodríguez-Abreu D, Robinson AG, et al.",
-        "year": 2016,
-        "journal": "N Engl J Med",
-        "pages": "375:1823-1833",
-        "doi": "10.1056/NEJMoa1606774",
-        "pmid": "27718847",
-        "design": "RCT",
-        "n": 305,
-        "population": "NSCLC, PD-L1 TPS ≥50%, first-line",
-        "endpoint": "Progression-free survival",
-        "effect_metric": "HR",
-        "hr": 0.5,
-        "low": 0.37,
-        "high": 0.68,
-        "grade": "A",
-        "claim_permitted": "Pembrolizumab monotherapy improved PFS vs platinum chemo in high PD-L1 first-line NSCLC.",
-        "caveat": "Restricted to TPS ≥50%.",
-        "mlr": "Do not generalise to all-comer first-line.",
-        "directs": "outcome-permission",
-        "control_event": null,
-        "treat_event": null,
-        "arr": null,
-        "nnt": null,
-        "horizon": null,
-        "visual_unit": null,
-        "spine_means": null,
-        "spine_barrier": null,
-        "spine_execute": null,
-        "spine_measure": null,
-        "citation": "Reck M, Rodríguez-Abreu D, Robinson AG, et al. Pembrolizumab versus chemotherapy for PD-L1–positive non–small-cell lung cancer. N Engl J Med. 2016;375:1823-1833. doi:10.1056/NEJMoa1606774. PMID 27718847",
-        "url": "https://pubmed.ncbi.nlm.nih.gov/27718847/",
-        "status": "validated",
-        "matchedFrom": "catalog"
       }
     ],
     "gaps": [
@@ -556,7 +476,7 @@
         "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim."
       }
     ],
-    "validatedCount": 9,
+    "validatedCount": 7,
     "gapCount": 2
   },
   "slides": [
@@ -637,19 +557,6 @@
             "control_label": "Comparator",
             "treat_label": "PARADIGM-HF",
             "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
-          },
-          {
-            "name": "KEYNOTE-189 2018",
-            "control": 50.6,
-            "treat": 30.8,
-            "arr": 19.8,
-            "nnt": 5,
-            "horizon": "12-month OS complement (published OS 69.2% vs 49.4%)",
-            "unit": "deaths per 100 patients at 12 months",
-            "pmid": "29658856",
-            "control_label": "Comparator",
-            "treat_label": "KEYNOTE-189",
-            "claim": "First-line PD-1 plus platinum pemetrexed improved OS vs chemo alone."
           }
         ]
       },
@@ -696,7 +603,7 @@
       "section": "Science",
       "kicker": "Evidence register",
       "title": "Every lead claim traces to a named paper",
-      "narrative": "9 validated records. 2 brief items still lack a DOI/PMID and cannot set direction.",
+      "narrative": "7 validated records. 2 brief items still lack a DOI/PMID and cannot set direction.",
       "layout": "split",
       "table": {
         "headers": [
@@ -755,13 +662,6 @@
             "Indian HF presents younger and with incomplete GDMT — local epidemiology supports a first-",
             "B",
             "26011246 / 10.1002/ejhf.283"
-          ],
-          [
-            "KEYNOTE-189 2018",
-            "RCT · n=616",
-            "First-line PD-1 plus platinum pemetrexed improved OS vs chemo alone.",
-            "A",
-            "29658856 / 10.1056/NEJMoa1801005"
           ]
         ]
       },
@@ -886,24 +786,6 @@
             "high": 0.89,
             "grade": "B",
             "note": "PMID 26231885 · doi:10.1093/eurheartj/ehv330"
-          },
-          {
-            "name": "KEYNOTE-189 2018",
-            "stream": "Independent / pivotal class",
-            "hr": 0.49,
-            "low": 0.38,
-            "high": 0.64,
-            "grade": "A",
-            "note": "PMID 29658856 · doi:10.1056/NEJMoa1801005"
-          },
-          {
-            "name": "KEYNOTE-024 2016",
-            "stream": "Independent / pivotal class",
-            "hr": 0.5,
-            "low": 0.37,
-            "high": 0.68,
-            "grade": "A",
-            "note": "PMID 27718847 · doi:10.1056/NEJMoa1606774"
           }
         ]
       },
@@ -939,7 +821,7 @@
           },
           {
             "name": "Independent",
-            "value": 3
+            "value": 1
           }
         ]
       },
@@ -1138,7 +1020,7 @@
       "layout": "grid",
       "bullets": [
         "Pillar 1 — Permission now (TRANSITION 2019, PMID 31134724): Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
-        "Pillar 2 — Outcome permission (KEYNOTE-024 2016, PMID 27718847): Pembrolizumab monotherapy improved PFS vs platinum chemo in high PD-L1 first-line NSCLC.",
+        "Pillar 2 — Outcome permission (PARADIGM-HF 2014, PMID 25176015): ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
         "Pillar 3 — Guideline cover (AHA/ACC/HFSA 2022, PMID 35363499): US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'."
       ],
       "callout": {
@@ -1733,7 +1615,7 @@
       },
       {
         "name": "Independent",
-        "value": 3
+        "value": 1
       }
     ],
     "campaignLead": {
@@ -2062,86 +1944,6 @@
         "url": "https://pubmed.ncbi.nlm.nih.gov/26011246/",
         "status": "validated",
         "matchedFrom": "catalog"
-      },
-      {
-        "id": "keynote-189-2018",
-        "stream": "Independent / pivotal class",
-        "trial": "KEYNOTE-189",
-        "short": "KEYNOTE-189 2018",
-        "title": "Pembrolizumab plus chemotherapy in metastatic non–small-cell lung cancer",
-        "authors": "Gandhi L, Rodríguez-Abreu D, Gadgeel S, et al.",
-        "year": 2018,
-        "journal": "N Engl J Med",
-        "pages": "378:2078-2092",
-        "doi": "10.1056/NEJMoa1801005",
-        "pmid": "29658856",
-        "design": "RCT",
-        "n": 616,
-        "population": "Metastatic nonsquamous NSCLC, first-line, no EGFR/ALK",
-        "endpoint": "Overall survival",
-        "effect_metric": "HR",
-        "hr": 0.49,
-        "low": 0.38,
-        "high": 0.64,
-        "grade": "A",
-        "claim_permitted": "First-line PD-1 plus platinum pemetrexed improved OS vs chemo alone.",
-        "caveat": "IO-chemo cost and toxicity are the access problem, not the OS signal.",
-        "mlr": "Stay inside the exact labelled combination and line of therapy.",
-        "directs": "outcome-permission",
-        "control_event": 50.6,
-        "treat_event": 30.8,
-        "arr": 19.8,
-        "nnt": 5,
-        "horizon": "12-month OS complement (published OS 69.2% vs 49.4%)",
-        "visual_unit": "deaths per 100 patients at 12 months",
-        "spine_means": "About 1 in 5 extra patients is alive at 12 months versus chemo alone.",
-        "spine_barrier": "PD-L1-first sequencing can withhold the combination that produced the OS gain.",
-        "spine_execute": "Biomarker-last sequencing so combination is not delayed for a test result.",
-        "spine_measure": "Share of eligible patients starting combination before a PD-L1 wait.",
-        "citation": "Gandhi L, Rodríguez-Abreu D, Gadgeel S, et al. Pembrolizumab plus chemotherapy in metastatic non–small-cell lung cancer. N Engl J Med. 2018;378:2078-2092. doi:10.1056/NEJMoa1801005. PMID 29658856",
-        "url": "https://pubmed.ncbi.nlm.nih.gov/29658856/",
-        "status": "validated",
-        "matchedFrom": "catalog"
-      },
-      {
-        "id": "keynote-024-2016",
-        "stream": "Independent / pivotal class",
-        "trial": "KEYNOTE-024",
-        "short": "KEYNOTE-024 2016",
-        "title": "Pembrolizumab versus chemotherapy for PD-L1–positive non–small-cell lung cancer",
-        "authors": "Reck M, Rodríguez-Abreu D, Robinson AG, et al.",
-        "year": 2016,
-        "journal": "N Engl J Med",
-        "pages": "375:1823-1833",
-        "doi": "10.1056/NEJMoa1606774",
-        "pmid": "27718847",
-        "design": "RCT",
-        "n": 305,
-        "population": "NSCLC, PD-L1 TPS ≥50%, first-line",
-        "endpoint": "Progression-free survival",
-        "effect_metric": "HR",
-        "hr": 0.5,
-        "low": 0.37,
-        "high": 0.68,
-        "grade": "A",
-        "claim_permitted": "Pembrolizumab monotherapy improved PFS vs platinum chemo in high PD-L1 first-line NSCLC.",
-        "caveat": "Restricted to TPS ≥50%.",
-        "mlr": "Do not generalise to all-comer first-line.",
-        "directs": "outcome-permission",
-        "control_event": null,
-        "treat_event": null,
-        "arr": null,
-        "nnt": null,
-        "horizon": null,
-        "visual_unit": null,
-        "spine_means": null,
-        "spine_barrier": null,
-        "spine_execute": null,
-        "spine_measure": null,
-        "citation": "Reck M, Rodríguez-Abreu D, Robinson AG, et al. Pembrolizumab versus chemotherapy for PD-L1–positive non–small-cell lung cancer. N Engl J Med. 2016;375:1823-1833. doi:10.1056/NEJMoa1606774. PMID 27718847",
-        "url": "https://pubmed.ncbi.nlm.nih.gov/27718847/",
-        "status": "validated",
-        "matchedFrom": "catalog"
       }
     ],
     "evidenceGaps": [
@@ -2221,19 +2023,6 @@
         "control_label": "Comparator",
         "treat_label": "PARADIGM-HF",
         "claim": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
-      },
-      {
-        "name": "KEYNOTE-189 2018",
-        "control": 50.6,
-        "treat": 30.8,
-        "arr": 19.8,
-        "nnt": 5,
-        "horizon": "12-month OS complement (published OS 69.2% vs 49.4%)",
-        "unit": "deaths per 100 patients at 12 months",
-        "pmid": "29658856",
-        "control_label": "Comparator",
-        "treat_label": "KEYNOTE-189",
-        "claim": "First-line PD-1 plus platinum pemetrexed improved OS vs chemo alone."
       }
     ],
     "compare": [
