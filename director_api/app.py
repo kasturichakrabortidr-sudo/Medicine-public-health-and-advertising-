@@ -38,7 +38,7 @@ def health():
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-every-paper",
+        "build": "2026-08-22-not-hf-clone",
     }
 
 
@@ -135,6 +135,35 @@ async def generate(
         or pack["meta"].get("source")
         or "uploaded brief"
     )
+    try:
+        recs = (pack.get("evidence") or {}).get("records") or []
+        Path("/tmp/strata-last-generate.json").write_text(
+            json.dumps(
+                {
+                    "brand": brief.brand,
+                    "product": brief.product,
+                    "therapy_area": brief.therapy_area,
+                    "indication": brief.indication,
+                    "insights": brief.hcp_insights,
+                    "doctrine": (pack.get("doctrine") or {}).get("id"),
+                    "n_records": len(recs),
+                    "papers": [
+                        {
+                            "ref": r.get("ref"),
+                            "role": r.get("roleLabel") or r.get("role"),
+                            "pmid": r.get("pmid"),
+                            "short": r.get("short"),
+                        }
+                        for r in recs
+                    ],
+                    "lead": ((pack.get("evidence") or {}).get("lead") or {}).get("statement"),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+    except OSError:
+        pass
     return pack
 
 

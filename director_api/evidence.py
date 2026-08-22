@@ -18,7 +18,14 @@ import urllib.request
 from typing import Any
 
 from .extract import ExtractedBrief
-from .paper_read import apply_reading, assign_paper_jobs, fetch_abstracts, select_papers
+from .paper_read import (
+    apply_reading,
+    assign_paper_jobs,
+    brief_has_delay,
+    fetch_abstracts,
+    paper_jobs,
+    select_papers,
+)
 
 # Curated, published anchors. Effect sizes are taken from the cited paper.
 # Do not add a row here unless DOI or PMID is real.
@@ -596,7 +603,13 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
 
     primary = anchors[0]
     support = anchors[1:4]
-    if catalog_core and primary["id"] in {"pioneer-hf-2019", "transition-2019"} and "paradigm-hf-2014" in {r["id"] for r in catalog}:
+    delay = brief_has_delay(brief)
+    if (
+        delay
+        and catalog_core
+        and primary["id"] in {"pioneer-hf-2019", "transition-2019"}
+        and "paradigm-hf-2014" in {r["id"] for r in catalog}
+    ):
         statement = (
             f"Lead the campaign with first-eligible / in-hospital initiation. "
             f"{primary['trial']} ({primary['year']}) shows that starting after haemodynamic "
@@ -611,10 +624,11 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
             f"not a reason to soften the efficacy lead."
         )
         directs = "outcome-permission"
-    elif not catalog_core:
+    else:
         tension = (brief.hcp_insights or brief.access_and_cost or [brief.business_goal] or [""])[0]
+        ordered = paper_jobs(matched, brief) or anchors
         bits = []
-        for rec in anchors[:4]:
+        for rec in ordered[:4]:
             finding = rec.get("finding") or rec.get("claim_permitted") or rec.get("title") or ""
             label = rec.get("roleLabel") or rec.get("trial") or rec.get("short") or "Paper"
             bits.append(
@@ -630,12 +644,10 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
                 f" The brief's conversion problem is “{_clip_lead(tension)}”. "
                 "We spend against that behaviour, using the set."
             )
-        directs = primary.get("directs") or "outcome-permission"
-    else:
-        statement = (
-            f"Lead with {primary['short']}: {primary['claim_permitted']}"
-        )
-        directs = primary.get("directs") or "outcome-permission"
+        directs = (ordered[0].get("directs") or ordered[0].get("role") if ordered else None) or "outcome-permission"
+        anchors = ordered
+        primary = anchors[0]
+        support = anchors[1:4]
 
     citations = [primary, *support]
     return {

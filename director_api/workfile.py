@@ -11,7 +11,7 @@ from typing import Any
 
 from .cite import mark
 from .extract import ExtractedBrief
-from .paper_read import hf_catalog_pack, paper_jobs
+from .paper_read import paper_jobs, uses_hf_playbook
 
 PHASE_TITLES = [
     ("01", "What the brief is really asking"),
@@ -38,9 +38,9 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
         _p01(brief, doctrine, records, gaps),
         _p02(brief, records),
         _p03(brief, records, gaps, lead),
-        _p04(brief, records, gaps),
+        _p04(brief, records, gaps, doctrine),
         _p05(brief, records, doctrine),
-        _p06(brief, records, by_direct),
+        _p06(brief, records, by_direct, doctrine),
         _p07(brief, records, doctrine, lead),
         _p08(brief, doctrine, records),
         _p09(brief, doctrine, records),
@@ -61,7 +61,7 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
         ),
         "phases": phases,
         "references": refs,
-        "openQuestions": _open_questions(brief, gaps, records),
+        "openQuestions": _open_questions(brief, gaps, records, doctrine),
         "cannotClaim": [c for c in (lead.get("doNotClaim") or []) if c],
         "refCount": len(refs),
         "validatedCount": len(records),
@@ -86,7 +86,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
         + (f"And then: {money} " if money else "")
         + f"So the work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
     )
-    questions = _first_questions(brief, records, gaps)
+    questions = _first_questions(brief, records, gaps, doctrine)
     assumptions = []
     for raw, why, test in [
         (delay, "If this is not actually the delay, we will spend a year fighting a habit that is not there.",
@@ -112,7 +112,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
         f"H1. Delay, not disbelief, is the conversion problem — from the insight “{_short(delay or 'not supplied', 90)}”.",
         f"H2. Cost is a veto in tier-2, not a footnote — from “{_short(money or 'not supplied', 90)}”.",
         "H3. In-hospital first-eligible start is the highest-leverage behaviour change, because that is the window the initiation papers actually studied."
-        if hf_catalog_pack(records)
+        if uses_hf_playbook(doctrine, records, brief)
         else (
             "H3. Each numbered paper has a job — placebo, head-to-head, durability — "
             "and we will not reprint one finding as the whole campaign."
@@ -193,11 +193,11 @@ def _p03(brief, records, gaps, lead) -> dict:
     )
 
 
-def _p04(brief, records, gaps) -> dict:
+def _p04(brief, records, gaps, doctrine=None) -> dict:
     insights = brief.hcp_insights or ["No HCP insight was supplied. We will not invent an advisory board."]
     concord, discord, silent = [], [], []
-    jobs = paper_jobs(records)
-    if not hf_catalog_pack(records):
+    jobs = paper_jobs(records, brief)
+    if not uses_hf_playbook(doctrine, records, brief):
         for rec in jobs:
             discord.append([
                 rec.get("roleLabel") or rec.get("short") or "Sourced",
@@ -278,9 +278,9 @@ def _p04(brief, records, gaps) -> dict:
 def _p05(brief, records, doctrine) -> dict:
     insights = brief.hcp_insights or []
     cost = brief.access_and_cost or []
-    jobs = paper_jobs(records)
+    jobs = paper_jobs(records, brief)
     delay = next((i for i in insights if _looks_like_delay(i)), "")
-    if hf_catalog_pack(records):
+    if uses_hf_playbook(doctrine, records, brief):
         start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
         current = delay = next((i for i in insights if _looks_like_delay(i)), "Start is later than first-eligible. The brief does not describe the current habit in so many words.")
         required = (
@@ -345,10 +345,10 @@ def _p05(brief, records, doctrine) -> dict:
     )
 
 
-def _p06(brief, records, by_direct) -> dict:
+def _p06(brief, records, by_direct, doctrine=None) -> dict:
     competitors = brief.competitors or ["Standard of care"]
-    if not hf_catalog_pack(records):
-        jobs = paper_jobs(records)
+    if not uses_hf_playbook(doctrine, records, brief):
+        jobs = paper_jobs(records, brief)
         rows = [
             [
                 r.get("roleLabel") or r.get("short") or "Sourced",
@@ -419,7 +419,7 @@ def _p07(brief, records, doctrine, lead) -> dict:
     sourced = [r for r in records if (r.get("claim_permitted") or r.get("finding"))]
     if primary is None and sourced:
         primary = sourced[0]
-    if hf_catalog_pack(records):
+    if uses_hf_playbook(doctrine, records, brief):
         pillars = [
             [
                 "Start now",
@@ -448,16 +448,7 @@ def _p07(brief, records, doctrine, lead) -> dict:
              "Do not invent an elderly-only indication."],
         ]
     else:
-        jobs = [r for r in records if r.get("claim_permitted") or r.get("finding")]
-        role_rank = {
-            "placebo-controlled": 0,
-            "head-to-head": 1,
-            "durability": 2,
-            "replication": 3,
-            "first-eligible-start": 0,
-            "guideline-cover": 4,
-        }
-        jobs = sorted(jobs, key=lambda r: role_rank.get(r.get("role") or "", 8))
+        jobs = paper_jobs(records, brief)
         pillars = []
         seen_claims: set[str] = set()
         for rec in jobs:
@@ -529,7 +520,7 @@ def _p07(brief, records, doctrine, lead) -> dict:
 
 def _p08(brief, doctrine, records=None) -> dict:
     specialties = brief.target_specialties or ["the named specialists"]
-    if hf_catalog_pack(records or []):
+    if uses_hf_playbook(doctrine, records, brief):
         stages = [
             ["Before launch", "A handful of hospital pathway owners write the first-eligible protocol", "Medical leads. Commercial listens."],
             ["First quarter", "One hospital live, one cost conversation kit in the bag, one myth we can actually source", "Field + medical huddle weekly."],
@@ -537,7 +528,7 @@ def _p08(brief, doctrine, records=None) -> dict:
             ["After the burst", "The pathway stays when the campaign money stops", "Handover into the next cycle's working file."],
         ]
     else:
-        jobs = paper_jobs(records or [])
+        jobs = paper_jobs(records or [], brief)
         stages = [
             [
                 "Before first call",
@@ -575,7 +566,7 @@ def _p09(brief, doctrine, records=None) -> dict:
     segments = brief.hcp_segments or []
     rows = []
     specs = specialties[:3]
-    if hf_catalog_pack(records or []):
+    if uses_hf_playbook(doctrine, records, brief):
         names = segments[:4] or [
             f"{specs[0]} · KOL metro" if specs else "KOL metro",
             f"{specs[0]} · private metro" if specs else "Private metro",
@@ -590,7 +581,7 @@ def _p09(brief, doctrine, records=None) -> dict:
         ]
         note = "Q1 is one hospital, one kit, one sourced myth. Not a national theatre."
     else:
-        jobs = paper_jobs(records or [])
+        jobs = paper_jobs(records or [], brief)
         names = segments[:4] or [
             f"{specs[0]} · first calls" if specs else "Priority specialists",
             f"{specs[0]} · competitor-loyal" if specs else "Competitor-loyal",
@@ -617,8 +608,8 @@ def _p09(brief, doctrine, records=None) -> dict:
 def _p10(brief, doctrine, records=None) -> dict:
     qoq = _qoq(brief)
     goal = (brief.business_goal or "").strip() or "No numeric goal in the brief."
-    jobs = paper_jobs(records or [])
-    if hf_catalog_pack(records or []):
+    jobs = paper_jobs(records or [], brief)
+    if uses_hf_playbook(doctrine, records, brief):
         kpis = [
             ["Parent", "Quarterly volume / revenue vs the brief", goal, "Sales / IQVIA equivalent", "If this does not move, the rest is decoration"],
             ["Lead", "Share of eligible starts inside 48 hours of first-eligible", "Audit the baseline first. Then set a target.", "Hospital pathway log", "Kill the protocol if this is flat at week 8 in the pilot"],
@@ -668,15 +659,15 @@ def _p11(brief, doctrine, lead, records, gaps) -> dict:
     )
 
 
-def _first_questions(brief, records, gaps) -> list[str]:
+def _first_questions(brief, records, gaps, doctrine=None) -> list[str]:
     qs = []
     if not brief.business_goal:
         qs.append("What does success look like in numbers we can audit?")
-    elif hf_catalog_pack(records):
+    elif uses_hf_playbook(doctrine, records, brief):
         qs.append("What is the current first-eligible start rate? The brief has a growth goal and no baseline.")
     else:
         qs.append("Which objection in the room maps to which numbered paper — and who owns that job?")
-    if hf_catalog_pack(records) and not any(r.get("directs") == "first-eligible-start" for r in records):
+    if uses_hf_playbook(doctrine, records, brief) and not any(r.get("directs") == "first-eligible-start" for r in records):
         qs.append("Which paper, with a PMID, allows us to talk about when to start?")
     if any("rwe" in (g.get("item") or "").lower() or "local" in (g.get("item") or "").lower() for g in gaps):
         qs.append("Where is the DOI for the local RWE the brief wants KOLs to hold?")
@@ -684,14 +675,14 @@ def _first_questions(brief, records, gaps) -> list[str]:
         qs.append("What may we actually say about cost, assistance, and health economics — in this code, with a paper?")
     if not brief.hcp_insights:
         qs.append("What do these doctors currently do at the eligible moment? We have no insight line.")
-    if hf_catalog_pack(records):
+    if uses_hf_playbook(doctrine, records, brief):
         qs.append("Which hospital will run the first pathway, and who owns the 48-hour log?")
     qs.append("What will we kill in week 8 if the lead indicator has not moved?")
     return qs[:10]
 
 
-def _open_questions(brief, gaps, records) -> list[str]:
-    qs = _first_questions(brief, records, gaps)
+def _open_questions(brief, gaps, records, doctrine=None) -> list[str]:
+    qs = _first_questions(brief, records, gaps, doctrine)
     for g in gaps[:4]:
         qs.append(f"Uncited: {g['item']}")
     # unique, preserve order

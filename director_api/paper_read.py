@@ -687,9 +687,19 @@ def assign_paper_jobs(records: list[dict[str, Any]], brief: Any) -> list[dict[st
     for rec in records:
         if rec.get("matchedFrom") == "catalog":
             role = rec.get("directs") or "outcome-permission"
-            rec["role"] = role
-            rec["roleLabel"] = ROLE_LABELS.get(role, rec.get("short") or "Sourced")
-            used.add(role)
+            if role in used:
+                rec["role"] = "replication"
+                rec["roleLabel"] = rec.get("short") or rec.get("trial") or "A second paper"
+            else:
+                rec["role"] = role
+                rec["roleLabel"] = ROLE_LABELS.get(role, rec.get("short") or "Sourced")
+                used.add(role)
+            rec["spine_means"] = rec.get("spine_means") or rec.get("claim_permitted") or ""
+            if not brief_has_delay(brief):
+                rec["spine_execute"] = (
+                    f"When this job comes up, quote {rec.get('short') or 'this paper'} — "
+                    "do not spend it as a reprint of another numbered paper."
+                )
             continue
         role = guess_role(rec, {
             "trial": rec.get("trial"),
@@ -729,18 +739,64 @@ def hf_catalog_pack(records: list[dict[str, Any]] | None) -> bool:
     )
 
 
-def paper_jobs(records: list[dict[str, Any]] | None) -> list[dict[str, Any]]:
+DELAY_HINT = re.compile(
+    r"stabilis(?:e|ation)|stabiliz(?:e|ation)|second[- ]line|too late|"
+    r"late\s*/\s*second|late/second|\bdelay(?:ed|ing|s)?\b|"
+    r"wait(?:ing)? until|stabilis(?:e|e) first|stabilize first|"
+    r"start on ace",
+    re.I,
+)
+
+
+def brief_has_delay(brief: Any) -> bool:
+    blob = " ".join(
+        [
+            getattr(brief, "business_goal", "") or "",
+            " ".join(getattr(brief, "hcp_insights", None) or []),
+            " ".join(getattr(brief, "access_and_cost", None) or []),
+            " ".join(getattr(brief, "competitors", None) or []),
+            getattr(brief, "indication", "") or "",
+        ]
+    )
+    return bool(DELAY_HINT.search(blob))
+
+
+def uses_hf_playbook(doctrine: dict | None, records: list[dict[str, Any]] | None, brief: Any = None) -> bool:
+    """First-touch / ACEI / Indian-RWE file is for delay briefs, not every ARNI upload."""
+    if not hf_catalog_pack(records):
+        return False
+    did = (doctrine or {}).get("id") or ""
+    if did:
+        return did == "first-touch"
+    return brief_has_delay(brief) if brief is not None else False
+
+
+def paper_jobs(records: list[dict[str, Any]] | None, brief: Any = None) -> list[dict[str, Any]]:
     """Numbered papers in campaign order — each row is a distinct job."""
-    role_rank = {
-        "placebo-controlled": 0,
-        "first-eligible-start": 0,
-        "head-to-head": 1,
-        "durability": 2,
-        "replication": 3,
-        "outcome-permission": 4,
-        "guideline-cover": 5,
-        "supporting": 6,
-    }
+    if brief is not None and not brief_has_delay(brief):
+        role_rank = {
+            "outcome-permission": 0,
+            "placebo-controlled": 0,
+            "head-to-head": 1,
+            "guideline-cover": 2,
+            "durability": 3,
+            "replication": 4,
+            "segment-confidence": 5,
+            "first-eligible-start": 6,
+            "local-context": 7,
+            "supporting": 8,
+        }
+    else:
+        role_rank = {
+            "placebo-controlled": 0,
+            "first-eligible-start": 0,
+            "head-to-head": 1,
+            "durability": 2,
+            "replication": 3,
+            "outcome-permission": 4,
+            "guideline-cover": 5,
+            "supporting": 6,
+        }
     jobs = [r for r in (records or []) if r.get("claim_permitted") or r.get("finding")]
     return sorted(
         jobs,

@@ -12,7 +12,7 @@ from datetime import date
 from .cite import attach_references, mark
 from .evidence import resolve_evidence
 from .extract import ExtractedBrief
-from .paper_read import hf_catalog_pack, paper_jobs
+from .paper_read import brief_has_delay, hf_catalog_pack, paper_jobs
 from .workfile import build_workfile
 
 DELAY_RE = re.compile(
@@ -424,10 +424,10 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "layout": "split",
             "table": p07.get("house") or {
                 "headers": ["Pillar", "Line", "Ref", "Proof"],
-                "rows": [[b, "", "", ""] for b in _message_pillars(records, doctrine)],
+                "rows": [[b, "", "", ""] for b in _message_pillars(records, doctrine, brief)],
             },
             "callout": {"label": "MLR", "text": "A pillar without a number does not ship."},
-            "bullets": _message_pillars(records, doctrine),
+            "bullets": _message_pillars(records, doctrine, brief),
         },
         *([execute_slide] if execute_slide else []),
         {
@@ -824,8 +824,8 @@ def _stream_mix(records: list[dict], brief: ExtractedBrief) -> list[dict]:
     return [{"name": k, "value": v} for k, v in counts.items()]
 
 
-def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
-    if hf_catalog_pack(records):
+def _message_pillars(records: list[dict], doctrine: dict, brief=None) -> list[str]:
+    if hf_catalog_pack(records) and (doctrine or {}).get("id") == "first-touch":
         by_direct = {r.get("directs"): r for r in records}
         start = by_direct.get("first-eligible-start")
         guide = by_direct.get("guideline-cover")
@@ -855,7 +855,7 @@ def _message_pillars(records: list[dict], doctrine: dict) -> list[str]:
         return pillars
     out = []
     seen: set[str] = set()
-    for r in paper_jobs(records):
+    for r in paper_jobs(records, brief):
         claim = (r.get("claim_permitted") or "").strip()
         key = re.sub(r"[^a-z0-9]+", " ", claim.lower())[:80]
         if not claim or key in seen:

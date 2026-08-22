@@ -397,3 +397,36 @@ def test_each_paper_owns_a_distinct_strategy_line(monkeypatch):
     assert "[1]" in standing and "[2]" in standing
     assert "74.1" in standing
     assert "86.6" in standing or "57.1" in standing
+
+
+def test_cost_arni_brief_does_not_clone_cardioshield_playbook():
+    """HelixOne / sacubitril + a cost insight is not the CardioShield first-touch file."""
+    brief = ExtractedBrief(
+        brand="HelixOne",
+        product="sacubitril",
+        therapy_area="Cardiology — HFrEF",
+        indication="HFrEF",
+        market="India",
+        business_goal="Grow ARNI initiation in metro clinics",
+        hcp_insights=["Cost is the veto at the desk"],
+        guidelines=["ESC HF 2021"],
+    )
+    pack = generate_pack(brief, pubmed=False)
+    lead = pack["evidence"]["lead"]["statement"]
+    assert "Lead the campaign with first-eligible" not in lead
+    assert "25176015" in lead  # PARADIGM-HF
+    house = next(p for p in pack["workfile"]["phases"] if p["id"] == "07")["house"]["rows"]
+    refs = [row[2] for row in house]
+    assert len(set(r for r in refs if str(r).startswith("["))) >= 3
+    p05 = next(p for p in pack["workfile"]["phases"] if p["id"] == "05")
+    assert "first eligible encounter" not in (p05.get("required") or "").lower()
+    p06 = next(p for p in pack["workfile"]["phases"] if p["id"] == "06")
+    blob = str(p06)
+    assert "Indian RWE" not in blob
+    assert pack["doctrine"]["id"] == "affordability-confidence"
+    demo = generate_pack(
+        _brief_from_mapping(load_brief("examples/brief.example.yaml")),
+        mode="demo",
+        pubmed=False,
+    )
+    assert "Lead the campaign with first-eligible" in demo["evidence"]["lead"]["statement"]
