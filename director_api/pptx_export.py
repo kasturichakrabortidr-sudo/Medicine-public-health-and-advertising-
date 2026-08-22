@@ -19,6 +19,8 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
+from .links import paper_href
+
 INK = RGBColor(0x0B, 0x12, 0x20)
 NAVY = RGBColor(0x13, 0x20, 0x37)
 CREAM = RGBColor(0xFA, 0xF6, 0xEF)
@@ -150,6 +152,27 @@ def _style_cell(cell, bg: RGBColor, fg: RGBColor, *, bold=False, size=12):
     cell.vertical_anchor = MSO_ANCHOR.MIDDLE
 
 
+def _href_from_citation(text: str) -> str:
+    blob = text or ""
+    pmid = re.search(r"PMID[:\s]+(\d+)", blob, re.I)
+    if pmid:
+        return f"https://pubmed.ncbi.nlm.nih.gov/{pmid.group(1)}/"
+    doi = re.search(r"doi:(\S+)", blob, re.I)
+    if doi:
+        return f"https://doi.org/{doi.group(1).rstrip('.,;')}"
+    return ""
+
+
+def _hyperlink_cell(cell, url: str) -> None:
+    """Make every run in a table cell a clickable URL."""
+    if not url:
+        return
+    for p in cell.text_frame.paragraphs:
+        for run in p.runs:
+            run.hyperlink.address = url
+            run.font.color.rgb = TEAL
+
+
 def _notes(slide, spec: dict) -> None:
     bits = [spec.get("narrative") or ""]
     if spec.get("callout"):
@@ -199,8 +222,14 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
         _textbox(slide, Inches(0.55), top, Inches(12.2), Inches(0.55),
                  spec.get("narrative") or "", size=13, color=body)
         table = spec.get("table") or {}
-        _table(slide, Inches(0.55), Inches(2.5), Inches(12.2), Inches(4.5),
-               table.get("headers") or ["No.", "Citation"], table.get("rows") or [])
+        shape = _table(slide, Inches(0.55), Inches(2.5), Inches(12.2), Inches(4.5),
+                       table.get("headers") or ["No.", "Citation"], table.get("rows") or [])
+        for i, row in enumerate(table.get("rows") or [], 1):
+            citation = _as_text(row[1] if len(row) > 1 else row[0] if row else "")
+            href = _href_from_citation(citation)
+            if href and i < len(shape.table.rows):
+                col = 1 if len(row) > 1 else 0
+                _hyperlink_cell(shape.table.cell(i, col), href)
         return
 
     if layout in {"title", "close", "insight"}:
@@ -565,7 +594,15 @@ def _appendix_bibliography(prs, blank, pack: dict) -> None:
         ]
         for r in records
     ]
-    _table(slide, Inches(0.35), Inches(1.85), Inches(12.6), Inches(5.3), headers, rows)
+    table_shape = _table(slide, Inches(0.35), Inches(1.85), Inches(12.6), Inches(5.3), headers, rows)
+    table = table_shape.table
+    for i, record in enumerate(records, 1):
+        href = paper_href(record)
+        if not href:
+            continue
+        _hyperlink_cell(table.cell(i, 1), href)
+        _hyperlink_cell(table.cell(i, 2), href)
+        _hyperlink_cell(table.cell(i, 3), href)
 
 
 def _appendix_interventions(prs, blank, pack: dict) -> None:

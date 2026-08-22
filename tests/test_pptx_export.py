@@ -25,6 +25,9 @@ def test_pptx_is_editable_office_file():
         assert "ppt/presentation.xml" in names
         assert any(n.startswith("ppt/slides/slide") for n in names)
         assert any(n.startswith("ppt/charts/") for n in names)
+        rels = [n for n in names if n.endswith(".rels")]
+        rels_blob = " ".join(zf.read(n).decode("utf-8", errors="ignore") for n in rels)
+        assert "pubmed.ncbi.nlm.nih.gov" in rels_blob
 
     prs = Presentation(io.BytesIO(data))
     # Strategy slides + bibliography + interventions + dashboard + edit guide

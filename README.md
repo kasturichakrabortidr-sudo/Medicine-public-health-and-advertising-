@@ -16,7 +16,9 @@ pip install -r requirements.txt
 python start_director.py
 ```
 
-Opens `http://127.0.0.1:5173`
+Opens `http://127.0.0.1:8080` — one link for the app and the API. Phone and laptop
+both use that address. `python start_director.py --dev` still splits Vite (`5173`)
+and the API (`8787`) for live reload.
 
 | Tab | What it does |
 |---|---|

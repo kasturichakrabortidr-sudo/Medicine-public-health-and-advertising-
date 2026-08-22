@@ -419,6 +419,20 @@ textarea {
   margin-left: 1px;
 }
 
+a.paper-link,
+a.cite-link,
+.ref-list a,
+.table a {
+  color: var(--copper-2);
+  cursor: pointer;
+  text-decoration: underline;
+  pointer-events: auto;
+}
+
+a.cite-link {
+  color: inherit;
+}
+
 .slide-refs {
   position: absolute;
   left: 42px;

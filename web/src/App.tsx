@@ -5,6 +5,7 @@ import { DashboardTab } from "./components/DashboardTab";
 import { DeckTab } from "./components/DeckTab";
 import { EvidenceTab } from "./components/EvidenceTab";
 import { WorkingFileTab } from "./components/WorkingFileTab";
+import { RefLinksProvider } from "./links";
 import type { StrategyPack, TabId } from "./types";
 
 const USER_PACK_KEY = "strata.userPack";
@@ -75,8 +76,10 @@ export default function App() {
   }, []);
 
   const demo = isDemoPack(pack);
+  const refs = pack?.references || pack?.evidence?.references || [];
 
   return (
+    <RefLinksProvider refs={refs}>
     <div className="app">
       <aside className="rail">
         <div className="mark">
@@ -164,5 +167,6 @@ export default function App() {
         {tab === "dashboard" && pack && <DashboardTab pack={pack} />}
       </main>
     </div>
+    </RefLinksProvider>
   );
 }

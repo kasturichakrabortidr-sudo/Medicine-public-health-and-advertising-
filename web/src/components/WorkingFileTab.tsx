@@ -1,5 +1,6 @@
 import type { StrategyPack, WorkPhase } from "../types";
 import { Cited } from "./Cited";
+import { PaperAnchor, paperHref } from "../links";
 
 export function WorkingFileTab({ pack }: { pack: StrategyPack }) {
   const work = pack.workfile;
@@ -53,11 +54,9 @@ export function WorkingFileTab({ pack }: { pack: StrategyPack }) {
         <p className="small muted">Vancouver. Numbers in the file and on the slides are these papers.</p>
         <ol className="ref-list">
           {refs.map((r) => (
-            <li key={r.n} value={r.n}>
-              {r.url ? (
-                <a href={r.url} target="_blank" rel="noreferrer">
-                  {r.citation}
-                </a>
+            <li key={r.n} id={`ref-${r.n}`} value={r.n}>
+              {paperHref(r) ? (
+                <PaperAnchor href={paperHref(r)}>{r.citation}</PaperAnchor>
               ) : (
                 r.citation
               )}

@@ -1,4 +1,5 @@
 import type { StrategyPack } from "../types";
+import { PaperAnchor, paperHref } from "../links";
 import { StrategyChart } from "./charts/StrategyChart";
 
 export function EvidenceTab({ pack }: { pack: StrategyPack }) {
@@ -31,7 +32,17 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
               <li key={c.id}>
                 <strong>{c.short}</strong> — {c.claim}
                 <div className="small muted">
-                  PMID {c.pmid || "—"} · doi:{c.doi || "—"}
+                  {c.pmid ? (
+                    <PaperAnchor href={paperHref(c)}>PMID {c.pmid}</PaperAnchor>
+                  ) : (
+                    "PMID —"
+                  )}
+                  {" · "}
+                  {c.doi ? (
+                    <PaperAnchor href={paperHref({ doi: c.doi })}>doi:{c.doi}</PaperAnchor>
+                  ) : (
+                    "doi:—"
+                  )}
                 </div>
               </li>
             ))}
@@ -106,10 +117,8 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
                   <div className="small muted">{r.stream}</div>
                 </td>
                 <td>
-                  {r.url ? (
-                    <a href={r.url} target="_blank" rel="noreferrer">
-                      {r.citation}
-                    </a>
+                  {paperHref(r) ? (
+                    <PaperAnchor href={paperHref(r)}>{r.citation}</PaperAnchor>
                   ) : (
                     r.citation
                   )}
@@ -159,11 +168,9 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         <p className="small muted">Vancouver. Same numbers as the superscripts in the working file and the deck.</p>
         <ol className="ref-list">
           {refs.map((r) => (
-            <li key={r.n} value={r.n}>
-              {r.url ? (
-                <a href={r.url} target="_blank" rel="noreferrer">
-                  {r.citation}
-                </a>
+            <li key={r.n} id={`ref-${r.n}`} value={r.n}>
+              {paperHref(r) ? (
+                <PaperAnchor href={paperHref(r)}>{r.citation}</PaperAnchor>
               ) : (
                 r.citation
               )}
@@ -183,9 +190,7 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           <ul className="bullets">
             {pubmed.map((p) => (
               <li key={p.pmid}>
-                <a href={p.url} target="_blank" rel="noreferrer">
-                  {p.citation}
-                </a>
+                <PaperAnchor href={paperHref(p) || p.url}>{p.citation}</PaperAnchor>
               </li>
             ))}
           </ul>

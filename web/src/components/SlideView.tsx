@@ -1,9 +1,12 @@
 import type { Slide } from "../types";
 import { Cited } from "./Cited";
+import { PaperAnchor, paperHref, useRefLinks } from "../links";
 import { StrategyChart } from "./charts/StrategyChart";
 
 export function SlideView({ slide }: { slide: Slide }) {
   const refs = (slide.refs || []).filter((n) => n !== "" && n != null);
+  const catalog = useRefLinks();
+  const byN = new Map(catalog.map((r) => [r.n, r]));
   return (
     <article className={`slide ${slide.layout}`}>
       <div className="kicker">{slide.kicker}</div>
@@ -57,7 +60,18 @@ export function SlideView({ slide }: { slide: Slide }) {
         </div>
       )}
       {refs.length ? (
-        <div className="slide-refs">Refs {refs.map((n) => `[${n}]`).join(" ")} · full list at the end</div>
+        <div className="slide-refs">
+          Refs{" "}
+          {refs.map((n, i) => (
+            <span key={`${n}-${i}`}>
+              {i ? " " : null}
+              <PaperAnchor href={paperHref(byN.get(Number(n)))} className="cite-link">
+                [{n}]
+              </PaperAnchor>
+            </span>
+          ))}{" "}
+          · full list at the end
+        </div>
       ) : null}
     </article>
   );

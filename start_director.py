@@ -1,4 +1,4 @@
-"""Launch the STRATA Strategy Director (API + web app)."""
+"""Launch the STRATA Strategy Director (API + web app) on one URL."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parent
 WEB = ROOT / "web"
 API_PORT = 8787
 WEB_PORT = 5173
+APP_PORT = int(os.environ.get("STRATA_PORT", "8080"))
 
 
 def run(cmd: list[str], cwd: Path | None = None, env: dict | None = None) -> subprocess.Popen:
@@ -36,31 +37,63 @@ def ensure_node_deps() -> None:
         subprocess.check_call(["npm", "install"], cwd=str(WEB))
 
 
+def ensure_web_build() -> None:
+    ensure_node_deps()
+    index = WEB / "dist" / "index.html"
+    if index.exists():
+        return
+    print("Building the web app (one-time)...")
+    subprocess.check_call(["npm", "run", "build"], cwd=str(WEB))
+
+
 def main() -> None:
     ensure_python_deps()
-    ensure_node_deps()
-
     env = os.environ.copy()
     env.setdefault("PYTHONUNBUFFERED", "1")
+    dev = "--dev" in sys.argv
 
-    api = run(
-        [
-            sys.executable,
-            "-m",
-            "uvicorn",
-            "director_api.app:app",
-            "--host",
-            "0.0.0.0",
-            "--port",
-            str(API_PORT),
-        ],
-        env=env,
-    )
-    web_cmd = ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", str(WEB_PORT)]
-    web = run(web_cmd, cwd=WEB, env=env)
+    if dev:
+        ensure_node_deps()
+        api = run(
+            [
+                sys.executable,
+                "-m",
+                "uvicorn",
+                "director_api.app:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                str(API_PORT),
+            ],
+            env=env,
+        )
+        web = run(
+            ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", str(WEB_PORT)],
+            cwd=WEB,
+            env=env,
+        )
+        url = f"http://127.0.0.1:{WEB_PORT}"
+        procs = [api, web]
+    else:
+        ensure_web_build()
+        api = run(
+            [
+                sys.executable,
+                "-m",
+                "uvicorn",
+                "director_api.app:app",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                str(APP_PORT),
+            ],
+            env=env,
+        )
+        url = f"http://127.0.0.1:{APP_PORT}"
+        procs = [api]
+        web = None
 
-    url = f"http://127.0.0.1:{WEB_PORT}"
-    print(f"\nSTRATA is up.\n  App   {url}\n  API   http://127.0.0.1:{API_PORT}/api/health\n")
+    print(f"\nSTRATA is up.\n  Open this link:  {url}\n")
     time.sleep(1.5)
     if shutil.which("xdg-open") or sys.platform in {"darwin", "win32"}:
         try:
@@ -70,18 +103,17 @@ def main() -> None:
 
     try:
         while True:
-            if api.poll() is not None:
-                print("API stopped.")
-                web.terminate()
-                sys.exit(api.returncode or 1)
-            if web.poll() is not None:
-                print("Web stopped.")
-                api.terminate()
-                sys.exit(web.returncode or 1)
+            for proc in procs:
+                if proc.poll() is not None:
+                    print("A STRATA process stopped.")
+                    for other in procs:
+                        if other.poll() is None:
+                            other.terminate()
+                    sys.exit(proc.returncode or 1)
             time.sleep(0.4)
     except KeyboardInterrupt:
-        api.terminate()
-        web.terminate()
+        for proc in procs:
+            proc.terminate()
 
 
 if __name__ == "__main__":

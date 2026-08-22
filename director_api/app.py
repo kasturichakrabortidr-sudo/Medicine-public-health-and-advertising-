@@ -8,7 +8,6 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
-from fastapi.staticfiles import StaticFiles
 from medicomarketing_agent.config import load_brief
 
 from .extract import ExtractedBrief, extract_files, merge_into_brief
@@ -175,17 +174,34 @@ def demo_file():
 
 @app.get("/")
 def spa_index():
+    return _web_file("")
+
+
+@app.get("/{full_path:path}")
+def spa(full_path: str):
+    """Serve the built web app so a single URL opens on phones and laptops."""
+    if full_path == "api" or full_path.startswith("api/"):
+        raise HTTPException(404, "Not found")
+    return _web_file(full_path)
+
+
+def _web_file(path: str):
+    if path:
+        for root in (DIST, ROOT / "web" / "public"):
+            candidate = (root / path).resolve()
+            try:
+                candidate.relative_to(root.resolve())
+            except ValueError:
+                continue
+            if candidate.is_file():
+                return FileResponse(candidate)
     index = DIST / "index.html"
-    if not index.exists():
-        raise HTTPException(
-            503,
-            "Web build missing. From the repo root run: cd web && npm run build",
-        )
-    return FileResponse(index)
-
-
-if (DIST / "assets").is_dir():
-    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+    if index.exists():
+        return FileResponse(index)
+    raise HTTPException(
+        503,
+        "Web build missing. From the repo root run: python start_director.py",
+    )
 
 
 def _brief_from_mapping(data: dict) -> ExtractedBrief:
