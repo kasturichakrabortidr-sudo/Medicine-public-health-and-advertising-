@@ -10,7 +10,8 @@ import re
 from datetime import date
 
 from .cite import attach_references, mark
-from .deck_craft import build_deck
+from .deck_craft import build_deck, story_map
+from .deck_skills import SKILL_IDS
 from .deck_visuals import compare_rows, people_rows, spine_rows
 from .evidence import resolve_evidence
 from .extract import ExtractedBrief
@@ -45,6 +46,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
     _bind_science(doctrine, ledger)
     work = build_workfile(brief, doctrine, ledger)
     interventions = _interventions(brief, doctrine, ledger)
+    slides = build_deck(brief, doctrine, ledger, work, interventions)
 
     return {
         "meta": {
@@ -61,13 +63,15 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
             "campaignLead": (ledger.get("lead") or {}).get("directs"),
             "source": ", ".join(brief.source_files) or ("pasted brief" if brief.raw_text else ""),
             "deckSkill": "strata-deck",
+            "deckSkills": list(SKILL_IDS),
+            "storyMap": story_map(slides),
         },
         "brief": brief.to_dict(),
         "doctrine": doctrine,
         "evidence": ledger,
         "workfile": work,
         "references": ledger.get("references") or [],
-        "slides": build_deck(brief, doctrine, ledger, work, interventions),
+        "slides": slides,
         "interventions": interventions,
         "dashboard": _dashboard(brief, doctrine, ledger, work),
     }

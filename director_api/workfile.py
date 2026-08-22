@@ -59,7 +59,7 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
             "Strategy lines quote findings written in those papers. "
             f"{len(gaps)} line{'s' if len(gaps) != 1 else ''} from the brief still have no PMID or DOI. "
             "Effect sizes are taken only from the abstract or a curated source, never invented. "
-            "The slides are this file, presented."
+            "The slides interpret this file as pictures. They do not paste these phases."
         ),
         "phases": phases,
         "references": refs,

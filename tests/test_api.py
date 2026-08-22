@@ -20,6 +20,11 @@ def test_health():
     assert res.status_code == 200
     assert res.json()["ok"] is True
     assert "pdf" in res.json()["accept"]
+    skills = client.get("/api/deck-skills")
+    assert skills.status_code == 200
+    names = {s["id"] for s in skills.json()["skills"]}
+    assert names == {"story", "visuals", "copy", "layout"}
+    assert len(skills.json()["beats"]) >= 11
 
 
 def test_demo_pack():

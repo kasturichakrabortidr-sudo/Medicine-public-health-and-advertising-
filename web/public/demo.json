@@ -12,7 +12,110 @@
     "angleId": "first-touch",
     "campaignLead": "first-eligible-start",
     "source": "examples/brief.example.yaml",
-    "deckSkill": "strata-deck"
+    "deckSkill": "strata-deck",
+    "deckSkills": [
+      "story",
+      "visuals",
+      "copy",
+      "layout"
+    ],
+    "storyMap": [
+      {
+        "phase": "01",
+        "slide": "title",
+        "question": "Why are we in the room?"
+      },
+      {
+        "phase": "01",
+        "slide": "need",
+        "question": "What is the real job?"
+      },
+      {
+        "phase": "05",
+        "slide": "tension",
+        "question": "What do they do versus what must change?"
+      },
+      {
+        "phase": "04",
+        "slide": "belief",
+        "question": "Where does belief fight the papers?"
+      },
+      {
+        "phase": "02",
+        "slide": "pico",
+        "question": "How will we judge the science?"
+      },
+      {
+        "phase": "03",
+        "slide": "science-meaning",
+        "question": "What did the lead paper show in a clinic of 100?"
+      },
+      {
+        "phase": "03",
+        "slide": "forest",
+        "question": "Do the numbered papers agree?"
+      },
+      {
+        "phase": "03",
+        "slide": "science-compare",
+        "question": "What does the next paper add?"
+      },
+      {
+        "phase": "03",
+        "slide": "pack",
+        "question": "Why is one paper not a case?"
+      },
+      {
+        "phase": "06",
+        "slide": "stand",
+        "question": "Where may we stand, and where are we silent?"
+      },
+      {
+        "phase": "07",
+        "slide": "house",
+        "question": "What will we say?"
+      },
+      {
+        "phase": "07",
+        "slide": "objections",
+        "question": "What will they say back?"
+      },
+      {
+        "phase": "08",
+        "slide": "sequence",
+        "question": "How does contact feel over time?"
+      },
+      {
+        "phase": "09",
+        "slide": "who",
+        "question": "Who do we activate first?"
+      },
+      {
+        "phase": "05",
+        "slide": "science-execute",
+        "question": "How does a finding become a move?"
+      },
+      {
+        "phase": "08",
+        "slide": "interventions",
+        "question": "What do we actually do?"
+      },
+      {
+        "phase": "10",
+        "slide": "measure",
+        "question": "How will we know?"
+      },
+      {
+        "phase": "11",
+        "slide": "close",
+        "question": "What do we need signed in 30 days?"
+      },
+      {
+        "phase": "03",
+        "slide": "references",
+        "question": "Where are the PMIDs?"
+      }
+    ]
   },
   "brief": {
     "brand": "CardioShield",
@@ -638,7 +741,7 @@
     ]
   },
   "workfile": {
-    "howBuilt": "We started with the brief for CardioShield. The brief is not expected to contain paper links. We searched PubMed for sacubitril/valsartan (the INN when named, never the campaign brand), then read the abstracts, and kept a short set of load-bearing papers. 7 papers have a number. One paper is not a case: load-bearing lines quote the pack, not a single PMID. Strategy lines quote findings written in those papers. 2 lines from the brief still have no PMID or DOI. Effect sizes are taken only from the abstract or a curated source, never invented. The slides are this file, presented.",
+    "howBuilt": "We started with the brief for CardioShield. The brief is not expected to contain paper links. We searched PubMed for sacubitril/valsartan (the INN when named, never the campaign brand), then read the abstracts, and kept a short set of load-bearing papers. 7 papers have a number. One paper is not a case: load-bearing lines quote the pack, not a single PMID. Strategy lines quote findings written in those papers. 2 lines from the brief still have no PMID or DOI. Effect sizes are taken only from the abstract or a curated source, never invented. The slides interpret this file as pictures. They do not paste these phases.",
     "phases": [
       {
         "id": "01",
@@ -1465,25 +1568,25 @@
       "section": "Open",
       "kicker": "India (metro + tier-2/3 cities)  ·  7 numbered papers",
       "title": "CardioShield",
-      "subtitle": "Start CardioShield at the first eligible encounter — in hospital if tha…",
-      "narrative": "Most launch decks sell the drug again. This one spends against the wait. If we cannot number the paper that allows a line, the line does not ship.",
+      "subtitle": "Start at the first eligible visit",
+      "narrative": "Most launch decks sell the drug again.",
       "layout": "title",
       "board": {
         "cards": [
           {
             "kicker": "Molecule",
             "title": "sacubitril/valsartan",
-            "body": "HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV"
+            "body": "HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV."
           },
           {
             "kicker": "The bet",
-            "title": "Start at the first eligible…",
-            "body": "Start CardioShield at the first eligible encounter — in hospital if tha…"
+            "title": "Start at the first eligible visit",
+            "body": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible."
           },
           {
             "kicker": "The pack",
             "title": "7 papers",
-            "body": "One paper is not a case."
+            "body": "7 numbered papers, each with a job."
           }
         ]
       },
@@ -1494,26 +1597,29 @@
         4,
         5,
         6
-      ]
+      ],
+      "phase": "01",
+      "question": "Why are we in the room?",
+      "skill": "story"
     },
     {
-      "id": "tension",
-      "section": "Tension",
-      "kicker": "What the room is actually fighting",
-      "title": "They wait. The papers do not.",
-      "narrative": "What CardioShield needs is not another reminder that the science is positive. The doctors already told us: Advisory board (n=12 cardiologists) - most agree wit…",
+      "id": "need",
+      "section": "Need",
+      "kicker": "Phase 01 · the real job",
+      "title": "The goal is not the job.",
+      "narrative": "What CardioShield needs is not another reminder that the science is positive.",
       "layout": "stat",
       "stat": {
         "items": [
           {
-            "kicker": "In the room",
-            "value": "Wait",
-            "label": "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but s…"
+            "kicker": "The brief asked",
+            "value": "Grow",
+            "label": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation."
           },
           {
-            "kicker": "On the register",
-            "value": "7",
-            "label": "No numbered finding yet."
+            "kicker": "The file restates",
+            "value": "Delay",
+            "label": "What CardioShield needs is not another reminder that the science is positive."
           }
         ]
       },
@@ -1522,15 +1628,124 @@
         3,
         5
       ],
-      "bullets": []
+      "bullets": [],
+      "phase": "01",
+      "question": "What is the real job?",
+      "skill": "story"
+    },
+    {
+      "id": "tension",
+      "section": "Tension",
+      "kicker": "Phase 05 · the behaviour",
+      "title": "Current habit versus required start.",
+      "narrative": "The habit of waiting until the patient is 'stable' in clinic.",
+      "layout": "stat",
+      "stat": {
+        "items": [
+          {
+            "kicker": "What they do",
+            "value": "Wait",
+            "label": "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\"."
+          },
+          {
+            "kicker": "What must change",
+            "value": "Start",
+            "label": "Start sacubitril/valsartan at the first eligible encounter — the window studied in [2] PIONEER-HF 2019."
+          }
+        ]
+      },
+      "refs": [
+        2,
+        3,
+        5
+      ],
+      "bullets": [],
+      "phase": "05",
+      "question": "What do they do versus what must change?",
+      "skill": "story"
+    },
+    {
+      "id": "belief",
+      "section": "Belief",
+      "kicker": "Phase 04 · belief versus papers",
+      "title": "Agreement is not the campaign.",
+      "narrative": "Disagreement is where we spend. Silence is research, not copy.",
+      "layout": "board",
+      "board": {
+        "cards": [
+          {
+            "kicker": "They still do this",
+            "title": "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise",
+            "body": "The initiation papers do not require a clinic wait.",
+            "ref": "Habit / handover theatre"
+          },
+          {
+            "kicker": "They still do this",
+            "title": "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually",
+            "body": "We do not have a renal-burden RCT on the register.",
+            "ref": "Old teaching / monitoring fear"
+          }
+        ]
+      },
+      "refs": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "bullets": [],
+      "phase": "04",
+      "question": "Where does belief fight the papers?",
+      "skill": "story"
+    },
+    {
+      "id": "pico",
+      "section": "Contract",
+      "kicker": "Phase 02 · how we judge the science",
+      "title": "If it is not in this frame, it is not a claim.",
+      "narrative": "Population, intervention, comparator, outcomes, setting. That is the contract.",
+      "layout": "board",
+      "board": {
+        "cards": [
+          {
+            "kicker": "Population",
+            "title": "Population",
+            "body": "HFrEF (heart failure with reduced ejection fraction), NYHA class II-IV."
+          },
+          {
+            "kicker": "Intervention",
+            "title": "Intervention",
+            "body": "sacubitril/valsartan at the first eligible encounter."
+          },
+          {
+            "kicker": "Comparator",
+            "title": "Comparator",
+            "body": "Habitual ACEI/ARB or SoC delay."
+          },
+          {
+            "kicker": "Outcomes we may use",
+            "title": "Outcomes we may use",
+            "body": "CV death or HF hospitalisation [1]; Time-averaged proportional change in NT-proBNP [2]; Proportion achieving target dose at 10 weeks [3]; Primary composite, consistent across age [4]."
+          },
+          {
+            "kicker": "Setting",
+            "title": "Setting",
+            "body": "India (metro + tier-2/3 cities)."
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "02",
+      "question": "How will we judge the science?",
+      "skill": "story"
     },
     {
       "id": "science-meaning",
       "section": "Science",
-      "kicker": "The prize, in a clinic of 100",
-      "title": "Read the dots, not the hazard ratio",
+      "kicker": "Phase 03 · the prize, in a clinic of 100",
+      "title": "Read the dots, not the hazard ratio.",
       "subtitle": "[1] PARADIGM-HF 2014 · PMID 25176015",
-      "narrative": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF. [1] Treat 21 to prevent 1 event over median 27 months.",
+      "narrative": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF. Treat 21 to prevent one event over median 27 months.",
       "layout": "visual",
       "chart": {
         "kind": "people",
@@ -1557,13 +1772,16 @@
       "refs": [
         1
       ],
-      "bullets": []
+      "bullets": [],
+      "phase": "03",
+      "question": "What did the lead paper show in a clinic of 100?",
+      "skill": "story"
     },
     {
       "id": "forest",
       "section": "Science",
-      "kicker": "The pack on one axis",
-      "title": "Agreement is the case, not one HR",
+      "kicker": "Phase 03 · the pack on one axis",
+      "title": "Agreement is the case, not one HR.",
       "narrative": "Only numbered papers with a published interval. We do not invent a forest.",
       "layout": "visual",
       "chart": {
@@ -1615,13 +1833,17 @@
         3,
         4
       ],
-      "bullets": []
+      "bullets": [],
+      "phase": "03",
+      "question": "Do the numbered papers agree?",
+      "skill": "story"
     },
     {
       "id": "science-compare",
       "section": "Science",
-      "kicker": "A second paper, a different job",
-      "title": "[2] PIONEER-HF 2019",
+      "kicker": "Phase 03 · a second paper, a different job",
+      "title": "This paper is not a reprint of the first.",
+      "subtitle": "[2] PIONEER-HF 2019",
       "narrative": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
       "layout": "visual",
       "chart": {
@@ -1648,13 +1870,16 @@
       "refs": [
         2
       ],
-      "bullets": []
+      "bullets": [],
+      "phase": "03",
+      "question": "What does the next paper add?",
+      "skill": "story"
     },
     {
       "id": "pack",
       "section": "Science",
-      "kicker": "The pack — each paper a job",
-      "title": "One paper is not enough to convince",
+      "kicker": "Phase 03 · each paper a job",
+      "title": "One paper is not enough to convince.",
       "narrative": "4 numbered papers carry the science — one paper is not enough to convince, led by PIONEER-HF 2019 (PMID 30415601).",
       "layout": "board",
       "board": {
@@ -1668,13 +1893,13 @@
           {
             "kicker": "TRANSITION 2019",
             "title": "TRANSITION 2019",
-            "body": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not r…",
+            "body": "Pre-discharge and early post-discharge initiation both reach target dose; the 'wait to start' ritual is not required for titration success.",
             "ref": "[3]"
           },
           {
             "kicker": "AHA/ACC/HFSA 2022",
             "title": "AHA/ACC/HFSA 2022",
-            "body": "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theat…",
+            "body": "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatre'.",
             "ref": "[6]"
           },
           {
@@ -1691,45 +1916,183 @@
         3,
         4
       ],
-      "bullets": []
+      "bullets": [],
+      "phase": "03",
+      "question": "Why is one paper not a case?",
+      "skill": "story"
+    },
+    {
+      "id": "stand",
+      "section": "Ground",
+      "kicker": "Phase 06 · shout versus silence",
+      "title": "We shout only where the columns agree.",
+      "narrative": "We stand only where the columns agree.",
+      "layout": "board",
+      "board": {
+        "cards": [
+          {
+            "kicker": "We may stand",
+            "title": "Outcome vs SoC",
+            "body": "Supportive [1]."
+          },
+          {
+            "kicker": "We may stand",
+            "title": "First-eligible / in-hospital start",
+            "body": "Supportive [3]."
+          },
+          {
+            "kicker": "Silent",
+            "title": "Cost offset",
+            "body": "Silent."
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "06",
+      "question": "Where may we stand, and where are we silent?",
+      "skill": "story"
     },
     {
       "id": "house",
       "section": "Message",
-      "kicker": "What we will say",
-      "title": "Start CardioShield at the first eligible encounter — in hospital if tha…",
+      "kicker": "Phase 07 · what we will say",
+      "title": "Three lines. Each one numbered.",
       "narrative": "A pillar without a number does not ship.",
       "layout": "board",
       "board": {
         "cards": [
           {
-            "kicker": "Pillar",
+            "kicker": "We will say",
             "title": "Start now",
-            "body": "First eligible encounter is a guideline encounter, not a later clinic. [2]",
+            "body": "First eligible encounter is a guideline encounter, not a later clinic.",
             "ref": "[2]"
           },
           {
-            "kicker": "Pillar",
-            "title": "The outcome is already earn…",
-            "body": "We are not arguing efficacy from scratch. [1]",
+            "kicker": "We will say",
+            "title": "The outcome is already earned",
+            "body": "We are not arguing efficacy from scratch.",
             "ref": "[1]"
           },
           {
-            "kicker": "Pillar",
+            "kicker": "We will say",
             "title": "Cover exists",
-            "body": "Class I / four-pillar language is permission, not a poster after the wait. [5]",
+            "body": "Class I / four-pillar language is permission, not a poster after the wait.",
             "ref": "[5]"
           }
         ]
       },
       "refs": [],
-      "bullets": []
+      "bullets": [],
+      "phase": "07",
+      "question": "What will we say?",
+      "skill": "story"
+    },
+    {
+      "id": "objections",
+      "section": "Message",
+      "kicker": "Phase 07 · what they say back",
+      "title": "Answer the objection. Do not dodge it.",
+      "narrative": "What we will not say sits in the working file. It does not become a slogan.",
+      "layout": "board",
+      "board": {
+        "cards": [
+          {
+            "kicker": "They will say",
+            "title": "I stabilise on ACEI first",
+            "body": "The initiation papers studied start after haemodynamic stability — not after a second clinic.",
+            "ref": "[2]"
+          },
+          {
+            "kicker": "They will say",
+            "title": "The patient cannot afford",
+            "body": "Stay on their side.",
+            "ref": "gap"
+          },
+          {
+            "kicker": "They will say",
+            "title": "They are too old / too frail",
+            "body": "Benefit vs enalapril was consistent in older patients; age alone is not a reason to delay.",
+            "ref": "[4]"
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "07",
+      "question": "What will they say back?",
+      "skill": "story"
+    },
+    {
+      "id": "sequence",
+      "section": "Contact",
+      "kicker": "Phase 08 · a sequence, not a spray",
+      "title": "A doctor should feel an order.",
+      "narrative": "If a contact cannot name a numbered paper, it does not go on the plan.",
+      "layout": "flow",
+      "flow": {
+        "steps": [
+          {
+            "n": "1",
+            "title": "Before launch",
+            "body": "A handful of hospital pathway owners write the first-eligible protocol."
+          },
+          {
+            "n": "2",
+            "title": "First quarter",
+            "body": "One hospital live, one cost conversation kit in the bag, one myth we can actually source."
+          },
+          {
+            "n": "3",
+            "title": "Adoption",
+            "body": "The second prescription is designed."
+          },
+          {
+            "n": "4",
+            "title": "After the burst",
+            "body": "The pathway stays when the campaign money stops."
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "08",
+      "question": "How does contact feel over time?",
+      "skill": "story"
+    },
+    {
+      "id": "who",
+      "section": "Audience",
+      "kicker": "Phase 09 · who we activate first",
+      "title": "A few rooms. The rest inherit.",
+      "narrative": "We collapsed specialty, city, and cost to the groups this brief can actually fund.",
+      "layout": "board",
+      "board": {
+        "cards": [
+          {
+            "kicker": "First",
+            "title": "KOL academic cardiologists (metro teaching hospitals)",
+            "body": "Peer cascade — they author the protocol Cover has to travel down."
+          },
+          {
+            "kicker": "First",
+            "title": "Senior private-practice cardiologists (metro and tier-2)",
+            "body": "First-eligible pathway + habit lock This is where volume lives."
+          },
+          {
+            "kicker": "First",
+            "title": "Early-career cardiologists and DM trainees",
+            "body": "Affordability conversation kit Cost is the veto."
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "09",
+      "question": "Who do we activate first?",
+      "skill": "story"
     },
     {
       "id": "science-execute",
       "section": "Action",
-      "kicker": "Science becomes a move",
-      "title": "The paper names the move",
+      "kicker": "Phase 05 · science becomes a move",
+      "title": "The paper names the move.",
       "narrative": "One cited finding, one execution. We do not invent a second campaign beside the papers.",
       "layout": "visual",
       "chart": {
@@ -1739,7 +2102,7 @@
           {
             "name": "[1] PARADIGM-HF 2014",
             "science": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
-            "means": "Treat 21 patients like these to prevent 1 death or HF hospitalisation over ~27 months — that is the clinical…",
+            "means": "Treat 21 patients like these to prevent 1 death or HF hospitalisation over ~27 months — that is the clinical prize.",
             "barrier": "The prize is lost if start waits until the outpatient clinic.",
             "execute": "First-Touch Protocol: initiate at first-eligible, not first-available.",
             "measure": "Share of eligible starts inside 48 hours of first-eligible.",
@@ -1764,12 +2127,15 @@
         1,
         2
       ],
-      "bullets": []
+      "bullets": [],
+      "phase": "05",
+      "question": "How does a finding become a move?",
+      "skill": "story"
     },
     {
       "id": "interventions",
       "section": "Action",
-      "kicker": "What we actually do",
+      "kicker": "Phase 08 · what we actually do",
       "title": "Three moves. The rest inherit.",
       "narrative": "If a move cannot name a numbered paper, it does not ship.",
       "layout": "board",
@@ -1779,63 +2145,103 @@
             "kicker": "Move 1",
             "title": "First-Touch Protocol",
             "body": "A hospital-to-clinic initiation bundle so CardioShield is started at the first eligible encounter.",
-            "ref": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
+            "ref": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10."
           },
           {
             "kicker": "Move 2",
             "title": "Affordability Confidence Kit",
             "body": "A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.",
-            "ref": "[7] Trivandrum HFR 2015 · PMID 26011246 · doi:10.1002/ejhf.283"
+            "ref": "[7] Trivandrum HFR 2015 · PMID 26011246 · doi:10."
           },
           {
             "kicker": "Move 3",
             "title": "Myth-Reset Asset",
-            "body": "One wrong belief, one local number, one peer voice. Unlearning, not a lecture.",
-            "ref": "[4] Jhund 2015 age · PMID 26231885 · doi:10.1093/eurheartj/ehv330"
+            "body": "One wrong belief, one local number, one peer voice.",
+            "ref": "[4] Jhund 2015 age · PMID 26231885 · doi:10."
           }
         ]
       },
-      "bullets": []
+      "bullets": [],
+      "phase": "08",
+      "question": "What do we actually do?",
+      "skill": "story"
+    },
+    {
+      "id": "measure",
+      "section": "Proof",
+      "kicker": "Phase 10 · how we will know",
+      "title": "The brief's goal is the parent metric.",
+      "narrative": "Lead indicators are recall of each paper's job, not a mash-up number. Rates stay sketches until the audit exists.",
+      "layout": "board",
+      "board": {
+        "cards": [
+          {
+            "kicker": "Parent",
+            "title": "Quarterly volume / revenue vs the brief",
+            "body": "If this does not move, the rest is decoration."
+          },
+          {
+            "kicker": "Lead",
+            "title": "Share of eligible starts inside 48 hours of first-eligible",
+            "body": "Kill the protocol if this is flat at week 8 in the pilot."
+          },
+          {
+            "kicker": "Lead",
+            "title": "Assistance offered in eligible high-OOP starts",
+            "body": "If mention rises and starts do not, the kit is a pamphlet."
+          }
+        ]
+      },
+      "bullets": [],
+      "phase": "10",
+      "question": "How will we know?",
+      "skill": "story"
     },
     {
       "id": "close",
       "section": "Ask",
-      "kicker": "The first 30 days",
+      "kicker": "Phase 11 · the page we take to sign-off",
       "title": "Sign the bet. Number the claims.",
-      "narrative": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Cla…",
+      "narrative": "Lead the campaign with first-eligible / in-hospital initiation.",
       "layout": "flow",
       "flow": {
         "steps": [
           {
             "n": "1",
-            "title": "Days 1–10",
-            "body": "Sign the bet: Start CardioShield at the first eligible encounter — in hospital if that is…"
+            "title": "Days 1 to 10",
+            "body": "Sign the bet: Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible."
           },
           {
             "n": "2",
-            "title": "Days 11–20",
-            "body": "Sign the scientific lead, with numbers: [2] PIONEER-HF 2019, [3] TRANSITION 2019, [5] ESC…"
+            "title": "Days 11 to 20",
+            "body": "Sign the scientific lead, with numbers: [2] PIONEER-HF 2019, [3] TRANSITION 2019, [5] ESC 2021 Class I, [1] PARADIGM-HF 2014."
           },
           {
             "n": "3",
-            "title": "Days 21–30",
-            "body": "Name owners for each paper's job in the bag, the cost conversation, and MLR on the number…"
+            "title": "Days 21 to 30",
+            "body": "Name owners for each paper's job in the bag, the cost conversation, and MLR on the numbered claims."
           }
         ]
       },
       "callout": {
         "label": "CardioShield",
-        "text": "Start CardioShield at the first eligible encounter — in hospital if tha…"
+        "text": "Start at the first eligible visit"
       },
-      "bullets": []
+      "bullets": [],
+      "phase": "11",
+      "question": "What do we need signed in 30 days?",
+      "skill": "story"
     },
     {
       "id": "references",
       "section": "References",
       "kicker": "Numbered sources",
-      "title": "Vancouver list",
-      "narrative": "Every superscript in this deck points here.",
+      "title": "Every superscript points here",
+      "narrative": "These are the numbered papers. Nothing else is a source.",
       "layout": "references",
+      "phase": "03",
+      "question": "Where are the PMIDs?",
+      "skill": "story",
       "table": {
         "headers": [
           "No.",
@@ -2598,7 +3004,7 @@
       {
         "name": "[1] PARADIGM-HF 2014",
         "science": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF.",
-        "means": "Treat 21 patients like these to prevent 1 death or HF hospitalisation over ~27 months — that is the clinical…",
+        "means": "Treat 21 patients like these to prevent 1 death or HF hospitalisation over ~27 months — that is the clinical prize.",
         "barrier": "The prize is lost if start waits until the outpatient clinic.",
         "execute": "First-Touch Protocol: initiate at first-eligible, not first-available.",
         "measure": "Share of eligible starts inside 48 hours of first-eligible.",
@@ -2713,7 +3119,7 @@
       "Uncited: Post-hoc analyses in elderly and diabetic subgroups",
       "Uncited: Ongoing local health-economics study (readmission cost offset)"
     ],
-    "howBuilt": "We started with the brief for CardioShield. The brief is not expected to contain paper links. We searched PubMed for sacubitril/valsartan (the INN when named, never the campaign brand), then read the abstracts, and kept a short set of load-bearing papers. 7 papers have a number. One paper is not a case: load-bearing lines quote the pack, not a single PMID. Strategy lines quote findings written in those papers. 2 lines from the brief still have no PMID or DOI. Effect sizes are taken only from the abstract or a curated source, never invented. The slides are this file, presented.",
+    "howBuilt": "We started with the brief for CardioShield. The brief is not expected to contain paper links. We searched PubMed for sacubitril/valsartan (the INN when named, never the campaign brand), then read the abstracts, and kept a short set of load-bearing papers. 7 papers have a number. One paper is not a case: load-bearing lines quote the pack, not a single PMID. Strategy lines quote findings written in those papers. 2 lines from the brief still have no PMID or DOI. Effect sizes are taken only from the abstract or a curated source, never invented. The slides interpret this file as pictures. They do not paste these phases.",
     "alerts": [
       {
         "level": "watch",

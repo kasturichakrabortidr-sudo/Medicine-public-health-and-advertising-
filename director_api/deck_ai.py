@@ -1,8 +1,7 @@
 """Optional LLM polish for deck headlines.
 
-The craft skill already interprets the plan. If an API key is present we
-ask a model only to shorten headlines — never to invent numbers or papers.
-Tests and keyless environments skip this path.
+Only complete sentences. Never ellipses. Never invented numbers.
+Off unless STRATA_DECK_AI is on and a key is present.
 """
 
 from __future__ import annotations
@@ -12,6 +11,8 @@ import os
 import urllib.error
 import urllib.request
 from typing import Any
+
+from .deck_visuals import sentence
 
 
 def polish_story(story: dict[str, Any], brief: Any, doctrine: dict) -> dict[str, Any]:
@@ -29,22 +30,23 @@ def _openai_polish(story: dict, doctrine: dict, key: str) -> dict:
     model = os.environ.get("STRATA_DECK_MODEL") or "gpt-4o-mini"
     prompt = {
         "model": model,
-        "temperature": 0.3,
-        "max_tokens": 220,
+        "temperature": 0.2,
+        "max_tokens": 280,
         "messages": [
             {
                 "role": "system",
                 "content": (
                     "You write slide headlines for a medical-affairs strategy deck. "
-                    "Return JSON with keys headline, tension. Each under 12 words. "
-                    "Do not add numbers, trial names, or claims that are not in the input."
+                    "Return JSON with keys headline, need. Each must be a complete sentence. "
+                    "Never use ellipses. Never cut a clause. Do not add numbers, trial names, "
+                    "or claims that are not in the input."
                 ),
             },
             {
                 "role": "user",
                 "content": json.dumps({
                     "headline": story.get("headline"),
-                    "tension": story.get("tension"),
+                    "need": story.get("need"),
                     "enemy": story.get("enemy"),
                     "doctrine": doctrine.get("name"),
                 }),
@@ -68,7 +70,7 @@ def _openai_polish(story: dict, doctrine: dict, key: str) -> dict:
         return story
     parsed = json.loads(text[start: end + 1])
     if parsed.get("headline"):
-        story["headline"] = str(parsed["headline"]).strip()[:72]
-    if parsed.get("tension"):
-        story["tension"] = str(parsed["tension"]).strip()[:160]
+        story["headline"] = sentence(parsed["headline"])
+    if parsed.get("need"):
+        story["need"] = sentence(parsed["need"])
     return story

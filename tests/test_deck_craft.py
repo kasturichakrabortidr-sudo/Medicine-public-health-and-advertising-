@@ -1,11 +1,23 @@
+import re
+
 from director_api.extract import ExtractedBrief
 from director_api.generate import generate_pack
 from medicomarketing_agent.config import load_brief
 from director_api.app import _brief_from_mapping
+from director_api.deck_visuals import sentence
 
 
 BANNED_IDS = {"how-built", "questions", "boxplot", "citation-register", "science-lead"}
 VISUAL_KEYS = ("chart", "board", "flow", "stat")
+REQUIRED_PHASES = {f"{i:02d}" for i in range(1, 12)}
+REQUIRED_SLIDES = {
+    "title", "need", "tension", "belief", "pico", "pack", "stand",
+    "house", "objections", "sequence", "who", "interventions", "measure", "close",
+}
+HANGING = re.compile(
+    r"\b(the|a|an|at|in|if|to|for|of|and|or|with|on|by|from|as|than|that|this|is|are)\s*$",
+    re.I,
+)
 
 
 def _demo_pack(**kwargs):
@@ -13,22 +25,40 @@ def _demo_pack(**kwargs):
     return generate_pack(brief, mode="demo", pubmed=False, **kwargs)
 
 
+def _copy_blobs(slide: dict) -> list[str]:
+    blobs = [
+        slide.get("title") or "",
+        slide.get("subtitle") or "",
+        slide.get("narrative") or "",
+    ]
+    for card in (slide.get("board") or {}).get("cards") or []:
+        blobs.extend([card.get("title") or "", card.get("body") or ""])
+    for step in (slide.get("flow") or {}).get("steps") or []:
+        blobs.extend([step.get("title") or "", step.get("body") or ""])
+    for item in (slide.get("stat") or {}).get("items") or []:
+        blobs.extend([item.get("value") or "", item.get("label") or ""])
+    return blobs
+
+
+def test_sentence_never_uses_ellipsis():
+    assert "…" not in sentence("Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.")
+    assert sentence("The doctors wait. Cost does the rest.") == "The doctors wait."
+    assert sentence("No stop here") == "No stop here."
+    assert not sentence("Start at the").endswith("the")
+
+
 def test_deck_interprets_plan_not_the_file():
     pack = _demo_pack()
     ids = [s["id"] for s in pack["slides"]]
     assert pack["meta"]["deckSkill"] == "strata-deck"
+    assert pack["meta"]["deckSkills"] == ["story", "visuals", "copy", "layout"]
     assert not (set(ids) & BANNED_IDS)
     assert ids[0] == "title"
-    assert "tension" in ids
-    assert "science-meaning" in ids
-    assert "forest" in ids
-    assert "pack" in ids
-    assert "house" in ids
-    assert "science-execute" in ids
-    assert "interventions" in ids
-    assert "close" in ids
-    assert "references" in ids
+    missing = REQUIRED_SLIDES - set(ids)
+    assert not missing, missing
     assert pack["workfile"]["phases"][0]["id"] == "01"
+    phases = {row["phase"] for row in pack["meta"]["storyMap"]}
+    assert REQUIRED_PHASES <= phases
 
 
 def test_one_visual_owns_each_content_slide():
@@ -41,6 +71,17 @@ def test_one_visual_owns_each_content_slide():
         assert any(slide.get(k) for k in VISUAL_KEYS), slide["id"]
         if slide.get("layout") in {"visual", "board", "flow", "stat"}:
             assert not slide.get("bullets")
+
+
+def test_copy_is_complete_never_clipped():
+    pack = _demo_pack()
+    for slide in pack["slides"]:
+        for blob in _copy_blobs(slide):
+            assert "…" not in blob, (slide["id"], blob)
+            assert "..." not in blob, (slide["id"], blob)
+            words = blob.strip()
+            if len(words.split()) >= 4:
+                assert not HANGING.search(words.rstrip(".!?")), (slide["id"], blob)
 
 
 def test_people_grid_is_one_paper():
@@ -69,17 +110,20 @@ def test_polish_is_off_without_flag(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
     from director_api.deck_ai import polish_story
 
-    story = {"headline": "Start at the first eligible visit", "tension": "They still wait."}
+    story = {"headline": "Start at the first eligible visit", "need": "They still wait."}
     assert polish_story(dict(story), None, {"name": "Start"}) == story
 
 
-def test_titles_stay_short():
+def test_titles_stay_short_and_complete():
     pack = _demo_pack()
     for slide in pack["slides"]:
         if slide["layout"] == "references":
             continue
-        words = [w for w in (slide.get("title") or "").replace("—", " ").split() if w]
-        assert len(words) <= 12, slide["id"]
+        title = slide.get("title") or ""
+        words = [w for w in title.replace("—", " ").split() if w]
+        assert 1 <= len(words) <= 14, (slide["id"], title)
+        assert "…" not in title
+        assert not HANGING.search(title.rstrip(".!?")), title
 
 
 def test_helix_cost_brief_still_gets_a_visual_deck():
@@ -92,8 +136,13 @@ def test_helix_cost_brief_still_gets_a_visual_deck():
     pack = generate_pack(brief, pubmed=False)
     ids = {s["id"] for s in pack["slides"]}
     assert "title" in ids
-    assert "tension" in ids
-    assert "science-meaning" in ids
+    assert "need" in ids
+    assert "pico" in ids
+    assert "pack" in ids
+    assert "measure" in ids
     assert pack["meta"]["brand"] == "HelixOne"
     meaning = next(s for s in pack["slides"] if s["id"] == "science-meaning")
     assert meaning["chart"]["data"][0]["pmid"] == "29658856"
+    for slide in pack["slides"]:
+        for blob in _copy_blobs(slide):
+            assert "…" not in blob, (slide["id"], blob)

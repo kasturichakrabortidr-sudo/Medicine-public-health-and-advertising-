@@ -1,15 +1,50 @@
-"""Row builders for visual slides. Numbers come from numbered papers only."""
+"""Row builders and copy helpers. Numbers come from numbered papers only.
+
+Copy rule: complete sentences. Never an ellipsis. Never a cut clause.
+"""
 
 from __future__ import annotations
 
-from typing import Any
+import re
 
 from .cite import mark
 
+HANGING = re.compile(
+    r"\b(the|a|an|at|in|if|to|for|of|and|or|with|on|by|from|as|than|that|this|is|are)\s*$",
+    re.I,
+)
+STOP = re.compile(r"[^.!?]*[.!?]")
 
-def clip(text, n: int) -> str:
+
+def sentence(text, n: int = 1) -> str:
+    """First n complete sentences. Never adds an ellipsis."""
     text = " ".join(str(text or "").split())
-    return text if len(text) <= n else text[: n - 1].rstrip() + "…"
+    if not text:
+        return ""
+    found = [m.group(0).strip() for m in STOP.finditer(text)]
+    if found:
+        return " ".join(found[: max(1, n)])
+    cleaned = text.rstrip(" .…,;:—-")
+    if not cleaned:
+        return ""
+    if HANGING.search(cleaned):
+        cleaned = HANGING.sub("", cleaned).rstrip(" ,;:—-")
+    if not cleaned:
+        return ""
+    if cleaned[-1] not in ".!?":
+        cleaned += "."
+    return cleaned
+
+
+def line(text) -> str:
+    """A complete noun phrase or sentence for a card title. No ellipsis."""
+    text = " ".join(str(text or "").split())
+    text = text.replace("…", "").rstrip(" .")
+    if not text:
+        return ""
+    if HANGING.search(text):
+        text = HANGING.sub("", text).rstrip(" ,;:—-")
+    return text
 
 
 def phase(work: dict, pid: str) -> dict:
@@ -19,12 +54,22 @@ def phase(work: dict, pid: str) -> dict:
     return {}
 
 
+def rows_of(block) -> list[list]:
+    if not isinstance(block, dict):
+        return []
+    out = []
+    for row in block.get("rows") or []:
+        if isinstance(row, (list, tuple)) and row:
+            out.append(list(row))
+    return out
+
+
 def finding(row: dict) -> str:
     if row.get("nnt"):
         return f"{row.get('control_event')} vs {row.get('treat_event')} per 100; NNT {row['nnt']}"
     if row.get("hr") is not None:
         return f"{row.get('effect_metric') or 'HR'} {row['hr']} ({row.get('low')}–{row.get('high')})"
-    return (row.get("claim_permitted") or row.get("endpoint") or "—")[:90]
+    return sentence(row.get("claim_permitted") or row.get("endpoint") or "")
 
 
 def people_rows(records: list[dict]) -> list[dict]:
@@ -51,7 +96,7 @@ def people_rows(records: list[dict]) -> list[dict]:
             "ref": r.get("ref") or "",
             "control_label": "Comparator",
             "treat_label": r.get("trial") or "Intervention",
-            "claim": r.get("claim_permitted") or "",
+            "claim": sentence(r.get("claim_permitted") or ""),
         })
     return rows
 
@@ -73,7 +118,7 @@ def compare_rows(records: list[dict]) -> list[dict]:
             "unit": r.get("visual_unit") or "",
             "pmid": r.get("pmid") or "",
             "ref": r.get("ref") or "",
-            "claim": r.get("claim_permitted") or "",
+            "claim": sentence(r.get("claim_permitted") or ""),
             "horizon": r.get("horizon") or "",
         })
     return rows
@@ -102,11 +147,11 @@ def spine_rows(records: list[dict], interventions: list[dict]) -> list[dict]:
             iv = next((i for i in interventions if i["id"] == want), None) if want else None
         rows.append({
             "name": f"{mark(r)} {r.get('short') or r.get('trial') or ''}",
-            "science": (r.get("claim_permitted") or "")[:120],
-            "means": clip(means, 110),
-            "barrier": clip(r.get("spine_barrier") or "", 110),
-            "execute": clip(r.get("spine_execute") or (iv["name"] if iv else ""), 110),
-            "measure": clip(r.get("spine_measure") or (iv["kill"] if iv else ""), 110),
+            "science": sentence(r.get("claim_permitted") or ""),
+            "means": sentence(means),
+            "barrier": sentence(r.get("spine_barrier") or ""),
+            "execute": sentence(r.get("spine_execute") or (iv["name"] if iv else "")),
+            "measure": sentence(r.get("spine_measure") or (iv["kill"] if iv else "")),
             "pmid": r.get("pmid") or "",
             "ref": r.get("ref") or "",
             "move": iv["name"] if iv else (r.get("spine_execute") or ""),
@@ -140,6 +185,9 @@ def reference_slides(references: list[dict]) -> list[dict]:
             "title": "The pack, when we have it",
             "narrative": "No PMID is on the register yet. Do not invent a reference list.",
             "layout": "insight",
+            "phase": "03",
+            "question": "Where are the PMIDs?",
+            "skill": "visuals",
             "bullets": ["Retrieve primary papers before anyone writes a claim."],
         }]
     slides = []
@@ -150,9 +198,12 @@ def reference_slides(references: list[dict]) -> list[dict]:
             "id": "references" if i == 0 else f"references-{i // chunk + 1}",
             "section": "References",
             "kicker": "Numbered sources",
-            "title": "Vancouver list" if i == 0 else "Vancouver list (continued)",
-            "narrative": "Every superscript in this deck points here.",
+            "title": "Every superscript points here",
+            "narrative": "These are the numbered papers. Nothing else is a source.",
             "layout": "references",
+            "phase": "03",
+            "question": "Where are the PMIDs?",
+            "skill": "visuals",
             "table": {
                 "headers": ["No.", "Citation"],
                 "rows": [[str(r.get("n") or ""), r.get("citation") or r.get("short") or ""] for r in part],

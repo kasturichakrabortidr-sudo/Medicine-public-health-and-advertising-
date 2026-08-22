@@ -20,7 +20,7 @@ def test_first_touch_doctrine_from_stabilize_insight():
     pack = generate_pack(brief)
     assert pack["doctrine"]["id"] == "first-touch"
     assert pack["meta"]["brand"] == "CardioShield"
-    assert len(pack["slides"]) >= 8
+    assert len(pack["slides"]) >= 14
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
     assert {"people", "forest", "spine"} <= kinds
     assert pack["dashboard"]["kpis"]
