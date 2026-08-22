@@ -161,3 +161,91 @@ def test_hf_sglt2_brief_does_not_attach_arni_trials():
     assert "paradigm-hf-2014" not in ids
     assert "pioneer-hf-2019" not in ids
     assert "keynote-189-2018" not in ids
+
+
+def test_product_without_trial_names_still_gets_catalog():
+    brief = ExtractedBrief(
+        brand="HelixOne",
+        product="sacubitril",
+        therapy_area="Cardiology — HFrEF",
+        market="India",
+        business_goal="Grow ARNI initiation in metro clinics",
+        hcp_insights=["Cost is the veto at the desk"],
+    )
+    ledger = resolve_evidence(brief, pubmed=False)
+    ids = {r["id"] for r in ledger["records"]}
+    assert "paradigm-hf-2014" in ids
+    assert ledger["lead"]["citations"][0]["pmid"]
+
+
+def test_brief_without_paper_links_gets_pubmed_records(monkeypatch):
+    def fake_search(term, retmax=8):
+        assert "lumetinib" in term.lower() or "psoriasis" in term.lower() or "dermatology" in term.lower()
+        return ["39001111"]
+
+    def fake_summary(pmids):
+        return {
+            "39001111": {
+                "title": "Lumetinib in moderate-to-severe plaque psoriasis: a randomized trial",
+                "fulljournalname": "N Engl J Med",
+                "pubdate": "2024 Jan",
+                "authors": [{"name": "Chen L"}, {"name": "Rao P"}, {"name": "Singh A"}, {"name": "Other"}],
+                "articleids": [{"idtype": "doi", "value": "10.1056/NEJMoa9999999"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            }
+        }
+
+    monkeypatch.setattr("director_api.evidence._esearch", fake_search)
+    monkeypatch.setattr("director_api.evidence._esummary", fake_summary)
+    brief = ExtractedBrief(
+        brand="LumenDerm",
+        product="lumetinib",
+        therapy_area="Dermatology",
+        indication="plaque psoriasis",
+        market="India",
+        business_goal="Grow first-line share among metro dermatologists",
+    )
+    ledger = resolve_evidence(brief, pubmed=True)
+    pmids = {r["pmid"] for r in ledger["records"]}
+    assert "39001111" in pmids
+    assert "paradigm-hf-2014" not in {r["id"] for r in ledger["records"]}
+    assert ledger["lead"]["citations"]
+    assert ledger["lead"]["citations"][0]["pmid"] == "39001111"
+    assert "paper links" in ledger["lead"]["statement"].lower()
+    pack = generate_pack(brief, pubmed=True)
+    assert pack["references"][0]["pmid"] == "39001111"
+    assert pack["references"][0]["url"].endswith("39001111/")
+    assert pack["evidence"]["records"][0]["hr"] is None
+    assert "CardioShield" not in pack["slides"][0]["title"]
+
+
+def test_sglt2_pubmed_does_not_steal_arni_catalog(monkeypatch):
+    def fake_search(term, retmax=8):
+        return ["31535829"]
+
+    def fake_summary(pmids):
+        return {
+            "31535829": {
+                "title": "Dapagliflozin in patients with heart failure and reduced ejection fraction",
+                "fulljournalname": "N Engl J Med",
+                "pubdate": "2019",
+                "authors": [{"name": "McMurray JJV"}],
+                "articleids": [{"idtype": "doi", "value": "10.1056/NEJMoa1911303"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            }
+        }
+
+    monkeypatch.setattr("director_api.evidence._esearch", fake_search)
+    monkeypatch.setattr("director_api.evidence._esummary", fake_summary)
+    brief = ExtractedBrief(
+        brand="GlucoHeart",
+        product="dapagliflozin",
+        therapy_area="Cardiology - chronic heart failure",
+        indication="HFrEF",
+        market="India",
+    )
+    ledger = resolve_evidence(brief, pubmed=True)
+    ids = {r["id"] for r in ledger["records"]}
+    pmids = {r["pmid"] for r in ledger["records"]}
+    assert "paradigm-hf-2014" not in ids
+    assert "31535829" in pmids

@@ -12,15 +12,22 @@ def attach_references(ledger: dict[str, Any]) -> dict[str, Any]:
     for row in ledger.get("records") or []:
         row["ref"] = n
         row["citation"] = vancouver(row)
-        refs.append(_entry(n, row, "validated"))
+        refs.append(_entry(n, row, row.get("status") or "validated"))
         n += 1
+    numbered_pmids = {str(row.get("pmid") or "") for row in (ledger.get("records") or []) if row.get("pmid")}
     for hit in ledger.get("pubmed") or []:
+        pmid = str(hit.get("pmid") or "")
+        if pmid and pmid in numbered_pmids:
+            rec = next((r for r in ledger["records"] if str(r.get("pmid") or "") == pmid), None)
+            if rec and rec.get("ref") is not None:
+                hit["ref"] = rec["ref"]
+            continue
         hit["ref"] = n
         if not hit.get("citation"):
             hit["citation"] = vancouver(hit)
         refs.append({
             **_entry(n, hit, "retrieved"),
-            "citation": f"{hit['citation']} [PubMed retrieval — confirm full text before it can lead.]",
+            "citation": f"{hit['citation']} [PubMed retrieval — confirm full text before promotional use.]",
             "id": hit.get("id") or f"pubmed-{hit.get('pmid') or n}",
             "short": (hit.get("title") or hit.get("short") or "PubMed hit")[:72],
         })

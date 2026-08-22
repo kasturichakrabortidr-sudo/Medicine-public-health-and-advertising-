@@ -48,11 +48,14 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
     ]
     return {
         "howBuilt": (
-            f"We started with the brief for {brief.brand or 'this brand'}, not with a deck. "
-            "Each section below is one step of the working process. "
+            f"We started with the brief for {brief.brand or 'this brand'}. "
+            "The brief is not expected to contain paper links. "
+            f"We searched PubMed for {brief.product or brief.therapy_area or 'this product/indication'} "
+            "and numbered every hit with a PMID or DOI. "
             f"{len(records)} paper{'s' if len(records) != 1 else ''} have a number. "
             f"{len(gaps)} line{'s' if len(gaps) != 1 else ''} from the brief still have no PMID or DOI. "
-            "Those lines cannot set a claim. The slides are this file, presented."
+            "Those lines cannot set a claim. Effect sizes are taken only from curated papers, never invented. "
+            "The slides are this file, presented."
         ),
         "phases": phases,
         "references": refs,
@@ -97,7 +100,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     known = [
         f"{mark(r)} {r.get('short')}: {r.get('claim_permitted')}"
         for r in records[:6]
-    ] or ["No numbered paper matched this brief yet."]
+    ] or ["No numbered paper on the register yet. PubMed is searched from the product and therapy area; the brief does not need to list papers."]
     unknown = [
         f"{g['stream']}: {g['item']}" for g in gaps[:6]
     ] or ["No uncited brief lines."]
@@ -142,7 +145,7 @@ def _p02(brief, records) -> dict:
             "C — uncited brief item, local RWE without a paper, ongoing study — research task, not a lead",
         ],
         include="Peer-reviewed papers and society guidelines with a PMID or DOI. HFrEF/indication must match the brief.",
-        exclude="Invented HRs, congress rumours, competitor claims without a source, and PubMed hits we have not read.",
+        exclude="Invented HRs, congress rumours, competitor claims without a source, and papers that do not match this product/indication.",
     )
 
 
@@ -170,7 +173,7 @@ def _p03(brief, records, gaps, lead) -> dict:
     ]
     return _phase(
         "03",
-        "Every row is a paper we can put a number on. Brief lines without a number are in the gap table. We did not give them an effect size.",
+        "Every row is a paper we can put a number on. We searched PubMed from the product and therapy area; the brief is not the source of the links. Brief lines without a number stay in the gap table. We did not give them an effect size.",
         forefront={
             "headers": ["Ref", "Source", "Stream", "Design / N", "Published finding", "Grade", "What we may say", "Caveat"],
             "rows": rows,

@@ -1,14 +1,16 @@
 """Validated, cited evidence that sets the campaign lead.
 
-Catalog entries are published sources with DOI/PMID. Brief mentions are matched
-to those records. Uncited brief items stay on the ledger as gaps — they are
-never given an invented effect size. Optional PubMed lookup adds recent
-independent hits without letting them silently become the lead claim.
+Client briefs never contain paper links. Science is sourced from (1) a curated
+catalog when the product/class in the brief matches a published trial, and
+(2) a live PubMed search on the product, indication, and therapy area.
+Uncited brief items stay gaps. PubMed hits become numbered records with PMID/DOI
+but never receive an invented effect size.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import re
 import urllib.error
 import urllib.parse
@@ -313,7 +315,7 @@ CATALOG: list[dict[str, Any]] = [
 
 
 def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str, Any]:
-    """Match the brief to cited records, list gaps, and name the campaign lead."""
+    """Find citable papers for this brief. The brief is not expected to list them."""
     blob = _brief_blob(brief)
     matched: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -323,18 +325,27 @@ def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str,
             matched.append(rec)
             seen.add(entry["id"])
 
-    gaps = _uncited_brief_items(brief, matched)
     pubmed_hits: list[dict[str, Any]] = []
     if pubmed:
         pubmed_hits = _pubmed_enrich(brief, seen)
+        catalog_pmids = {str(r.get("pmid") or "") for r in matched}
+        for hit in pubmed_hits:
+            pmid = str(hit.get("pmid") or "")
+            if pmid and pmid in catalog_pmids:
+                continue
+            rec = _pubmed_as_record(hit)
+            matched.append(rec)
+            if pmid:
+                catalog_pmids.add(pmid)
 
+    gaps = _uncited_brief_items(brief, matched)
     lead = _campaign_lead(brief, matched)
     return {
         "lead": lead,
         "records": matched,
         "gaps": gaps,
         "pubmed": pubmed_hits,
-        "validatedCount": len(matched),
+        "validatedCount": sum(1 for r in matched if r.get("status") == "validated"),
         "gapCount": len(gaps),
     }
 
@@ -531,14 +542,20 @@ def _tokens(text: str) -> list[str]:
 def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]:
     if not matched:
         return {
-            "statement": "No validated citation matched this brief yet. Do not lock a scientific lead.",
+            "statement": (
+                "No citable paper was retrieved for this product/indication yet. "
+                "Do not lock a scientific lead. The brief is not expected to contain paper links — "
+                "we search PubMed from the product and therapy area."
+            ),
             "why": "The working file has no DOI/PMID-backed row. Strategy stays behavioural until science is sourced.",
             "directs": "none",
             "citations": [],
             "doNotClaim": ["Any efficacy, safety, or guideline class statement"],
         }
 
-    by_id = {r["id"]: r for r in matched}
+    catalog = [r for r in matched if r.get("matchedFrom") == "catalog" or r.get("status") == "validated"]
+    pool = catalog or matched
+    by_id = {r["id"]: r for r in pool}
     preferred = [
         "pioneer-hf-2019",
         "transition-2019",
@@ -550,11 +567,14 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     ]
     anchors = [by_id[i] for i in preferred if i in by_id]
     if not anchors:
-        anchors = sorted(matched, key=lambda r: (0 if r.get("grade") == "A" else 1, r.get("year") or 0))
+        anchors = sorted(
+            pool,
+            key=lambda r: (0 if r.get("grade") == "A" else 1, -(r.get("year") or 0)),
+        )
 
     primary = anchors[0]
     support = anchors[1:4]
-    if primary["id"] in {"pioneer-hf-2019", "transition-2019"} and "paradigm-hf-2014" in by_id:
+    if catalog and primary["id"] in {"pioneer-hf-2019", "transition-2019"} and "paradigm-hf-2014" in {r["id"] for r in catalog}:
         statement = (
             f"Lead the campaign with first-eligible / in-hospital initiation. "
             f"{primary['trial']} ({primary['year']}) shows that starting after haemodynamic "
@@ -562,13 +582,22 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
             f"not a reason to wait for a second clinic visit."
         )
         directs = "first-eligible-start"
-    elif primary["id"].startswith("keynote"):
+    elif catalog and primary["id"].startswith("keynote"):
         statement = (
             f"Lead with the first-line survival evidence in {primary['trial']} "
             f"(PMID {primary['pmid']}). Cost is an access problem sitting on top of settled science, "
             f"not a reason to soften the efficacy lead."
         )
         directs = "outcome-permission"
+    elif not catalog:
+        who = brief.product or brief.therapy_area or brief.brand or "this brief"
+        statement = (
+            f"The brief does not contain paper links — none were expected. "
+            f"PubMed was searched for {who}. Lead with {primary.get('short')} "
+            f"(PMID {primary.get('pmid') or '—'}). Quote only what that paper states; "
+            f"do not invent an effect size from the abstract."
+        )
+        directs = "pubmed-retrieved"
     else:
         statement = (
             f"Lead with {primary['short']}: {primary['claim_permitted']}"
@@ -579,116 +608,232 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     return {
         "statement": statement,
         "why": (
-            f"Highest-leverage validated row is {primary['short']} "
-            f"({primary['journal']} {primary['year']}; PMID {primary.get('pmid') or '—'})."
+            f"Highest-leverage sourced row is {primary.get('short')} "
+            f"({primary.get('journal') or 'journal'} {primary.get('year') or ''}; "
+            f"PMID {primary.get('pmid') or '—'})."
         ),
         "directs": directs,
         "primaryId": primary["id"],
         "citations": [
             {
                 "id": c["id"],
-                "short": c["short"],
+                "short": c.get("short") or c.get("title") or c["id"],
                 "pmid": c.get("pmid"),
                 "doi": c.get("doi"),
-                "citation": c["citation"],
-                "claim": c["claim_permitted"],
+                "citation": c.get("citation") or "",
+                "claim": c.get("claim_permitted") or c.get("claim") or "",
             }
             for c in citations
         ],
         "doNotClaim": list(dict.fromkeys(
-            [primary.get("caveat") or "", *(c.get("caveat") or "" for c in support)]
+            [c for c in (
+                primary.get("caveat") or "",
+                *(s.get("caveat") or "" for s in support),
+                "Do not invent a hazard ratio or NNT from a PubMed title.",
+            ) if c]
         )),
     }
 
 
-def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, Any]]:
-    term = _pubmed_term(brief)
-    if not term:
-        return []
-    try:
-        ids = _esearch(term, retmax=4)
-        if not ids:
-            return []
-        summaries = _esummary(ids)
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
-        return []
+def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
+    pmid = str(hit.get("pmid") or "")
+    title = (hit.get("title") or "").rstrip(".")
+    return {
+        "id": hit.get("id") or (f"pmid-{pmid}" if pmid else f"pubmed-{abs(hash(title)) % 10**8}"),
+        "stream": "Independent / PubMed",
+        "trial": hit.get("trial") or "",
+        "short": (title[:88] + ("…" if len(title) > 88 else "")) or f"PMID {pmid}",
+        "title": hit.get("title") or "",
+        "authors": hit.get("authors") or "",
+        "year": hit.get("year"),
+        "journal": hit.get("journal") or "",
+        "pages": hit.get("pages") or "",
+        "doi": hit.get("doi") or "",
+        "pmid": pmid,
+        "design": hit.get("design") or "PubMed record",
+        "n": None,
+        "population": "",
+        "endpoint": "",
+        "effect_metric": None,
+        "hr": None,
+        "low": None,
+        "high": None,
+        "grade": "retrieved",
+        "claim_permitted": (
+            "Cite only findings stated in this paper. Do not invent a hazard ratio, "
+            "NNT, or class recommendation from the title or abstract."
+        ),
+        "caveat": hit.get("note") or (
+            "Retrieved from PubMed for this product/indication. Confirm full text and local label "
+            "before it leads a promotional claim."
+        ),
+        "mlr": "Full-text and label check required before promotional use.",
+        "directs": "pubmed-retrieved",
+        "citation": hit.get("citation") or "",
+        "url": hit.get("url") or (f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/" if pmid else ""),
+        "status": "retrieved",
+        "matchedFrom": "pubmed",
+    }
 
-    hits = []
-    known_pmids = {e.get("pmid") for e in CATALOG}
-    for pmid, doc in summaries.items():
-        if pmid in known_pmids:
+
+def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, Any]]:
+    hits: list[dict[str, Any]] = []
+    seen_pmids: set[str] = {str(e.get("pmid") or "") for e in CATALOG}
+    for term in _pubmed_queries(brief):
+        if len(hits) >= 8:
+            break
+        try:
+            ids = _esearch(term, retmax=8)
+            if not ids:
+                continue
+            summaries = _esummary(ids)
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
             continue
-        title = doc.get("title") or ""
-        journal = doc.get("fulljournalname") or doc.get("source") or ""
-        year = _year(doc.get("pubdate") or "")
-        authors = _author_line(doc.get("authors") or [])
-        doi = _doi_from(doc)
-        hits.append({
-            "pmid": pmid,
-            "title": title,
-            "authors": authors,
-            "year": year,
-            "journal": journal,
-            "doi": doi,
-            "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
-            "citation": f"{authors} {title} {journal}. {year}." + (f" doi:{doi}" if doi else f" PMID {pmid}"),
-            "status": "pubmed-retrieved",
-            "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
-        })
-    return hits[:4]
+        for pmid, doc in summaries.items():
+            if pmid in seen_pmids:
+                continue
+            seen_pmids.add(pmid)
+            title = doc.get("title") or ""
+            journal = doc.get("fulljournalname") or doc.get("source") or ""
+            year = _year(doc.get("pubdate") or "")
+            authors = _author_line(doc.get("authors") or [])
+            doi = _doi_from(doc)
+            pubtypes = doc.get("pubtype") or []
+            design = pubtypes[0] if pubtypes else "PubMed record"
+            hits.append({
+                "pmid": pmid,
+                "title": title,
+                "authors": authors,
+                "year": year,
+                "journal": journal,
+                "doi": doi,
+                "design": design,
+                "url": f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/",
+                "citation": (
+                    f"{authors} {title} {journal}. {year}."
+                    + (f" doi:{doi}" if doi else f" PMID {pmid}")
+                ),
+                "status": "pubmed-retrieved",
+                "note": (
+                    "Independent PubMed hit for this product/indication. "
+                    "Confirm against the full text before it can become a promotional claim."
+                ),
+            })
+        if hits:
+            break
+    if not hits:
+        return []
+    product_tokens = [t for t in re.findall(r"[a-z0-9-]{5,}", (brief.product or "").lower())]
+    if product_tokens:
+        product_hits = [h for h in hits if any(t in (h.get("title") or "").lower() for t in product_tokens)]
+        if product_hits:
+            return product_hits[:8]
+    relevant = [h for h in hits if _title_matches_brief(h.get("title") or "", brief)]
+    return (relevant or hits)[:8]
+
+
+def _pubmed_queries(brief: ExtractedBrief) -> list[str]:
+    product = _clean_query_bit(brief.product)
+    indication = _clean_query_bit(brief.indication)
+    ta = _clean_query_bit(brief.therapy_area)
+    brand = _clean_query_bit(brief.brand)
+    focus = product or brand
+    disease = indication or ta
+    if not focus and not disease:
+        return []
+    core = " ".join(p for p in (focus, disease) if p).strip()
+    if len(core) < 5:
+        return []
+    typed = (
+        f"({core}) AND ("
+        "randomized controlled trial[pt] OR clinical trial[pt] OR "
+        "guideline[pt] OR meta-analysis[pt] OR systematic review[pt]"
+        ")"
+    )
+    loose = f"({core}) AND (trial OR randomized OR guideline)"
+    queries = []
+    if product:
+        queries.append(
+            f"{product}[Title] AND ({disease or 'therapy'}) AND "
+            "(randomized OR trial OR guideline OR meta-analysis)"
+        )
+    queries.append(typed)
+    queries.append(loose)
+    if product and disease and product.lower() not in disease.lower():
+        queries.append(f"{product} {disease} randomized")
+    out: list[str] = []
+    for q in queries:
+        if q not in out:
+            out.append(q)
+    return out
+
+
+def _clean_query_bit(text: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", text or "")
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
+def _title_matches_brief(title: str, brief: ExtractedBrief) -> bool:
+    blob = title.lower()
+    stop = {
+        "chronic", "acute", "area", "therapy", "care", "disease", "the", "and",
+        "for", "with", "from", "specialty", "launch", "campaign", "brief",
+        "first", "line", "plus", "versus", "patients",
+    }
+    tokens = []
+    for field in (brief.product, brief.indication, brief.therapy_area):
+        tokens.extend(re.findall(r"[a-z0-9-]{4,}", (field or "").lower()))
+    tokens = [t for t in tokens if t not in stop]
+    if not tokens:
+        return True
+    return any(t in blob for t in tokens)
 
 
 def _pubmed_term(brief: ExtractedBrief) -> str:
-    product = brief.product or ""
-    indication = brief.indication or brief.therapy_area or ""
-    bits = []
-    if "sacubitril" in (product + indication).lower() or "hfref" in indication.lower() or "heart failure" in (brief.therapy_area or "").lower():
-        bits.append("sacubitril valsartan HFrEF")
-    elif "nsclc" in (indication + (brief.therapy_area or "")).lower() or "oncology" in (brief.therapy_area or "").lower():
-        bits.append("pembrolizumab NSCLC first-line randomized")
-    else:
-        token = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", f"{product} {indication}").strip()
-        if len(token) < 8:
-            return ""
-        bits.append(f"{token} randomized")
-    return " ".join(bits)
+    queries = _pubmed_queries(brief)
+    return queries[0] if queries else ""
 
 
-def _esearch(term: str, retmax: int = 4) -> list[str]:
-    q = urllib.parse.urlencode(
-        {
-            "db": "pubmed",
-            "retmode": "json",
-            "retmax": str(retmax),
-            "term": term,
-            "sort": "relevance",
-            "tool": "strata-director",
-            "email": "strata-director@local",
-        }
+def _ncbi_json(url: str) -> dict:
+    req = urllib.request.Request(
+        url,
+        headers={"User-Agent": "STRATA-director/1.0 (https://pubmed.ncbi.nlm.nih.gov/)"},
     )
-    with urllib.request.urlopen(
-        f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?{q}",
-        timeout=8,
-    ) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+    with urllib.request.urlopen(req, timeout=12) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+def _esearch(term: str, retmax: int = 8) -> list[str]:
+    params = {
+        "db": "pubmed",
+        "retmode": "json",
+        "retmax": str(retmax),
+        "term": term,
+        "sort": "relevance",
+        "tool": "strata-director",
+        "email": "strata-director@local",
+    }
+    api_key = os.environ.get("NCBI_API_KEY") or os.environ.get("PUBMED_API_KEY")
+    if api_key:
+        params["api_key"] = api_key
+    data = _ncbi_json(f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?{urllib.parse.urlencode(params)}")
     return list(data.get("esearchresult", {}).get("idlist") or [])
 
 
 def _esummary(pmids: list[str]) -> dict[str, dict]:
-    q = urllib.parse.urlencode(
-        {
-            "db": "pubmed",
-            "retmode": "json",
-            "id": ",".join(pmids),
-            "tool": "strata-director",
-            "email": "strata-director@local",
-        }
-    )
-    with urllib.request.urlopen(
-        f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?{q}",
-        timeout=8,
-    ) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
+    if not pmids:
+        return {}
+    params = {
+        "db": "pubmed",
+        "retmode": "json",
+        "id": ",".join(pmids),
+        "tool": "strata-director",
+        "email": "strata-director@local",
+    }
+    api_key = os.environ.get("NCBI_API_KEY") or os.environ.get("PUBMED_API_KEY")
+    if api_key:
+        params["api_key"] = api_key
+    data = _ncbi_json(f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?{urllib.parse.urlencode(params)}")
     result = data.get("result") or {}
     return {pmid: result[pmid] for pmid in pmids if pmid in result}
 

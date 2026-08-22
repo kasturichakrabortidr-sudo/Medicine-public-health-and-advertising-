@@ -144,7 +144,10 @@ def _bind_science(doctrine: dict, ledger: dict) -> None:
     lead = ledger.get("lead") or {}
     cites = lead.get("citations") or []
     if not cites:
-        doctrine["scienceLead"] = "No validated citation yet — do not lock a scientific lead."
+        doctrine["scienceLead"] = (
+            "No citable paper retrieved yet — we search PubMed from the product and therapy area. "
+            "Do not lock a scientific lead."
+        )
         return
     primary = cites[0]
     doctrine["scienceLead"] = lead.get("statement") or ""
@@ -205,7 +208,7 @@ def _slides(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None, w
             "kicker": "How this was built",
             "title": "The brief became a working file. The deck is that file, presented.",
             "narrative": work.get("howBuilt") or (
-                "We read the brief, numbered every paper we could match, and wrote the questions the brief cannot answer yet. We did not jump to a campaign."
+                "We read the brief, searched PubMed for the product and therapy area, numbered every paper with a PMID or DOI, and wrote the questions the brief cannot answer yet. Client briefs are not expected to contain scientific links."
             ),
             "layout": "split",
             "table": {

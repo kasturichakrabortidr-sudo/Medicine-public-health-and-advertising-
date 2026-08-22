@@ -31,3 +31,24 @@ def test_attach_references_numbers_in_order():
     assert ledger["pubmed"][0]["ref"] == 2
     assert ledger["lead"]["citations"][0]["ref"] == 1
     assert ledger["references"][1]["status"] == "retrieved"
+
+
+def test_attach_references_does_not_double_number_promoted_pubmed():
+    ledger = {
+        "records": [{
+            "id": "pmid-9",
+            "short": "Hit",
+            "authors": "B",
+            "title": "Hit",
+            "journal": "K",
+            "year": 2021,
+            "pmid": "9",
+            "status": "retrieved",
+        }],
+        "pubmed": [{"pmid": "9", "title": "Hit", "authors": "B", "journal": "K", "year": 2021}],
+        "lead": {"citations": [{"id": "pmid-9"}]},
+    }
+    attach_references(ledger)
+    assert ledger["records"][0]["ref"] == 1
+    assert ledger["pubmed"][0]["ref"] == 1
+    assert len(ledger["references"]) == 1
