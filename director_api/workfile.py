@@ -114,8 +114,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
         "H3. In-hospital first-eligible start is the highest-leverage behaviour change, because that is the window the initiation papers actually studied."
         if uses_hf_playbook(doctrine, records, brief)
         else (
-            "H3. Each numbered paper has a job — placebo, head-to-head, durability — "
-            "and we will not reprint one finding as the whole campaign."
+            "H3. Each numbered paper has a job, and we will not reprint one finding as the whole campaign."
             if records else
             "H3. We cannot name a scientific lead until a paper is on the register."
         ),
@@ -359,8 +358,8 @@ def _p06(brief, records, by_direct, doctrine=None) -> dict:
             for r in jobs[:4]
         ] or [["No numbered paper yet", "—", "—", "Retrieve papers before we stand anywhere."]]
         position = (
-            "Each numbered paper owns one job. We stand on the set — placebo, head-to-head, "
-            "durability, replication — and we do not reprint one finding as the others. "
+            "Each numbered paper owns one job. We stand on the set of numbered findings "
+            "and we do not reprint one paper as the others. "
             "Cost and local RWE stay silent until those papers exist."
         )
         roadmap = [
