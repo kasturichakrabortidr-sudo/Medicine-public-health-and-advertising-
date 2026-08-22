@@ -212,7 +212,8 @@ def _compare_slide(row: dict) -> dict:
         "id": "science-compare",
         "section": "Science",
         "kicker": "A second paper, a different job",
-        "title": clip(str(row.get("name") or "Published rates"), 72),
+        "title": "Not a reprint of the first",
+        "subtitle": clip(str(row.get("name") or "Published rates"), 72),
         "narrative": clip(row.get("claim") or "", 160),
         "layout": "visual",
         "chart": {
@@ -255,7 +256,7 @@ def _pillars_slide(story: dict, doctrine: dict) -> dict:
         "id": "house",
         "section": "Message",
         "kicker": "What we will say",
-        "title": clip(story.get("theme") or "Three lines. No reprints.", 72),
+        "title": _eight_words(story.get("theme") or "Three lines. No reprints."),
         "narrative": "A pillar without a number does not ship.",
         "layout": "board",
         "board": {"cards": cards[:4] or [{"kicker": "Theme", "title": doctrine.get("name") or "Bet", "body": story["headline"]}]},
@@ -339,6 +340,13 @@ def _house_cards(p07: dict, jobs: list[dict]) -> list[dict]:
             "ref": mark(rec) if rec.get("ref") else "",
         })
     return cards[:3]
+
+
+def _eight_words(text: str) -> str:
+    words = [w for w in str(text or "").split() if w]
+    if len(words) <= 8:
+        return " ".join(words)
+    return " ".join(words[:8]).rstrip(".,;:")
 
 
 def _one_visual(slide: dict) -> dict:
