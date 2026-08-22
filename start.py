@@ -130,7 +130,7 @@ def build_brief():
 def choose_mode():
     say("What would you like to do?")
     say("  1. Quick test        (runs just the first step - fast and cheap, good first try)")
-    say("  2. Full strategy     (all 11 steps - the complete strategy document)")
+    say("  2. Full strategy     (all 12 steps - the complete strategy document)")
     say("  3. Expand my outline (develops each point of an outline file you wrote)")
     while True:
         choice = ask("Type 1, 2 or 3")
@@ -172,7 +172,7 @@ def main():
         say("Running the quick test (Phase 1 only). Watch it think...\n")
         engine.run_pipeline(PHASES[:1])
     elif mode == "2":
-        say("Running the full 11-phase strategy. This takes a while — each phase")
+        say("Running the full 12-phase strategy. This takes a while — each phase")
         say("streams to this window and is saved as a document.\n")
         engine.run_pipeline()
     else:
@@ -192,7 +192,14 @@ def main():
     say(f"ALL DONE. Your documents are in the '{OUT_DIR.name}' folder:")
     for f in sorted(OUT_DIR.glob("*.md")):
         say(f"  - {f.name}")
-    say("Open them with any app that reads text (Word works fine).")
+    charts_dir = OUT_DIR / "charts"
+    if charts_dir.exists() and any(charts_dir.glob("*.png")):
+        say(f"  - {charts_dir.name}/  (the chart images used in the documents)")
+    say("")
+    say("Word/Notepad will open the text and tables fine, but they won't show")
+    say("the chart images embedded in the text. For the full picture — charts")
+    say("and all — open the .md files in a free Markdown viewer (VS Code,")
+    say("Obsidian, Typora) or drag one into a web browser window.")
     say("=" * 60)
     open_folder(OUT_DIR)
 
