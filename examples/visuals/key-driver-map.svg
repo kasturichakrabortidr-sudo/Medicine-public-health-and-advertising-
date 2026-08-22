@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="key-driver-map-title key-driver-map-desc"
+     viewBox="0 0 920 350" width="920" height="350">
+  <title id="key-driver-map-title">The levers the cascade must pull</title>
+  <desc id="key-driver-map-desc">Science changes minds only when it hits a named COM-B barrier. Source: Example brief HCP insights — advisory board, field notes, survey. MLR: not-promotional.</desc>
+  <rect width="920" height="350" fill="#F7F4EF"/>
+  <rect x="0" y="0" width="8" height="350" fill="#1A7A7A"/>
+  <text x="32" y="36" fill="#C4A35A" font-size="11"
+        font-family="Helvetica, Arial, sans-serif" letter-spacing="1.6">
+    WHAT THE SCIENCE REPRESENTS</text>
+  <text x="32" y="64" fill="#0B1F3A" font-size="22"
+        font-family="Georgia, 'Times New Roman', serif">The levers the cascade must pull</text>
+  <text x="32" y="88" fill="#4A5568" font-size="13"
+        font-family="Helvetica, Arial, sans-serif">Science changes minds only when it hits a named COM-B barrier</text>
+  <rect x="32" y="120" width="856" height="58" rx="8" fill="#FFFFFF" stroke="#D9D2C5"/><rect x="32" y="120" width="8" height="58" fill="#1A7A7A"/><text x="56" y="144" fill="#0B1F3A" font-size="15" font-family="Georgia, serif">Confidence to initiate once stable, not after a long ACEI chapter</text><text x="56" y="164" fill="#4A5568" font-size="12" font-family="Helvetica, Arial, sans-serif">COM-B lever: Motivation + Capability  ·  Barrier: &#x27;Stabilise first&#x27; habit</text><rect x="32" y="190" width="856" height="58" rx="8" fill="#FFFFFF" stroke="#D9D2C5"/><rect x="32" y="190" width="8" height="58" fill="#1A7A7A"/><text x="56" y="214" fill="#0B1F3A" font-size="15" font-family="Georgia, serif">Visible local tolerability</text><text x="56" y="234" fill="#4A5568" font-size="12" font-family="Helvetica, Arial, sans-serif">COM-B lever: Capability  ·  Barrier: KOLs waiting for Indian RWE before public advocacy</text><rect x="32" y="260" width="856" height="58" rx="8" fill="#FFFFFF" stroke="#D9D2C5"/><rect x="32" y="260" width="8" height="58" fill="#1A7A7A"/><text x="56" y="284" fill="#0B1F3A" font-size="15" font-family="Georgia, serif">A workable answer to monthly cost</text><text x="56" y="304" fill="#4A5568" font-size="12" font-family="Helvetica, Arial, sans-serif">COM-B lever: Opportunity  ·  Barrier: 8–10x generic ARB; PAP unused</text>
+  <text x="32" y="332" fill="#8A8276" font-size="11"
+        font-family="Helvetica, Arial, sans-serif">Source: Example brief HCP insights — advisory board, field notes, survey  ·  MLR: not-promotional</text>
+</svg>

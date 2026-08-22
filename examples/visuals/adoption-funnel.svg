@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="adoption-funnel-title adoption-funnel-desc"
+     viewBox="0 0 920 420" width="920" height="420">
+  <title id="adoption-funnel-title">How execution will be proven</title>
+  <desc id="adoption-funnel-desc">The cascade closes when an aware cardiologist becomes a repeating, advocating initiator. Source: Phase 12 measurement scaffold — targets are planning figures, not forecasts. MLR: not-promotional.</desc>
+  <rect width="920" height="420" fill="#F7F4EF"/>
+  <rect x="0" y="0" width="8" height="420" fill="#1A7A7A"/>
+  <text x="32" y="36" fill="#C4A35A" font-size="11"
+        font-family="Helvetica, Arial, sans-serif" letter-spacing="1.6">
+    WHAT THE SCIENCE REPRESENTS</text>
+  <text x="32" y="64" fill="#0B1F3A" font-size="22"
+        font-family="Georgia, 'Times New Roman', serif">How execution will be proven</text>
+  <text x="32" y="88" fill="#4A5568" font-size="13"
+        font-family="Helvetica, Arial, sans-serif">The cascade closes when an aware cardiologist becomes a repeating, advocating initiator</text>
+  <rect x="100.0" y="120" width="720.0" height="36" rx="4" fill="#1A7A7A" opacity="1.0"/><text x="460.0" y="144" text-anchor="middle" fill="#fff" font-size="14" font-family="Helvetica, Arial, sans-serif">Aware of early-initiation position  ·  100</text><rect x="217.0" y="172" width="486.0" height="36" rx="4" fill="#1A7A7A" opacity="0.88"/><text x="460.0" y="196" text-anchor="middle" fill="#fff" font-size="14" font-family="Helvetica, Arial, sans-serif">Engaged with a named visual  ·  55</text><rect x="287.2" y="224" width="345.6" height="36" rx="4" fill="#1A7A7A" opacity="0.76"/><text x="460.0" y="248" text-anchor="middle" fill="#fff" font-size="14" font-family="Helvetica, Arial, sans-serif">Trialled in eligible HFrEF  ·  28</text><rect x="318.4" y="276" width="283.2" height="36" rx="4" fill="#1A7A7A" opacity="0.64"/><text x="460.0" y="300" text-anchor="middle" fill="#fff" font-size="14" font-family="Helvetica, Arial, sans-serif">Repeating at 90 days  ·  16</text><rect x="344.4" y="328" width="231.2" height="36" rx="4" fill="#1A7A7A" opacity="0.52"/><text x="460.0" y="352" text-anchor="middle" fill="#fff" font-size="14" font-family="Helvetica, Arial, sans-serif">Advocating to peers  ·  6</text>
+  <text x="32" y="402" fill="#8A8276" font-size="11"
+        font-family="Helvetica, Arial, sans-serif">Source: Phase 12 measurement scaffold — targets are planning figures, not forecasts  ·  MLR: not-promotional</text>
+</svg>

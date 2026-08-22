@@ -10,6 +10,12 @@ entire working process as an explicit, auditable pipeline. Every phase writes a
 client-ready Markdown document, and each phase builds on all the phases before
 it in a single continuous reasoning thread.
 
+Scientific findings are not left as tables. The pipeline **draws what the
+data represents** (patient-impact grids, effect-size charts, evidence-mix
+donuts) and then **connects each finding to the solution through strategy
+execution** — a named cascade from the infographic to the field tactic to
+the proof metric.
+
 ---
 
 ## Easiest way to run it (no technical knowledge needed)
@@ -38,15 +44,17 @@ step you can run, inspect, and hand to a client.
 |---|-------|------------------|
 | 1 | **Strategic framing & insightful critical thinking** | Restated challenge, first-principles questions, assumptions register, known/unknown map, falsifiable working hypotheses |
 | 2 | **Medical & scientific criteria for research** | PICO(S) research questions, evidence inclusion/exclusion criteria, evidence-grading hierarchy, and a numbered research plan with sub-steps (sources, search strings, screening, extraction, appraisal, synthesis) |
-| 3 | **Evidence analysis & collation** | Five evidence streams analysed in parallel with identical extraction fields — brand-generated, independent published, evolving/new, guidelines, health-economic — stacked into the client-facing **Evidence Forefront Table**, plus top strategic assets and evidence gaps |
-| 4 | **In-house HCP insight analysis vs. evidence** | Insight inventory, concordance map (where HCP beliefs agree with evidence), discordance map (perception gaps and their origins), silent zones, validation plan |
-| 5 | **Behaviours, concerns, motivations & key behavioural drivers** | COM-B based analysis of what target doctors do today, the change required, their clinical/practical/economic/professional concerns, ranked motivations, and the 4–6 **key behavioural drivers** for adopting the product or recommendation change |
-| 6 | **Comparative evidence position** | Four-way comparison — brand evidence vs. existing evidence within the brand vs. evolving new evidence vs. supporting guidelines — alignment analysis, competitive shadow, strategic evidence position statement, evidence roadmap |
-| 7 | **Core messaging & behaviour-change adaptation** | Core messaging theme, message house tied to named evidence and behavioural drivers, segment adaptations, objection-handling grid, and the launch-vs-sustain **behaviour-change adaptation plan** required to launch and sustain the campaign |
-| 8 | **HCP engagement plan — start to end and beyond** | Staged journey (pre-launch → launch → adoption → reinforcement → beyond-campaign), touchpoint choreography, KOL/peer-influence plan, two-way feedback loops, post-campaign continuity |
-| 9 | **Activation ideas by segment** | Activation menu tailored to HCP **specialty × status × city tier × patient types encountered × cost-of-treatment concern**, with cost-concern adaptations and an impact/feasibility prioritisation for Q1 vs. Q2–Q4 |
-| 10 | **Measurement framework** | KPI tree from **quarterly revenue growth** down to engagement activity, metric definition tables with formulas/sources/targets, continuous HCP engagement metrics, **clinical popularity** and **social popularity** metrics, revenue-linkage model, and quarterly dashboard governance |
-| 11 | **Executive strategy summary** | The whole strategy condensed into a sign-off document for the client CEO and medical director |
+| 3 | **Evidence analysis & collation** | Five evidence streams analysed in parallel with identical extraction fields — brand-generated, independent published, evolving/new, guidelines, health-economic — stacked into the client-facing **Evidence Forefront Table**, plus the first science infographics (evidence mix, effect sizes, patient impact) |
+| 4 | **Scientific data visualization** | Infographic set of **what the data represents**: patient-impact grids, effect-size charts, evidence-mix donuts, callout stats, plus meaning captions and a handoff of findings that must become cascade rows |
+| 5 | **In-house HCP insight analysis vs. evidence** | Insight inventory, concordance / discordance maps against the visuals, silent zones, validation plan, belief-vs-evidence graphic |
+| 6 | **Behaviours, concerns, motivations & key behavioural drivers** | COM-B analysis, ranked motivations, 4–6 **key behavioural drivers**, and a driver-map infographic |
+| 7 | **Comparative evidence position** | Four-way comparison — brand vs independent vs evolving vs guidelines — plus a comparison-matrix visual and the strategic evidence position statement |
+| 8 | **Science → solution → execution cascade** | The strategy spine: solution thesis and named cascade rows (C1, C2, …) from scientific finding → clinical implication → implied solution → execution move → proof metric. Later tactics without a cascade parent are incomplete |
+| 9 | **Core messaging & behaviour-change adaptation** | Core theme and message house, each pillar tagged with cascade IDs and the Phase 4 visual it carries |
+| 10 | **HCP engagement plan — start to end and beyond** | Staged journey that *delivers* named cascade rows over time, with a timeline visual |
+| 11 | **Activation ideas by segment** | Activation menu tailored to HCP **specialty × status × city tier × patient types × cost concern**, each idea citing a cascade ID and the visual it puts in the room |
+| 12 | **Measurement framework** | KPI tree from **quarterly revenue growth** down to activity, every metric closing a cascade row, plus funnel / KPI-tree visuals |
+| 13 | **Executive strategy summary** | Sign-off document that leads with the science pictures and the cascade, then the words — for the client CEO and medical director |
 
 Every phase output begins with a short *"How this section was built"* note so
 the critical-thinking process behind each step stays visible and auditable.
@@ -59,6 +67,10 @@ the critical-thinking process behind each step stays visible and auditable.
   guideline sources are always distinguished and graded.
 - **Compliance aware** — outputs flag anything needing medical-legal-regulatory
   (MLR) review and stay inside pharmaceutical promotion codes.
+- **Drawn, not only tabulated** — scientific data is rendered as infographics
+  (`output/visuals/*.svg` and `output/visual-strategy-brief.html`).
+- **Science through to the field** — every material finding travels a cascade
+  ID from the picture to the tactic to the KPI.
 
 ---
 
@@ -87,9 +99,20 @@ output/
   01-critical-thinking.md
   02-scientific-criteria.md
   03-evidence-forefront.md
+  04-science-infographics.md
   ...
-  11-executive-summary.md
-  medicomarketing-strategy.md   <- the combined strategy document
+  08-science-to-solution.md
+  ...
+  13-executive-summary.md
+  medicomarketing-strategy.md      <- the combined strategy document
+  visual-strategy-brief.html       <- open in a browser: the science pictures
+  visuals/*.svg                    <- individual infographics
+```
+
+Re-render infographics from an existing Markdown file (no API call):
+
+```bash
+python -m medicomarketing_agent render-visuals --input examples/science-viz.example.md --out output/
 ```
 
 Run only selected phases:
@@ -121,6 +144,17 @@ plus dependencies, open questions, and MLR flags. Output:
 | `--out` | Output directory (default `output/`) |
 | `--quiet` | Suppress streaming output |
 | `phases` subcommand | List all pipeline phases |
+
+## Testing the visuals (no API key)
+
+```bash
+pip install -r requirements.txt
+python -m pytest tests/ -q
+```
+
+This renders the example CardioShield infographics from
+[`examples/science-viz.example.md`](examples/science-viz.example.md) and checks
+that the 13-phase spine still carries science → solution → execution.
 
 ## How it works technically
 

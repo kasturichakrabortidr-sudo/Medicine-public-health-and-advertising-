@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="lead-callout-rrr-title lead-callout-rrr-desc"
+     viewBox="0 0 920 300" width="920" height="300">
+  <title id="lead-callout-rrr-title">The number the campaign will be asked to stand behind</title>
+  <desc id="lead-callout-rrr-desc">A relative risk reduction is not a promise to an individual patient. Source: Illustrative 20% RRR on the composite — pending locked CSR extraction. MLR: required.</desc>
+  <rect width="920" height="300" fill="#F7F4EF"/>
+  <rect x="0" y="0" width="8" height="300" fill="#1A7A7A"/>
+  <text x="32" y="36" fill="#C4A35A" font-size="11"
+        font-family="Helvetica, Arial, sans-serif" letter-spacing="1.6">
+    WHAT THE SCIENCE REPRESENTS</text>
+  <text x="32" y="64" fill="#0B1F3A" font-size="22"
+        font-family="Georgia, 'Times New Roman', serif">The number the campaign will be asked to stand behind</text>
+  <text x="32" y="88" fill="#4A5568" font-size="13"
+        font-family="Helvetica, Arial, sans-serif">A relative risk reduction is not a promise to an individual patient</text>
+  <rect x="32" y="120" width="856" height="140" rx="10" fill="#0B1F3A"/><text x="64" y="188" fill="#C4A35A" font-size="56" font-family="Georgia, serif">20%</text><text x="64" y="216" fill="#F3E6C8" font-size="14" font-family="Helvetica, Arial, sans-serif">relative reduction in CV death or HF hospitalisation vs ACE inhibitor</text><text x="360" y="188" fill="#F7F4EF" font-size="16" font-family="Helvetica, Arial, sans-serif">What it represents: fewer composite events in a treated population — …</text>
+  <text x="32" y="282" fill="#8A8276" font-size="11"
+        font-family="Helvetica, Arial, sans-serif">Source: Illustrative 20% RRR on the composite — pending locked CSR extraction  ·  MLR: required</text>
+</svg>
