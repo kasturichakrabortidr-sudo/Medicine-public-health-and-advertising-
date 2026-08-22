@@ -2750,7 +2750,7 @@
             "value": 4
           },
           {
-            "name": "Senior private-practice · metro and tier-2",
+            "name": "Private · metro and tier-2",
             "full": "Senior private-practice cardiologists (metro and tier-2)",
             "value": 3
           },
@@ -2760,7 +2760,7 @@
             "value": 2
           },
           {
-            "name": "Consultant · · tier-2/3",
+            "name": "High-caseload · tier-2/3",
             "full": "Consultant physicians with high HF caseload (tier-2/3)",
             "value": 1
           }

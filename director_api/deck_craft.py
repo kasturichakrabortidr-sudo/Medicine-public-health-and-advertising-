@@ -649,16 +649,26 @@ def _who_label(text, fallback: str = "Priority room") -> str:
     if "(" in raw and ")" in raw:
         inside = raw[raw.find("(") + 1:raw.rfind(")")].strip()
         raw = raw[:raw.find("(")].strip()
-    raw = raw.replace(" cardiologists and ", " + ").replace(" physicians with ", " · ")
-    words = raw.split()
+    raw = raw.replace(" cardiologists and ", " + ")
+    skip = {"and", "with", "the", "of", "·"}
+    words = [w for w in raw.replace("·", " ").split() if w.lower() not in skip]
+    if "caseload" in " ".join(words).lower():
+        head = "High-caseload"
+    elif words and words[0] == "Senior":
+        head = "Private" if any("private" in w.lower() for w in words) else "Senior"
+    elif words and words[0] in {"KOL", "Early-career"}:
+        head = " ".join(words[:2]) if len(words) > 1 else words[0]
+    elif words:
+        head = words[0]
+    else:
+        head = ""
     if inside and 1 <= len(inside.split()) <= 5:
-        head = " ".join(words[:2]) if len(words) >= 2 else (words[0] if words else "")
         if head and head.lower() not in inside.lower():
             return f"{head} · {inside}"
         return inside
     if len(words) > 5:
-        raw = f"{words[0]} {' '.join(words[-3:])}".rstrip(",;:")
-    return raw or fallback
+        return f"{words[0]} {' '.join(words[-3:])}".rstrip(",;:")
+    return (" ".join(words) if words else "") or fallback
 
 
 def _who_slide(story: dict) -> dict:
