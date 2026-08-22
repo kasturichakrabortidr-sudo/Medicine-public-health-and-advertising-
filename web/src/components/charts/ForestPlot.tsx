@@ -44,7 +44,7 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
           return (
             <g key={String(r.name)}>
               <text x={8} y={y + 4} fontSize="11" fill="#0b1220">
-                {String(r.name).slice(0, 28)}
+                {String(r.name).slice(0, 32)}
               </text>
               <text x={8} y={y + 18} fontSize="9" fill="#2a6f6f">
                 {String(r.stream || "")} · {String(r.grade || "")}

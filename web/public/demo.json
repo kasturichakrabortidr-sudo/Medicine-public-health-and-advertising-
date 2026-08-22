@@ -195,7 +195,7 @@
         "note": "Published anchors used where named; local items flagged as brief-derived.",
         "data": [
           {
-            "name": "Pivotal outcome vs SoC (named if in brief)",
+            "name": "Pivotal outcome vs SoC",
             "stream": "Brand",
             "hr": 0.8,
             "low": 0.73,
@@ -213,7 +213,7 @@
             "note": "Meta-analytic direction from class evidence."
           },
           {
-            "name": "Early / in-hospital initiation (evolving)",
+            "name": "Early in-hospital start",
             "stream": "Evolving",
             "hr": 0.78,
             "low": 0.68,
@@ -222,7 +222,7 @@
             "note": "Watch-list — confirm before claim use."
           },
           {
-            "name": "Guideline-aligned foundational use",
+            "name": "Guideline-aligned use",
             "stream": "Guideline",
             "hr": 0.81,
             "low": 0.74,

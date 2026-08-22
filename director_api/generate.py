@@ -455,7 +455,7 @@ def _forest_rows(brief: ExtractedBrief) -> list[dict]:
     rows = []
     published = [
         {
-            "name": "Pivotal outcome vs SoC (named if in brief)",
+            "name": "Pivotal outcome vs SoC",
             "stream": "Brand",
             "hr": 0.80,
             "low": 0.73,
@@ -476,7 +476,7 @@ def _forest_rows(brief: ExtractedBrief) -> list[dict]:
     if brief.evolving_evidence:
         rows.append(
             {
-                "name": "Early / in-hospital initiation (evolving)",
+                "name": "Early in-hospital start",
                 "stream": "Evolving",
                 "hr": 0.78,
                 "low": 0.68,
@@ -488,7 +488,7 @@ def _forest_rows(brief: ExtractedBrief) -> list[dict]:
     if brief.guidelines:
         rows.append(
             {
-                "name": "Guideline-aligned foundational use",
+                "name": "Guideline-aligned use",
                 "stream": "Guideline",
                 "hr": 0.81,
                 "low": 0.74,
