@@ -1,0 +1,14 @@
+.git
+.agents
+.env
+web/node_modules
+web/dist
+web/.netlify
+data
+output
+.pytest_cache
+__pycache__
+*.pyc
+.venv
+venv
+node_modules

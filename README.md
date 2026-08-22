@@ -20,6 +20,22 @@ Opens `http://127.0.0.1:8080` — one link for the app and the API. Phone and la
 both use that address. `python start_director.py --dev` still splits Vite (`5173`)
 and the API (`8787`) for live reload.
 
+### Public rollout
+
+The working public demo (this environment) is:
+
+**https://cumulative-duty-tutorial-baghdad.trycloudflare.com**
+
+That host is a live tunnel in front of the FastAPI app (deck, credits, Stripe Checkout). It can change if the tunnel restarts. For a lasting launch, put the same app on a host you control:
+
+```bash
+cp .env.example .env   # add Stripe keys and PUBLIC_BASE_URL=https://your-domain
+docker build -t strata .
+docker run --env-file .env -p 8080:8080 strata
+```
+
+Set `PUBLIC_BASE_URL` to that domain, then run `PYTHONPATH=. python scripts/bootstrap_stripe.py` so Checkout and the webhook point at it. Netlify can serve the static UI, but generate, credits, and Stripe need this Python process.
+
 | Tab | What it does |
 |---|---|
 | **Brief** | Upload PDF/PPT/DOC/YAML or paste text. The working file is built from **your** files, not from the demo. |
