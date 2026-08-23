@@ -91,7 +91,17 @@ def ensure_price(item_id: str) -> str:
 
 
 def _base_url(request_base: str) -> str:
-    return (os.environ.get("PUBLIC_BASE_URL") or request_base or "http://127.0.0.1:8080").rstrip("/")
+    """Use the host the visitor actually opened when the configured URL is a quick tunnel.
+
+    trycloudflare.com hostnames die and rotate. Checkout must not send people back
+    to a hostname that no longer exists.
+    """
+    configured = (os.environ.get("PUBLIC_BASE_URL") or "").rstrip("/")
+    incoming = (request_base or "").rstrip("/")
+    ephemeral = (not configured) or "trycloudflare.com" in configured
+    if incoming and ephemeral:
+        return incoming
+    return configured or incoming or "http://127.0.0.1:8080"
 
 
 def start_checkout(wallet: dict, item_id: str, request_base: str) -> dict:

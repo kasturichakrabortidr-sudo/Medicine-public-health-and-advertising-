@@ -20,21 +20,23 @@ Opens `http://127.0.0.1:8080` — one link for the app and the API. Phone and la
 both use that address. `python start_director.py --dev` still splits Vite (`5173`)
 and the API (`8787`) for live reload.
 
-### Public rollout
+### Public rollout — a shareable link that stays up
 
-The working public demo (this environment) is:
+A `*.trycloudflare.com` workbench URL is **not** a product host. Cloudflare's own quick tunnels have no uptime guarantee, the hostname changes if the tunnel restarts, and this development machine goes away when the session stops. That is why a shared preview link becomes inactive.
 
-**https://cumulative-duty-tutorial-baghdad.trycloudflare.com**
-
-That host is a live tunnel in front of the FastAPI app (deck, credits, Stripe Checkout). It can change if the tunnel restarts. For a lasting launch, put the same app on a host you control:
+To give people a link that is ready at all times, run STRATA on a host you keep running and point a real hostname at it:
 
 ```bash
 cp .env.example .env   # add Stripe keys and PUBLIC_BASE_URL=https://your-domain
 docker build -t strata .
-docker run --env-file .env -p 8080:8080 strata
+docker run --restart unless-stopped --env-file .env -p 8080:8080 strata
 ```
 
 Set `PUBLIC_BASE_URL` to that domain, then run `PYTHONPATH=. python scripts/bootstrap_stripe.py` so Checkout and the webhook point at it. Netlify can serve the static UI, but generate, credits, and Stripe need this Python process.
+
+A named Cloudflare tunnel (`CLOUDFLARE_TUNNEL_TOKEN` plus `CLOUDFLARE_TUNNEL_HOST`) keeps one hostname across process restarts. A quick tunnel does not.
+
+While you are on this machine, `PYTHONPATH=. python scripts/keep_public.py` watches the local app and restarts the public tunnel if it drops. The live hostname is written to `.strata-public-url`. That still only lasts as long as this machine is up.
 
 | Tab | What it does |
 |---|---|

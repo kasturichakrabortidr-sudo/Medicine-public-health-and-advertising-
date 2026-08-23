@@ -1,8 +1,15 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
 from director_api.app import app
 from director_api.billing import apply_subscription, load_wallet, spend, BillingError
-from director_api.stripe_billing import apply_checkout_session, claim_session, handle_event
+from director_api.stripe_billing import (
+    _base_url,
+    apply_checkout_session,
+    claim_session,
+    handle_event,
+)
 
 
 client = TestClient(app)
@@ -150,6 +157,32 @@ def test_invoice_payment_failed_notes_wallet(tmp_path, monkeypatch):
     )
     again = load_wallet("wal_fail")
     assert any("failed" in (row.get("note") or "").lower() for row in again["ledger"])
+
+
+def test_checkout_follows_live_quick_tunnel_host(monkeypatch):
+    monkeypatch.setenv("PUBLIC_BASE_URL", "https://old-dead.trycloudflare.com")
+    assert _base_url("https://new-live.trycloudflare.com") == "https://new-live.trycloudflare.com"
+
+
+def test_checkout_keeps_owned_public_host(monkeypatch):
+    monkeypatch.setenv("PUBLIC_BASE_URL", "https://strata.example.com")
+    assert _base_url("https://random.trycloudflare.com") == "https://strata.example.com"
+
+
+def test_health_reports_public_share():
+    marker = Path("/tmp/strata-public-url.txt")
+    previous = marker.read_text(encoding="utf-8") if marker.is_file() else None
+    marker.write_text("https://example-share.trycloudflare.com\n")
+    try:
+        res = client.get("/api/health")
+        assert res.status_code == 200
+        assert res.json()["publicUrl"] == "https://example-share.trycloudflare.com"
+        assert res.json()["share"] == "ephemeral-tunnel"
+    finally:
+        if previous is None:
+            marker.unlink(missing_ok=True)
+        else:
+            marker.write_text(previous)
 
 
 def test_spend_raises_when_short(tmp_path, monkeypatch):

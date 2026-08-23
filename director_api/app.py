@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -45,13 +46,29 @@ ACCEPT_HINT = (
 )
 
 
+def _public_url() -> str:
+    for path in (
+        ROOT / ".strata-public-url",
+        Path("/tmp/strata-public-url.txt"),
+    ):
+        if path.is_file():
+            text = path.read_text(encoding="utf-8").strip().split()
+            if text and text[0].startswith("http"):
+                return text[0]
+    return (os.environ.get("STRATA_PUBLIC_URL") or os.environ.get("PUBLIC_BASE_URL") or "").rstrip("/")
+
+
 @app.get("/api/health")
 def health():
+    public = _public_url()
+    ephemeral = (not public) or "trycloudflare.com" in public
     return {
         "ok": True,
         "service": "strata-director",
         "accept": ACCEPT_HINT,
-        "build": "2026-08-22-brief-refs",
+        "build": "2026-08-23-public-share",
+        "publicUrl": public,
+        "share": "ephemeral-tunnel" if ephemeral else "owned-host",
         "deckSkills": catalog()["skills"],
         "billing": {"stripe": billing_catalog()["stripe"], "actions": billing_catalog()["actions"]},
     }

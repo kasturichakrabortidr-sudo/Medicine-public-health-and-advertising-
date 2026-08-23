@@ -17,6 +17,7 @@ web/.netlify/
 data/projects/
 data/wallets/
 data/stripe_catalog.json
+.strata-public-url
 
 *.tsbuildinfo
 
