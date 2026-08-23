@@ -55,7 +55,7 @@ def _public_url() -> str:
             text = path.read_text(encoding="utf-8").strip().split()
             if text and text[0].startswith("http"):
                 return text[0]
-    return (os.environ.get("STRATA_PUBLIC_URL") or os.environ.get("PUBLIC_BASE_URL") or "").rstrip("/")
+    return (os.environ.get("STRATA_PUBLIC_URL") or "").rstrip("/")
 
 
 @app.get("/api/health")

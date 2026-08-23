@@ -180,9 +180,9 @@ def public_ok(url: str) -> bool:
 
 def main() -> int:
     os.chdir(ROOT)
-    if not http_ok(f"{APP}/api/health"):
-        log(f"local app is down at {APP}/api/health — start uvicorn first")
-        return 2
+    while not http_ok(f"{APP}/api/health"):
+        log(f"waiting for local app at {APP}/api/health")
+        time.sleep(2)
     misses = 0
     while True:
         url = read_url()
