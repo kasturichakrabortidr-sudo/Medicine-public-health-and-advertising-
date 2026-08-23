@@ -11,7 +11,11 @@ RUN npm run build
 
 FROM python:3.12-slim-bookworm
 WORKDIR /app
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 STRATA_PORT=8080
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 STRATA_PORT=8080 \
+    STRATA_WALLETS_DIR=/data/wallets \
+    STRATA_PROJECTS_DIR=/data/projects \
+    STRATA_STRIPE_CATALOG=/data/stripe_catalog.json
+RUN mkdir -p /data/wallets /data/projects
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY director_api ./director_api

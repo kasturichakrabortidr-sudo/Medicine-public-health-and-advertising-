@@ -1,0 +1,30 @@
+# STRATA on Fly.io — one machine, always on, one stable hostname.
+# Deploy: FLY_API_TOKEN=... PYTHONPATH=. python scripts/deploy_fly.py
+
+app = "strata-director"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  STRATA_PORT = "8080"
+  STRATA_WALLETS_DIR = "/data/wallets"
+  STRATA_PROJECTS_DIR = "/data/projects"
+  STRATA_STRIPE_CATALOG = "/data/stripe_catalog.json"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"
+
+[mounts]
+  source = "strata_data"
+  destination = "/data"

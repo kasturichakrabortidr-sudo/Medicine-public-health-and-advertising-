@@ -22,21 +22,18 @@ and the API (`8787`) for live reload.
 
 ### Public rollout — a shareable link that stays up
 
-A `*.trycloudflare.com` workbench URL is **not** a product host. Cloudflare's own quick tunnels have no uptime guarantee, the hostname changes if the tunnel restarts, and this development machine goes away when the session stops. That is why a shared preview link becomes inactive.
-
-To give people a link that is ready at all times, run STRATA on a host you keep running and point a real hostname at it:
+The lasting host is **Fly.io**: one container, one hostname (`https://strata-director.fly.dev`), Stripe Checkout, and generate. It does not sleep when idle.
 
 ```bash
-cp .env.example .env   # add Stripe keys and PUBLIC_BASE_URL=https://your-domain
-docker build -t strata .
-docker run --restart unless-stopped --env-file .env -p 8080:8080 strata
+# one-time: a Fly API token in FLY_API_TOKEN
+PYTHONPATH=. python scripts/deploy_fly.py
 ```
 
-Set `PUBLIC_BASE_URL` to that domain, then run `PYTHONPATH=. python scripts/bootstrap_stripe.py` so Checkout and the webhook point at it. Netlify can serve the static UI, but generate, credits, and Stripe need this Python process.
+That script creates the app if needed, copies Stripe keys already on this machine, deploys the Docker image on Fly's builders (no local Docker), keeps one machine running, and points the webhook at `https://<app>.fly.dev`.
 
-A named Cloudflare tunnel (`CLOUDFLARE_TUNNEL_TOKEN` plus `CLOUDFLARE_TUNNEL_HOST`) keeps one hostname across process restarts. A quick tunnel does not.
+A `*.trycloudflare.com` workbench URL is only a preview. Cloudflare's quick tunnels have no uptime guarantee, and this development machine goes away when the session stops.
 
-While you are on this machine, `PYTHONPATH=. python scripts/keep_public.py` watches the local app and restarts the public tunnel if it drops. The live hostname is written to `.strata-public-url`. That still only lasts as long as this machine is up.
+Netlify can serve the static UI, but generate, credits, and Stripe need this Python process.
 
 | Tab | What it does |
 |---|---|
