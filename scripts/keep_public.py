@@ -54,6 +54,15 @@ def http_ok(url: str, timeout: float = 12) -> bool:
         return False
 
 
+def tunnel_connected(text: str) -> bool:
+    """True when cloudflared last registered a connector, not when it last failed."""
+    registered = text.rfind("Registered tunnel connection")
+    if registered < 0:
+        return False
+    failed = max(text.rfind("Serve tunnel error"), text.rfind("failed to serve tunnel connection"))
+    return registered > failed
+
+
 def read_url() -> str:
     if URL_FILE.is_file():
         text = URL_FILE.read_text(encoding="utf-8").strip().split()
@@ -172,10 +181,13 @@ def start_tunnel() -> str:
     raise RuntimeError("cloudflared started but no public hostname appeared")
 
 
-def public_ok(url: str) -> bool:
-    if not url:
+def connector_ok() -> bool:
+    if not tunnel_pid():
         return False
-    return http_ok(f"{url}/api/health")
+    log_path = Path("/tmp/cloudflared-public.log")
+    if not log_path.is_file():
+        return False
+    return tunnel_connected(log_path.read_text(encoding="utf-8", errors="replace"))
 
 
 def main() -> int:
@@ -186,12 +198,12 @@ def main() -> int:
     misses = 0
     while True:
         url = read_url()
-        if url and public_ok(url):
+        if connector_ok() and url:
             misses = 0
             time.sleep(20)
             continue
         misses += 1
-        log(f"public check failed url={url or '-'} misses={misses}")
+        log(f"connector check failed url={url or '-'} pid={tunnel_pid() or '-'} misses={misses}")
         if misses < 2 and tunnel_pid():
             time.sleep(8)
             continue
@@ -201,7 +213,7 @@ def main() -> int:
             log(f"tunnel restart failed: {exc}")
             time.sleep(12)
             continue
-        if public_ok(url):
+        if connector_ok():
             misses = 0
             log(f"share is live {url}")
         else:
