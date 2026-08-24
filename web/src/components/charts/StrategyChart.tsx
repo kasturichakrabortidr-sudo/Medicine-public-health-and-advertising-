@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Bar,
   BarChart,
@@ -23,11 +24,36 @@ import { Infographic } from "./Infographic";
 
 const PALETTE = ["#132037", "#c4844a", "#2a6f6f", "#8b2e2e", "#5c7a5c", "#1b2c49"];
 
-function ChartFrame({ title, note, children }: { title?: string; note?: string; children: React.ReactNode }) {
+function ChartFrame({
+  title,
+  note,
+  children,
+}: {
+  title?: string;
+  note?: string;
+  children: (size: { w: number; h: number }) => ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const apply = () => {
+      const w = Math.floor(el.clientWidth);
+      const h = Math.floor(el.clientHeight);
+      if (w > 8 && h > 8) setSize({ w, h });
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   return (
     <div className="chart-fill">
       {title ? <div className="small muted">{title}</div> : null}
-      <div className="chart-fill-plot">{children}</div>
+      <div className="chart-fill-plot" ref={ref}>
+        {size.w && size.h ? children(size) : null}
+      </div>
       {note ? <div className="small muted">{note}</div> : null}
     </div>
   );
@@ -43,17 +69,19 @@ export function StrategyChart({ spec }: { spec: ChartSpec; height?: number }) {
   if (spec.kind === "pie") {
     return (
       <ChartFrame title={spec.title}>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={spec.data} dataKey="value" nameKey="name" outerRadius="70%">
-              {spec.data.map((_, i) => (
-                <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
+        {({ w, h }) => (
+          <ResponsiveContainer width={w} height={h}>
+            <PieChart>
+              <Pie data={spec.data} dataKey="value" nameKey="name" outerRadius="70%">
+                {spec.data.map((_, i) => (
+                  <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
       </ChartFrame>
     );
   }
@@ -62,18 +90,20 @@ export function StrategyChart({ spec }: { spec: ChartSpec; height?: number }) {
     const series = spec.series || ["value"];
     return (
       <ChartFrame title={spec.title} note={spec.note}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={spec.data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(11, 18, 32, 0.08)" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            {series.map((s, i) => (
-              <Line key={s} type="monotone" dataKey={s} stroke={PALETTE[i % PALETTE.length]} strokeWidth={2} dot />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        {({ w, h }) => (
+          <ResponsiveContainer width={w} height={h}>
+            <LineChart data={spec.data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(11, 18, 32, 0.08)" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              {series.map((s, i) => (
+                <Line key={s} type="monotone" dataKey={s} stroke={PALETTE[i % PALETTE.length]} strokeWidth={2} dot />
+              ))}
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </ChartFrame>
     );
   }
@@ -86,27 +116,29 @@ export function StrategyChart({ spec }: { spec: ChartSpec; height?: number }) {
     }));
     return (
       <ChartFrame title={spec.title} note={spec.note}>
-        <div className="scatter-layout">
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 12, right: 12, left: 8, bottom: 28 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
-              <XAxis type="number" dataKey="x" name={spec.xLabel || "x"} domain={[0, 100]} label={{ value: spec.xLabel || "Feasibility", position: "insideBottom", offset: -12, fontSize: 11 }} />
-              <YAxis type="number" dataKey="y" name={spec.yLabel || "y"} domain={[0, 100]} label={{ value: spec.yLabel || "Impact", angle: -90, position: "insideLeft", fontSize: 11 }} />
-              <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-              <Scatter data={points} fill="#c4844a" />
-            </ScatterChart>
-          </ResponsiveContainer>
-          <ul className="scatter-legend">
-            {points.map((d) => (
-              <li key={String(d.name)}>
-                <strong>{d.name}</strong>
-                <span>
-                  {spec.xLabel || "Feasibility"} {d.x} · {spec.yLabel || "Impact"} {d.y}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {({ w, h }) => (
+          <div className="scatter-layout" style={{ width: w, height: h }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 12, right: 12, left: 8, bottom: 28 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
+                <XAxis type="number" dataKey="x" name={spec.xLabel || "x"} domain={[0, 100]} label={{ value: spec.xLabel || "Feasibility", position: "insideBottom", offset: -12, fontSize: 11 }} />
+                <YAxis type="number" dataKey="y" name={spec.yLabel || "y"} domain={[0, 100]} label={{ value: spec.yLabel || "Impact", angle: -90, position: "insideLeft", fontSize: 11 }} />
+                <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+                <Scatter data={points} fill="#c4844a" />
+              </ScatterChart>
+            </ResponsiveContainer>
+            <ul className="scatter-legend">
+              {points.map((d) => (
+                <li key={String(d.name)}>
+                  <strong>{d.name}</strong>
+                  <span>
+                    {spec.xLabel || "Feasibility"} {d.x} · {spec.yLabel || "Impact"} {d.y}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </ChartFrame>
     );
   }
@@ -119,16 +151,18 @@ export function StrategyChart({ spec }: { spec: ChartSpec; height?: number }) {
     }));
     return (
       <ChartFrame title={spec.title} note={spec.note}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
-            <XAxis type="number" domain={[-80, 80]} />
-            <YAxis type="category" dataKey="name" width={120} />
-            <Tooltip />
-            <Bar dataKey="neg" fill="#8b2e2e" />
-            <Bar dataKey="pos" fill="#2a6f6f" />
-          </BarChart>
-        </ResponsiveContainer>
+        {({ w, h }) => (
+          <ResponsiveContainer width={w} height={h}>
+            <BarChart data={data} layout="vertical" margin={{ top: 8, right: 16, left: 8, bottom: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
+              <XAxis type="number" domain={[-80, 80]} />
+              <YAxis type="category" dataKey="name" width={120} />
+              <Tooltip />
+              <Bar dataKey="neg" fill="#8b2e2e" />
+              <Bar dataKey="pos" fill="#2a6f6f" />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </ChartFrame>
     );
   }
@@ -136,32 +170,36 @@ export function StrategyChart({ spec }: { spec: ChartSpec; height?: number }) {
   if (spec.kind === "funnel") {
     return (
       <ChartFrame title={spec.title} note={spec.note}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={spec.data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#132037" />
-          </BarChart>
-        </ResponsiveContainer>
+        {({ w, h }) => (
+          <ResponsiveContainer width={w} height={h}>
+            <BarChart data={spec.data} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="value" fill="#132037" />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </ChartFrame>
     );
   }
 
   return (
     <ChartFrame title={spec.title} note={spec.note || spec.unit}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={spec.data} margin={{ top: 8, right: 12, left: 0, bottom: 28 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
-          <XAxis dataKey="name" interval={0} />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="value" fill="#c4844a">
-            <LabelList dataKey="value" position="top" fontSize={11} />
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      {({ w, h }) => (
+        <ResponsiveContainer width={w} height={h}>
+          <BarChart data={spec.data} margin={{ top: 8, right: 12, left: 0, bottom: 28 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,18,32,0.08)" />
+            <XAxis dataKey="name" interval={0} />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="value" fill="#c4844a">
+              <LabelList dataKey="value" position="top" fontSize={11} />
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </ChartFrame>
   );
 }
