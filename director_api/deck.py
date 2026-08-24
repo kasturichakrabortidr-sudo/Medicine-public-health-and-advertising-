@@ -240,8 +240,8 @@ def _title_slide(brand: str, ta: str, market: str, doctrine: dict, brief: Extrac
         "section": "Open",
         "kicker": f"MEDICAL STRATEGY DECK  ·  {brand}",
         "title": f"{brand}",
-        "subtitle": bet,
-        "narrative": _complete(doctrine.get("thesis") or f"The scientific and strategic case for {brand} in {ta}."),
+        "subtitle": _complete(doctrine.get("name") or bet),
+        "narrative": "",
         "layout": "title",
         "cards": [
             {"title": market, "body": _complete(ta), "meta": "Market"},
@@ -404,9 +404,9 @@ def _idea_slide(doctrine: dict, p05: dict, p07: dict, lead: dict) -> dict:
         "id": "the-bet",
         "section": "Idea",
         "kicker": "The strategic idea",
-        "title": _complete(doctrine.get("bet") or "Start at the first eligible encounter"),
+        "title": _complete(doctrine.get("name") or doctrine.get("bet") or "Start at the first eligible encounter"),
         "subtitle": _complete(doctrine.get("whyNovel") or "One strategic idea resolves the problems named in this brief."),
-        "narrative": _complete(doctrine.get("thesis") or ""),
+        "narrative": "",
         "layout": "idea",
         "cards": cards,
         "refs": refs,
@@ -430,7 +430,7 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict], p03: dic
         stats.append(_stat(str(nnt), _complete(f"Treat {nnt} to prevent one event. {tag} PMID {primary.get('pmid') or rec.get('pmid') or '—'}."), "blue"))
     if hr is not None:
         stats.append(_stat(
-            f"{rec.get('effect_metric') or 'HR'} {hr}",
+            f"HR {hr}",
             _complete(f"{rec.get('low')}–{rec.get('high')}  ·  n = {n}."),
             "orange",
         ))
@@ -443,7 +443,7 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict], p03: dic
         "id": "science-lead",
         "section": "Evidence",
         "kicker": "Clinical evidence",
-        "title": _headline(lead.get("statement") or claim),
+        "title": _headline(primary.get("short") or lead.get("statement") or claim),
         "subtitle": f"{tag} {primary.get('short') or 'No validated lead'} · PMID {primary.get('pmid') or rec.get('pmid') or '—'}",
         "narrative": _complete(p03.get("leadStatement") or claim),
         "layout": "insight",
@@ -494,10 +494,6 @@ def _meaning_slide(people: list[dict]) -> dict:
     first = people[0]
     tag = mark({"ref": first.get("ref")}) if first.get("ref") else ""
     nnt = first.get("nnt")
-    stats = [
-        _stat(str(first.get("control")), _complete(f"{first.get('control_label') or 'Comparator'}: {first.get('unit')}."), "orange"),
-        _stat(str(first.get("treat")), _complete(f"{first.get('treat_label') or 'Intervention'}: {first.get('unit')}."), "blue"),
-    ]
     return {
         "id": "science-meaning",
         "section": "Evidence",
@@ -510,7 +506,6 @@ def _meaning_slide(people: list[dict]) -> dict:
             + (f" — treat {nnt} to prevent one event" if nnt else "")
         ),
         "layout": "infographic",
-        "stats": stats,
         "soWhat": _complete(f"Treat {nnt} to prevent one event over {first.get('horizon') or 'the published horizon'}." if nnt else first.get("claim") or ""),
         "source": f"{tag} PMID {first.get('pmid')}. Horizon: {first.get('horizon') or 'as published'}.",
         "chart": {
@@ -854,7 +849,7 @@ def _close_slide(brand: str, doctrine: dict, p11: dict, p07: dict) -> dict:
         "id": "close",
         "section": "Ask",
         "kicker": "Strategic summary",
-        "title": _complete(p11.get("bet") or doctrine.get("bet") or "Sign the bet. Number the claims. Park the gaps."),
+        "title": _complete(doctrine.get("name") or p11.get("bet") or "Sign the bet. Number the claims. Park the gaps."),
         "narrative": _complete(p11.get("warn") or "Draft for medical, legal, and regulatory"),
         "layout": "close",
         "cards": chips,
