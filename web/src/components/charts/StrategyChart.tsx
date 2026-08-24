@@ -21,7 +21,7 @@ import { BoxPlot } from "./BoxPlot";
 import { ForestPlot } from "./ForestPlot";
 import { Infographic } from "./Infographic";
 
-const PALETTE = ["#132037", "#c4844a", "#2a6f6f", "#8b2e2e", "#5c7a5c", "#1b2c49"];
+const PALETTE = ["#4E7DF2", "#FF6433", "#000000", "#4E7DF2", "#FF6433", "#111111"];
 
 function ChartFrame({ title, note, children }: { title?: string; note?: string; children: React.ReactNode }) {
   return (
@@ -93,7 +93,7 @@ export function StrategyChart({ spec }: { spec: ChartSpec; height?: number }) {
               <XAxis type="number" dataKey="x" name={spec.xLabel || "x"} domain={[0, 100]} label={{ value: spec.xLabel || "Feasibility", position: "insideBottom", offset: -12, fontSize: 11 }} />
               <YAxis type="number" dataKey="y" name={spec.yLabel || "y"} domain={[0, 100]} label={{ value: spec.yLabel || "Impact", angle: -90, position: "insideLeft", fontSize: 11 }} />
               <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-              <Scatter data={points} fill="#c4844a" />
+              <Scatter data={points} fill="#4E7DF2" />
             </ScatterChart>
           </ResponsiveContainer>
           <ul className="scatter-legend">
@@ -157,7 +157,7 @@ export function StrategyChart({ spec }: { spec: ChartSpec; height?: number }) {
           <XAxis dataKey="name" interval={0} />
           <YAxis />
           <Tooltip />
-          <Bar dataKey="value" fill="#c4844a">
+            <Bar dataKey="value" fill="#4E7DF2">
             <LabelList dataKey="value" position="top" fontSize={11} />
           </Bar>
         </BarChart>

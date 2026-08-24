@@ -25,7 +25,7 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
           y1={12}
           x2={x(1)}
           y2={h - 16}
-          stroke="#c4844a"
+          stroke="#FF6433"
           strokeDasharray="3 3"
         />
         {ticks.map((t) => (
@@ -36,10 +36,10 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
             </text>
           </g>
         ))}
-        <text x={LEFT} y={h - 2} fontSize="11" fill="#2a6f6f">
+        <text x={LEFT} y={h - 2} fontSize="11" fill="#4E7DF2">
           Favours intervention
         </text>
-        <text x={W - 8} y={h - 2} fontSize="11" textAnchor="end" fill="#8b2e2e">
+        <text x={W - 8} y={h - 2} fontSize="11" textAnchor="end" fill="#FF6433">
           Favours comparator
         </text>
         {rows.map((r, i) => {
@@ -49,21 +49,21 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
           const hr = Number(r.hr);
           return (
             <g key={String(r.name)}>
-              <text x={8} y={y + 4} fontSize="12" fill="#0b1220">
+              <text x={8} y={y + 4} fontSize="12" fill="#111111">
                 {String(r.name)}
               </text>
-              <text x={8} y={y + 18} fontSize="9" fill="#2a6f6f">
+              <text x={8} y={y + 18} fontSize="9" fill="#777777">
                 {String(r.stream || "")} · {String(r.grade || "")}
               </text>
-              <line x1={x(low)} y1={y} x2={x(high)} y2={y} stroke="#132037" strokeWidth="2" />
-              <rect x={x(hr) - 5} y={y - 5} width="10" height="10" fill="#c4844a" />
-              <text x={W - 8} y={y + 4} fontSize="10" textAnchor="end" fill="#5b6270">
+              <line x1={x(low)} y1={y} x2={x(high)} y2={y} stroke="#111111" strokeWidth="2" />
+              <rect x={x(hr) - 5} y={y - 5} width="10" height="10" fill="#4E7DF2" />
+              <text x={W - 8} y={y + 4} fontSize="10" textAnchor="end" fill="#777777">
                 {hr.toFixed(2)} ({low.toFixed(2)}–{high.toFixed(2)})
               </text>
             </g>
           );
         })}
-        <text x={x(1)} y={10} fontSize="9" textAnchor="middle" fill="#c4844a">
+        <text x={x(1)} y={10} fontSize="9" textAnchor="middle" fill="#FF6433">
           null (1.0)
         </text>
       </svg>

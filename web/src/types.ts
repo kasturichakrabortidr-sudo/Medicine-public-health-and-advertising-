@@ -36,11 +36,16 @@ export interface Slide {
   chart?: ChartSpec;
   table?: { headers: string[]; rows: string[][] };
   refs?: (number | string)[];
-  cards?: { title: string; body: string; meta?: string }[];
+  cards?: { title: string; body: string; meta?: string; accent?: "blue" | "orange" }[];
+  stats?: { value: string; caption: string; accent?: "blue" | "orange" }[];
+  soWhat?: string;
+  source?: string;
+  page?: string;
   footnote?: string;
   layout:
     | "title"
     | "insight"
+    | "idea"
     | "split"
     | "chart"
     | "grid"

@@ -1,9 +1,9 @@
-"""Client strategy deck — visual 16:9 narrative.
+"""Client medical-strategy deck.
 
-Every content slide carries a figure: forest plot, people-grid, comparison,
-table, flowchart, message house, scatter, or trajectory. Working-file process
-stays in its own tab. Effect sizes come from numbered papers; planning
-charts are labelled as planning, not as research.
+The working file is the source of truth. These slides present that file in the
+visual language of a medicomarketing strategy presentation: orange section
+kickers, one headline, two giant facts, a so-what line, and a source.
+Process notes stay in the Working file tab — they do not belong on slides.
 """
 
 from __future__ import annotations
@@ -31,9 +31,12 @@ def build_client_deck(
     gaps = ledger.get("gaps") or []
     references = ledger.get("references") or work.get("references") or []
     p01 = _phase(work, "01")
+    p03 = _phase(work, "03")
     p04 = _phase(work, "04")
+    p05 = _phase(work, "05")
     p07 = _phase(work, "07")
     p08 = _phase(work, "08")
+    p09 = _phase(work, "09")
     p10 = _phase(work, "10")
     p11 = _phase(work, "11")
     people = people_rows(records)
@@ -43,10 +46,12 @@ def build_client_deck(
     primary = (lead.get("citations") or [None])[0] or {}
 
     slides = [
-        _title_slide(brand, ta, market, doctrine, brief),
-        _problem_slide(doctrine, p01, goal, brief),
-        _bet_slide(doctrine, lead, primary),
-        _science_lead_slide(lead, primary, records),
+        _title_slide(brand, ta, market, doctrine, brief, records),
+        _problem_slide(doctrine, p01, goal, brief, records, gaps),
+        _landscape_slide(p04, brief),
+        _barriers_slide(p05, brief, doctrine),
+        _idea_slide(doctrine, p05, p07, lead),
+        _science_lead_slide(lead, primary, records, p03),
     ]
     if forest:
         slides.append(_forest_slide(forest, records))
@@ -55,18 +60,19 @@ def build_client_deck(
     if compare:
         slides.append(_compare_slide(compare))
     slides.append(_register_slide(records, gaps))
-    slides.append(_belief_slide(p04, brief.hcp_insights or []))
-    slides.append(_house_slide(p07, doctrine, records))
+    slides.append(_house_slide(p07, doctrine, records, brief))
     if spine:
         slides.append(_execute_slide(spine))
+    else:
+        slides.append(_execute_from_drivers(p05, interventions))
     slides.append(_moves_slide(interventions))
     slides.append(_matrix_slide(interventions))
-    slides.append(_who_slide(specialties, interventions, brief))
+    slides.append(_who_slide(specialties, interventions, brief, p09))
     slides.append(_journey_slide(p08, brand))
-    slides.append(_measure_slide(goal, p10, interventions))
-    slides.append(_close_slide(brand, doctrine, p11))
+    slides.append(_measure_slide(goal, p10, interventions, records))
+    slides.append(_close_slide(brand, doctrine, p11, p07))
     slides.extend(reference_slides(references))
-    return slides
+    return _paginate(slides)
 
 
 def people_rows(records: list[dict]) -> list[dict]:
@@ -195,12 +201,14 @@ def reference_slides(references: list[dict]) -> list[dict]:
     if not references:
         return [{
             "id": "references",
-            "section": "References",
-            "kicker": "Numbered sources",
+            "section": "Appendix",
+            "kicker": "Appendix",
             "title": "References",
             "narrative": "This brief has not matched a PMID or DOI. We will not invent a reference list.",
             "layout": "statement",
             "bullets": ["Retrieve primary papers before anyone writes a claim."],
+            "cards": [{"title": "No numbered paper", "body": "Retrieve primary papers before anyone writes a claim.", "meta": "Working file 03"}],
+            "source": "Working file 03 — evidence forefront. Nothing invented.",
         }]
     slides = []
     chunk = 6
@@ -210,8 +218,8 @@ def reference_slides(references: list[dict]) -> list[dict]:
         page = i // chunk + 1
         slides.append({
             "id": "references" if page == 1 else f"references-{page}",
-            "section": "References",
-            "kicker": f"Vancouver  ·  {page} of {total}",
+            "section": "Appendix",
+            "kicker": "Appendix" if total == 1 else f"Appendix  ·  {page} of {total}",
             "title": "References",
             "narrative": "Superscripts in the deck are these numbers.",
             "layout": "references",
@@ -220,104 +228,226 @@ def reference_slides(references: list[dict]) -> list[dict]:
                 "rows": [[str(r.get("n")), r.get("citation") or ""] for r in part],
             },
             "refs": [r.get("n") for r in part],
+            "source": "Vancouver list from the working-file register. Only PMID/DOI rows.",
         })
     return slides
 
 
-def _title_slide(brand: str, ta: str, market: str, doctrine: dict, brief: ExtractedBrief) -> dict:
+def _title_slide(brand: str, ta: str, market: str, doctrine: dict, brief: ExtractedBrief, records: list[dict]) -> dict:
+    bet = _complete(doctrine.get("bet") or "Start at the first eligible encounter.")
     return {
         "id": "title",
         "section": "Open",
-        "kicker": f"{market}  ·  {ta}",
-        "title": brand,
-        "subtitle": _complete(doctrine.get("bet") or "Start at the first eligible encounter."),
-        "narrative": "",
+        "kicker": f"MEDICAL STRATEGY DECK  ·  {brand}",
+        "title": f"{brand}",
+        "subtitle": bet,
+        "narrative": _complete(doctrine.get("thesis") or f"The scientific and strategic case for {brand} in {ta}."),
         "layout": "title",
-        "chart": {
-            "kind": "flow",
-            "title": "How this deck is built",
-            "data": [
-                {"name": "Number the papers", "detail": "Only a DOI or PMID can set campaign direction."},
-                {"name": "Name the wait", "detail": _complete(doctrine.get("enemy") or "The behaviour that loses the eligible moment")},
-                {"name": "Five sourced moves", "detail": "Each move executes one cited finding."},
-            ],
-        },
-        "footnote": brief.product or brand,
+        "cards": [
+            {"title": market, "body": _complete(ta), "meta": "Market"},
+            {
+                "title": f"{len(records)} numbered papers" if records else "Register empty",
+                "body": "Only a DOI or PMID can set campaign direction.",
+                "meta": "Working file 03",
+            },
+            {
+                "title": doctrine.get("name") or "Strategic idea",
+                "body": _complete(doctrine.get("whyNovel") or bet),
+                "meta": "The bet",
+            },
+        ],
+        "source": f"Internal medical affairs use  ·  {brief.product or brand}",
     }
 
 
-def _problem_slide(doctrine: dict, p01: dict, goal: str, brief: ExtractedBrief) -> dict:
+def _problem_slide(doctrine: dict, p01: dict, goal: str, brief: ExtractedBrief, records: list[dict], gaps: list[dict]) -> dict:
     delay = (brief.hcp_insights or ["The brief does not describe what doctors do at the eligible moment."])[0]
     cost = (brief.access_and_cost or ["Cost is not described in this brief."])[0]
+    goal_stat = _pull_stat(goal)
+    cost_stat = _pull_stat(cost)
+    stats = [
+        _stat(
+            goal_stat or str(len(records) or "0"),
+            _complete(f"What the brief asked us to grow: {_first_sentence(goal)}") if goal_stat
+            else _complete(f"{len(records)} numbered paper{'s' if len(records) != 1 else ''} on the working-file register."),
+            "blue",
+        ),
+        _stat(
+            cost_stat or (str(len(gaps)) if gaps else "Uncited"),
+            _complete(f"What money does next: {_first_sentence(cost)}") if cost_stat
+            else _complete(f"{len(gaps)} brief line{'s' if len(gaps) != 1 else ''} still lack a DOI or PMID."),
+            "orange",
+        ),
+    ]
+    headline = _headline(
+        p01.get("restatedNeed")
+        or doctrine.get("enemy")
+        or "The conversion problem is delay, not disbelief."
+    )
     return {
         "id": "problem",
-        "section": "Problem",
-        "kicker": "The problem",
-        "title": "Doctors already accept the science. They still wait to start.",
-        "narrative": "",
-        "layout": "split",
-        "bullets": [
-            _complete(f"What the brief asked us to grow: {_first_sentence(goal)}"),
-            _complete(f"What doctors actually do: {_first_sentence(delay)}"),
-            _complete(f"What money does next: {_first_sentence(cost)}"),
-        ],
-        "chart": {
-            "kind": "flow",
-            "title": "How the eligible moment is lost",
-            "data": [
-                {"name": "Patient is eligible", "detail": "The guideline encounter is already on the table."},
-                {"name": "Start the familiar first", "detail": _complete(delay)},
-                {"name": "Cost finishes the delay", "detail": _complete(cost)},
-                {"name": "The window is gone", "detail": _complete(doctrine.get("enemy") or "The wait becomes the protocol")},
-            ],
-        },
+        "section": "Context",
+        "kicker": "Market context",
+        "title": headline,
+        "narrative": _complete(
+            p01.get("restatedAsk")
+            or f"What the brief asked us to grow: {_first_sentence(goal)}"
+        ),
+        "layout": "insight",
+        "stats": stats,
+        "cards": _cards_from_stats(stats),
+        "soWhat": _complete(
+            f"The doctors already told us: {_first_sentence(delay)} "
+            f"The work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
+        ),
+        "source": "Working file 01 — restated from this brief. Not a market model.",
     }
 
 
-def _bet_slide(doctrine: dict, lead: dict, primary: dict) -> dict:
+def _landscape_slide(p04: dict, brief: ExtractedBrief) -> dict:
+    discord = p04.get("discord") or {
+        "headers": ["Belief that delays the start", "What the papers show", "Implication"],
+        "rows": [],
+    }
+    concord = p04.get("concord") or {"rows": []}
+    silent = p04.get("silent") or {"rows": []}
+    d_rows = [r for r in (discord.get("rows") or []) if r and r[0] not in {"None mapped", "—"}]
+    c_rows = [r for r in (concord.get("rows") or []) if r and r[0] not in {"None yet", "—"}]
+    s_rows = [r for r in (silent.get("rows") or []) if r and r[0] not in {"—", ""}]
+    insights = brief.hcp_insights or []
+    stats = [
+        _stat(
+            str(len(c_rows) or "Agree"),
+            _complete((c_rows[0][0] if c_rows else "Belief that already matches the papers is an amplifier, not a spend.")),
+            "blue",
+        ),
+        _stat(
+            str(len(d_rows) or "The campaign"),
+            _complete((d_rows[0][0] if d_rows else (insights[0] if insights else "No HCP insight was supplied."))),
+            "orange",
+        ),
+    ]
+    headers = discord.get("headers") or []
+    rows = discord.get("rows") or []
+    if len(headers) > 3:
+        keep = [0, 1, -1]
+        headers = [headers[i] for i in keep]
+        rows = [[row[i] if i < len(row) else "" for i in keep] for row in rows]
+    return {
+        "id": "opportunity",
+        "section": "Context",
+        "kicker": "HCP landscape",
+        "title": "Agreement is an amplifier. Disagreement is the campaign.",
+        "narrative": _complete(
+            "These lines are from the brief, mapped onto numbered papers. They are not a market model."
+        ),
+        "layout": "insight",
+        "stats": stats,
+        "cards": _cards_from_stats(stats),
+        "soWhat": _complete(
+            f"{len(d_rows)} disagreement line{'s' if len(d_rows) != 1 else ''} set the campaign. "
+            f"{len(s_rows)} line{'s' if len(s_rows) != 1 else ''} are still silent on the register."
+        ),
+        "source": "Working file 04 — what the doctors already told us, mapped to numbered papers.",
+        "table": {"headers": headers, "rows": rows[:5]},
+    }
+
+
+def _barriers_slide(p05: dict, brief: ExtractedBrief, doctrine: dict) -> dict:
+    concerns = (p05.get("concerns") or {}).get("rows") or []
+    live = [r for r in concerns if r and r[0] not in {"—", ""}]
+    delay = p05.get("current") or (brief.hcp_insights[0] if brief.hcp_insights else "The brief does not name the current habit.")
+    cost = (brief.access_and_cost or ["Cost is not described in this brief."])[0]
+    left = live[0] if live else ["Practical / ritual", delay, "", ""]
+    right = live[1] if len(live) > 1 else ["Economic", cost, "", ""]
+    left_stat = _pull_stat(str(left[1])) or _short_label(left[0])
+    right_stat = _pull_stat(str(right[1])) or _short_label(right[0])
+    stats = [
+        _stat(left_stat, _complete(left[1] if len(left) > 1 else delay), "orange"),
+        _stat(right_stat, _complete(right[1] if len(right) > 1 else cost), "blue"),
+    ]
+    return {
+        "id": "barriers",
+        "section": "Context",
+        "kicker": "The behaviour we change",
+        "title": _headline(p05.get("required") or doctrine.get("bet") or "Change the decision at the eligible moment."),
+        "narrative": _complete(p05.get("current") or delay),
+        "layout": "insight",
+        "stats": stats,
+        "cards": _cards_from_stats(stats),
+        "soWhat": _complete(
+            f"Strategic answer: {doctrine.get('bet') or p05.get('required') or 'retire the wait at the first eligible encounter'}."
+        ),
+        "source": "Working file 05 — COM-B on the actual insight and access lines.",
+    }
+
+
+def _idea_slide(doctrine: dict, p05: dict, p07: dict, lead: dict) -> dict:
+    drivers = (p05.get("drivers") or {}).get("rows") or []
+    cards = []
+    for i, row in enumerate(drivers[:4]):
+        cards.append({
+            "title": row[0] if row else "Driver",
+            "body": _complete(row[3] if len(row) > 3 else (row[1] if len(row) > 1 else "")),
+            "meta": row[1] if len(row) > 1 else "",
+            "accent": "blue" if i % 2 == 0 else "orange",
+        })
+    if not cards:
+        cards = [
+            {"title": "The bet", "body": _complete(doctrine.get("bet") or ""), "meta": "Doctrine", "accent": "blue"},
+            {"title": "The enemy", "body": _complete(doctrine.get("enemy") or ""), "meta": "Doctrine", "accent": "orange"},
+            {"title": "Scientific lead", "body": _complete(doctrine.get("scienceAnchor") or lead.get("statement") or "No numbered paper yet."), "meta": "Working file 03", "accent": "blue"},
+            {"title": "What we will say", "body": _complete(p07.get("theme") or doctrine.get("bet") or ""), "meta": "Working file 07", "accent": "orange"},
+        ]
     refs = [c.get("ref") for c in (lead.get("citations") or []) if c.get("ref")]
-    slide = {
+    return {
         "id": "the-bet",
-        "section": "Bet",
-        "kicker": "The bet",
+        "section": "Idea",
+        "kicker": "The strategic idea",
         "title": _complete(doctrine.get("bet") or "Start at the first eligible encounter"),
-        "narrative": _complete(doctrine.get("whyNovel") or "This is not a better-molecule story"),
-        "layout": "split",
-        "chart": {
-            "kind": "flow",
-            "title": "What we are actually fighting",
-            "data": [
-                {"name": "Enemy", "detail": _complete(doctrine.get("enemy") or "Unnamed delay")},
-                {"name": "The bet", "detail": _complete(doctrine.get("bet") or "Start at the first eligible encounter")},
-                {"name": "Scientific lead", "detail": _complete(doctrine.get("scienceAnchor") or "No numbered paper yet — do not lock a lead")},
-            ],
-        },
+        "subtitle": _complete(doctrine.get("whyNovel") or "One strategic idea resolves the problems named in this brief."),
+        "narrative": _complete(doctrine.get("thesis") or ""),
+        "layout": "idea",
+        "cards": cards,
         "refs": refs,
-    }
-    if doctrine.get("scienceAnchor") or primary:
-        slide["callout"] = {
+        "source": "Working file 05–07 — drivers and the signed bet. Not a slogan board.",
+        "callout": {
             "label": "We only lead with a numbered paper",
             "text": doctrine.get("scienceAnchor") or "No numbered paper yet — do not lock a lead.",
-        }
-    return slide
+        },
+    }
 
 
-def _science_lead_slide(lead: dict, primary: dict, records: list[dict]) -> dict:
+def _science_lead_slide(lead: dict, primary: dict, records: list[dict], p03: dict) -> dict:
     tag = mark(primary) if primary.get("ref") else ""
     claim = primary.get("claim") or lead.get("statement") or "No DOI or PMID matched this brief."
-    n = primary.get("n") or next((r.get("n") for r in records if r.get("id") == primary.get("id")), "—")
+    rec = next((r for r in records if r.get("id") == primary.get("id")), {}) or {}
+    nnt = rec.get("nnt")
+    hr = rec.get("hr")
+    n = primary.get("n") or rec.get("n") or "—"
+    stats = []
+    if nnt is not None:
+        stats.append(_stat(str(nnt), _complete(f"Treat {nnt} to prevent one event. {tag} PMID {primary.get('pmid') or rec.get('pmid') or '—'}."), "blue"))
+    if hr is not None:
+        stats.append(_stat(
+            f"{rec.get('effect_metric') or 'HR'} {hr}",
+            _complete(f"{rec.get('low')}–{rec.get('high')}  ·  n = {n}."),
+            "orange",
+        ))
+    if not stats:
+        stats = [
+            _stat(tag or "—", _complete(primary.get("short") or "No validated lead"), "blue"),
+            _stat(str(primary.get("pmid") or rec.get("pmid") or "None"), "A line without a PMID does not lock.", "orange"),
+        ]
     return {
         "id": "science-lead",
-        "section": "Science",
-        "kicker": "The paper we lead with",
-        "title": "We lead with a numbered paper, not with a slogan.",
-        "bullets": [
-            _complete(lead.get("statement") or claim),
-            "A line without a PMID does not lock.",
-        ],
-        "subtitle": f"{tag} {primary.get('short') or 'No validated lead'} · PMID {primary.get('pmid') or '—'}",
-        "narrative": "",
-        "layout": "split",
+        "section": "Evidence",
+        "kicker": "Clinical evidence",
+        "title": _headline(lead.get("statement") or claim),
+        "subtitle": f"{tag} {primary.get('short') or 'No validated lead'} · PMID {primary.get('pmid') or rec.get('pmid') or '—'}",
+        "narrative": _complete(p03.get("leadStatement") or claim),
+        "layout": "insight",
+        "stats": stats,
         "cards": [
             {
                 "title": primary.get("short") or "No lead paper",
@@ -335,6 +465,8 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict]) -> dict:
                 "meta": f"n = {n}",
             },
         ],
+        "soWhat": _complete("We lead with a numbered paper, not with a slogan."),
+        "source": _source_line(primary, rec),
         "refs": [c.get("ref") for c in (lead.get("citations") or []) if c.get("ref")],
     }
 
@@ -342,8 +474,8 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict]) -> dict:
 def _forest_slide(forest: list[dict], records: list[dict]) -> dict:
     return {
         "id": "forest",
-        "section": "Science",
-        "kicker": "Evidence figure",
+        "section": "Evidence",
+        "kicker": "Clinical evidence",
         "title": "These are the published effect sizes. We will not invent a missing hazard ratio.",
         "narrative": "Only rows with a DOI or PMID are plotted. Uncited brief items stay off this figure.",
         "layout": "chart",
@@ -353,6 +485,7 @@ def _forest_slide(forest: list[dict], records: list[dict]) -> dict:
             "note": "HR or ratio and 95% CI copied from the cited publication. Superscripts are Vancouver numbers.",
             "data": forest,
         },
+        "source": "Working file 03 — numbered papers only.",
         "refs": [r.get("ref") for r in records if r.get("hr") is not None and r.get("ref")],
     }
 
@@ -361,10 +494,14 @@ def _meaning_slide(people: list[dict]) -> dict:
     first = people[0]
     tag = mark({"ref": first.get("ref")}) if first.get("ref") else ""
     nnt = first.get("nnt")
+    stats = [
+        _stat(str(first.get("control")), _complete(f"{first.get('control_label') or 'Comparator'}: {first.get('unit')}."), "orange"),
+        _stat(str(first.get("treat")), _complete(f"{first.get('treat_label') or 'Intervention'}: {first.get('unit')}."), "blue"),
+    ]
     return {
         "id": "science-meaning",
-        "section": "Science",
-        "kicker": "What the science means",
+        "section": "Evidence",
+        "kicker": "Clinical evidence",
         "title": "In a clinic of 100 patients, this is what the paper actually showed.",
         "subtitle": f"{tag} {first.get('name', '').replace(tag, '').strip()} · PMID {first.get('pmid') or '—'}",
         "narrative": _complete(
@@ -373,6 +510,9 @@ def _meaning_slide(people: list[dict]) -> dict:
             + (f" — treat {nnt} to prevent one event" if nnt else "")
         ),
         "layout": "infographic",
+        "stats": stats,
+        "soWhat": _complete(f"Treat {nnt} to prevent one event over {first.get('horizon') or 'the published horizon'}." if nnt else first.get("claim") or ""),
+        "source": f"{tag} PMID {first.get('pmid')}. Horizon: {first.get('horizon') or 'as published'}.",
         "chart": {
             "kind": "people",
             "title": f"{first.get('name')}: {first.get('unit')}",
@@ -389,12 +529,14 @@ def _compare_slide(compare: list[dict]) -> dict:
     tag = mark({"ref": first.get("ref")}) if first.get("ref") else ""
     return {
         "id": "science-compare",
-        "section": "Science",
-        "kicker": "What the timing data means",
+        "section": "Evidence",
+        "kicker": "Timing evidence",
         "title": "The comparator is the delayed habit, not another molecule.",
         "subtitle": f"{tag} {first.get('name', '').replace(tag, '').strip()} · PMID {first.get('pmid') or '—'}",
         "narrative": _complete(f"{first.get('claim') or ''} {tag}"),
         "layout": "infographic",
+        "soWhat": _complete("A long-term or early-start frame only holds if this paper numbered the window."),
+        "source": f"{tag} PMID {first.get('pmid')}. {first.get('horizon') or 'As published'}.",
         "chart": {
             "kind": "compare",
             "title": f"{first.get('name')}: {first.get('unit')}",
@@ -414,7 +556,7 @@ def _register_slide(records: list[dict], gaps: list[dict]) -> dict:
     )
     return {
         "id": "citation-register",
-        "section": "Science",
+        "section": "Evidence",
         "kicker": "Evidence forefront",
         "title": "Every lead claim traces to a numbered paper.",
         "narrative": (
@@ -434,48 +576,21 @@ def _register_slide(records: list[dict], gaps: list[dict]) -> dict:
                 for r in records[:8]
             ] or [["—", "No numbered paper yet", "Do not lock a lead", "—"]],
         },
+        "source": "Working file 03 — every row is a paper we can put a number on.",
         "refs": [r.get("ref") for r in records if r.get("ref")],
     }
 
 
-def _belief_slide(p04: dict, insights: list[str]) -> dict:
-    discord = p04.get("discord") or {
-        "headers": ["Belief that delays the start", "What the papers show", "Implication"],
-        "rows": [[_complete(i), "Map after the register is numbered.", "Do not lock a line until the paper is numbered."] for i in insights[:4]],
-    }
-    headers = discord.get("headers") or []
-    rows = discord.get("rows") or []
-    if len(headers) > 3:
-        keep = [0, 1, -1]
-        headers = [headers[i] for i in keep]
-        rows = [[row[i] if i < len(row) else "" for i in keep] for row in rows]
-    concord = p04.get("concord") or {}
-    n_discord = len(rows)
-    n_concord = len((concord.get("rows") or []))
-    return {
-        "id": "opportunity",
-        "section": "Insight",
-        "kicker": "What the doctors already told us",
-        "title": "Agreement is an amplifier. Disagreement is the campaign.",
-        "narrative": "These lines are from the brief, mapped onto numbered papers. They are not a market model.",
-        "layout": "table",
-        "table": {"headers": headers, "rows": rows[:5]},
-        "chart": {
-            "kind": "bar",
-            "title": "Mapped insight lines from this brief",
-            "unit": "lines",
-            "note": "Counts from this brief, not a survey index.",
-            "data": [
-                {"name": "Agrees with papers", "value": n_concord},
-                {"name": "Disagrees — the campaign", "value": max(n_discord, 1)},
-            ],
-        },
-    }
-
-
-def _house_slide(p07: dict, doctrine: dict, records: list[dict]) -> dict:
+def _house_slide(p07: dict, doctrine: dict, records: list[dict], brief: ExtractedBrief) -> dict:
     house = p07.get("house") or {"headers": ["Pillar", "Line", "Ref", "Proof"], "rows": []}
-    rows = house.get("rows") or []
+    rows = list(house.get("rows") or [])
+    if len(rows) == 3 and (brief.access_and_cost or []):
+        rows.append([
+            "Stay on their side",
+            _complete(f"Cost is a veto, not a footnote. {(brief.access_and_cost or [''])[0]}"),
+            "gap",
+            "No health-economic claim until that paper is numbered.",
+        ])
     data = [
         {
             "name": row[0] if row else "Pillar",
@@ -483,17 +598,19 @@ def _house_slide(p07: dict, doctrine: dict, records: list[dict]) -> dict:
             "ref": row[2] if len(row) > 2 else "",
             "proof": _first_sentence(row[3] if len(row) > 3 else ""),
         }
-        for row in rows[:3]
+        for row in rows[:4]
     ]
     if not data:
         data = [{"name": "Permission now", "line": doctrine.get("bet") or "", "ref": "—", "proof": "Citation pending"}]
     return {
         "id": "house",
         "section": "Message",
-        "kicker": "Message house",
-        "title": "One theme. Three pillars. A pillar without a number does not ship.",
+        "kicker": "Messaging architecture",
+        "title": "One theme. Pillars without a number do not ship.",
         "narrative": _complete(p07.get("theme") or doctrine.get("bet") or "Start at the first eligible visit"),
         "layout": "infographic",
+        "soWhat": _complete(p07.get("theme") or doctrine.get("bet") or "Start at the first eligible visit"),
+        "source": "Working file 07 — one theme, sourced pillars, objection grid in the working file.",
         "chart": {
             "kind": "house",
             "title": _complete(p07.get("theme") or doctrine.get("bet") or "Start at the first eligible visit"),
@@ -507,15 +624,58 @@ def _execute_slide(spine: list[dict]) -> dict:
     return {
         "id": "science-execute",
         "section": "Action",
-        "kicker": "Science → execution",
+        "kicker": "Science to solution",
         "title": "Each cited finding becomes one campaign move.",
         "narrative": "Science names the prize. The barrier names why it is lost. The intervention is how we take it.",
         "layout": "infographic",
+        "source": "Working file 03 × 08 — only rows with a PMID or DOI. Uncited brief items cannot own a move.",
         "chart": {
             "kind": "spine",
             "title": "Science to solution through execution",
             "note": "Only rows with a PMID or DOI. Uncited brief items cannot own a move.",
             "data": spine,
+        },
+    }
+
+
+def _execute_from_drivers(p05: dict, interventions: list[dict]) -> dict:
+    drivers = (p05.get("drivers") or {}).get("rows") or []
+    data = []
+    for row, iv in zip(drivers[:4], interventions or [{}] * 4):
+        data.append({
+            "name": row[0] if row else "Driver",
+            "science": _complete(row[1] if len(row) > 1 else "Citation pending"),
+            "means": _complete(row[0] if row else ""),
+            "barrier": _complete(row[2] if len(row) > 2 else ""),
+            "execute": _complete((iv or {}).get("name") or (row[3] if len(row) > 3 else "")),
+            "measure": _complete((iv or {}).get("kill") or ""),
+            "move": (iv or {}).get("name") or "",
+            "pmid": "",
+        })
+    if not data:
+        data = [{
+            "name": "No spine yet",
+            "science": "No numbered paper matched this brief.",
+            "means": "Do not lock a move.",
+            "barrier": "Uncited lines cannot own execution.",
+            "execute": "Retrieve the primary paper.",
+            "measure": "Kill any line without a PMID.",
+            "move": "",
+            "pmid": "",
+        }]
+    return {
+        "id": "science-execute",
+        "section": "Action",
+        "kicker": "Science to solution",
+        "title": "Each cited finding becomes one campaign move.",
+        "narrative": "Until a paper is numbered, the driver table is a planning sketch, not a claim.",
+        "layout": "infographic",
+        "source": "Working file 05 — drivers only. No invented effect sizes.",
+        "chart": {
+            "kind": "spine",
+            "title": "Science to solution through execution",
+            "note": "Planning rows from the working file. Not research.",
+            "data": data,
         },
     }
 
@@ -528,13 +688,15 @@ def _moves_slide(interventions: list[dict]) -> dict:
         "title": "Five moves that retire the wait, each anchored to a numbered paper.",
         "narrative": "Each move is the execution of a cited finding, not a separate creative idea.",
         "layout": "cards",
+        "source": "Working file 08–09 — each move executes one cited finding.",
         "cards": [
             {
                 "title": i["name"],
                 "body": _first_sentence(i["promise"]),
                 "meta": i.get("evidenceAnchor") or "citation pending",
+                "accent": "blue" if n % 2 == 0 else "orange",
             }
-            for i in interventions[:5]
+            for n, i in enumerate(interventions[:5])
         ],
         "bullets": [
             f"{i['name']} — {i['promise']}  [{i.get('evidenceAnchor') or 'citation pending'}]"
@@ -551,6 +713,7 @@ def _matrix_slide(interventions: list[dict]) -> dict:
         "title": "Q1 buys proof of mechanism. We do not spend the year on congress theatre.",
         "narrative": "Impact versus feasibility for this architecture. These are design scores, not a market survey.",
         "layout": "chart",
+        "source": "Working file 09 — architecture scores for this mix. Not research.",
         "chart": {
             "kind": "scatter",
             "title": "Impact vs feasibility of the five moves",
@@ -565,29 +728,33 @@ def _matrix_slide(interventions: list[dict]) -> dict:
     }
 
 
-def _who_slide(specialties: list[str], interventions: list[dict], brief: ExtractedBrief) -> dict:
-    lead = specialties[0] if specialties else "Specialist"
-    second = specialties[1] if len(specialties) > 1 else "Consultant"
-    names = [i["name"] for i in interventions[:5]]
-    rows = [
-        [f"{lead} · KOL metro", names[3] if len(names) > 3 else "Peer cascade", "Low", "Heavy"],
-        [f"{lead} · private metro", names[0] if names else "First-Touch", "Medium", "Heavy"],
-        [f"{second} · tier-2", names[1] if len(names) > 1 else "Affordability kit", "High", "Heavy"],
-        ["Hospital pathway owners", names[0] if names else "Discharge initiation", "Medium", "Heavy"],
-        ["Early-career / trainee", names[2] if len(names) > 2 else "Myth-reset", "Medium", "Medium"],
-        ["GP / referrer", "Referral trigger, not a full lesson", "High", "Light"],
-    ]
+def _who_slide(specialties: list[str], interventions: list[dict], brief: ExtractedBrief, p09: dict) -> dict:
+    grid = p09.get("grid") or {}
+    if grid.get("rows"):
+        headers = grid.get("headers") or ["Who", "Lead move", "Cost posture", "Why them first"]
+        rows = grid.get("rows")
+    else:
+        lead = specialties[0] if specialties else "Specialist"
+        second = specialties[1] if len(specialties) > 1 else "Consultant"
+        names = [i["name"] for i in interventions[:5]]
+        headers = ["Segment", "Lead intervention", "Cost posture", "Q1 weight"]
+        rows = [
+            [f"{lead} · KOL metro", names[3] if len(names) > 3 else "Peer cascade", "Low", "Heavy"],
+            [f"{lead} · private metro", names[0] if names else "First-Touch", "Medium", "Heavy"],
+            [f"{second} · tier-2", names[1] if len(names) > 1 else "Affordability kit", "High", "Heavy"],
+            ["Hospital pathway owners", names[0] if names else "Discharge initiation", "Medium", "Heavy"],
+            ["Early-career / trainee", names[2] if len(names) > 2 else "Myth-reset", "Medium", "Medium"],
+            ["GP / referrer", "Referral trigger, not a full lesson", "High", "Light"],
+        ]
     return {
         "id": "segments",
         "section": "Who",
-        "kicker": "Who first",
+        "kicker": "Who we activate first",
         "title": "Four rooms carry the year. Everyone else inherits.",
-        "narrative": "Activation is a specialty × city × cost grid that we then collapse. Cost-concern is a design input, not a footnote.",
+        "narrative": _complete(p09.get("note") or "Activation is a specialty × city × cost grid that we then collapse. Cost-concern is a design input, not a footnote."),
         "layout": "table",
-        "table": {
-            "headers": ["Segment", "Lead intervention", "Cost posture", "Q1 weight"],
-            "rows": rows,
-        },
+        "table": {"headers": headers, "rows": rows},
+        "source": "Working file 09 — collapsed to the few groups this brief can actually fund.",
     }
 
 
@@ -605,6 +772,7 @@ def _journey_slide(p08: dict, brand: str) -> dict:
         "title": "A doctor should feel a designed sequence, not a spray of assets.",
         "narrative": p08.get("rule") or f"If a contact cannot name a numbered paper or a behaviour we are changing, it does not go on the {brand} plan.",
         "layout": "infographic",
+        "source": "Working file 08 — jobs in order. Not a 14-touch cadence we invented.",
         "chart": {
             "kind": "flow",
             "title": "Campaign sequence",
@@ -616,7 +784,7 @@ def _journey_slide(p08: dict, brand: str) -> dict:
     }
 
 
-def _measure_slide(goal: str, p10: dict, interventions: list[dict]) -> dict:
+def _measure_slide(goal: str, p10: dict, interventions: list[dict], records: list[dict]) -> dict:
     parent = p10.get("parent") or goal
     kpi_block = p10.get("kpis") or {}
     rows = kpi_block.get("rows") or []
@@ -643,9 +811,10 @@ def _measure_slide(goal: str, p10: dict, interventions: list[dict]) -> dict:
         "kicker": "How we will know",
         "title": "The parent metric is the goal written in the brief.",
         "subtitle": _complete(parent),
-        "narrative": "This line is a planning target from the brief. It is not an audited baseline.",
-        "layout": "chart" if series else "cards",
+        "narrative": _complete(p10.get("caveat") or "This line is a planning target from the brief. It is not an audited baseline."),
+        "layout": "chart" if series or _papers_by_year(records) else "cards",
         "cards": cards,
+        "source": "Working file 10 — the brief’s own goal is the parent metric. Not an audited baseline.",
     }
     if series:
         slide["chart"] = {
@@ -655,11 +824,25 @@ def _measure_slide(goal: str, p10: dict, interventions: list[dict]) -> dict:
             "series": ["target"],
             "data": series,
         }
+    else:
+        years = _papers_by_year(records)
+        if years:
+            slide["chart"] = {
+                "kind": "line",
+                "title": "Numbered papers on the register by publication year",
+                "note": "Counts from the working-file register. Not a market forecast.",
+                "series": ["papers"],
+                "data": years,
+            }
     return slide
 
 
-def _close_slide(brand: str, doctrine: dict, p11: dict) -> dict:
+def _close_slide(brand: str, doctrine: dict, p11: dict, p07: dict) -> dict:
     asks = (p11.get("ask") or [])[:4]
+    pillars = (p07.get("house") or {}).get("rows") or []
+    chips = [{"title": row[0], "body": _first_sentence(row[1] if len(row) > 1 else ""), "meta": row[2] if len(row) > 2 else ""} for row in pillars[:4]]
+    if not chips:
+        chips = [{"title": f"Ask {i + 1}", "body": _first_sentence(a), "meta": brand} for i, a in enumerate(asks[:4])]
     steps = [
         {"name": "Days 1–10", "detail": "Lock the bet and the numbered scientific lead."},
         {"name": "Days 11–20", "detail": "Stand up one hospital pathway and one cost conversation."},
@@ -670,10 +853,12 @@ def _close_slide(brand: str, doctrine: dict, p11: dict) -> dict:
     return {
         "id": "close",
         "section": "Ask",
-        "kicker": "The first 30 days",
-        "title": "Sign the bet. Number the claims. Park the gaps.",
+        "kicker": "Strategic summary",
+        "title": _complete(p11.get("bet") or doctrine.get("bet") or "Sign the bet. Number the claims. Park the gaps."),
         "narrative": _complete(p11.get("warn") or "Draft for medical, legal, and regulatory"),
         "layout": "close",
+        "cards": chips,
+        "source": "Working file 11 — the page we would take into the room. Draft for MLR.",
         "chart": {
             "kind": "flow",
             "title": "What we need signed in the room",
@@ -696,6 +881,20 @@ def _qoq_from_goal(goal: str) -> list[dict] | None:
     return rows
 
 
+def _papers_by_year(records: list[dict]) -> list[dict]:
+    counts: dict[int, int] = {}
+    for r in records:
+        year = r.get("year")
+        try:
+            year = int(year)
+        except (TypeError, ValueError):
+            continue
+        counts[year] = counts.get(year, 0) + 1
+    if len(counts) < 2:
+        return []
+    return [{"name": str(y), "papers": counts[y]} for y in sorted(counts)]
+
+
 def _phase(work: dict, pid: str) -> dict:
     for phase in work.get("phases") or []:
         if phase.get("id") == pid:
@@ -703,16 +902,55 @@ def _phase(work: dict, pid: str) -> dict:
     return {}
 
 
-def _clip(text, n: int) -> str:
+def _paginate(slides: list[dict]) -> list[dict]:
+    for i, slide in enumerate(slides, 1):
+        slide["page"] = f"{i:02d}"
+    return slides
+
+
+def _stat(value, caption: str, accent: str) -> dict:
+    return {"value": str(value), "caption": caption, "accent": accent}
+
+
+def _cards_from_stats(stats: list[dict]) -> list[dict]:
+    return [
+        {"title": s["value"], "body": s["caption"], "meta": s.get("accent") or "", "accent": s.get("accent")}
+        for s in stats
+    ]
+
+
+def _headline(text) -> str:
+    return _complete(_first_sentence(text))
+
+
+def _short_label(text) -> str:
     text = " ".join(str(text or "").split())
-    if len(text) <= n:
-        return text
-    cut = text[: n - 1].rsplit(" ", 1)[0]
-    return (cut or text[: n - 1]).rstrip(".,;:") + "…"
+    if not text:
+        return "—"
+    return text.split("/")[0].split("—")[0].strip()[:18] or text[:18]
+
+
+def _pull_stat(text: str) -> str:
+    raw = str(text or "")
+    match = re.search(r"(\d+\s*[-–]\s*\d+\s*[x×])|(\d+(?:\.\d+)?\s*%)|(\d+[x×])", raw, re.I)
+    if not match:
+        return ""
+    return re.sub(r"\s+", "", match.group(0))
+
+
+def _source_line(primary: dict, rec: dict) -> str:
+    citation = primary.get("citation") or rec.get("citation") or ""
+    pmid = primary.get("pmid") or rec.get("pmid") or ""
+    if citation:
+        return citation
+    if pmid:
+        return f"PMID {pmid}."
+    return "Working file 03 — no numbered lead yet."
 
 
 def _complete(text) -> str:
-    text = " ".join(str(text or "").split())
+    text = " ".join(str(text or "").split()).replace("…", "").replace("...", "")
+    text = text.rstrip(" ,;:")
     if not text:
         return ""
     if text[-1] in ".?!":

@@ -184,8 +184,8 @@ function HouseVisual({ spec }: { spec: ChartSpec }) {
         <strong>{spec.title}</strong>
       </div>
       <div className="house-pillars">
-        {spec.data.map((row) => (
-          <div className="house-pillar" key={String(row.name)}>
+        {spec.data.map((row, i) => (
+          <div className={`house-pillar accent-${i % 2 === 0 ? "blue" : "orange"}`} key={String(row.name)}>
             <div className="kicker">{row.ref || "Pillar"}</div>
             <h4>{row.name}</h4>
             <p>{row.line}</p>

@@ -19,15 +19,23 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
-INK = RGBColor(0x0B, 0x12, 0x20)
-NAVY = RGBColor(0x13, 0x20, 0x37)
-CREAM = RGBColor(0xFA, 0xF6, 0xEF)
-PAPER = RGBColor(0xF4, 0xEF, 0xE6)
-COPPER = RGBColor(0xC4, 0x84, 0x4A)
-TEAL = RGBColor(0x2A, 0x6F, 0x6F)
-CRIMSON = RGBColor(0x8B, 0x2E, 0x2E)
-MUTED = RGBColor(0x5B, 0x62, 0x70)
+INK = RGBColor(0x11, 0x11, 0x11)
+NAVY = RGBColor(0x00, 0x00, 0x00)
+CREAM = RGBColor(0xF7, 0xF7, 0xF4)
+PAPER = RGBColor(0xFF, 0xFF, 0xFF)
+COPPER = RGBColor(0xFF, 0x64, 0x33)
+TEAL = RGBColor(0x4E, 0x7D, 0xF2)
+CRIMSON = RGBColor(0xFF, 0x64, 0x33)
+MUTED = RGBColor(0x77, 0x77, 0x77)
 WHITE = RGBColor(0xFF, 0xFF, 0xFF)
+BLUE = RGBColor(0x4E, 0x7D, 0xF2)
+ORANGE = RGBColor(0xFF, 0x64, 0x33)
+BODY = RGBColor(0x33, 0x33, 0x33)
+PAGE_GREY = RGBColor(0xA7, 0xA7, 0xA7)
+DARK_CARD = RGBColor(0x11, 0x11, 0x11)
+HAIRLINE = RGBColor(0x00, 0x00, 0x00)
+FONT = "Calibri"
+DISPLAY = "Calibri"
 
 SLIDE_W = Inches(13.333)
 SLIDE_H = Inches(7.5)
@@ -46,8 +54,8 @@ def pack_to_pptx(pack: dict) -> bytes:
 
     for spec in slides:
         slide = prs.slides.add_slide(blank)
-        dark = spec.get("layout") in {"title", "close"}
-        _fill_slide(slide, INK if dark else CREAM)
+        dark = spec.get("layout") in {"title", "close", "idea"}
+        _fill_slide(slide, NAVY if dark else CREAM)
         _render_slide(slide, spec, dark)
         _notes(slide, spec)
 
@@ -80,7 +88,7 @@ def _fill_slide(slide, color: RGBColor) -> None:
     sp_tree.insert(2, sp)
 
 
-def _textbox(slide, l, t, w, h, text, *, size=16, bold=False, color=INK, font="Calibri", align=PP_ALIGN.LEFT):
+def _textbox(slide, l, t, w, h, text, *, size=16, bold=False, color=INK, font=FONT, align=PP_ALIGN.LEFT):
     box = slide.shapes.add_textbox(l, t, w, h)
     tf = box.text_frame
     tf.word_wrap = True
@@ -115,7 +123,7 @@ def _bullets(slide, l, t, w, h, items: list, *, color=INK, size=15):
         p.level = 0
         p.font.size = Pt(size)
         p.font.color.rgb = color
-        p.font.name = "Calibri"
+        p.font.name = FONT
         p.space_after = Pt(8)
     return box
 
@@ -145,7 +153,7 @@ def _style_cell(cell, bg: RGBColor, fg: RGBColor, *, bold=False, size=12):
         p.font.size = Pt(size)
         p.font.bold = bold
         p.font.color.rgb = fg
-        p.font.name = "Calibri"
+        p.font.name = FONT
         p.alignment = PP_ALIGN.LEFT
     cell.vertical_anchor = MSO_ANCHOR.MIDDLE
 
@@ -161,112 +169,214 @@ def _notes(slide, spec: dict) -> None:
     notes.text = "\n\n".join(b for b in bits if b)
 
 
-def _render_slide(slide, spec: dict, dark: bool) -> None:
-    ink = CREAM if dark else INK
-    muted = RGBColor(0xF0, 0xC4, 0x8A) if dark else COPPER
-    body = RGBColor(0xE8, 0xE2, 0xD6) if dark else MUTED
-    layout = spec.get("layout")
+def _hairline(slide, l, t, w, color=HAIRLINE) -> None:
+    line = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, l, t, w, Emu(6350))
+    line.fill.solid()
+    line.fill.fore_color.rgb = color
+    line.line.fill.background()
 
-    _textbox(slide, Inches(0.7), Inches(0.32), Inches(12.0), Inches(0.32),
-             (spec.get("kicker") or "").upper(), size=12, color=muted, font="Calibri")
 
-    if spec.get("refs"):
+def _rail_box(slide, l, t, w, h, accent: RGBColor, fill: RGBColor = PAPER) -> None:
+    shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, l, t, w, h)
+    shape.fill.solid()
+    shape.fill.fore_color.rgb = fill
+    shape.line.fill.background()
+    rail = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, l, t, Inches(0.06), h)
+    rail.fill.solid()
+    rail.fill.fore_color.rgb = accent
+    rail.line.fill.background()
+
+
+def _accent(i, card=None) -> RGBColor:
+    if isinstance(card, dict) and card.get("accent") == "orange":
+        return ORANGE
+    if isinstance(card, dict) and card.get("accent") == "blue":
+        return BLUE
+    return BLUE if i % 2 == 0 else ORANGE
+
+
+def _chrome(slide, spec: dict, dark: bool) -> None:
+    _textbox(slide, Inches(12.82), Inches(0.18), Inches(0.4), Inches(0.18),
+             spec.get("page") or "", size=8, color=PAGE_GREY, align=PP_ALIGN.RIGHT)
+    source = spec.get("source") or spec.get("footnote") or ""
+    if source:
+        _textbox(slide, Inches(0.34), Inches(6.82), Inches(10.4), Inches(0.22),
+                 source, size=9, color=RGBColor(0x80, 0x80, 0x80) if dark else MUTED)
+    elif spec.get("refs"):
         from .cite import format_marks
         nums = [int(n) for n in spec["refs"] if n not in (None, "")]
         if nums:
-            _textbox(slide, Inches(0.7), Inches(7.12), Inches(12.0), Inches(0.22),
+            _textbox(slide, Inches(0.34), Inches(6.82), Inches(10.4), Inches(0.22),
                      f"References {format_marks(nums)}  ·  Vancouver list at end of deck",
-                     size=10, color=MUTED)
+                     size=9, color=MUTED)
+
+
+def _stat_cards(slide, stats: list[dict], l, t, w, h) -> None:
+    if not stats:
+        return
+    n = max(len(stats), 1)
+    cw = w / n
+    for i, st in enumerate(stats):
+        x = l + cw * i + Inches(0.08)
+        card_w = cw - Inches(0.16)
+        _rail_box(slide, x, t, card_w, h, _accent(i, st), PAPER)
+        _textbox(slide, x + Inches(0.18), t + Inches(0.16), card_w - Inches(0.28), Inches(0.55),
+                 str(st.get("value") or ""), size=28, bold=True, color=INK, font=DISPLAY)
+        _textbox(slide, x + Inches(0.18), t + Inches(0.78), card_w - Inches(0.28), h - Inches(0.92),
+                 st.get("caption") or "", size=12, color=BODY)
+
+
+def _render_slide(slide, spec: dict, dark: bool) -> None:
+    ink = WHITE if dark else INK
+    body = RGBColor(0xBF, 0xBF, 0xBF) if dark else BODY
+    layout = spec.get("layout")
+    _chrome(slide, spec, dark)
 
     if layout == "title":
-        _textbox(slide, Inches(0.7), Inches(1.15), Inches(12.0), Inches(1.7),
-                 spec.get("title") or "", size=54, bold=True, color=ink, font="Calibri")
+        _textbox(slide, Inches(0.55), Inches(1.72), Inches(8.4), Inches(0.28),
+                 (spec.get("kicker") or "").upper(), size=12, bold=True, color=BLUE)
+        _textbox(slide, Inches(0.55), Inches(2.05), Inches(8.6), Inches(1.15),
+                 spec.get("title") or "", size=32, bold=True, color=WHITE, font=DISPLAY)
         if spec.get("subtitle"):
-            _textbox(slide, Inches(0.7), Inches(3.0), Inches(12.0), Inches(1.15),
-                     spec["subtitle"], size=20, color=body)
-        if spec.get("chart"):
-            _add_chart(slide, spec["chart"], Inches(0.55), Inches(4.4), Inches(12.2), Inches(2.5))
-        return
-
-    title_size = 20
-    title_h = Inches(1.35)
-    _textbox(slide, Inches(0.7), Inches(0.58), Inches(12.0), title_h,
-             spec.get("title") or "", size=title_size, bold=True, color=ink, font="Calibri")
-
-    top = Inches(2.05)
-    if spec.get("subtitle"):
-        _textbox(slide, Inches(0.7), top - Inches(0.12), Inches(12.0), Inches(0.55),
-                 spec["subtitle"], size=14, color=body)
-        top += Inches(0.5)
-
-    if layout == "close":
+            _textbox(slide, Inches(0.55), Inches(3.35), Inches(8.8), Inches(0.7),
+                     spec["subtitle"], size=16, color=RGBColor(0xB7, 0xC5, 0xE8))
         if spec.get("narrative"):
-            _textbox(slide, Inches(0.7), top, Inches(12.0), Inches(0.5),
-                     spec.get("narrative") or "", size=15, color=body)
-            top += Inches(0.5)
-        if spec.get("chart"):
-            _add_chart(slide, spec["chart"], Inches(0.5), top, Inches(12.3), Inches(6.95) - top)
+            _textbox(slide, Inches(0.55), Inches(4.1), Inches(8.8), Inches(0.55),
+                     spec["narrative"], size=13, color=RGBColor(0xBF, 0xBF, 0xBF))
+        if spec.get("cards"):
+            _dark_chips(slide, spec["cards"], Inches(0.55), Inches(4.85), Inches(12.2), Inches(1.55))
+        elif spec.get("chart"):
+            _add_chart(slide, spec["chart"], Inches(0.55), Inches(4.85), Inches(12.2), Inches(1.7))
         return
+
+    if layout in {"close", "idea"}:
+        _textbox(slide, Inches(0.55), Inches(1.2), Inches(8.0), Inches(0.22),
+                 (spec.get("kicker") or "").upper(), size=10, bold=True, color=ORANGE)
+        _textbox(slide, Inches(0.55), Inches(1.48), Inches(9.4), Inches(0.9),
+                 spec.get("title") or "", size=22, bold=True, color=WHITE, font=DISPLAY)
+        if spec.get("subtitle") or spec.get("narrative"):
+            _textbox(slide, Inches(0.55), Inches(2.4), Inches(9.0), Inches(0.55),
+                     spec.get("subtitle") or spec.get("narrative") or "", size=13, color=RGBColor(0xBF, 0xBF, 0xBF))
+        if spec.get("cards"):
+            _dark_quad(slide, spec["cards"], Inches(0.55), Inches(3.15), Inches(12.1), Inches(2.9))
+        elif spec.get("chart"):
+            _add_chart(slide, spec["chart"], Inches(0.55), Inches(3.2), Inches(12.2), Inches(3.2))
+        if spec.get("callout"):
+            _textbox(slide, Inches(0.55), Inches(6.2), Inches(10.5), Inches(0.35),
+                     spec["callout"].get("text") or "", size=12, bold=True, color=ORANGE)
+        return
+
+    if not dark:
+        _hairline(slide, Inches(0.34), Inches(0.55), Inches(11.95), HAIRLINE)
+        _hairline(slide, Inches(0.34), Inches(1.42), Inches(1.36), HAIRLINE)
+
+    _textbox(slide, Inches(0.34), Inches(0.82), Inches(8.4), Inches(0.22),
+             (spec.get("kicker") or "").upper(), size=10, bold=True, color=ORANGE)
+    _textbox(slide, Inches(0.34), Inches(1.04), Inches(8.6), Inches(0.7),
+             spec.get("title") or "", size=18, bold=True, color=INK, font=DISPLAY)
+
+    if layout == "insight":
+        _textbox(slide, Inches(0.34), Inches(2.08), Inches(3.35), Inches(1.35),
+                 spec.get("narrative") or spec.get("subtitle") or "", size=12, color=BODY)
+        stats = spec.get("stats") or []
+        if stats:
+            _stat_cards(slide, stats, Inches(4.15), Inches(1.28), Inches(8.5), Inches(2.15))
+        if spec.get("soWhat"):
+            _textbox(slide, Inches(4.15), Inches(3.6), Inches(8.4), Inches(0.7),
+                     spec["soWhat"], size=16, color=INK, font=DISPLAY)
+        if spec.get("chart"):
+            _add_chart(slide, spec["chart"], Inches(4.15), Inches(4.35), Inches(8.5), Inches(2.2))
+        elif spec.get("table") and not stats:
+            table = spec["table"]
+            _table(slide, Inches(4.15), Inches(3.55), Inches(8.5), Inches(2.9),
+                   table.get("headers") or [], table.get("rows") or [])
+        return
+
+    top = Inches(1.85)
+    if spec.get("subtitle"):
+        _textbox(slide, Inches(0.34), top, Inches(12.4), Inches(0.4),
+                 spec["subtitle"], size=13, color=body)
+        top += Inches(0.38)
+    if spec.get("narrative"):
+        _textbox(slide, Inches(0.34), top, Inches(12.4), Inches(0.45),
+                 spec.get("narrative") or "", size=13, color=BODY)
+        top += Inches(0.48)
 
     if layout == "split":
-        copy_bits = spec.get("narrative") or ""
-        _textbox(slide, Inches(0.7), top, Inches(5.5), Inches(0.9),
-                 copy_bits, size=14, color=body)
         if spec.get("bullets"):
-            _bullets(slide, Inches(0.7), top + Inches(0.95), Inches(5.5), Inches(3.4),
+            _bullets(slide, Inches(0.34), top, Inches(5.5), Inches(3.4),
                      spec["bullets"], color=INK, size=14)
         if spec.get("table"):
             table = spec["table"]
-            _table(slide, Inches(0.55), top + Inches(1.0), Inches(5.7), Inches(3.6),
+            _table(slide, Inches(0.34), top, Inches(5.7), Inches(3.6),
                    table.get("headers") or [], table.get("rows") or [])
         if spec.get("callout"):
-            _callout(slide, Inches(0.55), Inches(6.4), Inches(5.7), Inches(0.65), spec["callout"], dark)
+            _callout(slide, Inches(0.34), Inches(6.25), Inches(5.7), Inches(0.5), spec["callout"], dark)
         if spec.get("chart"):
-            _add_chart(slide, spec["chart"], Inches(6.5), top, Inches(6.3), Inches(4.8))
+            _add_chart(slide, spec["chart"], Inches(6.3), top, Inches(6.5), Inches(4.5))
         elif spec.get("cards"):
-            _cards(slide, spec["cards"], Inches(6.5), top, Inches(6.3), Inches(4.8))
+            _cards(slide, spec["cards"], Inches(6.3), top, Inches(6.5), Inches(4.5))
         return
 
     if layout in {"infographic", "chart"}:
         if spec.get("chart"):
-            _add_chart(slide, spec["chart"], Inches(0.55), top, Inches(12.2), Inches(7.05) - top)
+            _add_chart(slide, spec["chart"], Inches(0.34), top, Inches(12.6), Inches(6.55) - top)
         return
 
     if layout in {"references", "table"}:
-        if spec.get("narrative"):
-            _textbox(slide, Inches(0.7), top, Inches(12.0), Inches(0.4),
-                     spec.get("narrative") or "", size=13, color=body)
-            top += Inches(0.42)
         table = spec.get("table") or {}
         if spec.get("chart") and table.get("rows"):
-            _table(slide, Inches(0.4), top, Inches(7.4), Inches(6.9) - top,
+            _table(slide, Inches(0.34), top, Inches(7.5), Inches(6.55) - top,
                    table.get("headers") or [], table.get("rows") or [])
-            _add_chart(slide, spec["chart"], Inches(8.0), top, Inches(4.8), Inches(4.6))
+            _add_chart(slide, spec["chart"], Inches(8.05), top, Inches(4.8), Inches(4.4))
         elif table.get("rows") is not None:
-            _table(slide, Inches(0.55), top, Inches(12.2), Inches(6.95) - top,
+            _table(slide, Inches(0.34), top, Inches(12.6), Inches(6.55) - top,
                    table.get("headers") or ["No.", "Citation"], table.get("rows") or [])
         return
 
     if layout == "cards":
-        if spec.get("narrative"):
-            _textbox(slide, Inches(0.7), top, Inches(12.0), Inches(0.4),
-                     spec.get("narrative") or "", size=14, color=body)
-            top += Inches(0.42)
-        _cards(slide, spec.get("cards") or [], Inches(0.4), top, Inches(12.5), Inches(6.95) - top)
+        _cards(slide, spec.get("cards") or [], Inches(0.34), top, Inches(12.6), Inches(6.55) - top)
         return
 
-    if spec.get("narrative"):
-        _textbox(slide, Inches(0.7), top, Inches(12.0), Inches(1.1),
-                 spec.get("narrative") or "", size=16, color=body)
-        top += Inches(1.15)
     if spec.get("chart"):
-        _add_chart(slide, spec["chart"], Inches(0.55), top, Inches(12.2), Inches(2.2))
+        _add_chart(slide, spec["chart"], Inches(0.34), top, Inches(12.6), Inches(2.2))
         top += Inches(2.2)
     if spec.get("bullets"):
-        _bullets(slide, Inches(0.85), top, Inches(11.6), Inches(2.2),
-                 spec["bullets"][:5], color=ink if not dark else CREAM, size=16)
+        _bullets(slide, Inches(0.5), top, Inches(12.0), Inches(2.2),
+                 spec["bullets"][:5], color=ink if not dark else WHITE, size=16)
     if spec.get("callout"):
-        _callout(slide, Inches(0.7), Inches(6.45), Inches(12.0), Inches(0.7), spec["callout"], dark)
+        _callout(slide, Inches(0.34), Inches(6.25), Inches(12.4), Inches(0.5), spec["callout"], dark)
+
+
+def _dark_chips(slide, cards: list[dict], l, t, w, h) -> None:
+    n = max(len(cards), 1)
+    cw = w / n
+    for i, card in enumerate(cards):
+        x = l + cw * i + Inches(0.06)
+        _rail_box(slide, x, t, cw - Inches(0.12), h, _accent(i, card), DARK_CARD)
+        _textbox(slide, x + Inches(0.18), t + Inches(0.12), cw - Inches(0.36), Inches(0.22),
+                 card.get("meta") or "", size=10, color=BLUE)
+        _textbox(slide, x + Inches(0.18), t + Inches(0.36), cw - Inches(0.36), Inches(0.4),
+                 card.get("title") or "", size=14, bold=True, color=WHITE, font=DISPLAY)
+        _textbox(slide, x + Inches(0.18), t + Inches(0.8), cw - Inches(0.36), h - Inches(0.92),
+                 card.get("body") or "", size=11, color=RGBColor(0xD9, 0xD9, 0xD9))
+
+
+def _dark_quad(slide, cards: list[dict], l, t, w, h) -> None:
+    n = len(cards)
+    cols = 2 if n != 3 else 3
+    rows = 2 if n > 2 else 1
+    cw = w / cols
+    ch = h / max(rows, 1)
+    for i, card in enumerate(cards[: cols * rows]):
+        r, c = divmod(i, cols)
+        x = l + cw * c + Inches(0.06)
+        y = t + ch * r + Inches(0.06)
+        _rail_box(slide, x, y, cw - Inches(0.12), ch - Inches(0.12), _accent(i, card), DARK_CARD)
+        _textbox(slide, x + Inches(0.18), y + Inches(0.12), cw - Inches(0.36), Inches(0.38),
+                 card.get("title") or "", size=16, bold=True, color=WHITE, font=DISPLAY)
+        _textbox(slide, x + Inches(0.18), y + Inches(0.52), cw - Inches(0.36), ch - Inches(0.72),
+                 card.get("body") or "", size=11, color=RGBColor(0xD9, 0xD9, 0xD9))
 
 
 def _cards(slide, cards: list[dict], l, t, w, h) -> None:
@@ -274,23 +384,17 @@ def _cards(slide, cards: list[dict], l, t, w, h) -> None:
         return
     n = len(cards)
     cw = w / max(n, 1)
-    positions = [
-        (l + cw * i + Inches(0.06), t, cw - Inches(0.12), h)
-        for i in range(n)
-    ]
-    for card, (x, y, cw, ch) in zip(cards, positions):
-        shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, cw, ch)
-        shape.adjustments[0] = 0.08
-        shape.fill.solid()
-        shape.fill.fore_color.rgb = PAPER
-        shape.line.color.rgb = RGBColor(0xE0, 0xD8, 0xC8)
-        _textbox(slide, x + Inches(0.16), y + Inches(0.12), cw - Inches(0.28), Inches(0.4),
-                 card.get("title") or "", size=15, bold=True, color=INK)
-        _textbox(slide, x + Inches(0.16), y + Inches(0.52), cw - Inches(0.28), ch - Inches(0.95),
-                 card.get("body") or "", size=12, color=MUTED)
+    for i, card in enumerate(cards):
+        x = l + cw * i + Inches(0.06)
+        ch = h
+        _rail_box(slide, x, t, cw - Inches(0.12), ch, _accent(i, card), PAPER)
+        _textbox(slide, x + Inches(0.18), t + Inches(0.12), cw - Inches(0.36), Inches(0.4),
+                 card.get("title") or "", size=15, bold=True, color=INK, font=DISPLAY)
+        _textbox(slide, x + Inches(0.18), t + Inches(0.55), cw - Inches(0.36), ch - Inches(1.0),
+                 card.get("body") or "", size=12, color=BODY)
         if card.get("meta"):
-            _textbox(slide, x + Inches(0.16), y + ch - Inches(0.4), cw - Inches(0.28), Inches(0.28),
-                     card.get("meta") or "", size=10, color=COPPER)
+            _textbox(slide, x + Inches(0.18), t + ch - Inches(0.38), cw - Inches(0.36), Inches(0.28),
+                     card.get("meta") or "", size=10, color=ORANGE)
 
 
 def _callout(slide, l, t, w, h, callout: dict, dark: bool) -> None:
@@ -504,14 +608,14 @@ def _people(slide, rows: list[dict], l, t, w, h) -> None:
     card.adjustments[0] = 0.08
     _solid(card, NAVY)
     _textbox(slide, l + panel_w * 2 + Inches(0.4), t + Inches(0.15), nnt_w - Inches(0.3), Inches(0.28),
-             "NNT", size=11, color=COPPER)
+             "NNT", size=11, color=ORANGE)
     _textbox(slide, l + panel_w * 2 + Inches(0.4), t + Inches(0.45), nnt_w - Inches(0.3), Inches(1.1),
-             str(row.get("nnt") or "—"), size=44, bold=True, color=CREAM)
+             str(row.get("nnt") or "—"), size=44, bold=True, color=WHITE, font=DISPLAY)
     _textbox(slide, l + panel_w * 2 + Inches(0.4), t + Inches(1.6), nnt_w - Inches(0.3), Inches(1.6),
              f"Treat {row.get('nnt') or '—'} to prevent 1 event"
              + (f" over {row.get('horizon')}." if row.get("horizon") else ".")
              + f" PMID {row.get('pmid') or '—'}.",
-             size=13, color=CREAM)
+             size=13, color=WHITE)
 
 
 def _people_grid(slide, l, t, w, h, events: int, saved: int, label: str, accent: RGBColor) -> None:
@@ -652,34 +756,26 @@ def _flow(slide, rows: list[dict], l, t, w, h) -> None:
 
 def _house(slide, spec: dict, l, t, w, h) -> None:
     rows = spec.get("data") or []
-    roof = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, l, t, w, Inches(1.15))
-    roof.adjustments[0] = 0.06
-    _solid(roof, NAVY)
-    _textbox(slide, l + Inches(0.3), t + Inches(0.12), w - Inches(0.6), Inches(0.25),
-             "THEME", size=11, color=COPPER, align=PP_ALIGN.CENTER)
-    _textbox(slide, l + Inches(0.3), t + Inches(0.4), w - Inches(0.6), Inches(0.65),
-             spec.get("title") or "", size=16, bold=True, color=CREAM, align=PP_ALIGN.CENTER)
+    _textbox(slide, l, t, w, Inches(0.22), "THEME", size=10, bold=True, color=ORANGE)
+    _textbox(slide, l, t + Inches(0.22), w, Inches(0.45),
+             spec.get("title") or "", size=16, bold=True, color=INK, font=DISPLAY)
     if not rows:
         return
     n = len(rows)
     cw = w / n
-    y = t + Inches(1.28)
-    ch = h - Inches(1.35)
+    y = t + Inches(0.78)
+    ch = h - Inches(0.85)
     for i, row in enumerate(rows):
         x = l + cw * i + Inches(0.06)
-        box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, cw - Inches(0.12), ch)
-        box.adjustments[0] = 0.06
-        box.fill.solid()
-        box.fill.fore_color.rgb = PAPER
-        box.line.color.rgb = RGBColor(0xE0, 0xD8, 0xC8)
-        _textbox(slide, x + Inches(0.12), y + Inches(0.1), cw - Inches(0.3), Inches(0.25),
-                 str(row.get("ref") or "Pillar"), size=11, color=COPPER)
-        _textbox(slide, x + Inches(0.12), y + Inches(0.38), cw - Inches(0.3), Inches(0.4),
-                 str(row.get("name") or ""), size=16, bold=True, color=INK)
-        _textbox(slide, x + Inches(0.12), y + Inches(0.85), cw - Inches(0.3), ch - Inches(1.35),
-                 str(row.get("line") or ""), size=12, color=MUTED)
-        _textbox(slide, x + Inches(0.12), y + ch - Inches(0.45), cw - Inches(0.3), Inches(0.35),
-                 str(row.get("proof") or ""), size=11, color=TEAL)
+        _rail_box(slide, x, y, cw - Inches(0.12), ch, _accent(i), PAPER)
+        _textbox(slide, x + Inches(0.16), y + Inches(0.1), cw - Inches(0.34), Inches(0.22),
+                 str(row.get("ref") or "Pillar"), size=10, bold=True, color=ORANGE)
+        _textbox(slide, x + Inches(0.16), y + Inches(0.34), cw - Inches(0.34), Inches(0.4),
+                 str(row.get("name") or ""), size=15, bold=True, color=INK, font=DISPLAY)
+        _textbox(slide, x + Inches(0.16), y + Inches(0.78), cw - Inches(0.34), ch - Inches(1.2),
+                 str(row.get("line") or ""), size=12, color=BODY)
+        _textbox(slide, x + Inches(0.16), y + ch - Inches(0.38), cw - Inches(0.34), Inches(0.32),
+                 str(row.get("proof") or ""), size=11, color=MUTED)
 
 
 def _appendix_bibliography(prs, blank, pack: dict) -> None:
