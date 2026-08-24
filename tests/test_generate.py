@@ -56,3 +56,18 @@ def test_example_brief_is_presentation_ready():
         assert "…" not in headline
         if slide["id"] not in {"title", "references"} and not str(slide["id"]).startswith("references-"):
             assert headline[-1] in ".?!"
+        for text in [slide.get("narrative"), slide.get("subtitle"), *(slide.get("bullets") or [])]:
+            if not text:
+                continue
+            assert "…" not in text
+        for card in slide.get("cards") or []:
+            body = card.get("body") or ""
+            if body:
+                assert "…" not in body
+                assert body.rstrip()[-1] in ".?!"
+        chart = slide.get("chart") or {}
+        for row in chart.get("data") or []:
+            for key in ("detail", "line", "science", "means", "barrier", "execute", "measure", "claim"):
+                value = row.get(key) if isinstance(row, dict) else None
+                if value and str(value).strip() not in {"—", "-"}:
+                    assert "…" not in str(value)

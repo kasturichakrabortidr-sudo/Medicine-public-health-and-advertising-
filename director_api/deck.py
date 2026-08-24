@@ -147,11 +147,11 @@ def spine_rows(records: list[dict], interventions: list[dict]) -> list[dict]:
             iv = next((i for i in interventions if i["id"] == want), None) if want else None
         rows.append({
             "name": f"{mark(r)} {r.get('short') or r.get('trial') or ''}",
-            "science": (r.get("claim_permitted") or "")[:140],
-            "means": means,
-            "barrier": r.get("spine_barrier") or "",
-            "execute": r.get("spine_execute") or (iv["name"] if iv else ""),
-            "measure": r.get("spine_measure") or (iv["kill"] if iv else ""),
+            "science": _first_sentence(r.get("claim_permitted") or ""),
+            "means": _complete(means),
+            "barrier": _complete(r.get("spine_barrier") or ""),
+            "execute": _complete(r.get("spine_execute") or (iv["name"] if iv else "")),
+            "measure": _complete(r.get("spine_measure") or (iv["kill"] if iv else "")),
             "pmid": r.get("pmid") or "",
             "ref": r.get("ref") or "",
             "move": iv["name"] if iv else (r.get("spine_execute") or ""),
@@ -257,9 +257,9 @@ def _problem_slide(doctrine: dict, p01: dict, goal: str, brief: ExtractedBrief) 
         "narrative": "",
         "layout": "split",
         "bullets": [
-            _complete(f"What the brief asked us to grow: {goal.strip()}"),
-            _complete(f"What doctors actually do: {delay}"),
-            _complete(f"What money does next: {cost}"),
+            _complete(f"What the brief asked us to grow: {_first_sentence(goal)}"),
+            _complete(f"What doctors actually do: {_first_sentence(delay)}"),
+            _complete(f"What money does next: {_first_sentence(cost)}"),
         ],
         "chart": {
             "kind": "flow",
@@ -287,9 +287,9 @@ def _bet_slide(doctrine: dict, lead: dict, primary: dict) -> dict:
             "kind": "flow",
             "title": "What we are actually fighting",
             "data": [
-                {"name": "Enemy", "detail": doctrine.get("enemy") or "Unnamed delay"},
-                {"name": "The bet", "detail": doctrine.get("bet") or ""},
-                {"name": "Scientific lead", "detail": doctrine.get("scienceAnchor") or "No numbered paper yet — do not lock a lead."},
+                {"name": "Enemy", "detail": _complete(doctrine.get("enemy") or "Unnamed delay")},
+                {"name": "The bet", "detail": _complete(doctrine.get("bet") or "Start at the first eligible encounter")},
+                {"name": "Scientific lead", "detail": _complete(doctrine.get("scienceAnchor") or "No numbered paper yet — do not lock a lead")},
             ],
         },
         "refs": refs,
@@ -321,12 +321,12 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict]) -> dict:
         "cards": [
             {
                 "title": primary.get("short") or "No lead paper",
-                "body": primary.get("citation") or "Retrieve the primary paper before lock.",
+                "body": _complete(primary.get("citation") or "Retrieve the primary paper before lock"),
                 "meta": f"{tag} PMID {primary.get('pmid') or '—'}",
             },
             {
                 "title": "What the paper showed",
-                "body": claim,
+                "body": _complete(claim),
                 "meta": "Inside local label and code",
             },
             {
@@ -367,10 +367,10 @@ def _meaning_slide(people: list[dict]) -> dict:
         "kicker": "What the science means",
         "title": "In a clinic of 100 patients, this is what the paper actually showed.",
         "subtitle": f"{tag} {first.get('name', '').replace(tag, '').strip()} · PMID {first.get('pmid') or '—'}",
-        "narrative": (
-            f"{first.get('claim')} {tag} "
+        "narrative": _complete(
+            f"{first.get('claim') or ''} {tag} "
             f"{first.get('control')} events on the comparator versus {first.get('treat')} on the intervention"
-            + (f" — treat {nnt} to prevent one event." if nnt else ".")
+            + (f" — treat {nnt} to prevent one event" if nnt else "")
         ),
         "layout": "infographic",
         "chart": {
@@ -393,7 +393,7 @@ def _compare_slide(compare: list[dict]) -> dict:
         "kicker": "What the timing data means",
         "title": "The comparator is the delayed habit, not another molecule.",
         "subtitle": f"{tag} {first.get('name', '').replace(tag, '').strip()} · PMID {first.get('pmid') or '—'}",
-        "narrative": f"{first.get('claim') or ''} {tag}",
+        "narrative": _complete(f"{first.get('claim') or ''} {tag}"),
         "layout": "infographic",
         "chart": {
             "kind": "compare",
@@ -428,7 +428,7 @@ def _register_slide(records: list[dict], gaps: list[dict]) -> dict:
                 [
                     mark(r),
                     r.get("short") or r.get("trial") or "",
-                    _finding(r),
+                    _complete(_finding(r)),
                     r.get("grade") or "",
                 ]
                 for r in records[:8]
@@ -441,7 +441,7 @@ def _register_slide(records: list[dict], gaps: list[dict]) -> dict:
 def _belief_slide(p04: dict, insights: list[str]) -> dict:
     discord = p04.get("discord") or {
         "headers": ["Belief that delays the start", "What the papers show", "Implication"],
-        "rows": [[_clip(i, 110), "Map after the register is numbered", "—"] for i in insights[:4]],
+        "rows": [[_complete(i), "Map after the register is numbered.", "Do not lock a line until the paper is numbered."] for i in insights[:4]],
     }
     headers = discord.get("headers") or []
     rows = discord.get("rows") or []
@@ -479,9 +479,9 @@ def _house_slide(p07: dict, doctrine: dict, records: list[dict]) -> dict:
     data = [
         {
             "name": row[0] if row else "Pillar",
-            "line": row[1] if len(row) > 1 else "",
+            "line": _complete(row[1] if len(row) > 1 else ""),
             "ref": row[2] if len(row) > 2 else "",
-            "proof": row[3] if len(row) > 3 else "",
+            "proof": _first_sentence(row[3] if len(row) > 3 else ""),
         }
         for row in rows[:3]
     ]
@@ -492,7 +492,7 @@ def _house_slide(p07: dict, doctrine: dict, records: list[dict]) -> dict:
         "section": "Message",
         "kicker": "Message house",
         "title": "One theme. Three pillars. A pillar without a number does not ship.",
-        "narrative": p07.get("theme") or doctrine.get("bet") or "",
+        "narrative": _complete(p07.get("theme") or doctrine.get("bet") or "Start at the first eligible visit"),
         "layout": "infographic",
         "chart": {
             "kind": "house",
@@ -624,7 +624,7 @@ def _measure_slide(goal: str, p10: dict, interventions: list[dict]) -> dict:
     for row in rows[:4]:
         cards.append({
             "title": row[1] if len(row) > 1 else "Metric",
-            "body": row[2] if len(row) > 2 else "",
+            "body": _complete(row[2] if len(row) > 2 else ""),
             "meta": row[4] if len(row) > 4 else (row[0] if row else ""),
         })
     if not cards:

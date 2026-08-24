@@ -355,9 +355,10 @@ textarea {
 
 .presenter {
   flex: 1;
+  min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: 148px 1fr;
+  grid-template-columns: 148px minmax(0, 1fr);
   background: #ece6db;
 }
 
@@ -392,31 +393,50 @@ textarea {
   min-width: 0;
   min-height: 0;
   padding: 8px 18px 14px 8px;
+  overflow: hidden;
 }
 
 .slide-stage {
   flex: 1;
   min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   background: transparent;
   padding: 0;
+  container-type: size;
+}
+
+.slide-fit {
+  display: flex;
+  max-width: 100%;
+  max-height: 100%;
+}
+.slide-fit .slide {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  aspect-ratio: auto;
 }
 
 .slide {
-  width: min(100%, calc((100dvh - 168px) * 16 / 9));
+  width: min(100cqw, calc(100cqh * 16 / 9));
+  height: min(100cqh, calc(100cqw * 9 / 16));
+  max-width: 100%;
   max-height: 100%;
   aspect-ratio: 16 / 9;
   background: #fffdf8;
   color: var(--ink);
   border-radius: 4px;
-  padding: 3.4% 4.6% 5.8%;
+  padding: 3.2% 4.4% 5.4%;
   overflow: hidden;
   position: relative;
   box-shadow: 0 28px 80px rgba(11, 18, 32, 0.16);
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .slide.title,
@@ -552,11 +572,11 @@ textarea {
 
 .table-wrap {
   display: grid;
-  grid-template-columns: 1.3fr 0.9fr;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
   gap: 16px;
   flex: 1;
   min-height: 0;
-  align-items: start;
+  align-items: stretch;
 }
 
 .slide-table-body:not(.with-chart) .table-wrap {
@@ -664,7 +684,8 @@ textarea {
   border: 1px solid var(--line);
   border-radius: 0 0 14px 14px;
   padding: 16px;
-  min-height: 180px;
+  min-height: 0;
+  height: 100%;
 }
 
 .house-pillar h4 {
@@ -701,15 +722,66 @@ textarea {
 .slide-visual {
   flex: 1;
   min-height: 0;
-  margin-top: 1em;
+  min-width: 0;
+  margin-top: 0.6em;
   display: flex;
+  width: 100%;
 }
 
 .slide-visual > div,
-.slide-visual .infographic {
+.slide-visual .infographic,
+.slide-visual .forest-wrap,
+.slide-visual .chart-fill {
   flex: 1;
   width: 100%;
   height: 100%;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chart-fill {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.chart-fill-plot {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+}
+.scatter-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(148px, 0.7fr);
+  gap: 16px;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+}
+.scatter-legend {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--ink);
+  overflow: auto;
+}
+.scatter-legend li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.scatter-legend strong {
+  font-family: var(--serif);
+  font-size: 13px;
 }
 
 .forest-wrap {
@@ -720,10 +792,13 @@ textarea {
   min-height: 0;
 }
 
-.forest-wrap svg {
+.forest-wrap svg,
+.forest-svg {
   flex: 1;
   width: 100%;
-  min-height: 260px;
+  height: 100%;
+  min-height: 0;
+  display: block;
 }
 
 .slide-body {
@@ -764,10 +839,36 @@ textarea {
   margin-top: 4px;
 }
 
+.infographic {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .infographic.flow {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.infographic.house {
+  height: 100%;
+}
+
+.infographic.house .house-pillars {
+  flex: 1;
+  min-height: 0;
+}
+
+.infographic.spine {
+  height: 100%;
+}
+
+.infographic.spine .spine-row {
+  flex: 1;
+  min-height: 0;
 }
 
 .people-pair {
@@ -1196,8 +1297,8 @@ textarea {
   color: rgba(244, 239, 230, 0.8);
 }
 
-.presenter:fullscreen .slide {
-  width: min(100%, calc((100dvh - 80px) * 16 / 9));
+.presenter:fullscreen .slide-stage {
+  min-height: 0;
 }
 
 @media print {

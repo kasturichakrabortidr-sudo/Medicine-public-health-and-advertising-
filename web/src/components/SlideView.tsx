@@ -44,11 +44,11 @@ export function SlideView({ slide }: { slide: Slide }) {
   );
 }
 
-function Figure({ slide, height }: { slide: Slide; height: number }) {
+function Figure({ slide }: { slide: Slide }) {
   if (!slide.chart) return null;
   return (
     <div className="slide-visual">
-      <StrategyChart spec={slide.chart} height={height} />
+      <StrategyChart spec={slide.chart} />
     </div>
   );
 }
@@ -56,7 +56,7 @@ function Figure({ slide, height }: { slide: Slide; height: number }) {
 function TitleBody({ slide }: { slide: Slide }) {
   return (
     <div className="slide-title-body">
-      <Figure slide={slide} height={220} />
+      <Figure slide={slide} />
     </div>
   );
 }
@@ -69,7 +69,7 @@ function CloseBody({ slide }: { slide: Slide }) {
           <Cited text={slide.narrative} />
         </p>
       ) : null}
-      <Figure slide={slide} height={280} />
+      <Figure slide={slide} />
     </div>
   );
 }
@@ -82,7 +82,7 @@ function FigureBody({ slide }: { slide: Slide }) {
           <Cited text={slide.narrative} />
         </p>
       ) : null}
-      <Figure slide={slide} height={420} />
+      <Figure slide={slide} />
     </div>
   );
 }
@@ -101,7 +101,11 @@ function SplitBody({ slide }: { slide: Slide }) {
         <Callout callout={slide.callout} />
       </div>
       <div className="slide-split-visual">
-        {slide.chart ? <StrategyChart spec={slide.chart} height={340} /> : null}
+        {slide.chart ? (
+          <div className="slide-visual">
+            <StrategyChart spec={slide.chart} />
+          </div>
+        ) : null}
         {slide.cards ? <MiniCards cards={slide.cards} /> : null}
       </div>
     </div>
@@ -118,7 +122,11 @@ function TableBody({ slide }: { slide: Slide }) {
       ) : null}
       <div className="table-wrap">
         {slide.table ? <Table table={slide.table} /> : null}
-        {slide.chart ? <StrategyChart spec={slide.chart} height={240} /> : null}
+        {slide.chart ? (
+          <div className="slide-visual">
+            <StrategyChart spec={slide.chart} />
+          </div>
+        ) : null}
       </div>
     </div>
   );

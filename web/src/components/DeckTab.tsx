@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { downloadPptx } from "../api";
 import type { StrategyPack } from "../types";
 import { SlideView } from "./SlideView";
@@ -7,6 +7,8 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
   const [i, setI] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
+  const [fit, setFit] = useState({ w: 0, h: 0 });
+  const stageRef = useRef<HTMLDivElement>(null);
   const slides = pack.slides;
   const slide = slides[i];
   const sections = useMemo(() => {
@@ -22,6 +24,22 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
   const go = (next: number) => {
     setI(Math.max(0, Math.min(slides.length - 1, next)));
   };
+
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const apply = () => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      if (w < 8 || h < 8) return;
+      const width = Math.min(w, (h * 16) / 9);
+      setFit({ w: Math.floor(width), h: Math.floor((width * 9) / 16) });
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -102,8 +120,13 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
         </nav>
 
         <div className="stage-wrap">
-          <div className="slide-stage">
-            <SlideView slide={slide} />
+          <div className="slide-stage" ref={stageRef}>
+            <div
+              className="slide-fit"
+              style={fit.w ? { width: fit.w, height: fit.h } : undefined}
+            >
+              <SlideView slide={slide} />
+            </div>
           </div>
           <div className="deck-nav">
             <button className="btn" type="button" onClick={() => go(i - 1)} disabled={i === 0}>

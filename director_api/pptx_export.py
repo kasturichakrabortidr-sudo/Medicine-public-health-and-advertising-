@@ -357,11 +357,18 @@ def _add_chart(slide, spec: dict, l, t, w, h) -> None:
         return
 
     if kind == "scatter":
+        legend_w = min(int(w * 0.34), int(Inches(3.4)))
+        chart_w = w - legend_w - Inches(0.12)
         cd = XyChartData()
         series = cd.add_series("Moves")
         for r in data:
             series.add_data_point(_num(r.get("x")), _num(r.get("y")))
-        slide.shapes.add_chart(XL_CHART_TYPE.XY_SCATTER, l, t, w, h, cd)
+        slide.shapes.add_chart(XL_CHART_TYPE.XY_SCATTER, l, t, chart_w, h, cd)
+        lines = [
+            f"{r.get('name')}: {spec.get('xLabel') or 'Feasibility'} {r.get('x')}, {spec.get('yLabel') or 'Impact'} {r.get('y')}."
+            for r in data
+        ]
+        _bullets(slide, l + chart_w + Inches(0.12), t, legend_w, h, lines, size=12)
         return
 
     if kind == "diverging":
@@ -396,8 +403,8 @@ def _forest(slide, rows: list[dict], l, t, w, h) -> None:
         nums.extend([_num(r.get("low")), _num(r.get("high")), _num(r.get("hr"))])
     lo, hi = min(0.55, min(nums) - 0.04), max(1.15, max(nums) + 0.04)
     plot_l = l + Inches(2.3)
-    plot_w = w - Inches(2.5)
-    row_h = int(h / max(len(rows), 1))
+    plot_w = w - Inches(3.9)
+    row_h = int((h - Inches(0.28)) / max(len(rows), 1))
 
     def x_at(v: float) -> int:
         return int(plot_l + ((v - lo) / (hi - lo)) * plot_w)
@@ -429,6 +436,18 @@ def _forest(slide, rows: list[dict], l, t, w, h) -> None:
         diamond.fill.solid()
         diamond.fill.fore_color.rgb = COPPER
         diamond.line.fill.background()
+        hr, low, high = _num(r.get("hr")), _num(r.get("low")), _num(r.get("high"))
+        _textbox(
+            slide,
+            l + w - Inches(1.55),
+            y - Inches(0.14),
+            Inches(1.5),
+            Inches(0.4),
+            f"{hr:.2f} ({low:.2f}–{high:.2f})",
+            size=9,
+            color=MUTED,
+            align=PP_ALIGN.RIGHT,
+        )
 
 
 def _box(slide, rows: list[dict], l, t, w, h) -> None:

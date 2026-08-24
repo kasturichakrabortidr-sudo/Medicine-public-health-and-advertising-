@@ -1616,7 +1616,7 @@
         "data": [
           {
             "name": "Enemy",
-            "detail": "The habit of waiting until the patient is 'stable' in clinic"
+            "detail": "The habit of waiting until the patient is 'stable' in clinic."
           },
           {
             "name": "The bet",
@@ -1624,7 +1624,7 @@
           },
           {
             "name": "Scientific lead",
-            "detail": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
+            "detail": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851."
           }
         ]
       },
@@ -1776,7 +1776,7 @@
       "kicker": "What the timing data means",
       "title": "The comparator is the delayed habit, not another molecule.",
       "subtitle": "[2] PIONEER-HF 2019 · PMID 30415601",
-      "narrative": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor. [2]",
+      "narrative": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor. [2].",
       "layout": "infographic",
       "chart": {
         "kind": "compare",
@@ -1821,43 +1821,43 @@
           [
             "[1]",
             "PARADIGM-HF 2014",
-            "26.5 vs 21.8 per 100; NNT 21",
+            "26.5 vs 21.8 per 100; NNT 21.",
             "A"
           ],
           [
             "[2]",
             "PIONEER-HF 2019",
-            "ratio 0.71 (0.63–0.81)",
+            "ratio 0.71 (0.63–0.81).",
             "A"
           ],
           [
             "[3]",
             "TRANSITION 2019",
-            "risk difference 0.95 (0.88–1.03)",
+            "risk difference 0.95 (0.88–1.03).",
             "B"
           ],
           [
             "[4]",
             "Jhund 2015 age",
-            "HR 0.81 (0.74–0.89)",
+            "HR 0.81 (0.74–0.89).",
             "B"
           ],
           [
             "[5]",
             "ESC 2021 Class I",
-            "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand s",
+            "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand s.",
             "A"
           ],
           [
             "[6]",
             "AHA/ACC/HFSA 2022",
-            "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatr",
+            "US guideline places ARNI in foundational four-pillar therapy, not as a late switch after 'stabilisation theatr.",
             "A"
           ],
           [
             "[7]",
             "Trivandrum HFR 2015",
-            "Indian HF presents younger and with incomplete GDMT — local epidemiology supports a first-touch, not a Western",
+            "Indian HF presents younger and with incomplete GDMT — local epidemiology supports a first-touch, not a Western.",
             "B"
           ]
         ]
@@ -1933,21 +1933,21 @@
         "data": [
           {
             "name": "Start now",
-            "line": "First eligible encounter is a guideline encounter, not a later clinic. [2]",
+            "line": "First eligible encounter is a guideline encounter, not a later clinic. [2].",
             "ref": "[2]",
             "proof": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor."
           },
           {
             "name": "The outcome is already earned",
-            "line": "We are not arguing efficacy from scratch. [1]",
+            "line": "We are not arguing efficacy from scratch. [1].",
             "ref": "[1]",
             "proof": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
           },
           {
             "name": "Cover exists",
-            "line": "Class I / four-pillar language is permission, not a poster after the wait. [5]",
+            "line": "Class I / four-pillar language is permission, not a poster after the wait. [5].",
             "ref": "[5]",
-            "proof": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan."
+            "proof": "ESC gives Class I cover for ARNI in HFrEF."
           }
         ]
       },
@@ -2221,7 +2221,7 @@
         },
         {
           "title": "Unaided prevalence of the named myth",
-          "body": "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
+          "body": "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is.",
           "meta": "No drop, no second burst"
         }
       ],
