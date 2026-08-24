@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+output
+node_modules
+web/node_modules
+web/dist
+.env
+api_key.txt
+*.egg-info
+.cursor
