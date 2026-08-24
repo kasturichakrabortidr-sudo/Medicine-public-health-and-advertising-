@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { downloadPptx } from "../api";
 import type { StrategyPack } from "../types";
 import { SlideView } from "./SlideView";
@@ -7,11 +7,49 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
   const [i, setI] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
-  const slide = pack.slides[i];
+  const slides = pack.slides;
+  const slide = slides[i];
+  const sections = useMemo(() => {
+    const seen: { section: string; index: number }[] = [];
+    slides.forEach((s, idx) => {
+      if (!seen.length || seen[seen.length - 1].section !== s.section) {
+        seen.push({ section: s.section, index: idx });
+      }
+    });
+    return seen;
+  }, [slides]);
+
+  const go = (next: number) => {
+    setI(Math.max(0, Math.min(slides.length - 1, next)));
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") {
+        e.preventDefault();
+        go(i + 1);
+      } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        go(i - 1);
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        go(0);
+      } else if (e.key === "End") {
+        e.preventDefault();
+        go(slides.length - 1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [i, slides.length]);
+
   const present = () => {
-    const el = document.querySelector(".slide-stage");
+    const el = document.querySelector(".presenter");
     if (el && el.requestFullscreen) el.requestFullscreen();
   };
+
   const exportDeck = async () => {
     setExportError("");
     setExporting(true);
@@ -24,14 +62,15 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
     }
   };
 
+  if (!slide) return null;
+
   return (
-    <div>
-      <div className="topbar">
+    <div className="deck-shell">
+      <div className="deck-chrome">
         <div>
-          <h1>{pack.meta.doctrine}</h1>
+          <h1>{pack.meta.brand}</h1>
           <p>
-            {pack.meta.brand} · {pack.meta.therapyArea} · {pack.meta.market} ·{" "}
-            {pack.slides.length} slides
+            {pack.meta.therapyArea} · {pack.meta.market} · {slides.length} slides
           </p>
         </div>
         <div className="actions">
@@ -47,43 +86,49 @@ export function DeckTab({ pack }: { pack: StrategyPack }) {
         </div>
       </div>
       {exportError ? <p className="error">{exportError}</p> : null}
-      <p className="small muted" style={{ marginTop: -12, marginBottom: 12 }}>
-        The PPTX is a real PowerPoint file. Superscripts are Vancouver numbers. The last
-        slides are the reference list. Forest plots and people-grids are shapes you can edit.
-      </p>
-      <div className="slide-stage">
-        <SlideView slide={slide} />
-        <div className="deck-nav">
-          <button
-            className="btn"
-            type="button"
-            onClick={() => setI((n) => Math.max(0, n - 1))}
-            disabled={i === 0}
-          >
-            Prev
-          </button>
-          <div className="thumbs">
-            {pack.slides.map((s, idx) => (
-              <button
-                key={s.id}
-                type="button"
-                className={idx === i ? "on" : ""}
-                onClick={() => setI(idx)}
-                title={s.title}
-              >
-                {idx + 1}
-              </button>
-            ))}
+
+      <div className="presenter">
+        <nav className="section-rail" aria-label="Deck sections">
+          {sections.map((s) => (
+            <button
+              key={`${s.section}-${s.index}`}
+              type="button"
+              className={slide.section === s.section ? "on" : ""}
+              onClick={() => go(s.index)}
+            >
+              {s.section}
+            </button>
+          ))}
+        </nav>
+
+        <div className="stage-wrap">
+          <div className="slide-stage">
+            <SlideView slide={slide} />
           </div>
-          <button
-            className="btn"
-            type="button"
-            onClick={() => setI((n) => Math.min(pack.slides.length - 1, n + 1))}
-            disabled={i === pack.slides.length - 1}
-          >
-            Next
-          </button>
+          <div className="deck-nav">
+            <button className="btn" type="button" onClick={() => go(i - 1)} disabled={i === 0}>
+              Previous
+            </button>
+            <div className="slide-pos">
+              {i + 1} / {slides.length}
+              <span>{slide.kicker}</span>
+            </div>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => go(i + 1)}
+              disabled={i === slides.length - 1}
+            >
+              Next
+            </button>
+          </div>
         </div>
+      </div>
+
+      <div className="print-deck" aria-hidden="true">
+        {slides.map((s) => (
+          <SlideView key={s.id} slide={s} />
+        ))}
       </div>
     </div>
   );

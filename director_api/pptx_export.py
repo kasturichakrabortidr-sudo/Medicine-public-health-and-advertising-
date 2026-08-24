@@ -165,75 +165,113 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
     ink = CREAM if dark else INK
     muted = RGBColor(0xF0, 0xC4, 0x8A) if dark else COPPER
     body = RGBColor(0xE8, 0xE2, 0xD6) if dark else MUTED
+    layout = spec.get("layout")
 
-    _textbox(slide, Inches(0.55), Inches(0.28), Inches(12.2), Inches(0.32),
-             (spec.get("kicker") or "").upper(), size=11, color=muted, font="Calibri")
-    _textbox(slide, Inches(0.55), Inches(0.58), Inches(12.2), Inches(1.15),
-             spec.get("title") or "", size=28 if dark else 24, bold=True, color=ink, font="Calibri")
-
-    if spec.get("subtitle"):
-        _textbox(slide, Inches(0.55), Inches(1.7), Inches(12.2), Inches(0.4),
-                 spec["subtitle"], size=16, color=body)
+    _textbox(slide, Inches(0.7), Inches(0.32), Inches(12.0), Inches(0.32),
+             (spec.get("kicker") or "").upper(), size=12, color=muted, font="Calibri")
 
     if spec.get("refs"):
         from .cite import format_marks
         nums = [int(n) for n in spec["refs"] if n not in (None, "")]
         if nums:
-            _textbox(slide, Inches(0.55), Inches(7.15), Inches(12.2), Inches(0.22),
+            _textbox(slide, Inches(0.7), Inches(7.12), Inches(12.0), Inches(0.22),
                      f"References {format_marks(nums)}  ·  Vancouver list at end of deck",
                      size=10, color=MUTED)
 
-    layout = spec.get("layout")
-    if layout == "infographic":
-        top = Inches(2.05) if spec.get("subtitle") else Inches(1.75)
-        _textbox(slide, Inches(0.55), top, Inches(12.2), Inches(0.85),
-                 spec.get("narrative") or "", size=13, color=body)
-        if spec.get("chart"):
-            _add_chart(slide, spec["chart"], Inches(0.55), top + Inches(0.95), Inches(12.2), Inches(3.7))
-        if spec.get("callout"):
-            _callout(slide, Inches(0.55), Inches(6.6), Inches(12.2), Inches(0.65), spec["callout"], False)
+    if layout == "title":
+        _textbox(slide, Inches(0.7), Inches(2.35), Inches(12.0), Inches(2.4),
+                 spec.get("title") or "", size=60, bold=True, color=ink, font="Calibri")
+        if spec.get("subtitle"):
+            _textbox(slide, Inches(0.7), Inches(4.9), Inches(11.2), Inches(1.6),
+                     spec["subtitle"], size=22, color=body)
         return
 
-    if layout == "references":
-        top = Inches(1.85)
-        _textbox(slide, Inches(0.55), top, Inches(12.2), Inches(0.55),
-                 spec.get("narrative") or "", size=13, color=body)
+    title_size = 28 if layout in {"statement", "close"} else 24
+    title_h = Inches(1.7) if layout in {"statement", "close"} else Inches(1.15)
+    _textbox(slide, Inches(0.7), Inches(0.62), Inches(12.0), title_h,
+             spec.get("title") or "", size=title_size, bold=True, color=ink, font="Calibri")
+
+    top = Inches(2.4) if layout in {"statement", "close"} else Inches(1.85)
+    if spec.get("subtitle"):
+        _textbox(slide, Inches(0.7), top - Inches(0.08), Inches(12.0), Inches(0.4),
+                 spec["subtitle"], size=15, color=body)
+        top += Inches(0.38)
+
+    if layout == "infographic":
+        if spec.get("chart"):
+            _add_chart(slide, spec["chart"], Inches(0.55), top, Inches(12.2), Inches(7.05) - top)
+        return
+
+    if layout in {"references", "table"}:
+        if spec.get("narrative"):
+            _textbox(slide, Inches(0.7), top, Inches(12.0), Inches(0.45),
+                     spec.get("narrative") or "", size=13, color=body)
+            top += Inches(0.5)
         table = spec.get("table") or {}
-        _table(slide, Inches(0.55), Inches(2.5), Inches(12.2), Inches(4.5),
+        _table(slide, Inches(0.55), top, Inches(12.2), Inches(6.95) - top,
                table.get("headers") or ["No.", "Citation"], table.get("rows") or [])
         return
 
-    if layout in {"title", "close", "insight"}:
-        top = Inches(2.25) if spec.get("subtitle") else Inches(1.9)
-        _textbox(slide, Inches(0.55), top, Inches(12.1), Inches(1.6),
-                 spec.get("narrative") or "", size=16, color=body)
-        if spec.get("bullets"):
-            _bullets(slide, Inches(0.7), Inches(4.0), Inches(11.8), Inches(2.4),
-                     spec["bullets"], color=ink if not dark else CREAM, size=16)
-        if spec.get("callout"):
-            _callout(slide, Inches(0.55), Inches(6.55), Inches(12.2), Inches(0.7), spec["callout"], dark)
+    if layout == "cards":
+        if spec.get("narrative"):
+            _textbox(slide, Inches(0.7), top, Inches(12.0), Inches(0.45),
+                     spec.get("narrative") or "", size=14, color=body)
+            top += Inches(0.5)
+        _cards(slide, spec.get("cards") or [], Inches(0.55), top, Inches(12.2), Inches(6.95) - top)
         return
 
-    # Two-column body slides
-    _textbox(slide, Inches(0.55), Inches(1.85), Inches(5.6), Inches(1.5),
-             spec.get("narrative") or "", size=14, color=body)
+    if spec.get("narrative"):
+        _textbox(slide, Inches(0.7), top, Inches(12.0), Inches(1.35),
+                 spec.get("narrative") or "", size=16, color=body)
+        top += Inches(1.4)
     if spec.get("bullets"):
-        _bullets(slide, Inches(0.55), Inches(3.4), Inches(5.6), Inches(2.4),
-                 spec["bullets"], color=INK, size=14)
+        _bullets(slide, Inches(0.85), top, Inches(11.6), Inches(2.6),
+                 spec["bullets"][:5], color=ink if not dark else CREAM, size=16)
     if spec.get("callout"):
-        _callout(slide, Inches(0.55), Inches(6.55), Inches(5.6), Inches(0.7), spec["callout"], False)
+        _callout(slide, Inches(0.7), Inches(6.45), Inches(12.0), Inches(0.7), spec["callout"], dark)
 
-    right_l, right_t, right_w, right_h = Inches(6.4), Inches(1.85), Inches(6.4), Inches(4.9)
-    if spec.get("chart"):
-        _add_chart(slide, spec["chart"], right_l, right_t, right_w, right_h)
-    elif spec.get("table"):
-        table = spec["table"]
-        _table(slide, right_l, right_t, right_w, right_h, table.get("headers") or [], table.get("rows") or [])
 
-    if spec.get("table") and spec.get("chart"):
-        table = spec["table"]
-        _table(slide, Inches(0.55), Inches(5.6), Inches(5.6), Inches(1.5),
-               table.get("headers") or [], table.get("rows") or [])
+def _cards(slide, cards: list[dict], l, t, w, h) -> None:
+    if not cards:
+        return
+    n = len(cards)
+    if n == 5:
+        # Three across, then two centred.
+        widths = [w / 3.0] * 3 + [(w - Inches(0.24)) / 2.0] * 2
+        row_h = (h - Inches(0.16)) / 2.0
+        positions = []
+        for i in range(3):
+            positions.append((l + widths[0] * i + Inches(0.04), t, widths[0] - Inches(0.08), row_h))
+        second_w = widths[3]
+        start = l + (w - second_w * 2 - Inches(0.12)) / 2
+        positions.append((start, t + row_h + Inches(0.12), second_w, row_h))
+        positions.append((start + second_w + Inches(0.12), t + row_h + Inches(0.12), second_w, row_h))
+    elif n == 4:
+        cw, ch = w / 2.0, h / 2.0
+        positions = [
+            (l + (i % 2) * cw + Inches(0.06), t + (i // 2) * ch + Inches(0.06),
+             cw - Inches(0.12), ch - Inches(0.12))
+            for i in range(4)
+        ]
+    else:
+        cw = w / max(n, 1)
+        positions = [
+            (l + cw * i + Inches(0.06), t, cw - Inches(0.12), h)
+            for i in range(n)
+        ]
+    for card, (x, y, cw, ch) in zip(cards, positions):
+        shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, cw, ch)
+        shape.adjustments[0] = 0.08
+        shape.fill.solid()
+        shape.fill.fore_color.rgb = PAPER
+        shape.line.color.rgb = RGBColor(0xE0, 0xD8, 0xC8)
+        _textbox(slide, x + Inches(0.16), y + Inches(0.12), cw - Inches(0.28), Inches(0.4),
+                 card.get("title") or "", size=15, bold=True, color=INK)
+        _textbox(slide, x + Inches(0.16), y + Inches(0.52), cw - Inches(0.28), ch - Inches(0.95),
+                 card.get("body") or "", size=12, color=MUTED)
+        if card.get("meta"):
+            _textbox(slide, x + Inches(0.16), y + ch - Inches(0.4), cw - Inches(0.28), Inches(0.28),
+                     card.get("meta") or "", size=10, color=COPPER)
 
 
 def _callout(slide, l, t, w, h, callout: dict, dark: bool) -> None:
@@ -253,7 +291,8 @@ def _add_chart(slide, spec: dict, l, t, w, h) -> None:
     kind = spec.get("kind")
     data = spec.get("data") or []
     title = spec.get("title") or ""
-    _textbox(slide, l, t - Inches(0.28), w, Inches(0.28), title, size=11, color=MUTED)
+    if kind not in {"people", "compare", "spine", "forest", "box"} and title:
+        _textbox(slide, l, t - Inches(0.28), w, Inches(0.28), title, size=11, color=MUTED)
 
     if kind == "forest":
         _forest(slide, data, l, t, w, h)

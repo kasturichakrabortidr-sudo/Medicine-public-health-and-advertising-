@@ -34,7 +34,20 @@ export interface Slide {
   chart?: ChartSpec;
   table?: { headers: string[]; rows: string[][] };
   refs?: (number | string)[];
-  layout: "title" | "insight" | "split" | "chart" | "grid" | "close" | "infographic" | "references";
+  cards?: { title: string; body: string; meta?: string }[];
+  footnote?: string;
+  layout:
+    | "title"
+    | "insight"
+    | "split"
+    | "chart"
+    | "grid"
+    | "close"
+    | "infographic"
+    | "references"
+    | "statement"
+    | "table"
+    | "cards";
 }
 
 export interface Intervention {

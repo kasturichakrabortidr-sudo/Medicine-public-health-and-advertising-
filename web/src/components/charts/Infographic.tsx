@@ -41,77 +41,67 @@ function PeoplePanel({
 }
 
 function PeopleVisual({ spec }: { spec: ChartSpec }) {
+  const row = spec.data[0];
+  if (!row) return null;
+  const control = num(row.control);
+  const treat = num(row.treat);
+  const arr = num(row.arr, Math.max(0, control - treat));
   return (
     <div className="infographic people">
-      <div className="small muted">{spec.title}</div>
-      {spec.data.map((row) => {
-        const control = num(row.control);
-        const treat = num(row.treat);
-        const arr = num(row.arr, Math.max(0, control - treat));
-        return (
-          <div key={String(row.name)} className="people-block">
-            <div className="people-pair">
-              <PeoplePanel label={String(row.control_label || "Comparator")} rate={control} unit={String(row.unit || spec.unit || "")} />
-              <PeoplePanel
-                label={String(row.treat_label || "Intervention")}
-                rate={treat}
-                saved={arr}
-                unit="crimson = events · teal = events avoided"
-              />
-              <div className="nnt-card">
-                <div className="kicker">NNT</div>
-                <div className="nnt-value">{row.nnt || "—"}</div>
-                <p>
-                  Treat {row.nnt || "—"} to prevent 1 event
-                  {row.horizon ? ` over ${row.horizon}` : ""}.
-                </p>
-                <p className="small muted">PMID {row.pmid || "—"}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-      {spec.note ? <div className="small muted">{spec.note}</div> : null}
+      <div className="people-pair">
+        <PeoplePanel label={String(row.control_label || "Comparator")} rate={control} unit={String(row.unit || spec.unit || "")} />
+        <PeoplePanel
+          label={String(row.treat_label || "Intervention")}
+          rate={treat}
+          saved={arr}
+          unit="crimson = events · teal = events avoided"
+        />
+        <div className="nnt-card">
+          <div className="kicker">NNT</div>
+          <div className="nnt-value">{row.nnt || "—"}</div>
+          <p>
+            Treat {row.nnt || "—"} to prevent 1 event
+            {row.horizon ? ` over ${row.horizon}` : ""}.
+          </p>
+          <p className="small muted">PMID {row.pmid || "—"}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
 function CompareVisual({ spec }: { spec: ChartSpec }) {
+  const row = spec.data[0];
+  if (!row) return null;
+  const left = num(row.left);
+  const right = num(row.right);
+  const max = Math.max(left, right, 1);
   return (
     <div className="infographic compare">
-      <div className="small muted">{spec.title}</div>
-      {spec.data.map((row) => {
-        const left = num(row.left);
-        const right = num(row.right);
-        const max = Math.max(left, right, 1);
-        return (
-          <div key={String(row.name)} className="compare-row">
-            <div className="compare-col">
-              <div className="people-label">{row.left_label || "Comparator"}</div>
-              <div className="compare-num">{left}</div>
-              <div className="compare-bar">
-                <span style={{ height: `${(left / max) * 100}%` }} />
-              </div>
-            </div>
-            <div className="compare-delta">
-              <div className="kicker">Difference</div>
-              <strong>{row.delta !== "" && row.delta != null ? row.delta : Math.abs(left - right)}</strong>
-              <p>{row.claim}</p>
-              <p className="small muted">
-                PMID {row.pmid || "—"} · {row.horizon || ""}
-              </p>
-            </div>
-            <div className="compare-col treat">
-              <div className="people-label">{row.right_label || "Intervention"}</div>
-              <div className="compare-num">{right}</div>
-              <div className="compare-bar">
-                <span style={{ height: `${(right / max) * 100}%` }} />
-              </div>
-            </div>
+      <div className="compare-row">
+        <div className="compare-col">
+          <div className="people-label">{row.left_label || "Comparator"}</div>
+          <div className="compare-num">{left}</div>
+          <div className="compare-bar">
+            <span style={{ height: `${(left / max) * 100}%` }} />
           </div>
-        );
-      })}
-      {spec.note ? <div className="small muted">{spec.note}</div> : null}
+        </div>
+        <div className="compare-delta">
+          <div className="kicker">Difference</div>
+          <strong>{row.delta !== "" && row.delta != null ? row.delta : Math.abs(left - right)}</strong>
+          <p>{row.claim}</p>
+          <p className="small muted">
+            PMID {row.pmid || "—"} · {row.horizon || ""}
+          </p>
+        </div>
+        <div className="compare-col treat">
+          <div className="people-label">{row.right_label || "Intervention"}</div>
+          <div className="compare-num">{right}</div>
+          <div className="compare-bar">
+            <span style={{ height: `${(right / max) * 100}%` }} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -125,9 +115,9 @@ const SPINE_STEPS = [
 ] as const;
 
 function SpineVisual({ spec }: { spec: ChartSpec }) {
+  const rows = spec.data.slice(0, 3);
   return (
     <div className="infographic spine">
-      <div className="small muted">{spec.title}</div>
       <div className="spine-head">
         {SPINE_STEPS.map(([_, label], i) => (
           <div key={label} className="spine-step-label">
@@ -135,7 +125,7 @@ function SpineVisual({ spec }: { spec: ChartSpec }) {
           </div>
         ))}
       </div>
-      {spec.data.map((row) => (
+      {rows.map((row) => (
         <div key={String(row.name)} className="spine-row">
           {SPINE_STEPS.map(([key, label]) => (
             <div key={key} className={`spine-cell ${key}`}>
@@ -150,7 +140,6 @@ function SpineVisual({ spec }: { spec: ChartSpec }) {
           ))}
         </div>
       ))}
-      {spec.note ? <div className="small muted">{spec.note}</div> : null}
     </div>
   );
 }

@@ -33,7 +33,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="app">
+    <div className={tab === "deck" ? "app deck-mode" : "app"}>
       <aside className="rail">
         <div className="mark">
           <strong>STRATA</strong>

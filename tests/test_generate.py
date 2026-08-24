@@ -13,12 +13,16 @@ def test_first_touch_doctrine_from_stabilize_insight():
         hcp_insights=["Most agree in principle but start on ACEi to stabilise first"],
         access_and_cost=["Out-of-pocket, 8-10x generic ARB"],
     )
-    pack = generate_pack(brief)
+    pack = generate_pack(brief, pubmed=False)
     assert pack["doctrine"]["id"] == "first-touch"
     assert pack["meta"]["brand"] == "CardioShield"
-    assert len(pack["slides"]) >= 12
+    ids = [s["id"] for s in pack["slides"]]
+    assert 12 <= len(pack["slides"]) <= 16
+    assert "how-built" not in ids
+    assert "boxplot" not in ids
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
-    assert {"bar", "forest", "pie", "line", "scatter", "diverging", "people", "compare", "spine"} <= kinds
+    assert {"people", "compare", "spine"} <= kinds
+    assert not {"pie", "scatter", "diverging", "line"} & kinds
     assert pack["dashboard"]["kpis"]
     assert len(pack["interventions"]) == 5
 
@@ -36,10 +40,12 @@ def test_affordability_doctrine_when_cost_dominates():
 
 def test_example_brief_is_presentation_ready():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
-    pack = generate_pack(brief, mode="demo")
+    pack = generate_pack(brief, mode="demo", pubmed=False)
     title = pack["slides"][0]
     assert title["layout"] == "title"
     assert "CardioShield" in title["title"]
-    assert any(s["id"] == "forest" for s in pack["slides"])
-    assert any(s["id"] == "boxplot" for s in pack["slides"])
+    assert title.get("bullets") in (None, [])
+    ids = [s["id"] for s in pack["slides"]]
+    assert "science-meaning" in ids
+    assert "references" in ids
     assert pack["dashboard"]["alerts"]
