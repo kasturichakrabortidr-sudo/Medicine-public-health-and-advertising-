@@ -12,7 +12,7 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
   const min = Math.min(0.55, ...nums) - 0.04;
   const max = Math.max(1.15, ...nums) + 0.04;
   const inner = W - LEFT - RIGHT;
-  const h = AXIS_Y_PAD + rows.length * ROW_H + 18;
+  const h = AXIS_Y_PAD + rows.length * ROW_H + 42;
   const x = (v: number) => LEFT + ((v - min) / (max - min)) * inner;
   const ticks = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1];
 
@@ -30,12 +30,18 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
         />
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={x(t)} y1={h - 18} x2={x(t)} y2={h - 14} stroke="#132037" />
-            <text x={x(t)} y={h - 2} fontSize="9" textAnchor="middle" fill="#5b6270">
+            <line x1={x(t)} y1={h - 32} x2={x(t)} y2={h - 28} stroke="#132037" />
+            <text x={x(t)} y={h - 16} fontSize="11" textAnchor="middle" fill="#5b6270">
               {t.toFixed(1)}
             </text>
           </g>
         ))}
+        <text x={LEFT} y={h - 2} fontSize="11" fill="#2a6f6f">
+          Favours intervention
+        </text>
+        <text x={W - 8} y={h - 2} fontSize="11" textAnchor="end" fill="#8b2e2e">
+          Favours comparator
+        </text>
         {rows.map((r, i) => {
           const y = AXIS_Y_PAD + i * ROW_H;
           const low = Number(r.low);

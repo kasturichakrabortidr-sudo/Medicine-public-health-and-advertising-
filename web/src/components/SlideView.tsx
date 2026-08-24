@@ -26,15 +26,13 @@ export function SlideView({ slide }: { slide: Slide }) {
       ) : layout === "split" ? (
         <SplitBody slide={slide} />
       ) : layout === "infographic" || layout === "chart" ? (
-        <div className="slide-visual">
-          {slide.chart ? <StrategyChart spec={slide.chart} height={380} /> : null}
-        </div>
+        <FigureBody slide={slide} />
       ) : layout === "table" || layout === "references" ? (
         <TableBody slide={slide} />
       ) : layout === "cards" ? (
         <CardsBody slide={slide} />
       ) : (
-        <StatementBody slide={slide} />
+        <FigureBody slide={slide} />
       )}
 
       {refs.length ? (
@@ -46,10 +44,19 @@ export function SlideView({ slide }: { slide: Slide }) {
   );
 }
 
+function Figure({ slide, height }: { slide: Slide; height: number }) {
+  if (!slide.chart) return null;
+  return (
+    <div className="slide-visual">
+      <StrategyChart spec={slide.chart} height={height} />
+    </div>
+  );
+}
+
 function TitleBody({ slide }: { slide: Slide }) {
   return (
     <div className="slide-title-body">
-      {slide.chart ? <StrategyChart spec={slide.chart} height={160} /> : null}
+      <Figure slide={slide} height={220} />
     </div>
   );
 }
@@ -62,8 +69,20 @@ function CloseBody({ slide }: { slide: Slide }) {
           <Cited text={slide.narrative} />
         </p>
       ) : null}
-      {slide.chart ? <StrategyChart spec={slide.chart} height={150} /> : null}
-      {slide.bullets ? <Bullets items={slide.bullets} /> : null}
+      <Figure slide={slide} height={280} />
+    </div>
+  );
+}
+
+function FigureBody({ slide }: { slide: Slide }) {
+  return (
+    <div className="slide-figure-body">
+      {slide.narrative ? (
+        <p className="narrative figure-note">
+          <Cited text={slide.narrative} />
+        </p>
+      ) : null}
+      <Figure slide={slide} height={420} />
     </div>
   );
 }
@@ -77,28 +96,14 @@ function SplitBody({ slide }: { slide: Slide }) {
             <Cited text={slide.narrative} />
           </p>
         ) : null}
+        {slide.bullets ? <Bullets items={slide.bullets} /> : null}
         {slide.table ? <Table table={slide.table} /> : null}
         <Callout callout={slide.callout} />
       </div>
       <div className="slide-split-visual">
-        {slide.chart ? <StrategyChart spec={slide.chart} height={320} /> : null}
+        {slide.chart ? <StrategyChart spec={slide.chart} height={340} /> : null}
         {slide.cards ? <MiniCards cards={slide.cards} /> : null}
       </div>
-    </div>
-  );
-}
-
-function StatementBody({ slide }: { slide: Slide }) {
-  return (
-    <div className="slide-statement-body">
-      {slide.narrative ? (
-        <p className="narrative">
-          <Cited text={slide.narrative} />
-        </p>
-      ) : null}
-      {slide.chart ? <StrategyChart spec={slide.chart} height={240} /> : null}
-      {slide.bullets ? <Bullets items={slide.bullets} /> : null}
-      <Callout callout={slide.callout} />
     </div>
   );
 }
@@ -113,7 +118,7 @@ function TableBody({ slide }: { slide: Slide }) {
       ) : null}
       <div className="table-wrap">
         {slide.table ? <Table table={slide.table} /> : null}
-        {slide.chart ? <StrategyChart spec={slide.chart} height={220} /> : null}
+        {slide.chart ? <StrategyChart spec={slide.chart} height={240} /> : null}
       </div>
     </div>
   );

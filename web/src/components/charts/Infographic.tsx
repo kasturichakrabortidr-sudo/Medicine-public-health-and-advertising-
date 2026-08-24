@@ -158,10 +158,17 @@ function FlowVisual({ spec }: { spec: ChartSpec }) {
       {spec.title ? <div className="flow-title">{spec.title}</div> : null}
       <div className={`flow-row n-${spec.data.length}`}>
         {spec.data.map((row, i) => (
-          <div className="flow-step" key={String(row.name)}>
-            <div className="flow-index">{i + 1}</div>
-            <h4>{row.name}</h4>
-            <p>{row.detail || row.claim || ""}</p>
+          <div className="flow-item" key={String(row.name)}>
+            <div className="flow-step">
+              <div className="flow-index">{i + 1}</div>
+              <h4>{row.name}</h4>
+              <p>{row.detail || row.claim || ""}</p>
+            </div>
+            {i < spec.data.length - 1 ? (
+              <div className="flow-arrow" aria-hidden="true">
+                →
+              </div>
+            ) : null}
           </div>
         ))}
       </div>

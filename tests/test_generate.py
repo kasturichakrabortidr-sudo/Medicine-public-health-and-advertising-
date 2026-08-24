@@ -48,3 +48,11 @@ def test_example_brief_is_presentation_ready():
     assert "science-meaning" in ids
     assert "references" in ids
     assert pack["dashboard"]["alerts"]
+    kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
+    assert {"forest", "people", "compare", "spine", "flow", "house", "scatter", "line"} <= kinds
+    for slide in pack["slides"]:
+        assert slide.get("chart") or slide.get("table") or slide.get("cards")
+        headline = slide["title"]
+        assert "…" not in headline
+        if slide["id"] not in {"title", "references"} and not str(slide["id"]).startswith("references-"):
+            assert headline[-1] in ".?!"

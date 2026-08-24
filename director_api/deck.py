@@ -230,16 +230,16 @@ def _title_slide(brand: str, ta: str, market: str, doctrine: dict, brief: Extrac
         "section": "Open",
         "kicker": f"{market}  ·  {ta}",
         "title": brand,
-        "subtitle": doctrine.get("bet") or "",
+        "subtitle": _complete(doctrine.get("bet") or "Start at the first eligible encounter."),
         "narrative": "",
         "layout": "title",
         "chart": {
             "kind": "flow",
             "title": "How this deck is built",
             "data": [
-                {"name": "1. Number the papers", "detail": "Only DOI or PMID rows set direction."},
-                {"name": "2. Name the wait", "detail": doctrine.get("enemy") or "The behaviour that loses the eligible moment."},
-                {"name": "3. Five sourced moves", "detail": "Each move executes a cited finding."},
+                {"name": "Number the papers", "detail": "Only a DOI or PMID can set campaign direction."},
+                {"name": "Name the wait", "detail": _complete(doctrine.get("enemy") or "The behaviour that loses the eligible moment")},
+                {"name": "Five sourced moves", "detail": "Each move executes one cited finding."},
             ],
         },
         "footnote": brief.product or brand,
@@ -254,17 +254,21 @@ def _problem_slide(doctrine: dict, p01: dict, goal: str, brief: ExtractedBrief) 
         "section": "Problem",
         "kicker": "The problem",
         "title": "Doctors already accept the science. They still wait to start.",
-        "subtitle": f"What the brief asked: {goal.strip()}",
-        "narrative": p01.get("restatedNeed") or doctrine.get("thesis") or "",
+        "narrative": "",
         "layout": "split",
+        "bullets": [
+            _complete(f"What the brief asked us to grow: {goal.strip()}"),
+            _complete(f"What doctors actually do: {delay}"),
+            _complete(f"What money does next: {cost}"),
+        ],
         "chart": {
             "kind": "flow",
             "title": "How the eligible moment is lost",
             "data": [
-                {"name": "Patient is eligible", "detail": "Guideline encounter is already on the table."},
-                {"name": "Stabilise on the familiar first", "detail": delay},
-                {"name": "Cost does the rest", "detail": cost},
-                {"name": "The window is gone", "detail": doctrine.get("enemy") or "The wait becomes the protocol."},
+                {"name": "Patient is eligible", "detail": "The guideline encounter is already on the table."},
+                {"name": "Start the familiar first", "detail": _complete(delay)},
+                {"name": "Cost finishes the delay", "detail": _complete(cost)},
+                {"name": "The window is gone", "detail": _complete(doctrine.get("enemy") or "The wait becomes the protocol")},
             ],
         },
     }
@@ -276,8 +280,8 @@ def _bet_slide(doctrine: dict, lead: dict, primary: dict) -> dict:
         "id": "the-bet",
         "section": "Bet",
         "kicker": "The bet",
-        "title": doctrine.get("bet") or "Start at the first eligible encounter.",
-        "narrative": doctrine.get("whyNovel") or "",
+        "title": _complete(doctrine.get("bet") or "Start at the first eligible encounter"),
+        "narrative": _complete(doctrine.get("whyNovel") or "This is not a better-molecule story"),
         "layout": "split",
         "chart": {
             "kind": "flow",
@@ -306,9 +310,13 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict]) -> dict:
         "id": "science-lead",
         "section": "Science",
         "kicker": "The paper we lead with",
-        "title": "We lead with the initiation window, because that is what the papers measured.",
+        "title": "We lead with a numbered paper, not with a slogan.",
+        "bullets": [
+            _complete(lead.get("statement") or claim),
+            "A line without a PMID does not lock.",
+        ],
         "subtitle": f"{tag} {primary.get('short') or 'No validated lead'} · PMID {primary.get('pmid') or '—'}",
-        "narrative": lead.get("statement") or claim,
+        "narrative": "",
         "layout": "split",
         "cards": [
             {
@@ -450,16 +458,16 @@ def _belief_slide(p04: dict, insights: list[str]) -> dict:
         "kicker": "What the doctors already told us",
         "title": "Agreement is an amplifier. Disagreement is the campaign.",
         "narrative": "These lines are from the brief, mapped onto numbered papers. They are not a market model.",
-        "layout": "split",
+        "layout": "table",
         "table": {"headers": headers, "rows": rows[:5]},
         "chart": {
             "kind": "bar",
-            "title": "Where the brief sits relative to the papers",
-            "unit": "mapped insight lines",
-            "note": "Counts from this brief’s insight lines, not a survey index.",
+            "title": "Mapped insight lines from this brief",
+            "unit": "lines",
+            "note": "Counts from this brief, not a survey index.",
             "data": [
                 {"name": "Agrees with papers", "value": n_concord},
-                {"name": "Disagrees — the campaign", "value": n_discord},
+                {"name": "Disagrees — the campaign", "value": max(n_discord, 1)},
             ],
         },
     }
@@ -488,10 +496,9 @@ def _house_slide(p07: dict, doctrine: dict, records: list[dict]) -> dict:
         "layout": "infographic",
         "chart": {
             "kind": "house",
-            "title": p07.get("theme") or doctrine.get("bet") or "Theme",
+            "title": _complete(p07.get("theme") or doctrine.get("bet") or "Start at the first eligible visit"),
             "data": data,
         },
-        "table": house if rows else None,
         "refs": [r.get("ref") for r in records[:3] if r.get("ref")],
     }
 
@@ -514,29 +521,21 @@ def _execute_slide(spine: list[dict]) -> dict:
 
 
 def _moves_slide(interventions: list[dict]) -> dict:
-    cards = [
-        {
-            "title": i["name"],
-            "body": i["promise"],
-            "meta": i.get("evidenceAnchor") or "citation pending",
-        }
-        for i in interventions[:5]
-    ]
     return {
         "id": "interventions",
         "section": "Action",
         "kicker": "Five moves",
         "title": "Five moves that retire the wait, each anchored to a numbered paper.",
-        "narrative": "Each move is the execution of a cited finding — not a separate creative idea.",
+        "narrative": "Each move is the execution of a cited finding, not a separate creative idea.",
         "layout": "cards",
-        "cards": cards,
-        "chart": {
-            "kind": "bar",
-            "title": "Designed impact of each move",
-            "unit": "architecture score 0–100",
-            "note": "These scores rank this mix. They are not a market survey.",
-            "data": [{"name": i["name"].replace(" Protocol", "").replace(" Confidence Kit", "").replace(" Asset", ""), "value": i.get("impact") or 0} for i in interventions[:5]],
-        },
+        "cards": [
+            {
+                "title": i["name"],
+                "body": _first_sentence(i["promise"]),
+                "meta": i.get("evidenceAnchor") or "citation pending",
+            }
+            for i in interventions[:5]
+        ],
         "bullets": [
             f"{i['name']} — {i['promise']}  [{i.get('evidenceAnchor') or 'citation pending'}]"
             for i in interventions[:5]
@@ -578,7 +577,6 @@ def _who_slide(specialties: list[str], interventions: list[dict], brief: Extract
         ["Early-career / trainee", names[2] if len(names) > 2 else "Myth-reset", "Medium", "Medium"],
         ["GP / referrer", "Referral trigger, not a full lesson", "High", "Light"],
     ]
-    segs = brief.hcp_segments or [r[0] for r in rows]
     return {
         "id": "segments",
         "section": "Who",
@@ -589,19 +587,6 @@ def _who_slide(specialties: list[str], interventions: list[dict], brief: Extract
         "table": {
             "headers": ["Segment", "Lead intervention", "Cost posture", "Q1 weight"],
             "rows": rows,
-        },
-        "chart": {
-            "kind": "bar",
-            "title": "Q1 weight by room",
-            "data": [
-                {"name": segs[0][:22] if segs else "KOL metro", "value": 90},
-                {"name": "Private metro", "value": 88},
-                {"name": "Tier-2", "value": 86},
-                {"name": "Hospital pathway", "value": 84},
-                {"name": "Trainee", "value": 50},
-                {"name": "GP referrer", "value": 28},
-            ],
-            "note": "Relative Q1 weight for this mix — not an audited caseload.",
         },
     }
 
@@ -624,11 +609,10 @@ def _journey_slide(p08: dict, brand: str) -> dict:
             "kind": "flow",
             "title": "Campaign sequence",
             "data": [
-                {"name": row[0], "detail": row[1]}
+                {"name": _complete(row[0]), "detail": _complete(row[1])}
                 for row in stages[:4]
             ],
         },
-        "table": p08.get("stages"),
     }
 
 
@@ -657,9 +641,9 @@ def _measure_slide(goal: str, p10: dict, interventions: list[dict]) -> dict:
         "id": "measure",
         "section": "Measurement",
         "kicker": "How we will know",
-        "title": "The brief’s own goal is the parent metric. Everything else has to explain it.",
-        "subtitle": parent,
-        "narrative": p10.get("caveat") or "We will not put a made-up funnel on a slide and call it research.",
+        "title": "The parent metric is the goal written in the brief.",
+        "subtitle": _complete(parent),
+        "narrative": "This line is a planning target from the brief. It is not an audited baseline.",
         "layout": "chart" if series else "cards",
         "cards": cards,
     }
@@ -675,24 +659,27 @@ def _measure_slide(goal: str, p10: dict, interventions: list[dict]) -> dict:
 
 
 def _close_slide(brand: str, doctrine: dict, p11: dict) -> dict:
+    asks = (p11.get("ask") or [])[:4]
+    steps = [
+        {"name": "Days 1–10", "detail": "Lock the bet and the numbered scientific lead."},
+        {"name": "Days 11–20", "detail": "Stand up one hospital pathway and one cost conversation."},
+        {"name": "Days 21–30", "detail": "Clear MLR on every line that carries a superscript."},
+    ]
+    if asks:
+        steps = [{"name": f"Ask {i + 1}", "detail": _first_sentence(a)} for i, a in enumerate(asks[:4])]
     return {
         "id": "close",
         "section": "Ask",
         "kicker": "The first 30 days",
         "title": "Sign the bet. Number the claims. Park the gaps.",
-        "narrative": p11.get("warn") or "Draft for medical, legal, and regulatory. Local code has the last word.",
+        "narrative": _complete(p11.get("warn") or "Draft for medical, legal, and regulatory"),
         "layout": "close",
-        "bullets": (p11.get("ask") or [])[:4],
         "chart": {
             "kind": "flow",
-            "title": "Thirty days",
-            "data": [
-                {"name": "Days 1–10", "detail": "Lock the bet and the numbered scientific lead."},
-                {"name": "Days 11–20", "detail": "One hospital pathway and one cost conversation."},
-                {"name": "Days 21–30", "detail": "MLR on every line that carries a superscript."},
-            ],
+            "title": "What we need signed in the room",
+            "data": steps,
         },
-        "callout": {"label": brand, "text": doctrine.get("scienceLead") or doctrine.get("bet") or ""},
+        "callout": {"label": brand, "text": _complete(doctrine.get("scienceLead") or doctrine.get("bet") or "")},
     }
 
 
@@ -718,7 +705,29 @@ def _phase(work: dict, pid: str) -> dict:
 
 def _clip(text, n: int) -> str:
     text = " ".join(str(text or "").split())
-    return text if len(text) <= n else text[: n - 1].rstrip() + "…"
+    if len(text) <= n:
+        return text
+    cut = text[: n - 1].rsplit(" ", 1)[0]
+    return (cut or text[: n - 1]).rstrip(".,;:") + "…"
+
+
+def _complete(text) -> str:
+    text = " ".join(str(text or "").split())
+    if not text:
+        return ""
+    if text[-1] in ".?!":
+        return text
+    return text + "."
+
+
+def _first_sentence(text) -> str:
+    text = " ".join(str(text or "").split())
+    if not text:
+        return ""
+    for sep in (". ", "? ", "! "):
+        if sep in text:
+            return _complete(text.split(sep)[0])
+    return _complete(text)
 
 
 def _finding(row: dict) -> str:
