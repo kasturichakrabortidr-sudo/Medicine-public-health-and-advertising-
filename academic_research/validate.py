@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from urllib.parse import quote
 
+from .extract import strip_text
 from .http_client import get_json, head_ok
 from .models import EvidenceRecord, Validation
 
@@ -95,7 +96,7 @@ def validate_record(record: EvidenceRecord) -> EvidenceRecord | None:
             if ct:
                 venue = ct[0]
             record.doi = doi
-            record.title = title or record.title
+            record.title = strip_text(title or record.title)
             record.year = year or record.year
             if authors:
                 record.authors = authors
@@ -129,7 +130,7 @@ def validate_record(record: EvidenceRecord) -> EvidenceRecord | None:
             hits = (data.get("resultList") or {}).get("result") or []
             if hits:
                 hit = hits[0]
-                record.title = hit.get("title") or record.title
+                record.title = strip_text(hit.get("title") or record.title)
                 record.year = _safe_year(hit.get("pubYear")) or record.year
                 if hit.get("doi"):
                     record.doi = normalize_doi(hit.get("doi"))

@@ -9,55 +9,101 @@ THERAPY_SYNONYMS: dict[str, list[str]] = {
         "HFrEF",
         "HFpEF",
         "chronic heart failure",
-        "CHF",
         "ARNI",
         "sacubitril",
         "valsartan",
         "cardiomyopathy",
         "GDMT",
+        "heart failure",
     ],
     "cardiology": [
         "cardiovascular",
         "heart failure",
         "hypertension",
         "ischemic heart",
-        "NCD",
     ],
-    "diabetes": ["T2DM", "glycaemic", "SGLT2", "insulin"],
+    "diabetes": ["T2DM", "glycaemic", "SGLT2", "insulin", "diabetes"],
     "oncology": ["cancer", "tumour", "tumor", "chemotherapy"],
-    "hiv": ["antiretroviral", "UNAIDS", "AIDS"],
+    "hiv": ["antiretroviral", "UNAIDS", "AIDS", "HIV"],
+}
+
+STOPWORDS = {
+    "the",
+    "and",
+    "for",
+    "with",
+    "from",
+    "chronic",
+    "adult",
+    "adults",
+    "class",
+    "fixed",
+    "dose",
+    "combination",
+    "illustrative",
+    "example",
+    "failure",  # too generic alone (hepatic failure, treatment failure)
+    "area",
+    "market",
+    "india",  # country is for search, not screening
+    "metro",
+    "tier",
 }
 
 
-def _clean_terms(text: str) -> list[str]:
-    parts = re.split(r"[^A-Za-z0-9+/.-]+", text or "")
-    return [p for p in parts if len(p) >= 3]
+def sanitize(text: str | None) -> str:
+    if not text:
+        return ""
+    cleaned = re.sub(r"\(.*?\)", " ", str(text))
+    cleaned = cleaned.split(",")[0]
+    return re.sub(r"\s+", " ", cleaned).strip()
+
+
+def short_concept(brief: dict) -> str:
+    indication = sanitize(brief.get("indication"))
+    therapy = sanitize(brief.get("therapy_area"))
+    if indication:
+        return indication
+    return therapy or "public health"
+
+
+def product_concept(brief: dict) -> str:
+    return sanitize(brief.get("product") or brief.get("brand"))
 
 
 def expand_terms(brief: dict) -> list[str]:
     blob = " ".join(
         str(brief.get(k) or "")
-        for k in ("therapy_area", "indication", "product", "brand", "market")
+        for k in ("therapy_area", "indication", "product", "brand")
     )
-    terms = _clean_terms(blob)
     lowered = blob.lower()
+    terms: list[str] = []
+    for field in (brief.get("indication"), brief.get("product"), brief.get("brand")):
+        s = sanitize(field)
+        if s:
+            terms.append(s)
     for stem, extras in THERAPY_SYNONYMS.items():
         if stem in lowered:
+            terms.append(stem)
             terms.extend(extras)
-    # de-dupe preserving order
+    # keep longer tokens only
+    for tok in re.split(r"[^A-Za-z0-9+/.-]+", blob):
+        if len(tok) >= 5 and tok.lower() not in STOPWORDS:
+            terms.append(tok)
     seen: set[str] = set()
     out: list[str] = []
     for t in terms:
         key = t.lower()
-        if key not in seen:
-            seen.add(key)
-            out.append(t)
+        if key in STOPWORDS or key in seen:
+            continue
+        seen.add(key)
+        out.append(t)
     return out
 
 
 def pico(brief: dict) -> dict:
-    population = brief.get("indication") or brief.get("therapy_area") or "target cohort"
-    intervention = brief.get("product") or brief.get("brand") or "index intervention"
+    population = sanitize(brief.get("indication")) or sanitize(brief.get("therapy_area")) or "target cohort"
+    intervention = product_concept(brief) or "index intervention"
     goal = (brief.get("business_goal") or "").strip()
     outcome = (
         "clinical outcomes, guideline concordance, access/cost, and lived experience"
@@ -82,17 +128,14 @@ def pico(brief: dict) -> dict:
 
 
 def build_queries(brief: dict) -> list[dict]:
-    product = (brief.get("product") or brief.get("brand") or "").strip()
-    indication = (brief.get("indication") or brief.get("therapy_area") or "").strip()
-    therapy = (brief.get("therapy_area") or "").strip()
-    market = (brief.get("market") or "").strip()
-    core = " ".join(x for x in (product, indication) if x)
-    if not core:
-        core = therapy or "public health"
-    market_term = ""
-    if market:
-        # first token often the country
-        market_term = re.split(r"[,(]", market)[0].strip()
+    product = product_concept(brief)
+    indication = short_concept(brief)
+    therapy = sanitize(brief.get("therapy_area"))
+    market = sanitize(re.split(r"[,(]", str(brief.get("market") or ""))[0])
+    disease = indication if indication.lower() != therapy.lower() else indication
+    # Prefer a human disease phrase for title searches
+    disease_phrase = "heart failure" if "heart failure" in f"{therapy} {indication}".lower() else disease
+    core = " ".join(x for x in (product, disease_phrase) if x)
 
     queries = [
         {
@@ -104,39 +147,39 @@ def build_queries(brief: dict) -> list[dict]:
         {
             "id": "guidelines",
             "purpose": "International and national guidelines",
-            "europe_pmc": f'(TITLE:guideline OR TITLE:"consensus statement") AND ({therapy or indication})',
-            "openalex": f"{therapy or indication} guideline",
+            "europe_pmc": f'(TITLE:guideline OR TITLE:"consensus statement" OR TITLE:"position statement") AND ("{disease_phrase}")',
+            "openalex": f"{disease_phrase} guideline heart failure" if disease_phrase else f"{therapy} guideline",
         },
         {
             "id": "qualitative",
             "purpose": "Lived experience / IPA-eligible qualitative literature",
             "europe_pmc": (
-                f'TITLE:("{indication or therapy}") AND '
+                f'TITLE:"{disease_phrase}" AND '
                 f'("lived experience" OR phenomenological OR "qualitative study" '
                 f'OR "qualitative research" OR "semi-structured")'
             ),
-            "openalex": f"{indication or therapy} lived experience qualitative",
+            "openalex": f'"{disease_phrase}" "lived experience" qualitative',
         },
         {
             "id": "burden_access",
             "purpose": "Epidemiology, cost, and access",
-            "europe_pmc": f"({indication or therapy}) AND (epidemiology OR burden OR cost OR access OR out-of-pocket)",
-            "openalex": f"{indication or therapy} burden cost access",
+            "europe_pmc": f'("{disease_phrase}") AND (epidemiology OR burden OR cost OR access OR out-of-pocket)',
+            "openalex": f"{disease_phrase} burden cost access",
         },
         {
             "id": "un_ncd",
             "purpose": "UN-system and NCD / UHC framing",
-            "openalex": f"{therapy or indication} noncommunicable cardiovascular",
-            "who": f"{indication or therapy}",
+            "openalex": f"{disease_phrase} noncommunicable cardiovascular HEARTS",
+            "who": disease_phrase,
         },
     ]
-    if market_term:
+    if market:
         queries.append(
             {
                 "id": "national",
-                "purpose": f"National guidance and regional evidence ({market_term})",
-                "europe_pmc": f"({indication or therapy}) AND ({market_term})",
-                "openalex": f"{indication or therapy} {market_term}",
+                "purpose": f"National guidance and regional evidence ({market})",
+                "europe_pmc": f'("{disease_phrase}") AND ({market})',
+                "openalex": f"{disease_phrase} {market}",
             }
         )
     return queries

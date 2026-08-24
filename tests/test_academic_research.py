@@ -72,6 +72,24 @@ class ExtractTests(unittest.TestCase):
         self.assertEqual(hr.ci_high, 0.87)
         self.assertIn("0.80", hr.excerpt)
 
+    def test_parses_semicolon_ci_form(self):
+        text = (
+            "died from cardiovascular causes (hazard ratio, 0.80; 95% CI, 0.71 to 0.89; "
+            "P<0.001)."
+        )
+        effects = parse_effects(text)
+        self.assertTrue(effects)
+        self.assertEqual(effects[0].value, 0.80)
+        self.assertEqual(effects[0].ci_low, 0.71)
+        self.assertEqual(effects[0].ci_high, 0.89)
+
+    def test_alzheimer_not_on_topic_for_hf_brief(self):
+        r = rec(
+            title="NIA-AA Research Framework: Toward a biological definition of Alzheimer's disease",
+            abstract="Alzheimer's disease diagnostic recommendations and dementia stages.",
+        )
+        self.assertFalse(on_topic(r, ["heart failure", "hfref", "sacubitril"], min_hits=1))
+
     def test_rejects_implausible_effect_sizes(self):
         text = "The hazard ratio was 42.0 (95% CI, 30 to 50)"
         self.assertEqual(parse_effects(text), [])
@@ -144,6 +162,8 @@ class QueryTests(unittest.TestCase):
         self.assertIn("national", ids)
         qual = next(q for q in qs if q["id"] == "qualitative")
         self.assertIn("lived experience", qual["europe_pmc"])
+        self.assertIn('TITLE:"heart failure"', qual["europe_pmc"])
+        self.assertNotIn("NYHA", qual["europe_pmc"])
 
 
 if __name__ == "__main__":

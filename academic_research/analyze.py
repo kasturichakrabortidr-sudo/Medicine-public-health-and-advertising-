@@ -81,29 +81,30 @@ def qualitative(records: list[EvidenceRecord], cohort: str) -> dict:
     q_recs = [r for r in records if r.is_qualitative]
     theme_papers: dict[str, list[EvidenceRecord]] = defaultdict(list)
     theme_quotes: dict[str, list[dict]] = defaultdict(list)
-    pool = q_recs or records
+    pool = [r for r in records if r.is_qualitative]
+    if not pool:
+        pool = [r for r in records if ipa_hits(r.text_blob())]
     for rec in pool:
         blob = rec.text_blob()
         themes = ipa_hits(blob)
-        if rec.is_qualitative:
-            for theme in themes:
-                theme_papers[theme].append(rec)
-                for sent in sentences(blob)[:8]:
-                    if any(
-                        __import__("re").search(n, sent, __import__("re").I)
-                        for n in IPA_CODEBOOK[theme]["needles"]
-                    ):
-                        theme_quotes[theme].append(
-                            {
-                                "citation_id": rec.citation_id,
-                                "text": sent[:280],
-                            }
-                        )
-                        break
+        for theme in themes:
+            theme_papers[theme].append(rec)
+            for sent in sentences(blob)[:8]:
+                if any(
+                    __import__("re").search(n, sent, __import__("re").I)
+                    for n in IPA_CODEBOOK[theme]["needles"]
+                ):
+                    theme_quotes[theme].append(
+                        {
+                            "citation_id": rec.citation_id,
+                            "text": sent[:280],
+                        }
+                    )
+                    break
     superordinate = []
     for theme_id, spec in IPA_CODEBOOK.items():
         papers = theme_papers.get(theme_id) or []
-        quotes = theme_quotes.get(theme_id)[:5]
+        quotes = (theme_quotes.get(theme_id) or [])[:5]
         if not papers and not quotes:
             continue
         ids = sorted({p.citation_id for p in papers if p.citation_id})

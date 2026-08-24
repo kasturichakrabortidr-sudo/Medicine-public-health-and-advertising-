@@ -10,10 +10,10 @@ _HTML = re.compile(r"<[^>]+>")
 _SPACE = re.compile(r"\s+")
 
 EFFECT_RE = re.compile(
-    r"\b(?P<metric>HR|OR|RR|hazard ratio|odds ratio|relative risk|rate ratio)\s*"
-    r"(?:was\s+|of\s+|=\s*|:\s*)?"
+    r"\b(?P<metric>HR|OR|RR|hazard ratio|odds ratio|relative risk|rate ratio)"
+    r"(?:[^0-9]{0,80})?"
     r"(?P<value>\d+(?:\.\d+)?)\s*"
-    r"(?:\(|\[\s*)?(?:95\s*%\s*CI[:\s,]*)\s*"
+    r"[;,]?\s*(?:\(|\[\s*)?(?:95\s*%\s*CI[:\s,]*)\s*"
     r"(?P<low>\d+(?:\.\d+)?)\s*(?:[-–—]|to)\s*(?P<high>\d+(?:\.\d+)?)",
     re.IGNORECASE,
 )
@@ -126,8 +126,8 @@ CLAIM_RULES: list[tuple[str, list[re.Pattern]]] = [
         "lived_experience_or_care_relationship",
         [
             re.compile(
-                r"\b(lived experience|caregiver|self[- ]manag\w+|identity|"
-                r"uncertainty|fear|distress|family)\b",
+                r"\b(lived experience|caregiver|self[- ]manag\w+|interpretative|"
+                r"phenomenolog\w*|semi-structured interview)\b",
                 re.I,
             )
         ],
@@ -311,7 +311,7 @@ def ipa_hits(text: str) -> list[str]:
 
 def on_topic(record: EvidenceRecord, terms: list[str], min_hits: int = 1) -> bool:
     blob = record.text_blob().lower()
-    hits = sum(1 for t in terms if t and t.lower() in blob)
-    # molecule / brand-like tokens (mixed case original often product names)
-    strong = [t for t in terms if any(ch.isdigit() for ch in t) or t.lower() in blob]
-    return hits >= min_hits or bool(strong and hits >= 1)
+    if "alzheimer" in blob and not any("alzheimer" in t for t in terms):
+        return False
+    phrase_hits = [t for t in terms if t and len(t) > 4 and t.lower() in blob]
+    return len(phrase_hits) >= min_hits

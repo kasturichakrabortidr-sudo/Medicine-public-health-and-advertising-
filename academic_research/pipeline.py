@@ -14,10 +14,11 @@ from .extract import (
     is_qualitative,
     on_topic,
     parse_effects,
+    strip_text,
     supporting_snippets,
 )
 from .models import EvidenceRecord, to_dict
-from .queries import build_queries, pico, relevance_terms
+from .queries import build_queries, pico, product_concept, relevance_terms, short_concept
 from .validate import utcnow, validate_record
 
 PIPELINE_VERSION = "1.0.0"
@@ -34,6 +35,7 @@ class ResearchPipeline:
     def run(self) -> dict:
         identified = self._harvest()
         self._log("harvest", f"{len(identified)} raw records from live APIs")
+        identified = [r for r in identified if self._keep_record(r)]
         deduped = self._dedupe(identified)
         self._log("dedupe", f"{len(deduped)} after identifier de-duplication")
         screened: list[EvidenceRecord] = []
@@ -53,6 +55,8 @@ class ResearchPipeline:
             if verified is None:
                 excluded_unvalidated += 1
                 continue
+            self._enrich_abstract(verified)
+            verified.title = strip_text(verified.title)
             verified.is_qualitative = is_qualitative(verified)
             verified.is_guideline = is_guideline(verified)
             verified.claims = code_claims(verified)
@@ -133,8 +137,6 @@ class ResearchPipeline:
     def _harvest(self) -> list[EvidenceRecord]:
         found: list[EvidenceRecord] = []
         n = self.max_per_query
-        product = self.brief.get("product") or self.brief.get("brand") or ""
-        indication = self.brief.get("indication") or self.brief.get("therapy_area") or ""
 
         for q in self.queries:
             if q.get("europe_pmc"):
@@ -161,10 +163,10 @@ class ResearchPipeline:
             "openalex_un",
             "un_family",
             lambda: connectors.openalex_un_ngo(
-                f"{indication} cardiovascular noncommunicable", n
+                f"{short_concept(self.brief)} cardiovascular HEARTS", n
             ),
         )
-        trial_q = " ".join(x for x in (product, indication) if x)
+        trial_q = " ".join(x for x in (product_concept(self.brief), short_concept(self.brief)) if x)
         if trial_q:
             found += self._try(
                 "clinicaltrials",
@@ -172,7 +174,7 @@ class ResearchPipeline:
                 lambda: connectors.clinical_trials(trial_q, min(n, 6)),
             )
 
-        blob = f"{indication} {self.brief.get('therapy_area') or ''}".lower()
+        blob = f"{short_concept(self.brief)} {self.brief.get('therapy_area') or ''}".lower()
         if "heart failure" in blob or "hfref" in blob:
             rec = connectors.nice_guideline(
                 "ng106",
@@ -200,6 +202,39 @@ class ResearchPipeline:
         except Exception as exc:  # noqa: BLE001
             self._log(connector, f"{query_id}: FAILED {type(exc).__name__}: {exc}")
             return []
+
+    def _keep_record(self, rec: EvidenceRecord) -> bool:
+        title = strip_text(rec.title).lower()
+        if len(title) < 20 or title in {"abstracts programme", "abstracts"}:
+            return False
+        if rec.source_connector in {"who_iris", "who_publications"}:
+            return any(
+                token in title
+                for token in (
+                    "heart",
+                    "cardio",
+                    "hearts",
+                    "hypertension",
+                    "stroke",
+                    "sodium",
+                    "ncd",
+                    "noncommunicable",
+                )
+            )
+        return True
+
+    def _enrich_abstract(self, rec: EvidenceRecord) -> None:
+        blob = f"{rec.title} {rec.abstract}".lower()
+        interesting = any(
+            x in blob for x in ("sacubitril", "neprilysin", "paradigm", "arni", "enalapril")
+        )
+        if rec.doi and (len(rec.abstract or "") < 400 or interesting):
+            try:
+                rows = connectors.europe_pmc(f"DOI:{rec.doi}", 1)
+            except Exception:
+                return
+            if rows and len(rows[0].abstract) > len(rec.abstract or ""):
+                rec.abstract = rows[0].abstract
 
     def _dedupe(self, records: list[EvidenceRecord]) -> list[EvidenceRecord]:
         by_key: dict[str, EvidenceRecord] = {}
@@ -237,7 +272,15 @@ class ResearchPipeline:
                 continue
             seen_id.add(ident)
             uniq.append(rec)
-        return uniq
+        by_title: dict[str, EvidenceRecord] = {}
+        for rec in uniq:
+            nt = " ".join(
+                "".join(ch if ch.isalnum() else " " for ch in strip_text(rec.title).lower()).split()
+            )[:88]
+            prev = by_title.get(nt)
+            if prev is None or len(rec.abstract) > len(prev.abstract):
+                by_title[nt] = rec
+        return list(by_title.values())
 
     def _public_record(self, rec: EvidenceRecord) -> dict:
         data = to_dict(rec)
