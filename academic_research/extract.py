@@ -11,11 +11,11 @@ _SPACE = re.compile(r"\s+")
 
 EFFECT_RE = re.compile(
     r"\b(?P<metric>HR|OR|RR|hazard ratio|odds ratio|relative risk|rate ratio)"
-    r"(?:[^0-9]{0,80})?"
-    r"(?P<value>\d+(?:\.\d+)?)\s*"
-    r"[;,]?\s*(?:\(|\[\s*)?(?:95\s*%\s*CI[:\s,]*)\s*"
-    r"(?P<low>\d+(?:\.\d+)?)\s*(?:[-–—]|to)\s*(?P<high>\d+(?:\.\d+)?)",
-    re.IGNORECASE,
+    r".{0,70}?"
+    r"(?P<value>\d+\.\d+)\s*"
+    r"[;,]?\s*(?:\(|\[\s*)?(?:95\s*%\s*(?:CI|confidence interval(?:\s*\[CI\])?)[:;, ]*)\s*"
+    r"(?P<low>\d+\.\d+)\s*(?:[-–—]|to)\s*(?P<high>\d+\.\d+)",
+    re.IGNORECASE | re.DOTALL,
 )
 
 QUAL_MARKERS = re.compile(
@@ -311,7 +311,12 @@ def ipa_hits(text: str) -> list[str]:
 
 def on_topic(record: EvidenceRecord, terms: list[str], min_hits: int = 1) -> bool:
     blob = record.text_blob().lower()
-    if "alzheimer" in blob and not any("alzheimer" in t for t in terms):
+    title = (record.title or "").lower()
+    if any(bad in blob for bad in ("covid-19", "covid 19", "sars-cov-2", "alzheimer")) and not any(
+        t in {"covid", "covid-19", "alzheimer"} for t in terms
+    ):
+        return False
+    if "bias in meta-analysis" in title:
         return False
     phrase_hits = [t for t in terms if t and len(t) > 4 and t.lower() in blob]
     return len(phrase_hits) >= min_hits

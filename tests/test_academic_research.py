@@ -72,7 +72,17 @@ class ExtractTests(unittest.TestCase):
         self.assertEqual(hr.ci_high, 0.87)
         self.assertIn("0.80", hr.excerpt)
 
-    def test_parses_semicolon_ci_form(self):
+    def test_parses_confidence_interval_bracket_form(self):
+        text = (
+            "the primary outcome had occurred in the LCZ696 group "
+            "(hazard ratio in the LCZ696 group, 0.80; 95% confidence interval [CI], "
+            "0.73 to 0.87; P<0.001)."
+        )
+        effects = parse_effects(text)
+        self.assertTrue(effects)
+        self.assertEqual(effects[0].value, 0.80)
+        self.assertEqual(effects[0].ci_low, 0.73)
+        self.assertEqual(effects[0].ci_high, 0.87)
         text = (
             "died from cardiovascular causes (hazard ratio, 0.80; 95% CI, 0.71 to 0.89; "
             "P<0.001)."
