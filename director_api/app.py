@@ -9,11 +9,11 @@ from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
-from medicomarketing_agent.config import load_brief
 
 from .extract import ExtractedBrief, extract_files, merge_into_brief
 from .generate import generate_pack
 from .pptx_export import filename_for, pack_to_pptx
+from .projects import delete_project, get_project, list_projects, save_project, upsert_ongoing
 
 app = FastAPI(title="STRATA Strategy Director", version="1.0.0")
 app.add_middleware(
@@ -24,7 +24,6 @@ app.add_middleware(
 )
 
 ROOT = Path(__file__).resolve().parent.parent
-EXAMPLE_BRIEF = ROOT / "examples" / "brief.example.yaml"
 DIST = ROOT / "web" / "dist"
 
 ACCEPT_HINT = (
@@ -36,14 +35,6 @@ ACCEPT_HINT = (
 @app.get("/api/health")
 def health():
     return {"ok": True, "service": "strata-director", "accept": ACCEPT_HINT}
-
-
-@app.get("/api/demo")
-def demo():
-    brief = _brief_from_mapping(load_brief(EXAMPLE_BRIEF))
-    pack = generate_pack(brief, mode="demo")
-    pack["meta"]["source"] = "examples/brief.example.yaml"
-    return pack
 
 
 @app.post("/api/extract")
@@ -109,12 +100,60 @@ async def generate(
     if not brief.brand and not brief.therapy_area and not brief.raw_text:
         raise HTTPException(422, "Could not read a usable brief from the upload.")
 
-    return generate_pack(brief, mode=mode)
+    if mode == "demo":
+        raise HTTPException(400, "Demo mode is not available. Upload your own brief.")
+
+    pack = generate_pack(brief, mode=mode)
+    pack["meta"]["source"] = (
+        ", ".join(brief.source_files)
+        or pack["meta"].get("source")
+        or "uploaded brief"
+    )
+    try:
+        upsert_ongoing(pack)
+    except OSError:
+        pass
+    return pack
 
 
-@app.get("/api/export/pptx")
-def export_demo_pptx():
-    return _pptx_response(demo())
+@app.get("/api/projects")
+def projects_list():
+    return {"projects": list_projects()}
+
+
+@app.post("/api/projects")
+async def projects_save(request: Request):
+    try:
+        payload = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, f"Body must be JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(400, "Body must be an object.")
+    pack = payload.get("pack")
+    if not isinstance(pack, dict) or not pack.get("slides"):
+        raise HTTPException(400, "A project must include a strategy pack with slides.")
+    try:
+        record = save_project(payload) if payload.get("id") or payload.get("status") == "saved" else upsert_ongoing(pack)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except OSError as exc:
+        raise HTTPException(500, f"Could not save the project: {exc}") from exc
+    return record
+
+
+@app.get("/api/projects/{pid}")
+def projects_get(pid: str):
+    record = get_project(pid)
+    if not record:
+        raise HTTPException(404, "Project not found.")
+    return record
+
+
+@app.delete("/api/projects/{pid}")
+def projects_delete(pid: str):
+    if not delete_project(pid):
+        raise HTTPException(404, "Project not found.")
+    return {"ok": True, "id": pid}
 
 
 @app.post("/api/export/pptx")
@@ -139,16 +178,6 @@ def _pptx_response(pack: dict) -> Response:
             "Content-Length": str(len(data)),
         },
     )
-
-
-@app.get("/demo.json")
-def demo_file():
-    path = DIST / "demo.json"
-    if not path.exists():
-        path = ROOT / "web" / "public" / "demo.json"
-    if not path.exists():
-        raise HTTPException(404, "demo.json missing")
-    return FileResponse(path, media_type="application/json")
 
 
 @app.get("/")

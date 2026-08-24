@@ -5,9 +5,12 @@ client brief in **any format**, extract the working file, and get a visual
 strategy deck plus a measurement dashboard.
 
 The director does not write a generic funnel. It picks a **doctrine** from the
-tension in the brief — for the CardioShield example, **The First-Touch
-Doctrine**: the enemy is the *stabilise-first* ritual, not the comparator
-molecule. Interventions, charts, and kill-criteria all serve that bet.
+tension in the brief. Interventions, charts, and kill-criteria all serve that bet.
+
+The app does **not** preload a sample brand. Upload your brief, or open a pack
+from **Projects**.
+
+### Run the app
 
 ### Run the app
 
@@ -20,11 +23,14 @@ Opens `http://127.0.0.1:5173`
 
 | Tab | What it does |
 |---|---|
-| **Evidence** | Validated citation register (DOI/PMID). The campaign lead is the highest-leverage published source, not a slogan. Uncited brief items stay gaps. PubMed hits are retrieved but cannot silently become the lead. |
-| **Strat deck** | Client-ready slides: forest plots, box plots, bars, lines, pies, impact matrix. **Download PPTX** for an editable PowerPoint (native text, tables, Office charts). Print to PDF. |
-| **Dashboard** | KPI room, funnel, evidence mix, intervention board, governance. |
+| **Brief** | Upload or paste a client brief. Nothing is preloaded. |
+| **Projects** | **Ongoing** working files from Generate, and **Saved** packs you pin. Open, save, or delete them here. |
+| **Working file** | The eleven-step strategy for the open pack. |
+| **Papers** | Validated citation register (DOI/PMID). Uncited brief items stay gaps. |
+| **Deck** | Client-ready slides. **Download PPTX**. Print to PDF. |
+| **Measurement** | KPI room, funnel, evidence mix, intervention board, governance. |
 
-Demo data is the CardioShield HFrEF brief in `examples/brief.example.yaml`.
+`examples/brief.example.yaml` is a CLI fixture only. It is not opened by the app.
 Planning numbers are labelled illustrative until you replace them with audit /
 CRM baselines. All claims still need MLR.
 

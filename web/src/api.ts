@@ -28,18 +28,6 @@ async function readError(res: Response): Promise<string> {
   }
 }
 
-export async function fetchDemo(): Promise<StrategyPack> {
-  try {
-    const res = await fetch("/api/demo");
-    if (res.ok) return res.json();
-  } catch {
-    /* fall through to the static pack */
-  }
-  const fallback = await fetch("/demo.json");
-  if (!fallback.ok) throw new Error("Could not load the demo strategy pack.");
-  return fallback.json();
-}
-
 export async function extractBriefs(
   files: File[],
   pasted: string,
@@ -83,5 +71,43 @@ export async function generatePack(args: {
   if (args.brief) body.append("brief_json", JSON.stringify(args.brief));
   const res = await fetch("/api/generate", { method: "POST", body });
   if (!res.ok) throw new Error(await readError(res));
+  const pack = (await res.json()) as StrategyPack;
+  const asked = (args.brief?.brand || "").trim().toLowerCase();
+  const got = (pack.meta?.brand || "").trim().toLowerCase();
+  if (got === "cardioshield" && asked && asked !== "cardioshield") {
+    throw new Error("The engine returned the sample brand instead of your brief. Try Write the working file again.");
+  }
+  return pack;
+}
+
+export async function listProjects(): Promise<import("./types").ProjectSummary[]> {
+  const res = await fetch("/api/projects");
+  if (!res.ok) throw new Error(await readError(res));
+  const data = await res.json();
+  return data.projects || [];
+}
+
+export async function loadProject(id: string): Promise<import("./types").ProjectRecord> {
+  const res = await fetch(`/api/projects/${encodeURIComponent(id)}`);
+  if (!res.ok) throw new Error(await readError(res));
   return res.json();
+}
+
+export async function saveProject(
+  pack: StrategyPack,
+  status: import("./types").ProjectStatus,
+  id?: string,
+): Promise<import("./types").ProjectRecord> {
+  const res = await fetch("/api/projects", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pack, status, id }),
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  return res.json();
+}
+
+export async function deleteProject(id: string): Promise<void> {
+  const res = await fetch(`/api/projects/${encodeURIComponent(id)}`, { method: "DELETE" });
+  if (!res.ok) throw new Error(await readError(res));
 }

@@ -292,4 +292,26 @@ export interface Workfile {
   gapCount: number;
 }
 
-export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence";
+export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence" | "projects";
+
+export type ProjectStatus = "ongoing" | "saved";
+
+export interface ProjectSummary {
+  id: string;
+  status: ProjectStatus;
+  title: string;
+  brand: string;
+  molecule?: string;
+  therapyArea: string;
+  market: string;
+  doctrine: string;
+  source: string;
+  papers: number;
+  slides: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProjectRecord extends ProjectSummary {
+  pack: StrategyPack;
+}

@@ -12,12 +12,12 @@ from medicomarketing_agent.config import load_brief
 client = TestClient(app)
 
 
-def _demo_pack():
+def _sample_pack():
     return generate_pack(_brief_from_mapping(load_brief("examples/brief.example.yaml")), mode="demo")
 
 
 def test_pptx_is_editable_office_file():
-    pack = _demo_pack()
+    pack = _sample_pack()
     data = pack_to_pptx(pack)
     assert data[:2] == b"PK"
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
@@ -46,13 +46,9 @@ def test_pptx_is_editable_office_file():
 
 def test_export_endpoints():
     res = client.get("/api/export/pptx")
-    assert res.status_code == 200
-    assert "presentationml" in res.headers["content-type"]
-    assert res.headers["content-disposition"].endswith('.pptx"')
-    assert res.content[:2] == b"PK"
-    Presentation(io.BytesIO(res.content))
+    assert res.status_code in {404, 405}
 
-    pack = client.get("/api/demo").json()
+    pack = _sample_pack()
     posted = client.post("/api/export/pptx", json=pack)
     assert posted.status_code == 200
     assert posted.content[:2] == b"PK"

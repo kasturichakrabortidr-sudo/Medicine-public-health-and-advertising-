@@ -1,36 +1,37 @@
-import { useEffect, useState } from "react";
-import { fetchDemo } from "./api";
+import { useState } from "react";
+import { saveProject } from "./api";
 import { BriefsTab } from "./components/BriefsTab";
 import { DashboardTab } from "./components/DashboardTab";
 import { DeckTab } from "./components/DeckTab";
 import { EvidenceTab } from "./components/EvidenceTab";
+import { ProjectsTab } from "./components/ProjectsTab";
 import { WorkingFileTab } from "./components/WorkingFileTab";
 import type { StrategyPack, TabId } from "./types";
 
 export default function App() {
-  const [tab, setTab] = useState<TabId>("briefs");
+  const [tab, setTab] = useState<TabId>("projects");
   const [pack, setPack] = useState<StrategyPack | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const loadDemo = async () => {
+  const applyPack = (next: StrategyPack, go: TabId = "work") => {
+    setPack(next);
+    setTab(go);
+  };
+
+  const pinPack = async () => {
+    if (!pack) return;
     setBusy(true);
     setError("");
     try {
-      const demo = await fetchDemo();
-      setPack(demo);
-      setTab("work");
+      await saveProject(pack, "saved");
+      setTab("projects");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setBusy(false);
     }
   };
-
-  useEffect(() => {
-    loadDemo().catch(() => undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div className={tab === "deck" ? "app deck-mode" : "app"}>
@@ -42,6 +43,13 @@ export default function App() {
         <nav className="nav">
           <button type="button" className={tab === "briefs" ? "active" : ""} onClick={() => setTab("briefs")}>
             Brief
+          </button>
+          <button
+            type="button"
+            className={tab === "projects" ? "active" : ""}
+            onClick={() => setTab("projects")}
+          >
+            Projects
           </button>
           <button
             type="button"
@@ -76,12 +84,16 @@ export default function App() {
             Measurement
           </button>
         </nav>
-        <button className="btn" type="button" onClick={loadDemo} disabled={busy}>
-          Open the CardioShield working file
-        </button>
+        {pack ? (
+          <button className="btn" type="button" onClick={() => void pinPack()} disabled={busy}>
+            Save this pack
+          </button>
+        ) : null}
         <div className="doctrine-chip">
-          <em>{pack ? pack.doctrine.name : "Nothing read yet"}</em>
-          {pack ? pack.doctrine.bet : "Drop a brief. We will write the working file before anyone sees a slide."}
+          <em>{pack ? pack.doctrine.name : "No working file yet"}</em>
+          {pack
+            ? pack.doctrine.bet
+            : "Upload a brief, or open a saved project. Nothing is preloaded."}
         </div>
       </aside>
       <main className="main">
@@ -98,11 +110,17 @@ export default function App() {
               busy={busy}
               setBusy={setBusy}
               onPack={(next) => {
-                setPack(next);
-                setTab("work");
+                applyPack(next, "work");
               }}
             />
           </>
+        )}
+        {tab === "projects" && (
+          <ProjectsTab
+            pack={pack}
+            onOpen={(next) => applyPack(next, "work")}
+            onError={setError}
+          />
         )}
         {tab === "work" && pack && <WorkingFileTab pack={pack} />}
         {tab === "evidence" && pack && <EvidenceTab pack={pack} />}
