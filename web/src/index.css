@@ -429,21 +429,6 @@ textarea {
   flex: 0 0 auto;
 }
 
-.slide.title .slide-head {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding-bottom: 1.5%;
-}
-
-.slide.title h2 {
-  font-size: clamp(52px, 6.4vw, 84px);
-  max-width: 12ch;
-  letter-spacing: -0.02em;
-  margin-top: 0;
-}
-
 .slide .kicker {
   font-family: var(--mono);
   font-size: clamp(10px, 1.05vw, 13px);
@@ -460,36 +445,38 @@ textarea {
 
 .slide h2 {
   font-family: var(--serif);
-  font-size: clamp(26px, 2.8vw, 40px);
-  line-height: 1.12;
+  font-size: clamp(22px, 2.15vw, 34px);
+  line-height: 1.22;
   margin: 0;
-  max-width: 22ch;
+  max-width: none;
   font-weight: 640;
 }
 
 .slide.title h2 {
-  font-size: clamp(52px, 6.4vw, 84px);
-  max-width: 12ch;
+  font-size: clamp(40px, 5.2vw, 72px);
+  max-width: none;
   letter-spacing: -0.02em;
-  margin-top: auto;
+  margin-top: 0;
 }
 
 .slide.close h2 {
-  font-size: clamp(34px, 3.6vw, 52px);
-  max-width: 16ch;
+  font-size: clamp(28px, 3.2vw, 44px);
+  max-width: none;
 }
 
 .slide.statement h2 {
-  font-size: clamp(28px, 3.2vw, 44px);
-  max-width: 22ch;
+  font-size: clamp(24px, 2.6vw, 36px);
+  max-width: none;
 }
 
 .slide.infographic h2,
 .slide.table h2,
 .slide.cards h2,
-.slide.references h2 {
-  font-size: clamp(24px, 2.4vw, 34px);
-  max-width: 28ch;
+.slide.references h2,
+.slide.chart h2,
+.slide.split h2 {
+  font-size: clamp(20px, 2.05vw, 30px);
+  max-width: none;
 }
 
 .slide .sub {
@@ -502,8 +489,8 @@ textarea {
 
 .slide.title .sub {
   color: rgba(244, 239, 230, 0.82);
-  font-size: clamp(18px, 1.8vw, 26px);
-  max-width: 28ch;
+  font-size: clamp(16px, 1.5vw, 22px);
+  max-width: 46ch;
   margin-top: 0.8em;
 }
 
@@ -524,8 +511,154 @@ textarea {
   color: rgba(244, 239, 230, 0.7);
 }
 
-.slide-title-body {
-  margin-top: auto;
+.slide-split {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 0.95fr 1.15fr;
+  gap: 22px;
+  margin-top: 0.7em;
+}
+
+.slide-split-copy .narrative {
+  margin-top: 0;
+}
+
+.slide-split-visual {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+.table-wrap {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  align-items: start;
+}
+
+.slide-table-body:not(.with-chart) .table-wrap {
+  grid-template-columns: 1fr;
+}
+
+.flow-title {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.flow-row {
+  display: grid;
+  gap: 12px;
+}
+
+.flow-row.n-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.flow-row.n-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.flow-step {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  position: relative;
+}
+
+.slide.title .flow-step,
+.slide.close .flow-step {
+  background: rgba(244, 239, 230, 0.08);
+  border-color: rgba(244, 239, 230, 0.18);
+  color: var(--paper);
+}
+
+.flow-index {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--copper);
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+
+.flow-step h4 {
+  font-family: var(--serif);
+  font-size: 16px;
+  margin: 0 0 6px;
+}
+
+.flow-step p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.slide.title .flow-step p,
+.slide.close .flow-step p {
+  color: rgba(244, 239, 230, 0.72);
+}
+
+.house-roof {
+  background: var(--navy);
+  color: var(--cream);
+  text-align: center;
+  padding: 16px 20px;
+  border-radius: 14px 14px 0 0;
+}
+
+.house-roof strong {
+  font-family: var(--serif);
+  font-size: clamp(16px, 1.6vw, 22px);
+  line-height: 1.25;
+}
+
+.house-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: -4px;
+}
+
+.house-pillar {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 0 0 14px 14px;
+  padding: 16px;
+  min-height: 180px;
+}
+
+.house-pillar h4 {
+  font-family: var(--serif);
+  margin: 4px 0 8px;
+  font-size: 18px;
+}
+
+.card-grid.n-5 {
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.card-grid.n-5 .deck-card:nth-child(-n + 3),
+.card-grid.n-5 .deck-card:nth-child(4),
+.card-grid.n-5 .deck-card:nth-child(5) {
+  grid-column: auto;
+}
+
+.card-grid.n-3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .slide-statement-body,

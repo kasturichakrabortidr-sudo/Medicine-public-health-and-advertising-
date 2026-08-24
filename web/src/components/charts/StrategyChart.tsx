@@ -3,6 +3,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  LabelList,
   Legend,
   Line,
   LineChart,
@@ -25,7 +26,7 @@ const PALETTE = ["#132037", "#c4844a", "#2a6f6f", "#8b2e2e", "#5c7a5c", "#1b2c49
 export function StrategyChart({ spec, height = 260 }: { spec: ChartSpec; height?: number }) {
   if (spec.kind === "forest") return <ForestPlot spec={spec} />;
   if (spec.kind === "box") return <BoxPlot spec={spec} />;
-  if (spec.kind === "people" || spec.kind === "compare" || spec.kind === "spine") {
+  if (spec.kind === "people" || spec.kind === "compare" || spec.kind === "spine" || spec.kind === "flow" || spec.kind === "house") {
     return <Infographic spec={spec} />;
   }
 
@@ -79,7 +80,9 @@ export function StrategyChart({ spec, height = 260 }: { spec: ChartSpec; height?
             <XAxis type="number" dataKey="x" name={spec.xLabel || "x"} domain={[0, 100]} />
             <YAxis type="number" dataKey="y" name={spec.yLabel || "y"} domain={[0, 100]} />
             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-            <Scatter data={spec.data} fill="#c4844a" />
+            <Scatter data={spec.data} fill="#c4844a">
+              <LabelList dataKey="name" position="top" fontSize={11} />
+            </Scatter>
           </ScatterChart>
         </ResponsiveContainer>
       </div>

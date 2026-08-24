@@ -147,5 +147,45 @@ function SpineVisual({ spec }: { spec: ChartSpec }) {
 export function Infographic({ spec }: { spec: ChartSpec }) {
   if (spec.kind === "people") return <PeopleVisual spec={spec} />;
   if (spec.kind === "compare") return <CompareVisual spec={spec} />;
+  if (spec.kind === "flow") return <FlowVisual spec={spec} />;
+  if (spec.kind === "house") return <HouseVisual spec={spec} />;
   return <SpineVisual spec={spec} />;
+}
+
+function FlowVisual({ spec }: { spec: ChartSpec }) {
+  return (
+    <div className="infographic flow">
+      {spec.title ? <div className="flow-title">{spec.title}</div> : null}
+      <div className={`flow-row n-${spec.data.length}`}>
+        {spec.data.map((row, i) => (
+          <div className="flow-step" key={String(row.name)}>
+            <div className="flow-index">{i + 1}</div>
+            <h4>{row.name}</h4>
+            <p>{row.detail || row.claim || ""}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function HouseVisual({ spec }: { spec: ChartSpec }) {
+  return (
+    <div className="infographic house">
+      <div className="house-roof">
+        <div className="kicker">Theme</div>
+        <strong>{spec.title}</strong>
+      </div>
+      <div className="house-pillars">
+        {spec.data.map((row) => (
+          <div className="house-pillar" key={String(row.name)}>
+            <div className="kicker">{row.ref || "Pillar"}</div>
+            <h4>{row.name}</h4>
+            <p>{row.line}</p>
+            <div className="small muted">{row.proof}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

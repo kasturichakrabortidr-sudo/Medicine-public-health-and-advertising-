@@ -9,7 +9,9 @@ export type ChartKind =
   | "funnel"
   | "people"
   | "compare"
-  | "spine";
+  | "spine"
+  | "flow"
+  | "house";
 
 export interface ChartSpec {
   kind: ChartKind;

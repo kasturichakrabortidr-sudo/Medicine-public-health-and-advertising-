@@ -1,9 +1,9 @@
 import type { ChartSpec } from "../../types";
 
-const W = 520;
-const ROW_H = 42;
-const LEFT = 168;
-const RIGHT = 36;
+const W = 720;
+const ROW_H = 48;
+const LEFT = 210;
+const RIGHT = 88;
 const AXIS_Y_PAD = 28;
 
 export function ForestPlot({ spec }: { spec: ChartSpec }) {
@@ -43,8 +43,8 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
           const hr = Number(r.hr);
           return (
             <g key={String(r.name)}>
-              <text x={8} y={y + 4} fontSize="11" fill="#0b1220">
-                {String(r.name).slice(0, 32)}
+              <text x={8} y={y + 4} fontSize="12" fill="#0b1220">
+                {String(r.name)}
               </text>
               <text x={8} y={y + 18} fontSize="9" fill="#2a6f6f">
                 {String(r.stream || "")} · {String(r.grade || "")}

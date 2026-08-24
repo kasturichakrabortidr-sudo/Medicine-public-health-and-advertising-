@@ -23,11 +23,11 @@ export function SlideView({ slide }: { slide: Slide }) {
         <TitleBody slide={slide} />
       ) : layout === "close" ? (
         <CloseBody slide={slide} />
-      ) : layout === "statement" ? (
-        <StatementBody slide={slide} />
-      ) : layout === "infographic" ? (
+      ) : layout === "split" ? (
+        <SplitBody slide={slide} />
+      ) : layout === "infographic" || layout === "chart" ? (
         <div className="slide-visual">
-          {slide.chart ? <StrategyChart spec={slide.chart} height={420} /> : null}
+          {slide.chart ? <StrategyChart spec={slide.chart} height={380} /> : null}
         </div>
       ) : layout === "table" || layout === "references" ? (
         <TableBody slide={slide} />
@@ -49,11 +49,7 @@ export function SlideView({ slide }: { slide: Slide }) {
 function TitleBody({ slide }: { slide: Slide }) {
   return (
     <div className="slide-title-body">
-      {slide.narrative ? (
-        <p className="narrative">
-          <Cited text={slide.narrative} />
-        </p>
-      ) : null}
+      {slide.chart ? <StrategyChart spec={slide.chart} height={160} /> : null}
     </div>
   );
 }
@@ -66,7 +62,28 @@ function CloseBody({ slide }: { slide: Slide }) {
           <Cited text={slide.narrative} />
         </p>
       ) : null}
+      {slide.chart ? <StrategyChart spec={slide.chart} height={150} /> : null}
       {slide.bullets ? <Bullets items={slide.bullets} /> : null}
+    </div>
+  );
+}
+
+function SplitBody({ slide }: { slide: Slide }) {
+  return (
+    <div className="slide-split">
+      <div className="slide-split-copy">
+        {slide.narrative ? (
+          <p className="narrative">
+            <Cited text={slide.narrative} />
+          </p>
+        ) : null}
+        {slide.table ? <Table table={slide.table} /> : null}
+        <Callout callout={slide.callout} />
+      </div>
+      <div className="slide-split-visual">
+        {slide.chart ? <StrategyChart spec={slide.chart} height={320} /> : null}
+        {slide.cards ? <MiniCards cards={slide.cards} /> : null}
+      </div>
     </div>
   );
 }
@@ -79,6 +96,7 @@ function StatementBody({ slide }: { slide: Slide }) {
           <Cited text={slide.narrative} />
         </p>
       ) : null}
+      {slide.chart ? <StrategyChart spec={slide.chart} height={240} /> : null}
       {slide.bullets ? <Bullets items={slide.bullets} /> : null}
       <Callout callout={slide.callout} />
     </div>
@@ -87,13 +105,16 @@ function StatementBody({ slide }: { slide: Slide }) {
 
 function TableBody({ slide }: { slide: Slide }) {
   return (
-    <div className="slide-table-body">
+    <div className={`slide-table-body ${slide.chart ? "with-chart" : ""}`}>
       {slide.narrative ? (
         <p className="narrative">
           <Cited text={slide.narrative} />
         </p>
       ) : null}
-      {slide.table ? <Table table={slide.table} /> : null}
+      <div className="table-wrap">
+        {slide.table ? <Table table={slide.table} /> : null}
+        {slide.chart ? <StrategyChart spec={slide.chart} height={220} /> : null}
+      </div>
     </div>
   );
 }
@@ -127,6 +148,26 @@ function CardsBody({ slide }: { slide: Slide }) {
   );
 }
 
+function MiniCards({ cards }: { cards: { title: string; body: string; meta?: string }[] }) {
+  return (
+    <div className="mini-cards">
+      {cards.map((card) => (
+        <div className="deck-card" key={card.title}>
+          <h3>{card.title}</h3>
+          <p>
+            <Cited text={card.body} />
+          </p>
+          {card.meta ? (
+            <div className="deck-card-meta">
+              <Cited text={card.meta} />
+            </div>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Bullets({ items }: { items: string[] }) {
   return (
     <ul className="bullets">
@@ -143,7 +184,7 @@ function Callout({ callout }: { callout?: { label: string; text: string } }) {
   if (!callout) return null;
   return (
     <div className="callout">
-      <strong>{callout.label}</strong>
+      <strong>{callout.label}. </strong>
       <Cited text={callout.text} />
     </div>
   );

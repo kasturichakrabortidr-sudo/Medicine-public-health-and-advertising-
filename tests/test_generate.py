@@ -17,12 +17,11 @@ def test_first_touch_doctrine_from_stabilize_insight():
     assert pack["doctrine"]["id"] == "first-touch"
     assert pack["meta"]["brand"] == "CardioShield"
     ids = [s["id"] for s in pack["slides"]]
-    assert 12 <= len(pack["slides"]) <= 16
+    assert 16 <= len(pack["slides"]) <= 24
     assert "how-built" not in ids
     assert "boxplot" not in ids
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
-    assert {"people", "compare", "spine"} <= kinds
-    assert not {"pie", "scatter", "diverging", "line"} & kinds
+    assert {"people", "compare", "spine", "forest", "flow"} <= kinds
     assert pack["dashboard"]["kpis"]
     assert len(pack["interventions"]) == 5
 

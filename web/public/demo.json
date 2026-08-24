@@ -1548,16 +1548,56 @@
       "subtitle": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
       "narrative": "",
       "layout": "title",
+      "chart": {
+        "kind": "flow",
+        "title": "How this deck is built",
+        "data": [
+          {
+            "name": "1. Number the papers",
+            "detail": "Only DOI or PMID rows set direction."
+          },
+          {
+            "name": "2. Name the wait",
+            "detail": "The habit of waiting until the patient is 'stable' in clinic"
+          },
+          {
+            "name": "3. Five sourced moves",
+            "detail": "Each move executes a cited finding."
+          }
+        ]
+      },
       "footnote": "sacubitril/valsartan fixed-dose combination (illustrative example)"
     },
     {
       "id": "problem",
       "section": "Problem",
       "kicker": "The problem",
-      "title": "The habit of waiting until the patient is 'stable' in clinic",
+      "title": "Doctors already accept the science. They still wait to start.",
+      "subtitle": "What the brief asked: Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.",
       "narrative": "What CardioShield needs is not another reminder that the science is positive. The doctors already told us: Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\" And then: Largely out-of-pocket market; monthly cost 8-10x generic ARB So the work is Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible..",
-      "layout": "statement",
-      "subtitle": "What the brief asked: Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to g…"
+      "layout": "split",
+      "chart": {
+        "kind": "flow",
+        "title": "How the eligible moment is lost",
+        "data": [
+          {
+            "name": "Patient is eligible",
+            "detail": "Guideline encounter is already on the table."
+          },
+          {
+            "name": "Stabilise on the familiar first",
+            "detail": "Advisory board (n=12 cardiologists) - most agree with early initiation in principle but start on ACEi/ARB \"to stabilise first\""
+          },
+          {
+            "name": "Cost does the rest",
+            "detail": "Largely out-of-pocket market; monthly cost 8-10x generic ARB"
+          },
+          {
+            "name": "The window is gone",
+            "detail": "The habit of waiting until the patient is 'stable' in clinic"
+          }
+        ]
+      }
     },
     {
       "id": "the-bet",
@@ -1565,7 +1605,25 @@
       "kicker": "The bet",
       "title": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
       "narrative": "Most launch decks sell the drug again. This one spends against the wait. If we cannot number the paper that allows a line, the line does not ship.",
-      "layout": "statement",
+      "layout": "split",
+      "chart": {
+        "kind": "flow",
+        "title": "What we are actually fighting",
+        "data": [
+          {
+            "name": "Enemy",
+            "detail": "The habit of waiting until the patient is 'stable' in clinic"
+          },
+          {
+            "name": "The bet",
+            "detail": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible."
+          },
+          {
+            "name": "Scientific lead",
+            "detail": "[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851"
+          }
+        ]
+      },
       "refs": [
         2,
         3,
@@ -1581,10 +1639,27 @@
       "id": "science-lead",
       "section": "Science",
       "kicker": "The paper we lead with",
-      "title": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+      "title": "We lead with the initiation window, because that is what the papers measured.",
       "subtitle": "[2] PIONEER-HF 2019 · PMID 30415601",
       "narrative": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit.",
-      "layout": "statement",
+      "layout": "split",
+      "cards": [
+        {
+          "title": "PIONEER-HF 2019",
+          "body": "Velazquez EJ, Morrow DA, DeVore AD, et al. Angiotensin–neprilysin inhibition in acute decompensated heart failure. N Engl J Med. 2019;380:539-548. doi:10.1056/NEJMoa1812851. PMID: 30415601.",
+          "meta": "[2] PMID 30415601"
+        },
+        {
+          "title": "What the paper showed",
+          "body": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor.",
+          "meta": "Inside local label and code"
+        },
+        {
+          "title": "So the campaign leads here",
+          "body": "We spend against the delay in the window this paper actually studied — not against a later clinic visit.",
+          "meta": "n = 881"
+        }
+      ],
       "refs": [
         2,
         3,
@@ -1593,12 +1668,73 @@
       ]
     },
     {
+      "id": "forest",
+      "section": "Science",
+      "kicker": "Evidence figure",
+      "title": "These are the published effect sizes. We will not invent a missing hazard ratio.",
+      "narrative": "Only rows with a DOI or PMID are plotted. Uncited brief items stay off this figure.",
+      "layout": "chart",
+      "chart": {
+        "kind": "forest",
+        "title": "Validated evidence position (named trials)",
+        "note": "HR or ratio and 95% CI copied from the cited publication. Superscripts are Vancouver numbers.",
+        "data": [
+          {
+            "name": "[1] PARADIGM-HF 2014",
+            "stream": "Brand / pivotal",
+            "hr": 0.8,
+            "low": 0.73,
+            "high": 0.87,
+            "grade": "A",
+            "pmid": "25176015",
+            "note": "[1] PMID 25176015 · doi:10.1056/NEJMoa1409077"
+          },
+          {
+            "name": "[2] PIONEER-HF 2019",
+            "stream": "Evolving / initiation",
+            "hr": 0.71,
+            "low": 0.63,
+            "high": 0.81,
+            "grade": "A",
+            "pmid": "30415601",
+            "note": "[2] PMID 30415601 · doi:10.1056/NEJMoa1812851"
+          },
+          {
+            "name": "[3] TRANSITION 2019",
+            "stream": "Evolving / initiation",
+            "hr": 0.95,
+            "low": 0.88,
+            "high": 1.03,
+            "grade": "B",
+            "pmid": "31134724",
+            "note": "[3] PMID 31134724 · doi:10.1002/ejhf.1498"
+          },
+          {
+            "name": "[4] Jhund 2015 age",
+            "stream": "Brand / post-hoc",
+            "hr": 0.81,
+            "low": 0.74,
+            "high": 0.89,
+            "grade": "B",
+            "pmid": "26231885",
+            "note": "[4] PMID 26231885 · doi:10.1093/eurheartj/ehv330"
+          }
+        ]
+      },
+      "refs": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
       "id": "science-meaning",
       "section": "Science",
       "kicker": "What the science means",
-      "title": "In a clinic of 100, this is what the paper showed",
+      "title": "In a clinic of 100 patients, this is what the paper actually showed.",
       "subtitle": "[1] PARADIGM-HF 2014 · PMID 25176015",
-      "narrative": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF. [1] 26.5 events on the comparator versus 21.8 on the intervention — treat 21 to prevent 1 event.",
+      "narrative": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF. [1] 26.5 events on the comparator versus 21.8 on the intervention — treat 21 to prevent one event.",
       "layout": "infographic",
       "chart": {
         "kind": "people",
@@ -1630,7 +1766,7 @@
       "id": "science-compare",
       "section": "Science",
       "kicker": "What the timing data means",
-      "title": "The comparator is the delayed habit, not another molecule",
+      "title": "The comparator is the delayed habit, not another molecule.",
       "subtitle": "[2] PIONEER-HF 2019 · PMID 30415601",
       "narrative": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor. [2]",
       "layout": "infographic",
@@ -1663,8 +1799,8 @@
       "id": "citation-register",
       "section": "Science",
       "kicker": "Evidence forefront",
-      "title": "Every lead claim traces to a numbered paper",
-      "narrative": "7 numbered papers [1–7]. 2 brief item(s) still lack a DOI/PMID and cannot set direction. Full Vancouver list at the end.",
+      "title": "Every lead claim traces to a numbered paper.",
+      "narrative": "7 numbered papers [1–7]. 2 brief items still lack a DOI or PMID and cannot set direction. The full Vancouver list is at the end of the deck.",
       "layout": "table",
       "table": {
         "headers": [
@@ -1734,7 +1870,7 @@
       "kicker": "What the doctors already told us",
       "title": "Agreement is an amplifier. Disagreement is the campaign.",
       "narrative": "These lines are from the brief, mapped onto numbered papers. They are not a market model.",
-      "layout": "table",
+      "layout": "split",
       "table": {
         "headers": [
           "Belief that delays the start",
@@ -1758,19 +1894,100 @@
             "Myth-reset only with a sourced number. If we cannot source it, we do not run the line."
           ]
         ]
+      },
+      "chart": {
+        "kind": "bar",
+        "title": "Where the brief sits relative to the papers",
+        "unit": "mapped insight lines",
+        "note": "Counts from this brief’s insight lines, not a survey index.",
+        "data": [
+          {
+            "name": "Agrees with papers",
+            "value": 1
+          },
+          {
+            "name": "Disagrees — the campaign",
+            "value": 3
+          }
+        ]
       }
+    },
+    {
+      "id": "house",
+      "section": "Message",
+      "kicker": "Message house",
+      "title": "One theme. Three pillars. A pillar without a number does not ship.",
+      "narrative": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+      "layout": "infographic",
+      "chart": {
+        "kind": "house",
+        "title": "Start CardioShield at the first eligible encounter — in hospital if that is when they are eligible.",
+        "data": [
+          {
+            "name": "Start now",
+            "line": "First eligible encounter is a guideline encounter, not a later clinic. [2]",
+            "ref": "[2]",
+            "proof": "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor."
+          },
+          {
+            "name": "The outcome is already earned",
+            "line": "We are not arguing efficacy from scratch. [1]",
+            "ref": "[1]",
+            "proof": "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+          },
+          {
+            "name": "Cover exists",
+            "line": "Class I / four-pillar language is permission, not a poster after the wait. [5]",
+            "ref": "[5]",
+            "proof": "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan."
+          }
+        ]
+      },
+      "table": {
+        "headers": [
+          "Pillar",
+          "Line",
+          "Ref",
+          "Proof we are allowed to use"
+        ],
+        "rows": [
+          [
+            "Start now",
+            "First eligible encounter is a guideline encounter, not a later clinic. [2]",
+            "[2]",
+            "In-hospital initiation after haemodynamic stabilisation is feasible and lowers NT-proBNP vs ACE inhibitor."
+          ],
+          [
+            "The outcome is already earned",
+            "We are not arguing efficacy from scratch. [1]",
+            "[1]",
+            "ARNI reduced the primary composite vs ACE inhibitor in HFrEF."
+          ],
+          [
+            "Cover exists",
+            "Class I / four-pillar language is permission, not a poster after the wait. [5]",
+            "[5]",
+            "ESC gives Class I cover for ARNI in HFrEF. Early foundational therapy is the guideline position, not a brand slogan."
+          ]
+        ]
+      },
+      "refs": [
+        1,
+        2,
+        3
+      ]
     },
     {
       "id": "science-execute",
       "section": "Action",
       "kicker": "Science → execution",
-      "title": "Each cited finding becomes one campaign move",
-      "narrative": "",
+      "title": "Each cited finding becomes one campaign move.",
+      "narrative": "Science names the prize. The barrier names why it is lost. The intervention is how we take it.",
       "layout": "infographic",
       "chart": {
         "kind": "spine",
         "title": "Science to solution through execution",
-        "note": "Only rows with a PMID/DOI. Uncited brief items cannot own a move.",
+        "note": "Only rows with a PMID or DOI. Uncited brief items cannot own a move.",
         "data": [
           {
             "name": "[1] PARADIGM-HF 2014",
@@ -1823,7 +2040,7 @@
       "id": "interventions",
       "section": "Action",
       "kicker": "Five moves",
-      "title": "Five moves that retire the ritual",
+      "title": "Five moves that retire the wait, each anchored to a numbered paper.",
       "narrative": "Each move is the execution of a cited finding — not a separate creative idea.",
       "layout": "cards",
       "cards": [
@@ -1853,6 +2070,34 @@
           "meta": "[1] PARADIGM-HF 2014 · PMID 25176015 · doi:10.1056/NEJMoa1409077"
         }
       ],
+      "chart": {
+        "kind": "bar",
+        "title": "Designed impact of each move",
+        "unit": "architecture score 0–100",
+        "note": "These scores rank this mix. They are not a market survey.",
+        "data": [
+          {
+            "name": "First-Touch",
+            "value": 88
+          },
+          {
+            "name": "Affordability",
+            "value": 84
+          },
+          {
+            "name": "Myth-Reset",
+            "value": 61
+          },
+          {
+            "name": "Peer Cascade",
+            "value": 76
+          },
+          {
+            "name": "Habit-Lock CRM",
+            "value": 58
+          }
+        ]
+      },
       "bullets": [
         "First-Touch Protocol — A hospital-to-clinic initiation bundle so CardioShield is started at the first eligible encounter.  [[2] PIONEER-HF 2019 · PMID 30415601 · doi:10.1056/NEJMoa1812851]",
         "Affordability Confidence Kit — A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.  [[7] Trivandrum HFR 2015 · PMID 26011246 · doi:10.1002/ejhf.283]",
@@ -1862,34 +2107,201 @@
       ]
     },
     {
+      "id": "matrix",
+      "section": "Action",
+      "kicker": "Where we spend first",
+      "title": "Q1 buys proof of mechanism. We do not spend the year on congress theatre.",
+      "narrative": "Impact versus feasibility for this architecture. These are design scores, not a market survey.",
+      "layout": "chart",
+      "chart": {
+        "kind": "scatter",
+        "title": "Impact vs feasibility of the five moves",
+        "xLabel": "Feasibility",
+        "yLabel": "Impact on the key driver",
+        "note": "Architecture scores for this mix. Not research.",
+        "data": [
+          {
+            "name": "First-Touch Protocol",
+            "x": 62,
+            "y": 88,
+            "z": 28
+          },
+          {
+            "name": "Affordability Confidence Kit",
+            "x": 70,
+            "y": 84,
+            "z": 28
+          },
+          {
+            "name": "Myth-Reset Asset",
+            "x": 78,
+            "y": 61,
+            "z": 28
+          },
+          {
+            "name": "Peer Cascade",
+            "x": 54,
+            "y": 76,
+            "z": 28
+          },
+          {
+            "name": "Habit-Lock CRM",
+            "x": 80,
+            "y": 58,
+            "z": 28
+          },
+          {
+            "name": "Congress theatre",
+            "x": 40,
+            "y": 34,
+            "z": 18
+          }
+        ]
+      }
+    },
+    {
       "id": "segments",
       "section": "Who",
       "kicker": "Who first",
-      "title": "Four rooms. Not a year-long spray.",
-      "narrative": "Everyone else inherits. Cost-concern is a design input, not a footnote.",
-      "layout": "cards",
-      "cards": [
-        {
-          "title": "Cardiologists (interventiona · KOL metro",
-          "body": "Peer Cascade",
-          "meta": "Q1 heavy · low cost-friction"
-        },
-        {
-          "title": "Cardiologists (interventiona · private metro",
-          "body": "First-Touch Protocol",
-          "meta": "Q1 heavy · the eligible visit"
-        },
-        {
-          "title": "Consultant physicians managi · tier-2",
-          "body": "Affordability Confidence Kit",
-          "meta": "Q1 heavy · cost is the veto"
-        },
-        {
-          "title": "Hospital pathway owners",
-          "body": "First-Touch Protocol",
-          "meta": "Q1 heavy · 48-hour log"
-        }
-      ]
+      "title": "Four rooms carry the year. Everyone else inherits.",
+      "narrative": "Activation is a specialty × city × cost grid that we then collapse. Cost-concern is a design input, not a footnote.",
+      "layout": "table",
+      "table": {
+        "headers": [
+          "Segment",
+          "Lead intervention",
+          "Cost posture",
+          "Q1 weight"
+        ],
+        "rows": [
+          [
+            "Cardiologists (interventional and non-interventional) · KOL metro",
+            "Peer Cascade",
+            "Low",
+            "Heavy"
+          ],
+          [
+            "Cardiologists (interventional and non-interventional) · private metro",
+            "First-Touch Protocol",
+            "Medium",
+            "Heavy"
+          ],
+          [
+            "Consultant physicians managing heart failure · tier-2",
+            "Affordability Confidence Kit",
+            "High",
+            "Heavy"
+          ],
+          [
+            "Hospital pathway owners",
+            "First-Touch Protocol",
+            "Medium",
+            "Heavy"
+          ],
+          [
+            "Early-career / trainee",
+            "Myth-Reset Asset",
+            "Medium",
+            "Medium"
+          ],
+          [
+            "GP / referrer",
+            "Referral trigger, not a full lesson",
+            "High",
+            "Light"
+          ]
+        ]
+      },
+      "chart": {
+        "kind": "bar",
+        "title": "Q1 weight by room",
+        "data": [
+          {
+            "name": "KOL academic cardiolog",
+            "value": 90
+          },
+          {
+            "name": "Private metro",
+            "value": 88
+          },
+          {
+            "name": "Tier-2",
+            "value": 86
+          },
+          {
+            "name": "Hospital pathway",
+            "value": 84
+          },
+          {
+            "name": "Trainee",
+            "value": 50
+          },
+          {
+            "name": "GP referrer",
+            "value": 28
+          }
+        ],
+        "note": "Relative Q1 weight for this mix — not an audited caseload."
+      }
+    },
+    {
+      "id": "journey",
+      "section": "Engagement",
+      "kicker": "The sequence",
+      "title": "A doctor should feel a designed sequence, not a spray of assets.",
+      "narrative": "If a contact cannot name a numbered paper or a behaviour we are trying to change, it does not go on the plan.",
+      "layout": "infographic",
+      "chart": {
+        "kind": "flow",
+        "title": "Campaign sequence",
+        "data": [
+          {
+            "name": "Before launch",
+            "detail": "A handful of hospital pathway owners write the first-eligible protocol"
+          },
+          {
+            "name": "First quarter",
+            "detail": "One hospital live, one cost conversation kit in the bag, one myth we can actually source"
+          },
+          {
+            "name": "Adoption",
+            "detail": "The second prescription is designed. Repeat among trialists is the tell."
+          },
+          {
+            "name": "After the burst",
+            "detail": "The pathway stays when the campaign money stops"
+          }
+        ]
+      },
+      "table": {
+        "headers": [
+          "When",
+          "Job",
+          "Who owns it"
+        ],
+        "rows": [
+          [
+            "Before launch",
+            "A handful of hospital pathway owners write the first-eligible protocol",
+            "Medical leads. Commercial listens."
+          ],
+          [
+            "First quarter",
+            "One hospital live, one cost conversation kit in the bag, one myth we can actually source",
+            "Field + medical huddle weekly."
+          ],
+          [
+            "Adoption",
+            "The second prescription is designed. Repeat among trialists is the tell.",
+            "CRM is promotional. It goes through MLR."
+          ],
+          [
+            "After the burst",
+            "The pathway stays when the campaign money stops",
+            "Handover into the next cycle's working file."
+          ]
+        ]
+      }
     },
     {
       "id": "measure",
@@ -1898,7 +2310,7 @@
       "title": "The brief’s own goal is the parent metric. Everything else has to explain it.",
       "subtitle": "Grow quarterly prescription volume 15% QoQ over 4 quarters by moving cardiologists and consultant physicians from late/second-line use to guideline-consistent early initiation.",
       "narrative": "Any initiation % we later put on a dashboard is a planning target until the audit exists.",
-      "layout": "cards",
+      "layout": "chart",
       "cards": [
         {
           "title": "Quarterly volume / revenue vs the brief",
@@ -1920,7 +2332,37 @@
           "body": "Survey (n=180) - 40% believe renal monitoring burden is higher than it actually is",
           "meta": "No drop, no second burst"
         }
-      ]
+      ],
+      "chart": {
+        "kind": "line",
+        "title": "Planning target taken from the brief’s stated QoQ goal",
+        "note": "Index, Q0 = 100. This is the brief’s own ambition, not an audited baseline.",
+        "series": [
+          "target"
+        ],
+        "data": [
+          {
+            "name": "Q0",
+            "target": 100
+          },
+          {
+            "name": "Q1",
+            "target": 115
+          },
+          {
+            "name": "Q2",
+            "target": 132
+          },
+          {
+            "name": "Q3",
+            "target": 152
+          },
+          {
+            "name": "Q4",
+            "target": 175
+          }
+        ]
+      }
     },
     {
       "id": "close",
@@ -1935,6 +2377,24 @@
         "Name owners for the hospital pathway, the cost conversation, and the one myth we can source.",
         "Park 2 uncited brief line(s) as research, not as copy."
       ],
+      "chart": {
+        "kind": "flow",
+        "title": "Thirty days",
+        "data": [
+          {
+            "name": "Days 1–10",
+            "detail": "Lock the bet and the numbered scientific lead."
+          },
+          {
+            "name": "Days 11–20",
+            "detail": "One hospital pathway and one cost conversation."
+          },
+          {
+            "name": "Days 21–30",
+            "detail": "MLR on every line that carries a superscript."
+          }
+        ]
+      },
       "callout": {
         "label": "CardioShield",
         "text": "Lead the campaign with first-eligible / in-hospital initiation. PIONEER-HF (2019) shows that starting after haemodynamic stabilisation is feasible; ESC/ACC Class I plus PARADIGM-HF are the outcome permission — not a reason to wait for a second clinic visit."

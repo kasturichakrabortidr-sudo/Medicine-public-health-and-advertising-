@@ -32,6 +32,9 @@ def test_pack_exposes_science_slides_and_anchors():
     assert "science-meaning" in ids
     assert "science-compare" in ids
     assert "science-execute" in ids
+    assert "forest" in ids
+    assert "house" in ids
+    assert "journey" in ids
     assert "how-built" not in ids
     assert "questions" not in ids
     assert "references" in ids
@@ -51,7 +54,14 @@ def test_pack_exposes_science_slides_and_anchors():
     assert "PMID" in pack["doctrine"]["scienceAnchor"]
     forefront = " ".join(str(c) for row in register["table"]["rows"] for c in row)
     assert "[1]" in forefront
-    assert pack["interventions"][0]["evidenceAnchor"]
+    house = next(s for s in pack["slides"] if s["id"] == "house")
+    house_text = " ".join(str(r) for r in (house.get("chart") or {}).get("data") or [])
+    house_text += str(house.get("table") or "") + (house.get("narrative") or "")
+    assert "[1]" in house_text or "[2]" in house_text or "PMID" in house_text
+    forest = next(s for s in pack["slides"] if s["id"] == "forest")
+    names = [row["name"] for row in forest["chart"]["data"]]
+    assert any("PARADIGM-HF" in n for n in names)
+    assert any("PIONEER-HF" in n for n in names)
 
 
 def test_people_infographic_uses_published_paradigm_rates():
