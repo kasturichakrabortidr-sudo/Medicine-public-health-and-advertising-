@@ -17,9 +17,9 @@ export function ForestPlot({ spec }: { spec: ChartSpec }) {
   const ticks = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1];
 
   return (
-    <div>
+    <div className="forest-wrap">
       <div className="small muted">{spec.title}</div>
-      <svg viewBox={`0 0 ${W} ${h}`} role="img" aria-label={spec.title} width="100%">
+      <svg viewBox={`0 0 ${W} ${h}`} role="img" aria-label={spec.title} width="100%" height="100%">
         <line
           x1={x(1)}
           y1={12}
