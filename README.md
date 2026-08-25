@@ -29,6 +29,24 @@ in the `output` folder, and your answers are remembered for next time.
 
 ---
 
+## Evidence workflow (literature → visual deck, no API key)
+
+Option **4** in the launcher, or:
+
+```bash
+python -m academic_research demo --brief examples/brief.example.yaml
+cd web && npm install && npm run dev
+```
+
+Open `/deck` for a citation-numbered slide deck (PRISMA, frequency charts,
+forest plot, IPA carousel). Every included reference is resolved in Crossref,
+Europe PMC, ClinicalTrials.gov, or an allow-listed official URL. Methods:
+[`EVIDENCE_WORKFLOW.md`](EVIDENCE_WORKFLOW.md).
+
+To publish the site on Netlify after logging in: `npx netlify deploy --prod`.
+
+---
+
 ## The working process — fully outlined
 
 This is the exact process the agent executes, phase by phase. Each phase is a
