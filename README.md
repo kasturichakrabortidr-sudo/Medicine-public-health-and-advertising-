@@ -10,9 +10,7 @@ tension in the brief. Interventions, charts, and kill-criteria all serve that be
 The app does **not** preload a sample brand. Upload your brief, or open a pack
 from **Projects**.
 
-### Run the app
-
-### Run the app
+### Run the app on your computer
 
 ```bash
 pip install -r requirements.txt
@@ -33,6 +31,76 @@ Opens `http://127.0.0.1:5173`
 `examples/brief.example.yaml` is a CLI fixture only. It is not opened by the app.
 Planning numbers are labelled illustrative until you replace them with audit /
 CRM baselines. All claims still need MLR.
+
+### Live website (always-on URL)
+
+The preview tunnel used during development dies when that session ends. A live
+app is one Docker service: the website and the `/api` backend on the same URL.
+
+You need a GitHub account (this repo is already there) and a Render account.
+Render’s Starter plan is paid. The director website itself does **not** need an
+Anthropic API key.
+
+#### Steps on Render (recommended)
+
+1. Open [Render](https://dashboard.render.com) and click **Sign in with GitHub**.
+2. Approve access to `kasturichakrabortidr-sudo/Medicine-public-health-and-advertising-`.
+3. Click **New** → **Blueprint**.
+4. Select this repository.
+5. Set the branch to the one that contains this `render.yaml` (this branch, or
+   `main` after you merge it).
+6. Click **Apply**. Render creates a web service named `strata-director`.
+7. Wait for the first deploy. The log should show a Node build, a Python image,
+   then `Uvicorn running on http://0.0.0.0:8080`.
+8. Open the URL Render shows (it looks like `https://strata-director.onrender.com`).
+9. Confirm the API: open `/api/health` on that same host. You should see
+   `"ok": true` and `"web": true`.
+10. Use the app: **Brief** → paste or upload a brief → write the working file →
+    open **Deck**.
+
+If the Blueprint name `strata-director` is already taken, Render suffixes the
+URL. Use whatever hostname it prints.
+
+**Manual path (same result, no Blueprint):** **New** → **Web Service** →
+connect this repo → **Language: Docker** → health-check path `/api/health` →
+**Create Web Service**.
+
+Projects persist across deploys because `render.yaml` mounts a 1 GB disk at
+`/var/data`. If you skip the disk, saved packs disappear on every deploy.
+
+#### Other hosts
+
+**Your own server (VPS):**
+
+```bash
+pip install -r requirements.txt
+python start_live.py
+```
+
+Then open `http://YOUR-SERVER:8080`. Point Nginx or Caddy at that port for HTTPS.
+
+**Docker Compose (on a machine with Docker):**
+
+```bash
+docker compose up --build
+```
+
+Opens `http://127.0.0.1:8080`.
+
+**Fly.io:** install [flyctl](https://fly.io/docs/flyctl/install/), then:
+
+```bash
+fly auth login
+fly launch --copy-config --yes
+fly volumes create strata_data --region iad --size 1
+fly deploy
+```
+
+Change `app = "strata-director"` in `fly.toml` if that name is taken.
+
+Do **not** deploy the `netlify.toml` frontend as the live app. That file only
+builds the Vite site. Without the Python API, Brief, Projects, and PPTX download
+will fail.
 
 The original 11-phase Claude pipeline (Markdown documents) is unchanged below.
 

@@ -13,3 +13,4 @@ web/dist
 api_key.txt
 *.egg-info
 .cursor
+data/projects

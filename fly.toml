@@ -1,0 +1,37 @@
+# fly launch --copy-config --yes
+# fly volumes create strata_data --region iad --size 1
+# fly deploy
+
+app = "strata-director"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PYTHONUNBUFFERED = "1"
+  STRATA_PROJECTS_DIR = "/var/data/projects"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [[http_service.checks]]
+    grace_period = "30s"
+    interval = "15s"
+    method = "GET"
+    timeout = "5s"
+    path = "/api/health"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "1gb"
+
+[[mounts]]
+  source = "strata_data"
+  destination = "/var/data"

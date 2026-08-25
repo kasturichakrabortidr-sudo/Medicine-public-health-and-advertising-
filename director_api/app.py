@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
-from fastapi.staticfiles import StaticFiles
 
 from .extract import ExtractedBrief, extract_files, merge_into_brief
 from .generate import generate_pack
@@ -24,7 +24,7 @@ app.add_middleware(
 )
 
 ROOT = Path(__file__).resolve().parent.parent
-DIST = ROOT / "web" / "dist"
+_RESERVED_SPA = {"api", "docs", "redoc", "openapi.json"}
 
 ACCEPT_HINT = (
     ".pdf .ppt .pptx .doc .docx .xls .xlsx .csv .tsv .txt .md .rtf .yaml .yml "
@@ -32,9 +32,20 @@ ACCEPT_HINT = (
 )
 
 
+def web_dist() -> Path:
+    override = os.environ.get("STRATA_WEB_DIST", "").strip()
+    return Path(override) if override else ROOT / "web" / "dist"
+
+
 @app.get("/api/health")
 def health():
-    return {"ok": True, "service": "strata-director", "accept": ACCEPT_HINT}
+    dist = web_dist()
+    return {
+        "ok": True,
+        "service": "strata-director",
+        "accept": ACCEPT_HINT,
+        "web": (dist / "index.html").is_file(),
+    }
 
 
 @app.post("/api/extract")
@@ -180,19 +191,37 @@ def _pptx_response(pack: dict) -> Response:
     )
 
 
-@app.get("/")
-def spa_index():
-    index = DIST / "index.html"
-    if not index.exists():
+def _web_file(relative: str) -> FileResponse:
+    dist = web_dist().resolve()
+    index = dist / "index.html"
+    if not index.is_file():
         raise HTTPException(
             503,
-            "Web build missing. From the repo root run: cd web && npm run build",
+            "Web build missing. From the repo root run: python start_live.py",
         )
+    if not relative or relative == "index.html":
+        return FileResponse(index)
+    candidate = (dist / relative).resolve()
+    try:
+        candidate.relative_to(dist)
+    except ValueError as exc:
+        raise HTTPException(404, "Not found") from exc
+    if candidate.is_file():
+        return FileResponse(candidate)
     return FileResponse(index)
 
 
-if (DIST / "assets").is_dir():
-    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+@app.get("/")
+def spa_index():
+    return _web_file("index.html")
+
+
+@app.get("/{full_path:path}")
+def spa_or_asset(full_path: str):
+    first = full_path.split("/", 1)[0]
+    if first in _RESERVED_SPA:
+        raise HTTPException(404, "Not found")
+    return _web_file(full_path)
 
 
 def _brief_from_mapping(data: dict) -> ExtractedBrief:

@@ -1,3 +1,5 @@
+# Frontend-only snapshot. This is not the live STRATA app.
+# Live hosting needs the Python API (Docker / Render / start_live.py). See README.
 [build]
   base = "web"
   command = "npm run build"

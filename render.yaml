@@ -1,8 +1,19 @@
+# Blueprint: https://dashboard.render.com → New → Blueprint
+# Deploys the Docker image (Vite website + FastAPI) as one always-on URL.
 services:
   - type: web
     name: strata-director
     runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
     healthCheckPath: /api/health
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: STRATA_PROJECTS_DIR
+        value: /var/data/projects
+    disk:
+      name: strata-projects
+      mountPath: /var/data
+      sizeGB: 1
