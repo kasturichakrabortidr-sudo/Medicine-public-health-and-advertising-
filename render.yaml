@@ -1,19 +1,13 @@
-# Blueprint: https://dashboard.render.com → New → Blueprint
-# Deploys the Docker image (Vite website + FastAPI) as one always-on URL.
+# Blueprint: New → Blueprint, then set the branch to cursor/live-working-app-8da2.
+# Prefer the Dashboard manual Web Service path in the README. Free has no disk.
 services:
   - type: web
     name: strata-director
     runtime: docker
     dockerfilePath: ./Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /api/health
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
-      - key: STRATA_PROJECTS_DIR
-        value: /var/data/projects
-    disk:
-      name: strata-projects
-      mountPath: /var/data
-      sizeGB: 1

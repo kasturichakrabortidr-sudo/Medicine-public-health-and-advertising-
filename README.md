@@ -32,41 +32,67 @@ Opens `http://127.0.0.1:5173`
 Planning numbers are labelled illustrative until you replace them with audit /
 CRM baselines. All claims still need MLR.
 
-### Live website (always-on URL)
+### Live website
 
-The preview tunnel used during development dies when that session ends. A live
-app is one Docker service: the website and the `/api` backend on the same URL.
+Use the **manual Web Service** path below. Do not type a guessed
+`strata-director.onrender.com` URL — that host does not exist. Render only
+makes a URL after the service is **Live**, and the hostname is whatever Render
+prints on the service page.
 
-You need a GitHub account (this repo is already there) and a Render account.
-Render’s Starter plan is paid. The director website itself does **not** need an
-Anthropic API key.
+GitHub’s default branch in this repo is the old CLI launcher. It has **no
+website**. If you leave **Branch** on the default, the deploy has nothing to
+serve and the URL shows as not available.
 
-#### Steps on Render (recommended)
+The director website does **not** need an Anthropic API key.
 
-1. Open [Render](https://dashboard.render.com) and click **Sign in with GitHub**.
-2. Approve access to `kasturichakrabortidr-sudo/Medicine-public-health-and-advertising-`.
-3. Click **New** → **Blueprint**.
-4. Select this repository.
-5. Set the branch to the one that contains this `render.yaml` (this branch, or
-   `main` after you merge it).
-6. Click **Apply**. Render creates a web service named `strata-director`.
-7. Wait for the first deploy. The log should show a Node build, a Python image,
-   then `Uvicorn running on http://0.0.0.0:8080`.
-8. Open the URL Render shows (it looks like `https://strata-director.onrender.com`).
-9. Confirm the API: open `/api/health` on that same host. You should see
-   `"ok": true` and `"web": true`.
-10. Use the app: **Brief** → paste or upload a brief → write the working file →
-    open **Deck**.
+#### Manual path (Render Dashboard)
 
-If the Blueprint name `strata-director` is already taken, Render suffixes the
-URL. Use whatever hostname it prints.
+1. Open [https://dashboard.render.com](https://dashboard.render.com) and sign in
+   with GitHub.
+2. Top right: **New** → **Web Service**.
+3. Stay on **Git Provider**. Connect GitHub if asked, and allow
+   `Medicine-public-health-and-advertising-`.
+4. Click that repository. Do **not** pick **Existing Image**.
+5. Fill the form exactly:
 
-**Manual path (same result, no Blueprint):** **New** → **Web Service** →
-connect this repo → **Language: Docker** → health-check path `/api/health` →
-**Create Web Service**.
+   | Field | Set to |
+   |---|---|
+   | **Name** | anything you like (this becomes part of the URL) |
+   | **Region** | Oregon, or the region closest to you |
+   | **Branch** | `cursor/live-working-app-8da2` |
+   | **Language** | **Docker** (not Python) |
+   | **Dockerfile Path** | `./Dockerfile` |
+   | **Root Directory** | leave blank |
+   | **Instance type** | **Free** to try, or **Starter** if you want it always on |
 
-Projects persist across deploys because `render.yaml` mounts a 1 GB disk at
-`/var/data`. If you skip the disk, saved packs disappear on every deploy.
+6. Open **Advanced**:
+   - **Health Check Path:** `/api/health`
+   - Leave **Docker Command** empty (the Dockerfile already starts uvicorn)
+   - Do **not** add a disk on the Free instance (Render rejects it)
+7. Click **Create Web Service** (some accounts say **Deploy Web Service**).
+8. Open **Logs** / **Events**. Wait until the deploy status is **Live**. First
+   Docker build takes several minutes. Opening the URL before **Live** is what
+   produces “URL not available”.
+9. On the service page, copy the `https://….onrender.com` link next to the
+   service name. Open **that** URL, not a name you invent.
+10. Confirm `https://YOUR-HOST.onrender.com/api/health` shows `"ok": true` and
+    `"web": true`.
+
+**If the browser still says the URL is not available**
+
+- Confirm **Events** says **Live**, then wait one minute and refresh.
+- Free instances sleep after 15 minutes idle. The first request after that can
+  take about a minute. Keep the tab open; do not treat the wait page as a dead
+  link.
+- Use `https://`, not `http://`.
+- Try an incognito window or another network (some VPNs break `onrender.com`).
+
+**Free vs always-on:** Free is fine to test. For a URL that stays up, change
+the instance type to **Starter** on the service **Settings** page.
+
+Do **not** use **New → Blueprint** unless you first set the Blueprint branch to
+`cursor/live-working-app-8da2`. A Blueprint against the default GitHub branch
+will not find this app.
 
 #### Other hosts
 
