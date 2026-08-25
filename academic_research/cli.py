@@ -47,7 +47,7 @@ def main(argv: list[str] | None = None) -> int:
     brief = load_brief(args.brief)
     pipe = ResearchPipeline(brief, max_per_query=args.max_per_query)
     payload = pipe.run()
-    path = write_deck(payload, args.out)
+    path = write_deck(payload, args.out, git_safe=args.command == "demo")
     print(f"Included {payload['prisma']['included']} validated records")
     print(f"Wrote {path}")
     if args.command == "demo":

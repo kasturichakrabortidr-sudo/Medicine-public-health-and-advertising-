@@ -16,6 +16,10 @@ slide-making versus ~12 hours of oversight).
 
 Paywalled journals contribute metadata and abstracts only. Full text is never scraped.
 
+The committed file `web/public/demo/literature-deck.json` may omit a few
+otherwise-valid papers whose bibliographic text collides with a repository
+secret scanner. A live `run` keeps every registry-validated record.
+
 ## Anti-hallucination contract
 
 A record is included only if:
