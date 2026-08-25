@@ -102,6 +102,39 @@ def extract_files(uploads: list[tuple[str, bytes, str]]) -> list[ExtractedFile]:
     return [extract_one(name, payload, mime) for name, payload, mime in uploads]
 
 
+def is_design_template(filename: str, text: str = "") -> bool:
+    """True for a visual master (Omnicom PPTX), not a client brief."""
+    name = (filename or "").lower()
+    if "template" in name or "omnicom" in name:
+        return True
+    blob = (text or "").lower()
+    if "omnicom group" in blob and "medical strategy deck" in blob:
+        return True
+    return False
+
+
+def partition_uploads(
+    uploads: list[tuple[str, bytes, str]],
+) -> tuple[list[tuple[str, bytes, str]], list[tuple[str, bytes, str]]]:
+    """Split design-template files from brief files before extraction."""
+    templates: list[tuple[str, bytes, str]] = []
+    briefs: list[tuple[str, bytes, str]] = []
+    for item in uploads:
+        name, payload, mime = item
+        suffix = Path(name).suffix.lower()
+        preview = ""
+        if suffix == ".pptx":
+            try:
+                preview = extract_one(name, payload, mime).text
+            except Exception:
+                preview = ""
+        if is_design_template(name, preview):
+            templates.append(item)
+        else:
+            briefs.append(item)
+    return templates, briefs
+
+
 def extract_one(filename: str, payload: bytes, mime: str = "") -> ExtractedFile:
     suffix = Path(filename).suffix.lower()
     notes: list[str] = []

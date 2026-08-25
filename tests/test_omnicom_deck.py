@@ -76,3 +76,4 @@ def test_pptx_uses_omnicom_palette():
     assert b"4E7DF2" in xml
     assert b"FF6433" in xml
     assert b"F7F7F4" in xml
+    assert b"Aptos" in xml

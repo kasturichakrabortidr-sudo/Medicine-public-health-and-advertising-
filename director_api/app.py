@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 
-from .extract import ExtractedBrief, extract_files, merge_into_brief
+from .extract import ExtractedBrief, extract_files, merge_into_brief, partition_uploads
 from .generate import generate_pack
 from .pptx_export import filename_for, pack_to_pptx
 from .projects import delete_project, get_project, list_projects, save_project, upsert_ongoing
@@ -63,21 +64,40 @@ async def extract(
     if not uploads and not pasted.strip():
         raise HTTPException(400, "Upload at least one file or paste brief text.")
 
-    extracted = extract_files(uploads)
+    templates, briefs = partition_uploads(uploads)
+    extracted = extract_files(briefs)
     brief = merge_into_brief(extracted, pasted)
-    return {
-        "files": [
+    if templates:
+        names = ", ".join(name for name, _, _ in templates)
+        brief.extraction_notes.append(
+            f"Design template kept for the deck look, not read as a second brief: {names}"
+        )
+    file_rows = [
+        {
+            "filename": e.filename,
+            "suffix": e.suffix,
+            "bytes": e.bytes,
+            "pages": e.pages,
+            "notes": e.notes,
+            "chars": len(e.text),
+            "preview": e.text[:1200],
+        }
+        for e in extracted
+    ]
+    for name, payload, mime in templates:
+        file_rows.append(
             {
-                "filename": e.filename,
-                "suffix": e.suffix,
-                "bytes": e.bytes,
-                "pages": e.pages,
-                "notes": e.notes,
-                "chars": len(e.text),
-                "preview": e.text[:1200],
+                "filename": name,
+                "suffix": Path(name).suffix.lower(),
+                "bytes": len(payload),
+                "pages": None,
+                "notes": ["Design template — not merged into the brief."],
+                "chars": 0,
+                "preview": "",
             }
-            for e in extracted
-        ],
+        )
+    return {
+        "files": file_rows,
         "brief": brief.to_dict(),
         "accept": ACCEPT_HINT,
     }
@@ -90,23 +110,40 @@ async def generate(
     brief_json: str = Form(default=""),
     mode: str = Form(default="director"),
 ):
+    uploads = []
+    template_names: list[str] = []
+    if files:
+        for f in files:
+            payload = await f.read()
+            if len(payload) > 25 * 1024 * 1024:
+                raise HTTPException(413, f"{f.filename} exceeds 25 MB")
+            uploads.append((f.filename or "upload", payload, f.content_type or ""))
+        templates, briefs = partition_uploads(uploads)
+        template_names = [name for name, _, _ in templates]
+        uploads = briefs
+
+    form = None
     if brief_json.strip():
         try:
             mapping = json.loads(brief_json)
         except json.JSONDecodeError as exc:
             raise HTTPException(400, f"brief_json is not valid JSON: {exc}") from exc
-        brief = _brief_from_mapping(mapping)
-    else:
-        uploads = []
-        if files:
-            for f in files:
-                payload = await f.read()
-                if len(payload) > 25 * 1024 * 1024:
-                    raise HTTPException(413, f"{f.filename} exceeds 25 MB")
-                uploads.append((f.filename or "upload", payload, f.content_type or ""))
-        if not uploads and not pasted.strip():
-            raise HTTPException(400, "Provide files, pasted text, or brief_json.")
-        brief = merge_into_brief(extract_files(uploads), pasted)
+        form = _brief_from_mapping(mapping)
+
+    extracted = None
+    if uploads or pasted.strip():
+        extracted = merge_into_brief(extract_files(uploads), pasted)
+
+    brief = _compose_brief(extracted, form)
+    if not brief:
+        raise HTTPException(400, "Provide files, pasted text, or brief_json.")
+    if template_names:
+        note = (
+            "Design template kept for the deck look, not read as a second brief: "
+            + ", ".join(template_names)
+        )
+        if note not in brief.extraction_notes:
+            brief.extraction_notes.append(note)
 
     if not brief.brand and not brief.therapy_area and not brief.raw_text:
         raise HTTPException(422, "Could not read a usable brief from the upload.")
@@ -120,6 +157,8 @@ async def generate(
         or pack["meta"].get("source")
         or "uploaded brief"
     )
+    if template_names:
+        pack["meta"]["templateFiles"] = template_names
     try:
         upsert_ongoing(pack)
     except OSError:
@@ -222,6 +261,32 @@ def spa_or_asset(full_path: str):
     if first in _RESERVED_SPA:
         raise HTTPException(404, "Not found")
     return _web_file(full_path)
+
+
+def _norm_brand(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", (value or "").lower())
+
+
+def _compose_brief(extracted: ExtractedBrief | None, form: ExtractedBrief | None) -> ExtractedBrief | None:
+    """One brief only. A new upload/paste wins over a leftover working-brief form."""
+    if extracted is None and form is None:
+        return None
+    if extracted is None:
+        return form
+    if form is None:
+        return extracted
+    extracted_brand = _norm_brand(extracted.brand)
+    form_brand = _norm_brand(form.brand)
+    if extracted_brand and form_brand and extracted_brand != form_brand:
+        return extracted
+    same_sources = set(extracted.source_files or []) == set(form.source_files or [])
+    if not same_sources and (extracted.brand or extracted.therapy_area or extracted.raw_text):
+        return extracted
+    data = extracted.to_dict()
+    for key, value in form.to_dict().items():
+        if value not in (None, "", []):
+            data[key] = value
+    return _brief_from_mapping(data)
 
 
 def _brief_from_mapping(data: dict) -> ExtractedBrief:

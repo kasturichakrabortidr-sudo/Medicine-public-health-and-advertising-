@@ -357,21 +357,50 @@ def _brief_blob(brief: ExtractedBrief) -> str:
     return " ".join(p for p in parts if p).lower()
 
 
+_GENERIC_TAGS = frozenset(
+    {
+        "early",
+        "initiation",
+        "india",
+        "indian",
+        "age",
+        "registry",
+        "elderly",
+        "discharge",
+        "in-hospital",
+        "guideline",
+        "four-pillar",
+        "epidemiology",
+    }
+)
+
+
 def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str) -> bool:
     tags = entry.get("tags") or ()
     family = _catalog_family(tags)
     brief_family = _brief_family(brief, blob)
     if family and brief_family and family != brief_family:
         return False
-    hits = sum(1 for tag in tags if len(str(tag)) >= 4 and tag in blob)
-    if hits >= 2:
-        return True
+    distinctive = [str(t) for t in tags if len(str(t)) >= 4 and str(t) not in _GENERIC_TAGS]
+    distinctive_hits = sum(1 for tag in distinctive if tag in blob)
     ta = f"{brief.therapy_area} {brief.indication} {brief.product}".lower()
-    if family == "cardiology":
-        return any(k in ta or k in blob for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm"))
-    if family == "oncology":
-        return any(k in ta or k in blob for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote"))
-    return hits >= 1
+    if family and brief_family == family:
+        if distinctive_hits >= 1:
+            return True
+        if family == "cardiology":
+            return any(
+                k in ta or k in blob
+                for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm")
+            )
+        if family == "oncology":
+            return any(
+                k in ta or k in blob
+                for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote")
+            )
+        return False
+    # Unknown therapy area: never attach a specialised catalog row on generic words
+    # like "early" / "initiation" / "India".
+    return distinctive_hits >= 2
 
 
 def _catalog_family(tags) -> str:
@@ -379,15 +408,26 @@ def _catalog_family(tags) -> str:
         return "cardiology"
     if any(t in tags for t in ("nsclc", "oncology")):
         return "oncology"
+    if any(t in tags for t in ("diabetes", "obesity", "glp1", "glp-1", "endocrinology")):
+        return "endocrinology"
     return ""
 
 
 def _brief_family(brief: ExtractedBrief, blob: str) -> str:
-    ta = f"{brief.therapy_area} {brief.indication} {brief.product} {blob}".lower()
-    if any(k in ta for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril")):
-        return "cardiology"
-    if any(k in ta for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab")):
+    stated = f"{brief.therapy_area} {brief.indication} {brief.product}".lower()
+    hay = f"{stated} {brief.brand} {blob}".lower()
+    if any(k in stated for k in ("endocrin", "diabetes", "t2d", "obesity", "glp-1", "glp1", "semaglutide")):
+        return "endocrinology"
+    if any(k in stated for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote")):
         return "oncology"
+    if any(k in stated for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm")):
+        return "cardiology"
+    if any(k in hay for k in ("endocrin", "diabetes", "t2d", "obesity", "glp-1", "glp1", "semaglutide")):
+        return "endocrinology"
+    if any(k in hay for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote")):
+        return "oncology"
+    if any(k in hay for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm")):
+        return "cardiology"
     return ""
 
 

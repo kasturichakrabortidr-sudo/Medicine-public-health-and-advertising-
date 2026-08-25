@@ -116,8 +116,9 @@ export function BriefsTab({
       <section className="card">
         <h2>Upload a brief — any format</h2>
         <p className="muted small">
-          Drop the client files, the advisory notes, a messy paste. We will pull the fields,
-          then write the eleven-step working file. We will not jump to a deck from a slogan.
+          Drop the client brief. A design template (Omnicom PPTX) can ride along —
+          we will use it for look, not as a second brief. Then we write the eleven-step
+          working file. We will not jump to a deck from a slogan.
         </p>
         <div
           className={`drop ${over ? "over" : ""}`}

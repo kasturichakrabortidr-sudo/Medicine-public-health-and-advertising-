@@ -34,8 +34,8 @@ BODY = RGBColor(0x33, 0x33, 0x33)
 PAGE_GREY = RGBColor(0xA7, 0xA7, 0xA7)
 DARK_CARD = RGBColor(0x11, 0x11, 0x11)
 HAIRLINE = RGBColor(0x00, 0x00, 0x00)
-FONT = "Calibri"
-DISPLAY = "Calibri"
+FONT = "Aptos"
+DISPLAY = "Aptos Display"
 
 SLIDE_W = Inches(13.333)
 SLIDE_H = Inches(7.5)
@@ -48,8 +48,6 @@ def pack_to_pptx(pack: dict) -> bytes:
     prs.slide_height = SLIDE_H
     blank = prs.slide_layouts[6]
 
-    meta = pack.get("meta") or {}
-    doctrine = pack.get("doctrine") or {}
     slides = pack.get("slides") or []
 
     for spec in slides:
@@ -58,11 +56,6 @@ def pack_to_pptx(pack: dict) -> bytes:
         _fill_slide(slide, NAVY if dark else CREAM)
         _render_slide(slide, spec, dark)
         _notes(slide, spec)
-
-    _appendix_bibliography(prs, blank, pack)
-    _appendix_interventions(prs, blank, pack)
-    _appendix_dashboard(prs, blank, pack)
-    _appendix_edit_guide(prs, blank, meta, doctrine)
 
     buf = io.BytesIO()
     prs.save(buf)
@@ -196,19 +189,44 @@ def _accent(i, card=None) -> RGBColor:
 
 
 def _chrome(slide, spec: dict, dark: bool) -> None:
-    _textbox(slide, Inches(12.82), Inches(0.18), Inches(0.4), Inches(0.18),
-             spec.get("page") or "", size=8, color=PAGE_GREY, align=PP_ALIGN.RIGHT)
+    _textbox(
+        slide,
+        Inches(12.82),
+        Inches(0.18),
+        Inches(0.4),
+        Inches(0.18),
+        spec.get("page") or "",
+        size=8,
+        color=PAGE_GREY,
+        align=PP_ALIGN.RIGHT,
+    )
     source = spec.get("source") or spec.get("footnote") or ""
     if source:
-        _textbox(slide, Inches(0.34), Inches(6.82), Inches(10.4), Inches(0.22),
-                 source, size=9, color=RGBColor(0x80, 0x80, 0x80) if dark else MUTED)
+        _textbox(
+            slide,
+            Inches(0.34),
+            Inches(6.82),
+            Inches(10.4),
+            Inches(0.22),
+            source,
+            size=9,
+            color=RGBColor(0x80, 0x80, 0x80) if dark else MUTED,
+        )
     elif spec.get("refs"):
         from .cite import format_marks
+
         nums = [int(n) for n in spec["refs"] if n not in (None, "")]
         if nums:
-            _textbox(slide, Inches(0.34), Inches(6.82), Inches(10.4), Inches(0.22),
-                     f"References {format_marks(nums)}  ·  Vancouver list at end of deck",
-                     size=9, color=MUTED)
+            _textbox(
+                slide,
+                Inches(0.34),
+                Inches(6.82),
+                Inches(10.4),
+                Inches(0.22),
+                f"References {format_marks(nums)}  ·  Vancouver list at end of deck",
+                size=9,
+                color=MUTED,
+            )
 
 
 def _stat_cards(slide, stats: list[dict], l, t, w, h) -> None:
@@ -233,16 +251,51 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
     _chrome(slide, spec, dark)
 
     if layout == "title":
-        _textbox(slide, Inches(0.55), Inches(1.72), Inches(8.4), Inches(0.28),
-                 (spec.get("kicker") or "").upper(), size=12, bold=True, color=BLUE)
-        _textbox(slide, Inches(0.55), Inches(2.05), Inches(8.6), Inches(1.15),
-                 spec.get("title") or "", size=32, bold=True, color=WHITE, font=DISPLAY)
+        _textbox(
+            slide,
+            Inches(0.55),
+            Inches(1.72),
+            Inches(8.4),
+            Inches(0.22),
+            (spec.get("kicker") or "").upper(),
+            size=12,
+            bold=True,
+            color=BLUE,
+        )
+        _textbox(
+            slide,
+            Inches(0.55),
+            Inches(2.03),
+            Inches(8.8),
+            Inches(1.35),
+            spec.get("title") or "",
+            size=36,
+            bold=True,
+            color=WHITE,
+            font=DISPLAY,
+        )
         if spec.get("subtitle"):
-            _textbox(slide, Inches(0.55), Inches(3.35), Inches(8.8), Inches(0.7),
-                     spec["subtitle"], size=16, color=RGBColor(0xB7, 0xC5, 0xE8))
+            _textbox(
+                slide,
+                Inches(0.55),
+                Inches(3.55),
+                Inches(8.8),
+                Inches(0.7),
+                spec["subtitle"],
+                size=16,
+                color=RGBColor(0xB7, 0xC5, 0xE8),
+            )
         if spec.get("narrative"):
-            _textbox(slide, Inches(0.55), Inches(4.1), Inches(8.8), Inches(0.55),
-                     spec["narrative"], size=13, color=RGBColor(0xBF, 0xBF, 0xBF))
+            _textbox(
+                slide,
+                Inches(0.55),
+                Inches(4.2),
+                Inches(8.8),
+                Inches(0.45),
+                spec["narrative"],
+                size=13,
+                color=RGBColor(0xBF, 0xBF, 0xBF),
+            )
         if spec.get("cards"):
             _dark_chips(slide, spec["cards"], Inches(0.55), Inches(4.85), Inches(12.2), Inches(1.55))
         elif spec.get("chart"):
@@ -250,46 +303,125 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
         return
 
     if layout in {"close", "idea"}:
-        _textbox(slide, Inches(0.55), Inches(1.2), Inches(8.0), Inches(0.22),
-                 (spec.get("kicker") or "").upper(), size=10, bold=True, color=ORANGE)
-        _textbox(slide, Inches(0.55), Inches(1.48), Inches(9.4), Inches(0.9),
-                 spec.get("title") or "", size=22, bold=True, color=WHITE, font=DISPLAY)
+        _textbox(
+            slide,
+            Inches(0.55),
+            Inches(1.2),
+            Inches(8.0),
+            Inches(0.16),
+            (spec.get("kicker") or "").upper(),
+            size=11,
+            bold=True,
+            color=ORANGE,
+        )
+        _textbox(
+            slide,
+            Inches(0.55),
+            Inches(1.48),
+            Inches(9.4),
+            Inches(0.9),
+            spec.get("title") or "",
+            size=28,
+            bold=True,
+            color=WHITE,
+            font=DISPLAY,
+        )
         if spec.get("subtitle") or spec.get("narrative"):
-            _textbox(slide, Inches(0.55), Inches(2.4), Inches(9.0), Inches(0.55),
-                     spec.get("subtitle") or spec.get("narrative") or "", size=13, color=RGBColor(0xBF, 0xBF, 0xBF))
+            _textbox(
+                slide,
+                Inches(0.55),
+                Inches(2.45),
+                Inches(9.0),
+                Inches(0.45),
+                spec.get("subtitle") or spec.get("narrative") or "",
+                size=14,
+                color=RGBColor(0xBF, 0xBF, 0xBF),
+            )
         if spec.get("cards"):
-            _dark_quad(slide, spec["cards"], Inches(0.55), Inches(3.15), Inches(12.1), Inches(2.9))
+            _dark_quad(slide, spec["cards"], Inches(0.55), Inches(3.1), Inches(12.1), Inches(3.0))
         elif spec.get("chart"):
             _add_chart(slide, spec["chart"], Inches(0.55), Inches(3.2), Inches(12.2), Inches(3.2))
         if spec.get("callout"):
-            _textbox(slide, Inches(0.55), Inches(6.2), Inches(10.5), Inches(0.35),
-                     spec["callout"].get("text") or "", size=12, bold=True, color=ORANGE)
+            _textbox(
+                slide,
+                Inches(0.55),
+                Inches(6.2),
+                Inches(10.5),
+                Inches(0.35),
+                spec["callout"].get("text") or "",
+                size=12,
+                bold=True,
+                color=ORANGE,
+            )
         return
 
     if not dark:
         _hairline(slide, Inches(0.34), Inches(0.55), Inches(11.95), HAIRLINE)
         _hairline(slide, Inches(0.34), Inches(1.42), Inches(1.36), HAIRLINE)
 
-    _textbox(slide, Inches(0.34), Inches(0.82), Inches(8.4), Inches(0.22),
-             (spec.get("kicker") or "").upper(), size=10, bold=True, color=ORANGE)
-    _textbox(slide, Inches(0.34), Inches(1.04), Inches(8.6), Inches(0.7),
-             spec.get("title") or "", size=18, bold=True, color=INK, font=DISPLAY)
+    _textbox(
+        slide,
+        Inches(0.34),
+        Inches(0.86),
+        Inches(8.4),
+        Inches(0.18),
+        (spec.get("kicker") or "").upper(),
+        size=11,
+        bold=True,
+        color=ORANGE,
+    )
+    _textbox(
+        slide,
+        Inches(0.34),
+        Inches(1.06),
+        Inches(8.6),
+        Inches(0.78),
+        spec.get("title") or "",
+        size=20,
+        bold=True,
+        color=INK,
+        font=DISPLAY,
+    )
 
     if layout == "insight":
-        _textbox(slide, Inches(0.34), Inches(2.08), Inches(3.35), Inches(1.35),
-                 spec.get("narrative") or spec.get("subtitle") or "", size=12, color=BODY)
+        _textbox(
+            slide,
+            Inches(0.34),
+            Inches(2.08),
+            Inches(3.35),
+            Inches(1.6),
+            spec.get("narrative") or spec.get("subtitle") or "",
+            size=13,
+            color=BODY,
+        )
         stats = spec.get("stats") or []
         if stats:
-            _stat_cards(slide, stats, Inches(4.15), Inches(1.28), Inches(8.5), Inches(2.15))
+            _stat_cards(slide, stats, Inches(4.25), Inches(1.32), Inches(8.5), Inches(2.1))
         if spec.get("soWhat"):
-            _textbox(slide, Inches(4.15), Inches(3.6), Inches(8.4), Inches(0.7),
-                     spec["soWhat"], size=16, color=INK, font=DISPLAY)
+            _textbox(
+                slide,
+                Inches(4.25),
+                Inches(3.6),
+                Inches(8.4),
+                Inches(0.7),
+                spec["soWhat"],
+                size=16,
+                color=INK,
+                font=DISPLAY,
+            )
         if spec.get("chart"):
-            _add_chart(slide, spec["chart"], Inches(4.15), Inches(4.35), Inches(8.5), Inches(2.2))
+            _add_chart(slide, spec["chart"], Inches(4.25), Inches(4.35), Inches(8.5), Inches(2.2))
         elif spec.get("table") and not stats:
             table = spec["table"]
-            _table(slide, Inches(4.15), Inches(3.55), Inches(8.5), Inches(2.9),
-                   table.get("headers") or [], table.get("rows") or [])
+            _table(
+                slide,
+                Inches(4.15),
+                Inches(3.55),
+                Inches(8.5),
+                Inches(2.9),
+                table.get("headers") or [],
+                table.get("rows") or [],
+            )
         return
 
     top = Inches(1.85)

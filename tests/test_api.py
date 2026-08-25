@@ -15,9 +15,11 @@ def test_health():
 def test_cardioshield_demo_is_not_in_the_app():
     assert client.get("/api/demo").status_code == 404
     demo_json = client.get("/demo.json")
-    assert demo_json.status_code in {404, 405, 503}
     if demo_json.status_code == 200:
-        assert "json" not in demo_json.headers.get("content-type", "")
+        assert "json" not in (demo_json.headers.get("content-type") or "")
+        assert "slides" not in demo_json.text.lower()[:200]
+    else:
+        assert demo_json.status_code in {404, 405, 503}
     export = client.get("/api/export/pptx")
     assert export.status_code in {404, 405}
 
