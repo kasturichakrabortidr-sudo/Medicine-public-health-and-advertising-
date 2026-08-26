@@ -1,4 +1,5 @@
 import io
+import json
 import zipfile
 
 from director_api.app import _brief_from_mapping
@@ -65,6 +66,12 @@ def test_helix_deck_is_not_a_cardioshield_copy():
     assert "CardioShield" not in blob
     problem = next(s for s in pack["slides"] if s["id"] == "problem")
     assert "CardioShield" not in (problem["title"] + (problem.get("narrative") or ""))
+    deck = json.dumps(pack).lower()
+    assert "keynote" not in deck
+    assert "pembrolizumab" not in deck
+    assert "paradigm-hf" not in deck
+    assert "sacubitril" not in deck
+    assert pack["evidence"]["records"] == []
 
 
 def test_pptx_uses_omnicom_palette():

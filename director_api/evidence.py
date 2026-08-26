@@ -1,9 +1,11 @@
 """Validated, cited evidence that sets the campaign lead.
 
-Catalog entries are published sources with DOI/PMID. Brief mentions are matched
-to those records. Uncited brief items stay on the ledger as gaps — they are
-never given an invented effect size. Optional PubMed lookup adds recent
-independent hits without letting them silently become the lead claim.
+Catalog entries are published sources with DOI/PMID. A row attaches only when
+the brief names that trial, molecule, PMID, or DOI. Therapy area alone is not
+enough — an NSCLC brief does not inherit pembrolizumab, and an HFrEF brief does
+not inherit sacubitril. Uncited brief items stay on the ledger as gaps. Optional
+PubMed lookup is off by default and, when enabled, may only keep hits that name
+the brief's own product.
 """
 
 from __future__ import annotations
@@ -45,6 +47,14 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Run-in design; hypotension and angioedema require labelled monitoring.",
         "mlr": "Use only inside local label. Quote the composite, not a cherry-picked arm.",
         "tags": ("hfref", "arni", "sacubitril", "valsartan", "cardiology", "heart failure", "paradigm"),
+        "aliases": (
+            "paradigm-hf",
+            "paradigm hf",
+            "sacubitril",
+            "entresto",
+            "lcz696",
+            "arni",
+        ),
         "directs": "outcome-permission",
         "control_event": 26.5,
         "treat_event": 21.8,
@@ -82,6 +92,14 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Primary endpoint is a biomarker, not mortality. Safety was comparable.",
         "mlr": "Do not imply a new mortality claim from PIONEER-HF alone.",
         "tags": ("hfref", "arni", "sacubitril", "in-hospital", "early", "initiation", "pioneer", "cardiology"),
+        "aliases": (
+            "pioneer-hf",
+            "pioneer hf",
+            "sacubitril",
+            "entresto",
+            "lcz696",
+            "arni",
+        ),
         "directs": "first-eligible-start",
         "control_event": 100,
         "treat_event": 71,
@@ -119,6 +137,13 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Open-label; primary was dose attainment, not outcomes.",
         "mlr": "Use as feasibility evidence, not as an outcomes claim.",
         "tags": ("hfref", "arni", "transition", "discharge", "early", "cardiology"),
+        "aliases": (
+            "transition 2019",
+            "sacubitril",
+            "entresto",
+            "lcz696",
+            "arni",
+        ),
         "directs": "first-eligible-start",
         "spine_means": "Waiting until the clinic is not required for titration success.",
         "spine_barrier": "The start-after-discharge habit still treats in-hospital initiation as optional.",
@@ -150,6 +175,14 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Subgroup analysis; hypotension more frequent in the elderly.",
         "mlr": "Flag as post-hoc/subgroup. Do not invent an elderly-only indication.",
         "tags": ("hfref", "arni", "elderly", "age", "cardiology"),
+        "aliases": (
+            "jhund",
+            "paradigm-hf",
+            "sacubitril",
+            "entresto",
+            "lcz696",
+            "arni",
+        ),
         "directs": "segment-confidence",
         "spine_means": "Age is not a reason to withhold the outcome benefit.",
         "spine_barrier": "Older patients are left on ACEI 'to be safe'.",
@@ -181,6 +214,13 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Local label and national adaptation (e.g. CSI) still govern promotion.",
         "mlr": "Quote recommendation class, not a promotional paraphrase.",
         "tags": ("hfref", "arni", "guideline", "esc", "cardiology", "heart failure"),
+        "aliases": (
+            "esc 2021",
+            "esc hf",
+            "esc heart failure",
+            "esc guidelines",
+            "esc guideline",
+        ),
         "directs": "guideline-cover",
         "spine_means": "Class I is cover to start now, not a poster to quote after a delay.",
         "spine_barrier": "Guideline awareness without a pathway still produces late starts.",
@@ -212,6 +252,15 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Pillar choice still follows label, tolerance, and access.",
         "mlr": "Do not imply all four pillars must start on day one if the label sequences them.",
         "tags": ("hfref", "arni", "guideline", "acc", "aha", "hfsa", "four-pillar", "cardiology"),
+        "aliases": (
+            "aha/acc/hfsa",
+            "acc/aha/hfsa",
+            "acc/aha",
+            "aha acc hfsa",
+            "hfsa 2022",
+            "four-pillar",
+            "four pillar",
+        ),
         "directs": "guideline-cover",
         "spine_means": "ARNI sits in foundational four-pillar therapy, not as a late switch.",
         "spine_barrier": "Four-pillar talk without a first-touch pathway still sequences ARNI last.",
@@ -243,6 +292,7 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Single-region registry; not a product trial.",
         "mlr": "Epidemiology only. No product claim.",
         "tags": ("india", "registry", "hf", "epidemiology", "cardiology", "indian"),
+        "aliases": ("trivandrum", "harikrishnan"),
         "directs": "local-context",
     },
     {
@@ -270,6 +320,12 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "IO-chemo cost and toxicity are the access problem, not the OS signal.",
         "mlr": "Stay inside the exact labelled combination and line of therapy.",
         "tags": ("nsclc", "oncology", "lung", "pembrolizumab", "io", "keynote"),
+        "aliases": (
+            "keynote-189",
+            "keynote 189",
+            "pembrolizumab",
+            "keytruda",
+        ),
         "directs": "outcome-permission",
         "control_event": 50.6,
         "treat_event": 30.8,
@@ -307,18 +363,25 @@ CATALOG: list[dict[str, Any]] = [
         "caveat": "Restricted to TPS ≥50%.",
         "mlr": "Do not generalise to all-comer first-line.",
         "tags": ("nsclc", "oncology", "lung", "pembrolizumab", "pd-l1", "keynote"),
+        "aliases": (
+            "keynote-024",
+            "keynote 024",
+            "pembrolizumab",
+            "keytruda",
+        ),
         "directs": "outcome-permission",
     },
 ]
 
 
-def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str, Any]:
+def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = False) -> dict[str, Any]:
     """Match the brief to cited records, list gaps, and name the campaign lead."""
     blob = _brief_blob(brief)
+    folded = _fold(blob)
     matched: list[dict[str, Any]] = []
     seen: set[str] = set()
     for entry in CATALOG:
-        if _matches(entry, brief, blob):
+        if _matches(entry, brief, blob, folded):
             rec = _record(entry, status="validated", matched_from="catalog")
             matched.append(rec)
             seen.add(entry["id"])
@@ -357,50 +420,50 @@ def _brief_blob(brief: ExtractedBrief) -> str:
     return " ".join(p for p in parts if p).lower()
 
 
-_GENERIC_TAGS = frozenset(
-    {
-        "early",
-        "initiation",
-        "india",
-        "indian",
-        "age",
-        "registry",
-        "elderly",
-        "discharge",
-        "in-hospital",
-        "guideline",
-        "four-pillar",
-        "epidemiology",
-    }
-)
+def _fold(text: str) -> str:
+    """Lowercase and turn dashes/slashes into spaces so PARADIGM-HF matches PARADIGM HF."""
+    lowered = (text or "").lower()
+    lowered = re.sub(r"[–—−\-_/]+", " ", lowered)
+    lowered = re.sub(r"\s+", " ", lowered).strip()
+    return f" {lowered} "
 
 
-def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str) -> bool:
+def _alias_in(folded_blob: str, alias: str) -> bool:
+    needle = _fold(alias).strip()
+    if len(needle) < 3:
+        return False
+    return f" {needle} " in folded_blob
+
+
+def _entry_aliases(entry: dict[str, Any]) -> list[str]:
+    names = [str(a) for a in (entry.get("aliases") or ()) if a]
+    pmid = str(entry.get("pmid") or "").strip()
+    if pmid:
+        names.append(pmid)
+    doi = str(entry.get("doi") or "").strip()
+    if doi:
+        names.append(doi)
+    trial = str(entry.get("trial") or "").strip()
+    # Bare English words ("TRANSITION") are too common to auto-match.
+    if trial and ("-" in trial or "/" in trial or any(ch.isdigit() for ch in trial)):
+        names.append(trial)
+    return names
+
+
+def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str, folded: str | None = None) -> bool:
+    """Attach a catalog row only when the brief names that paper or molecule.
+
+    Therapy area is a negative filter (do not put KEYNOTE on a cardiology brief)
+    and is never enough on its own. NSCLC does not inherit pembrolizumab; HFrEF
+    does not inherit sacubitril.
+    """
     tags = entry.get("tags") or ()
     family = _catalog_family(tags)
     brief_family = _brief_family(brief, blob)
     if family and brief_family and family != brief_family:
         return False
-    distinctive = [str(t) for t in tags if len(str(t)) >= 4 and str(t) not in _GENERIC_TAGS]
-    distinctive_hits = sum(1 for tag in distinctive if tag in blob)
-    ta = f"{brief.therapy_area} {brief.indication} {brief.product}".lower()
-    if family and brief_family == family:
-        if distinctive_hits >= 1:
-            return True
-        if family == "cardiology":
-            return any(
-                k in ta or k in blob
-                for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm")
-            )
-        if family == "oncology":
-            return any(
-                k in ta or k in blob
-                for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote")
-            )
-        return False
-    # Unknown therapy area: never attach a specialised catalog row on generic words
-    # like "early" / "initiation" / "India".
-    return distinctive_hits >= 2
+    hay = folded if folded is not None else _fold(blob)
+    return any(_alias_in(hay, alias) for alias in _entry_aliases(entry))
 
 
 def _catalog_family(tags) -> str:
@@ -560,6 +623,18 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     }
 
 
+_FOREIGN_MOLECULES = (
+    "sacubitril",
+    "entresto",
+    "lcz696",
+    "pembrolizumab",
+    "keytruda",
+    "semaglutide",
+    "ozempic",
+    "liraglutide",
+)
+
+
 def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, Any]]:
     term = _pubmed_term(brief)
     if not term:
@@ -578,6 +653,8 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
         if pmid in known_pmids:
             continue
         title = doc.get("title") or ""
+        if not _pubmed_hit_belongs(brief, title):
+            continue
         journal = doc.get("fulljournalname") or doc.get("source") or ""
         year = _year(doc.get("pubdate") or "")
         authors = _author_line(doc.get("authors") or [])
@@ -597,20 +674,41 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
     return hits[:4]
 
 
+def _pubmed_name_tokens(brief: ExtractedBrief) -> list[str]:
+    """Tokens the brief actually named — never a catalog molecule inferred from TA."""
+    stop = {
+        "first", "line", "therapy", "chronic", "acute", "cancer", "failure",
+        "heart", "lung", "small", "cell", "reduced", "ejection", "fraction",
+        "oncology", "cardiology", "endocrinology", "nsclc", "hfref", "india",
+    }
+    blob = f"{brief.product or ''} {brief.brand or ''}"
+    return [
+        tok for tok in re.findall(r"[a-z0-9]{5,}", blob.lower())
+        if tok not in stop
+    ]
+
+
+def _pubmed_hit_belongs(brief: ExtractedBrief, title: str) -> bool:
+    title_l = (title or "").lower()
+    blob = _brief_blob(brief)
+    for mol in _FOREIGN_MOLECULES:
+        if mol in title_l and mol not in blob:
+            return False
+    tokens = _pubmed_name_tokens(brief)
+    if not tokens:
+        return False
+    return any(tok in title_l for tok in tokens)
+
+
 def _pubmed_term(brief: ExtractedBrief) -> str:
-    product = brief.product or ""
-    indication = brief.indication or brief.therapy_area or ""
-    bits = []
-    if "sacubitril" in (product + indication).lower() or "hfref" in indication.lower() or "heart failure" in (brief.therapy_area or "").lower():
-        bits.append("sacubitril valsartan HFrEF")
-    elif "nsclc" in (indication + (brief.therapy_area or "")).lower() or "oncology" in (brief.therapy_area or "").lower():
-        bits.append("pembrolizumab NSCLC first-line randomized")
-    else:
-        token = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", f"{product} {indication}").strip()
-        if len(token) < 8:
-            return ""
-        bits.append(f"{token} randomized")
-    return " ".join(bits)
+    product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
+    if len(product) < 5:
+        return ""
+    indication = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.indication or "").strip()
+    bits = [product]
+    if indication:
+        bits.append(indication)
+    return f"{' '.join(bits)} randomized"
 
 
 def _esearch(term: str, retmax: int = 4) -> list[str]:

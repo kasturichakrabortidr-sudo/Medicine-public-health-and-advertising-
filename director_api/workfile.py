@@ -128,7 +128,7 @@ def _p02(brief, records) -> dict:
     pico = [
         ["Population", pop, "Taken from the brief. We will not widen it."],
         ["Intervention", f"{product} at the first eligible encounter", "Eligible as labelled — not 'all comers'."],
-        ["Comparator", "Habitual ACEI/ARB or SoC delay" if records else "Standard of care named in the brief", "The comparator is the current habit, not a straw man."],
+        ["Comparator", "Standard of care named in the brief", "The comparator is the current habit, not a straw man."],
         ["Outcomes we may use", _outcome_line(records), "Only endpoints published in numbered papers."],
         ["Setting", brief.market or "markets named in the brief", "Local label and code still govern."],
     ]
@@ -141,7 +141,7 @@ def _p02(brief, records) -> dict:
             "B — pre-specified subgroup, open-label timing, or well-described registry",
             "C — uncited brief item, local RWE without a paper, ongoing study — research task, not a lead",
         ],
-        include="Peer-reviewed papers and society guidelines with a PMID or DOI. HFrEF/indication must match the brief.",
+        include=f"Peer-reviewed papers and society guidelines with a PMID or DOI. {pop} must match the brief.",
         exclude="Invented HRs, congress rumours, competitor claims without a source, and PubMed hits we have not read.",
     )
 
@@ -281,26 +281,29 @@ def _p06(brief, records, by_direct) -> dict:
     rows = [
         ["Outcome vs SoC", cell(outcome), cell(outcome), "Supportive where evolving rows exist" if any("Evolving" in (r.get("stream") or "") for r in records) else "Silent", cell(guide)],
         ["First-eligible / in-hospital start", cell(start), "Neutral / not the pivotal claim", cell(start, "timing papers"), cell(guide)],
-        ["Local RWE / Indian patient", "Cited in the brief, no PMID", cell(local) if local else "Registry epidemiology only" + (f" {mark(local)}" if local else ""), "Evolving — HE study ongoing (uncited)", "Silent"],
-        ["Cost offset", "Silent", "Silent", "Ongoing HE study is a gap", "Silent"],
+        ["Local evidence named in the brief", "Cited in the brief, no PMID" if _mentions(brief, "rwe", "local", "india", "indian") else "Silent — not named", cell(local) if local else "Silent — not on the register", "Silent", "Silent"],
+        ["Cost offset", "Silent", "Silent", "Silent — no health-economic paper on the register", "Silent"],
     ]
     competitors = brief.competitors or ["Standard of care"]
     position = (
         f"We stand only where the columns agree. Outcome permission {mark(outcome) if outcome else '[pending]'} "
         f"plus guideline class {mark(guide) if guide else '[pending]'} plus initiation feasibility {mark(start) if start else '[pending]'}. "
-        "Cost and local RWE are silent. We will not shout there."
+        "Uncited cost or local lines stay silent."
     )
+    roadmap = ["Retrieve a PMID or DOI before any efficacy line ships."]
+    if _mentions(brief, "rwe", "local", "india", "indian"):
+        roadmap.append("Retrieve DOI/PMID for the local RWE the brief mentions — or take it off the KOL script.")
+    if _mentions(brief, "csi"):
+        roadmap.append("Retrieve the CSI position paper if we want a national-guideline line.")
+    if _mentions(brief, "health-economic", "cost offset", "he study"):
+        roadmap.append("Do not lead with the ongoing HE study until it exists as a paper.")
     return _phase(
         "06",
         "Four columns: brand / independent / evolving / guideline. Alignment is the only safe shout. Silence is a boundary.",
         fourway={"headers": ["Territory", "Brand", "Independent", "Evolving", "Guidelines"], "rows": rows},
         competitors=competitors,
         position=position,
-        roadmap=[
-            "Retrieve DOI/PMID for the Indian RWE the brief mentions — or take it off the KOL script.",
-            "Retrieve the CSI position paper if we want a national-guideline line.",
-            "Do not lead with the ongoing HE study until it exists as a paper.",
-        ],
+        roadmap=roadmap,
     )
 
 
@@ -324,18 +327,14 @@ def _p07(brief, records, doctrine, lead) -> dict:
         ],
         [
             "Cover exists",
-            f"Class I / four-pillar language is permission, not a poster after the wait." + (f" {mark(guide)}" if guide else ""),
+            (
+                f"Guideline cover is permission to start, not a poster after the wait.{f' {mark(guide)}' if guide else ''}"
+            ),
             mark(guide) if guide else "—",
             (guide.get("claim_permitted") if guide else "No guideline PMID on the register."),
         ],
     ]
-    objections = [
-        ["I stabilise on ACEI first", "The initiation papers studied start after haemodynamic stability — not after a second clinic.", mark(start) if start else "pending", "Do not say 'start everyone on day one'."],
-        ["The patient cannot afford this", "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.", "gap", "Do not imply a cost-offset we have not sourced."],
-        ["They are too old / too frail", next((r.get("claim_permitted") for r in records if r.get("directs") == "segment-confidence"), "No age paper on the register — do not run an elderly line."),
-         mark(next((r for r in records if r.get("directs") == "segment-confidence"), None)) or "pending",
-         "Do not invent an elderly-only indication."],
-    ]
+    objections = _objections(brief, records, start)
     return _phase(
         "07",
         "One theme. Three pillars. Each pillar carries a number or it does not ship. The objection grid says what we will not say.",
@@ -486,6 +485,68 @@ def _outcome_line(records) -> str:
 def _qoq(brief) -> int | None:
     m = re.search(r"(\d+)\s*%", brief.business_goal or "")
     return int(m.group(1)) if m else None
+
+
+def _mentions(brief: ExtractedBrief, *needles: str) -> bool:
+    blob = " ".join(
+        [
+            brief.brand,
+            brief.product,
+            brief.therapy_area,
+            brief.indication,
+            brief.market,
+            brief.business_goal,
+            brief.raw_text,
+            " ".join(brief.brand_evidence),
+            " ".join(brief.existing_evidence),
+            " ".join(brief.evolving_evidence),
+            " ".join(brief.guidelines),
+            " ".join(brief.hcp_insights),
+            " ".join(brief.access_and_cost),
+        ]
+    ).lower()
+    return any(n.lower() in blob for n in needles)
+
+
+def _objections(brief: ExtractedBrief, records: list, start) -> list[list[str]]:
+    rows: list[list[str]] = []
+    insights = brief.hcp_insights or []
+    delay = next((i for i in insights if _looks_like_delay(i)), insights[0] if insights else "")
+    if _mentions(brief, "acei", "ace inhibitor", "arb", "arni", "enalapril", "sacubitril"):
+        rows.append([
+            "I stabilise on ACEI first",
+            "The initiation papers studied start after haemodynamic stability — not after a second clinic.",
+            mark(start) if start else "pending",
+            "Do not say 'start everyone on day one'.",
+        ])
+    elif delay:
+        rows.append([
+            _short(delay, 90),
+            "The wait is the conversion problem on this brief. We do not borrow another molecule's initiation paper.",
+            mark(start) if start else "pending",
+            "Do not invent a start window the register does not support.",
+        ])
+    if any(_looks_like_cost(c) for c in (brief.access_and_cost or [])) or any(_looks_like_cost(i) for i in insights):
+        rows.append([
+            "The patient cannot afford this",
+            "Stay on their side. Assistance mechanics, no price promise. No HE claim until that paper is numbered.",
+            "gap",
+            "Do not imply a cost-offset we have not sourced.",
+        ])
+    if _mentions(brief, "elderly", "too old", "too frail", "age") or any(r.get("directs") == "segment-confidence" for r in records):
+        age = next((r for r in records if r.get("directs") == "segment-confidence"), None)
+        rows.append([
+            "They are too old / too frail",
+            age.get("claim_permitted") if age else "No age paper on the register — do not run an elderly line.",
+            mark(age) if age else "pending",
+            "Do not invent an elderly-only indication.",
+        ])
+    return rows or [[
+        "No objection from this brief yet",
+        "Do not import another brand's objection grid.",
+        "—",
+        "Do not write a rebuttal until the insight exists.",
+    ]]
 
 
 def _looks_like_delay(text: str) -> bool:

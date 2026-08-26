@@ -99,6 +99,7 @@ def test_generate_does_not_mix_template_or_cardioshield_into_helixone():
     ids = {r["id"] for r in pack["evidence"]["records"]}
     assert "paradigm-hf-2014" not in ids
     assert "pioneer-hf-2019" not in ids
+    assert "keynote-189-2018" not in ids
     assert pack["meta"].get("templateFiles")
 
 
@@ -120,3 +121,7 @@ def test_endocrinology_brief_does_not_inherit_heart_failure_catalog():
     pack = generate_pack(brief, pubmed=False)
     assert pack["meta"]["brand"] == "HelixOne"
     assert pack["evidence"]["records"] == []
+    blob = json.dumps(pack).lower()
+    assert "keynote" not in blob
+    assert "pembrolizumab" not in blob
+    assert "sacubitril" not in blob

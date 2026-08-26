@@ -1,3 +1,5 @@
+import json
+
 from director_api.extract import ExtractedBrief
 from director_api.generate import generate_pack
 from medicomarketing_agent.config import load_brief
@@ -20,8 +22,16 @@ def test_first_touch_doctrine_from_stabilize_insight():
     assert 16 <= len(pack["slides"]) <= 24
     assert "how-built" not in ids
     assert "boxplot" not in ids
+    # This brief never named PARADIGM-HF or sacubitril — do not invent those charts.
+    assert "forest" not in ids
+    assert "science-meaning" not in ids
+    blob = json.dumps(pack).lower()
+    assert "paradigm-hf" not in blob
+    assert "sacubitril" not in blob
+    assert "pembrolizumab" not in blob
+    assert "keynote" not in blob
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
-    assert {"people", "compare", "spine", "forest", "flow"} <= kinds
+    assert "flow" in kinds
     assert pack["dashboard"]["kpis"]
     assert len(pack["interventions"]) == 5
 

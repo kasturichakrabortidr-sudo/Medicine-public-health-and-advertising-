@@ -1,3 +1,5 @@
+import json
+
 from director_api.app import _brief_from_mapping
 from director_api.evidence import resolve_evidence
 from director_api.extract import ExtractedBrief
@@ -99,7 +101,7 @@ def test_spine_connects_pioneer_to_first_touch():
     assert any("[" in b and "PMID" in b for b in iv["bullets"])
 
 
-def test_oncology_brief_matches_keynote_not_hf():
+def test_oncology_brief_without_named_molecule_does_not_borrow_keynote():
     brief = ExtractedBrief(
         brand="HelixOne",
         therapy_area="Oncology - NSCLC",
@@ -107,14 +109,66 @@ def test_oncology_brief_matches_keynote_not_hf():
         business_goal="Grow first-line share. Cost of IO combo is the main barrier.",
     )
     ledger = resolve_evidence(brief, pubmed=False)
+    assert ledger["records"] == []
+    assert ledger["lead"]["citations"] == []
+    pack = generate_pack(brief, pubmed=False)
+    blob = json.dumps(pack).lower()
+    assert "keynote" not in blob
+    assert "pembrolizumab" not in blob
+    assert "keytruda" not in blob
+    assert "paradigm-hf" not in blob
+    assert "sacubitril" not in blob
+    assert "29658856" not in blob
+    ids = [s["id"] for s in pack["slides"]]
+    assert "science-meaning" not in ids
+    assert "forest" not in ids
+
+
+def test_named_keynote_attaches_only_that_oncology_row():
+    brief = ExtractedBrief(
+        brand="HelixOne",
+        product="pembrolizumab",
+        therapy_area="Oncology - NSCLC",
+        indication="first-line NSCLC",
+        existing_evidence=["KEYNOTE-189 pembrolizumab plus chemotherapy"],
+        business_goal="Grow first-line share. Cost of IO combo is the main barrier.",
+    )
+    ledger = resolve_evidence(brief, pubmed=False)
     ids = {r["id"] for r in ledger["records"]}
     assert "keynote-189-2018" in ids
     assert "paradigm-hf-2014" not in ids
-    assert ledger["lead"]["citations"][0]["pmid"] == "29658856"
+    assert "pioneer-hf-2019" not in ids
     pack = generate_pack(brief, pubmed=False)
     meaning = next(s for s in pack["slides"] if s["id"] == "science-meaning")
     assert meaning["chart"]["data"][0]["pmid"] == "29658856"
-    assert meaning["chart"]["data"][0]["nnt"] == 5
+    blob = json.dumps(pack).lower()
+    assert "paradigm-hf" not in blob
+    assert "sacubitril" not in blob
+
+
+def test_unrelated_hf_molecule_does_not_borrow_paradigm():
+    brief = ExtractedBrief(
+        brand="Lumenol",
+        product="lumenolol",
+        therapy_area="Cardiology - HFrEF",
+        indication="HFrEF, NYHA II–IV",
+        market="India",
+        business_goal="Grow early initiation in HFrEF",
+        hcp_insights=["Most agree in principle but start late"],
+        access_and_cost=["Out-of-pocket cost is high"],
+    )
+    ledger = resolve_evidence(brief, pubmed=False)
+    ids = {r["id"] for r in ledger["records"]}
+    assert ids == set()
+    pack = generate_pack(brief, pubmed=False)
+    blob = json.dumps(pack).lower()
+    assert "paradigm-hf" not in blob
+    assert "pioneer-hf" not in blob
+    assert "sacubitril" not in blob
+    assert "pembrolizumab" not in blob
+    assert "keynote" not in blob
+    assert "25176015" not in blob
+    assert pack["evidence"]["records"] == []
 
 
 def test_respiratory_without_catalog_does_not_invent_trials():
@@ -128,3 +182,35 @@ def test_respiratory_without_catalog_does_not_invent_trials():
     assert pack["doctrine"]["id"] == "affordability-confidence"
     assert pack["evidence"]["records"] == []
     assert "do not lock" in pack["evidence"]["lead"]["statement"].lower()
+
+
+def test_pubmed_does_not_search_another_molecule_from_therapy_area():
+    from director_api.evidence import _pubmed_hit_belongs, _pubmed_term
+
+    nsclc = ExtractedBrief(
+        brand="HelixOne",
+        therapy_area="Oncology - NSCLC",
+        indication="first-line NSCLC",
+    )
+    assert _pubmed_term(nsclc) == ""
+    assert _pubmed_hit_belongs(nsclc, "Pembrolizumab plus chemotherapy in metastatic NSCLC") is False
+
+    named = ExtractedBrief(
+        brand="HelixOne",
+        product="pembrolizumab",
+        therapy_area="Oncology - NSCLC",
+        indication="first-line NSCLC",
+    )
+    assert "pembrolizumab" in _pubmed_term(named).lower()
+    assert "sacubitril" not in _pubmed_term(named).lower()
+    assert _pubmed_hit_belongs(named, "Pembrolizumab plus chemotherapy in metastatic NSCLC") is True
+    assert _pubmed_hit_belongs(named, "Sacubitril/valsartan in heart failure") is False
+
+    hf = ExtractedBrief(
+        brand="Lumenol",
+        product="lumenolol",
+        therapy_area="Cardiology - HFrEF",
+        indication="HFrEF",
+    )
+    assert "sacubitril" not in _pubmed_term(hf).lower()
+    assert _pubmed_hit_belongs(hf, "Angiotensin–neprilysin inhibition versus enalapril in heart failure") is False

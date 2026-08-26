@@ -21,7 +21,7 @@ from .extract import ExtractedBrief
 from .workfile import build_workfile
 
 
-def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = True) -> dict:
+def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = False) -> dict:
     """Build a presentation-ready strategy pack from a structured brief."""
     brand = brief.brand or "Unnamed brand"
     ta = brief.therapy_area or "Specialty care"
