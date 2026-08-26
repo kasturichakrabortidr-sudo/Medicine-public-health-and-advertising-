@@ -7,3 +7,8 @@ output/
 api_key.txt
 my-brief.yaml
 my-outline.txt
+node_modules/
+web/node_modules/
+web/dist/
+.netlify
+*.tsbuildinfo
