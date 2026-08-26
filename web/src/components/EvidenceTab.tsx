@@ -124,7 +124,10 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           </tbody>
         </table>
         {records.length === 0 && (
-          <p className="muted">No catalog match. Do not invent a trial name or effect size.</p>
+          <p className="muted">
+            No catalog match yet. Live PubMed hits, if any, are in the retrieved list — we will not
+            invent a trial name or effect size for another molecule.
+          </p>
         )}
       </section>
 
@@ -173,13 +176,14 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         {refs.length === 0 && <p className="muted">No numbered paper matched this brief.</p>}
       </section>
 
-      {pubmed.length > 0 && (
-        <section className="card" style={{ marginTop: 18 }}>
-          <h3>PubMed — retrieved, not yet lead</h3>
-          <p className="small muted">
-            Live NCBI hits for the product/indication. Confirm full text before promoting any of these
-            to the campaign lead.
-          </p>
+      <section className="card" style={{ marginTop: 18 }}>
+        <h3>PubMed — retrieved for this brief</h3>
+        <p className="small muted">
+          Live NCBI hits for this product, named studies, and indication. Another molecule's
+          pivotal is excluded unless this brief named it. Confirm full text before promoting
+          any of these to the campaign lead.
+        </p>
+        {pubmed.length > 0 ? (
           <ul className="bullets">
             {pubmed.map((p) => (
               <li key={p.pmid}>
@@ -189,8 +193,10 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
               </li>
             ))}
           </ul>
-        </section>
-      )}
+        ) : (
+          <p className="muted">No PubMed hits yet for this brief's own product and indication.</p>
+        )}
+      </section>
     </div>
   );
 }

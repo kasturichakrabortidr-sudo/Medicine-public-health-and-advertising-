@@ -185,15 +185,21 @@ def test_respiratory_without_catalog_does_not_invent_trials():
 
 
 def test_pubmed_does_not_search_another_molecule_from_therapy_area():
-    from director_api.evidence import _pubmed_hit_belongs, _pubmed_term
+    from director_api.evidence import _pubmed_hit_belongs, _pubmed_term, _pubmed_terms
 
     nsclc = ExtractedBrief(
         brand="HelixOne",
         therapy_area="Oncology - NSCLC",
         indication="first-line NSCLC",
     )
-    assert _pubmed_term(nsclc) == ""
+    terms = " ".join(_pubmed_terms(nsclc)).lower()
+    assert terms
+    assert "pembrolizumab" not in terms
+    assert "keynote" not in terms
+    assert "sacubitril" not in terms
+    assert "nsclc" in terms or "lung" in terms
     assert _pubmed_hit_belongs(nsclc, "Pembrolizumab plus chemotherapy in metastatic NSCLC") is False
+    assert _pubmed_hit_belongs(nsclc, "NCCN guidelines for non-small cell lung cancer") is True
 
     named = ExtractedBrief(
         brand="HelixOne",
@@ -201,8 +207,9 @@ def test_pubmed_does_not_search_another_molecule_from_therapy_area():
         therapy_area="Oncology - NSCLC",
         indication="first-line NSCLC",
     )
-    assert "pembrolizumab" in _pubmed_term(named).lower()
-    assert "sacubitril" not in _pubmed_term(named).lower()
+    named_term = _pubmed_term(named).lower()
+    assert "pembrolizumab" in named_term
+    assert "sacubitril" not in named_term
     assert _pubmed_hit_belongs(named, "Pembrolizumab plus chemotherapy in metastatic NSCLC") is True
     assert _pubmed_hit_belongs(named, "Sacubitril/valsartan in heart failure") is False
 
@@ -212,5 +219,8 @@ def test_pubmed_does_not_search_another_molecule_from_therapy_area():
         therapy_area="Cardiology - HFrEF",
         indication="HFrEF",
     )
-    assert "sacubitril" not in _pubmed_term(hf).lower()
+    hf_terms = " ".join(_pubmed_terms(hf)).lower()
+    assert "sacubitril" not in hf_terms
+    assert "pembrolizumab" not in hf_terms
     assert _pubmed_hit_belongs(hf, "Angiotensin–neprilysin inhibition versus enalapril in heart failure") is False
+    assert _pubmed_hit_belongs(hf, "Hospital admissions among patients with reduced ejection fraction") is True

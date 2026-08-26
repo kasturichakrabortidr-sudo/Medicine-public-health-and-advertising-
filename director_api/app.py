@@ -151,7 +151,7 @@ async def generate(
     if mode == "demo":
         raise HTTPException(400, "Demo mode is not available. Upload your own brief.")
 
-    pack = generate_pack(brief, mode=mode)
+    pack = generate_pack(brief, mode=mode, pubmed=True)
     pack["meta"]["source"] = (
         ", ".join(brief.source_files)
         or pack["meta"].get("source")

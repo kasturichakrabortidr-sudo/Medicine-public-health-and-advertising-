@@ -13,7 +13,7 @@ client = TestClient(app)
 
 
 def _sample_pack():
-    return generate_pack(_brief_from_mapping(load_brief("examples/brief.example.yaml")), mode="demo")
+    return generate_pack(_brief_from_mapping(load_brief("examples/brief.example.yaml")), mode="demo", pubmed=False)
 
 
 def test_pptx_is_editable_office_file():

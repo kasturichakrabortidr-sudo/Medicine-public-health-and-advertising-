@@ -9,12 +9,17 @@ def attach_references(ledger: dict[str, Any]) -> dict[str, Any]:
     """Give every validated (then retrieved) source a stable number, 1…n."""
     refs: list[dict[str, Any]] = []
     n = 1
+    seen_pmids = set()
     for row in ledger.get("records") or []:
         row["ref"] = n
         row["citation"] = vancouver(row)
-        refs.append(_entry(n, row, "validated"))
+        refs.append(_entry(n, row, "validated" if row.get("matchedFrom") != "pubmed" else "retrieved"))
+        if row.get("pmid"):
+            seen_pmids.add(str(row.get("pmid")))
         n += 1
     for hit in ledger.get("pubmed") or []:
+        if str(hit.get("pmid") or "") in seen_pmids:
+            continue
         hit["ref"] = n
         if not hit.get("citation"):
             hit["citation"] = vancouver(hit)

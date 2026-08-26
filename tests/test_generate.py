@@ -43,7 +43,7 @@ def test_affordability_doctrine_when_cost_dominates():
         access_and_cost=["High out-of-pocket cost is the only stated barrier"],
         business_goal="Grow reimbursed volume",
     )
-    pack = generate_pack(brief)
+    pack = generate_pack(brief, pubmed=False)
     assert pack["doctrine"]["id"] == "affordability-confidence"
 
 

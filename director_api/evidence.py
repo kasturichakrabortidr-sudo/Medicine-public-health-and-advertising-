@@ -54,6 +54,7 @@ CATALOG: list[dict[str, Any]] = [
             "entresto",
             "lcz696",
             "arni",
+            "neprilysin",
         ),
         "directs": "outcome-permission",
         "control_event": 26.5,
@@ -390,6 +391,13 @@ def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = False) -> dict[str
     pubmed_hits: list[dict[str, Any]] = []
     if pubmed:
         pubmed_hits = _pubmed_enrich(brief, seen)
+        catalog_pmids = {r.get("pmid") for r in matched}
+        for hit in pubmed_hits:
+            if hit.get("pmid") in catalog_pmids:
+                continue
+            rec = _pubmed_as_record(hit)
+            matched.append(rec)
+            catalog_pmids.add(hit.get("pmid"))
 
     lead = _campaign_lead(brief, matched)
     return {
@@ -397,7 +405,7 @@ def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = False) -> dict[str
         "records": matched,
         "gaps": gaps,
         "pubmed": pubmed_hits,
-        "validatedCount": len(matched),
+        "validatedCount": sum(1 for r in matched if r.get("matchedFrom") == "catalog"),
         "gapCount": len(gaps),
     }
 
@@ -551,7 +559,9 @@ def _tokens(text: str) -> list[str]:
 
 
 def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]:
-    if not matched:
+    catalog = [r for r in matched if r.get("matchedFrom") != "pubmed"]
+    retrieved = [r for r in matched if r.get("matchedFrom") == "pubmed"]
+    if not catalog and not retrieved:
         return {
             "statement": "No validated citation matched this brief yet. Do not lock a scientific lead.",
             "why": "The working file has no DOI/PMID-backed row. Strategy stays behavioural until science is sourced.",
@@ -559,8 +569,39 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
             "citations": [],
             "doNotClaim": ["Any efficacy, safety, or guideline class statement"],
         }
+    if not catalog and retrieved:
+        primary = retrieved[0]
+        return {
+            "statement": (
+                f"PubMed retrieved {len(retrieved)} paper"
+                f"{'s' if len(retrieved) != 1 else ''} for this brief's product and indication. "
+                "Treat them as a working register. Confirm full text before locking an efficacy lead."
+            ),
+            "why": (
+                f"No catalog row named this molecule, so we searched the literature instead of "
+                f"borrowing another brand's pivotal. First hit: {primary.get('short')} "
+                f"(PMID {primary.get('pmid') or '—'})."
+            ),
+            "directs": "none",
+            "primaryId": primary.get("id"),
+            "citations": [
+                {
+                    "id": c.get("id"),
+                    "short": c.get("short"),
+                    "pmid": c.get("pmid"),
+                    "doi": c.get("doi"),
+                    "citation": c.get("citation"),
+                    "claim": c.get("claim_permitted"),
+                }
+                for c in retrieved[:4]
+            ],
+            "doNotClaim": [
+                "Effect sizes, NNT, or a locked efficacy line until medical confirms the full text",
+                "Another molecule's pivotal trial as if it belonged to this brand",
+            ],
+        }
 
-    by_id = {r["id"]: r for r in matched}
+    by_id = {r["id"]: r for r in catalog}
     preferred = [
         "pioneer-hf-2019",
         "transition-2019",
@@ -572,7 +613,7 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict]) -> dict[str, Any]
     ]
     anchors = [by_id[i] for i in preferred if i in by_id]
     if not anchors:
-        anchors = sorted(matched, key=lambda r: (0 if r.get("grade") == "A" else 1, r.get("year") or 0))
+        anchors = sorted(catalog, key=lambda r: (0 if r.get("grade") == "A" else 1, r.get("year") or 0))
 
     primary = anchors[0]
     support = anchors[1:4]
@@ -632,29 +673,178 @@ _FOREIGN_MOLECULES = (
     "semaglutide",
     "ozempic",
     "liraglutide",
+    "paradigm-hf",
+    "pioneer-hf",
+    "keynote-189",
+    "keynote-024",
+    "neprilysin",
 )
 
 
+def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
+    title = hit.get("title") or "PubMed retrieval"
+    return {
+        "id": hit.get("id") or f"pubmed-{hit.get('pmid')}",
+        "stream": "Independent / retrieved",
+        "trial": "",
+        "short": title[:88],
+        "title": title,
+        "authors": hit.get("authors") or "",
+        "year": hit.get("year"),
+        "journal": hit.get("journal") or "",
+        "pages": "",
+        "doi": hit.get("doi") or "",
+        "pmid": hit.get("pmid") or "",
+        "design": "PubMed retrieval",
+        "n": None,
+        "population": "",
+        "endpoint": "",
+        "effect_metric": None,
+        "hr": None,
+        "low": None,
+        "high": None,
+        "grade": "C",
+        "claim_permitted": (
+            "Retrieved from PubMed for this brief. Confirm the full text before this can lead."
+        ),
+        "caveat": hit.get("note") or "Not a locked efficacy row.",
+        "mlr": "Do not quote an effect size until the full paper is on the working file.",
+        "directs": "none",
+        "citation": hit.get("citation") or "",
+        "url": hit.get("url") or "",
+        "status": "pubmed-retrieved",
+        "matchedFrom": "pubmed",
+    }
+
+
+def _pmids_in_brief(brief: ExtractedBrief) -> list[str]:
+    blob = _brief_blob(brief)
+    found = re.findall(r"pmid[:\s#]*([1-9]\d{6,8})", blob, re.I)
+    return list(dict.fromkeys(found))
+
+
+def _named_search_molecules(brief: ExtractedBrief) -> list[str]:
+    """INNs / trial names the brief actually used — never inferred from therapy area."""
+    blob = _brief_blob(brief)
+    folded = _fold(blob)
+    named: list[str] = []
+    for entry in CATALOG:
+        for alias in entry.get("aliases") or ():
+            token = str(alias).strip()
+            if len(token) < 4:
+                continue
+            if _alias_in(folded, token) and token.lower() not in {n.lower() for n in named}:
+                named.append(token)
+    product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
+    if _looks_like_inn(product) and product.lower() not in {n.lower() for n in named}:
+        named.append(product)
+    return named
+
+
+def _looks_like_inn(product: str) -> bool:
+    """True for generic/INN-like strings, not trade names like HelixOne."""
+    if not product or len(product) < 5:
+        return False
+    low = product.lower()
+    if re.search(
+        r"(mab|nib|tide|glutide|gliflozin|sartan|pril|olol|umab|ciclib|fenib|parib)\b",
+        low,
+    ):
+        return True
+    return "/" in product
+
+
+def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
+    """Search this brief's studies and molecule — never a substitute catalog drug."""
+    terms: list[str] = []
+    indication = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.indication or "").strip()
+    ta = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.therapy_area or "").strip()
+    disease = indication or ta
+
+    for item in (
+        *(brief.brand_evidence or []),
+        *(brief.existing_evidence or []),
+        *(brief.evolving_evidence or []),
+        *(brief.guidelines or []),
+    ):
+        cleaned = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", item).strip()
+        if len(cleaned) >= 12:
+            terms.append(cleaned[:180])
+
+    named = _named_search_molecules(brief)
+    for mol in named[:3]:
+        extra = disease or ""
+        terms.append(f"{mol} {extra} randomized controlled trial".strip())
+
+    product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
+    brand = (brief.brand or "").strip()
+    if product and product.lower() != brand.lower() and len(product) >= 5:
+        terms.append(f"{product} {disease} randomized".strip())
+
+    if disease and len(disease) >= 4:
+        if named:
+            terms.append(f"{disease} systematic review")
+        terms.append(f"{disease} AND (guideline[pt] OR practice guideline[pt])")
+
+    uniq: list[str] = []
+    seen = set()
+    for term in terms:
+        key = re.sub(r"\s+", " ", term.lower()).strip()
+        if key in seen or len(key) < 8:
+            continue
+        # Never inject a catalog molecule the brief did not name.
+        if _term_smuggles_foreign_molecule(brief, key):
+            continue
+        seen.add(key)
+        uniq.append(term)
+    return uniq[:5]
+
+
+def _term_smuggles_foreign_molecule(brief: ExtractedBrief, term: str) -> bool:
+    blob = _fold(_brief_blob(brief))
+    folded = _fold(term)
+    for mol in _FOREIGN_MOLECULES:
+        if _alias_in(folded, mol) and not _alias_in(blob, mol):
+            return True
+    return False
+
+
+def _pubmed_term(brief: ExtractedBrief) -> str:
+    terms = _pubmed_terms(brief)
+    return terms[0] if terms else ""
+
+
 def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, Any]]:
-    term = _pubmed_term(brief)
-    if not term:
-        return []
+    terms = _pubmed_terms(brief)
+    pmids = _pmids_in_brief(brief)
     try:
-        ids = _esearch(term, retmax=4)
-        if not ids:
+        for term in terms:
+            pmids.extend(_esearch(term, retmax=5))
+        pmids = list(dict.fromkeys(p for p in pmids if p))
+        if not pmids:
             return []
-        summaries = _esummary(ids)
+        summaries = _esummary(pmids[:15])
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
         return []
 
+    named = _named_search_molecules(brief)
     hits = []
-    known_pmids = {e.get("pmid") for e in CATALOG}
+    catalog_pmids = {e.get("pmid") for e in CATALOG}
     for pmid, doc in summaries.items():
-        if pmid in known_pmids:
-            continue
         title = doc.get("title") or ""
         if not _pubmed_hit_belongs(brief, title):
             continue
+        if pmid in catalog_pmids and pmid not in set(_pmids_in_brief(brief)):
+            continue
+        if not named:
+            pubtypes = " ".join(
+                str(x).lower() for x in (doc.get("pubtype") or [])
+            )
+            title_l = (title or "").lower()
+            if "guideline" not in pubtypes:
+                continue
+            if "systematic review" in title_l or "meta-analysis" in title_l:
+                continue
         journal = doc.get("fulljournalname") or doc.get("source") or ""
         year = _year(doc.get("pubdate") or "")
         authors = _author_line(doc.get("authors") or [])
@@ -671,44 +861,34 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
             "status": "pubmed-retrieved",
             "note": "Independent PubMed hit — confirm against the full text before it can become a lead claim.",
         })
-    return hits[:4]
+    return hits[:8]
 
 
-def _pubmed_name_tokens(brief: ExtractedBrief) -> list[str]:
-    """Tokens the brief actually named — never a catalog molecule inferred from TA."""
-    stop = {
-        "first", "line", "therapy", "chronic", "acute", "cancer", "failure",
-        "heart", "lung", "small", "cell", "reduced", "ejection", "fraction",
-        "oncology", "cardiology", "endocrinology", "nsclc", "hfref", "india",
-    }
-    blob = f"{brief.product or ''} {brief.brand or ''}"
-    return [
-        tok for tok in re.findall(r"[a-z0-9]{5,}", blob.lower())
-        if tok not in stop
-    ]
+def _unmentioned_catalog_markers(brief: ExtractedBrief) -> list[str]:
+    blob = _fold(_brief_blob(brief))
+    markers: list[str] = []
+    for entry in CATALOG:
+        for alias in entry.get("aliases") or ():
+            token = str(alias).strip()
+            if len(token) < 5:
+                continue
+            if _alias_in(blob, token):
+                continue
+            markers.append(token)
+        trial = str(entry.get("trial") or "")
+        if trial and ("-" in trial or any(ch.isdigit() for ch in trial)):
+            if not _alias_in(blob, trial):
+                markers.append(trial)
+    markers.extend(m for m in _FOREIGN_MOLECULES if not _alias_in(blob, m))
+    return list(dict.fromkeys(markers))
 
 
 def _pubmed_hit_belongs(brief: ExtractedBrief, title: str) -> bool:
-    title_l = (title or "").lower()
-    blob = _brief_blob(brief)
-    for mol in _FOREIGN_MOLECULES:
-        if mol in title_l and mol not in blob:
+    folded_title = _fold(title or "")
+    for marker in _unmentioned_catalog_markers(brief):
+        if _alias_in(folded_title, marker):
             return False
-    tokens = _pubmed_name_tokens(brief)
-    if not tokens:
-        return False
-    return any(tok in title_l for tok in tokens)
-
-
-def _pubmed_term(brief: ExtractedBrief) -> str:
-    product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
-    if len(product) < 5:
-        return ""
-    indication = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.indication or "").strip()
-    bits = [product]
-    if indication:
-        bits.append(indication)
-    return f"{' '.join(bits)} randomized"
+    return bool((title or "").strip())
 
 
 def _esearch(term: str, retmax: int = 4) -> list[str]:
