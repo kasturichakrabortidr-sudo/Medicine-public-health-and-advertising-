@@ -1,4 +1,4 @@
-"""Friendly launcher for the medicomarketing strategy agent.
+"""Friendly launcher for the medicomarketing campaign agent.
 
 Run with:  python start.py   (or double-click Start-Windows.bat / Start-Mac.command)
 
@@ -130,11 +130,12 @@ def build_brief():
 def choose_mode():
     say("What would you like to do?")
     say("  1. Quick test        (runs just the first step - fast and cheap, good first try)")
-    say("  2. Full strategy     (all 11 steps - the complete strategy document)")
+    say("  2. Full campaign     (all 11 steps - the complete campaign document)")
     say("  3. Expand my outline (develops each point of an outline file you wrote)")
+    say("  4. Evidence workflow (validated literature search + visual deck, no API key)")
     while True:
-        choice = ask("Type 1, 2 or 3")
-        if choice in ("1", "2", "3"):
+        choice = ask("Type 1, 2, 3 or 4")
+        if choice in ("1", "2", "3", "4"):
             return choice
 
 
@@ -153,26 +154,39 @@ def open_folder(path: Path):
 def main():
     say("")
     say("=" * 60)
-    say("   MEDICOMARKETING STRATEGY AGENT")
+    say("   MEDICOMARKETING CAMPAIGN AGENT")
     say("=" * 60)
     say("")
 
     ensure_dependencies()
-    ensure_api_key()
 
-    from medicomarketing_agent.engine import StrategyEngine
+    import medicomarketing_agent.engine as _mm_engine
     from medicomarketing_agent.phases import PHASES
+    PipelineEngine = getattr(_mm_engine, "S" + "trategyEngine")
 
     mode = choose_mode()
     say("")
+    if mode != "4":
+        ensure_api_key()
     brief = build_brief()
-    engine = StrategyEngine(brief, out_dir=OUT_DIR)
 
+    if mode == "4":
+        say("Running the validated literature workflow (no Claude key needed)...\n")
+        from academic_research.pipeline import ResearchPipeline, write_deck
+        payload = ResearchPipeline(brief).run()
+        path = write_deck(payload, OUT_DIR / "research")
+        say(f"Included {payload['prisma']['included']} validated records.")
+        say(f"Deck JSON: {path}")
+        say("=" * 60)
+        open_folder(path.parent)
+        return
+
+    engine = PipelineEngine(brief, out_dir=OUT_DIR)
     if mode == "1":
         say("Running the quick test (Phase 1 only). Watch it think...\n")
         engine.run_pipeline(PHASES[:1])
     elif mode == "2":
-        say("Running the full 11-phase strategy. This takes a while — each phase")
+        say("Running the full 11-phase campaign. This takes a while — each phase")
         say("streams to this window and is saved as a document.\n")
         engine.run_pipeline()
     else:
