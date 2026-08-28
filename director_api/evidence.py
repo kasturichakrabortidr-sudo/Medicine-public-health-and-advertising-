@@ -1208,7 +1208,7 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
                 brief,
             ),
         })
-    hits.sort(key=_pubmed_score, reverse=True)
+    hits.sort(key=lambda h: _pubmed_score(h, brief), reverse=True)
     return hits[:12]
 
 
@@ -1263,7 +1263,7 @@ def _strip_xml(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _pubmed_score(hit: dict[str, Any]) -> int:
+def _pubmed_score(hit: dict[str, Any], brief: ExtractedBrief | None = None) -> int:
     blob = f"{hit.get('title') or ''} {hit.get('pubtype') or ''} {hit.get('abstract') or ''} {hit.get('journal') or ''}".lower()
     score = 0
     if any(w in blob for w in ("randomiz", "randomis", "rct", "phase 3", "phase iii")):
@@ -1293,6 +1293,23 @@ def _pubmed_score(hit: dict[str, Any]) -> int:
         score += 2
     if hit.get("independence") == "of-this-indication":
         score += 1
+    if "triple" in blob or "ics/lama/laba" in blob or "ics/laba/lama" in blob:
+        score += 3
+    if "gold" in blob and ("copd" in blob or "obstructive" in blob):
+        score += 3
+    if brief:
+        named = [n.lower() for n in _named_search_molecules(brief)]
+        hits_n = sum(1 for n in named if n in blob)
+        if hits_n >= 2:
+            score += 4
+        elif hits_n == 1:
+            score += 1
+        product = (brief.product or "").lower()
+        if "nebul" in product and "nebul" in blob:
+            score += 2
+    # Soft-deprioritise adjacent-but-off papers (telerehab, biologics) on a triple-maintenance brief.
+    if any(w in blob for w in ("telerehab", "biologic", "monoclonal", "dupilumab", "benralizumab")):
+        score -= 4
     return score
 
 

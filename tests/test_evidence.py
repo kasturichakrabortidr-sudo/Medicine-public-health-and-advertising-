@@ -367,3 +367,18 @@ def test_trivora_pubmed_queries_are_short_copd_not_the_whole_brief():
         "Tongxinluo capsule in patients with ST-segment elevation myocardial infarction",
     )
     assert not _pubmed_hit_belongs(brief, "Sacubitril/valsartan in heart failure")
+    from director_api.evidence import _pubmed_score
+
+    triple = _pubmed_score(
+        {"title": "Triple Therapy with Budesonide/Glycopyrronium/Formoterol versus Dual", "pubtype": "RCT", "abstract": "COPD exacerbations"},
+        brief,
+    )
+    dual = _pubmed_score(
+        {"title": "Indacaterol-Glycopyrronium versus Salmeterol-Fluticasone for COPD", "pubtype": "RCT", "abstract": "COPD"},
+        brief,
+    )
+    junk = _pubmed_score(
+        {"title": "Telerehabilitation for chronic respiratory disease", "pubtype": "Review", "abstract": "COPD"},
+        brief,
+    )
+    assert triple > dual > junk
