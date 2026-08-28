@@ -100,6 +100,11 @@ def test_trivora_step_up_brief_is_first_line_not_hospital_wait():
     assert "stable" not in enemy
     assert "rescue" in enemy or "free-mix" in enemy or "step-up" in enemy
     assert pack["interventions"][0]["name"] == "First-line maintenance protocol"
+    work = json.dumps(pack["workfile"]).lower()
+    assert "first-line maintenance" in work
+    p05 = next(p for p in pack["workfile"]["phases"] if p["id"] == "05")
+    assert "first eligible encounter" not in json.dumps(p05).lower()
+    assert "first-line" in json.dumps(p05).lower()
     blob = json.dumps(pack).lower()
     assert "paradigm-hf" not in blob
     assert "sacubitril" not in blob

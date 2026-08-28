@@ -36,7 +36,7 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
     by_direct = {r.get("directs"): r for r in records}
     phases = [
         _p01(brief, doctrine, records, gaps),
-        _p02(brief, records),
+        _p02(brief, records, doctrine),
         _p03(brief, records, gaps, lead),
         _p04(brief, records, gaps),
         _p05(brief, records, doctrine),
@@ -148,12 +148,19 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     )
 
 
-def _p02(brief, records) -> dict:
+def _start_action(brief, doctrine) -> str:
+    brand = (brief.brand or "the product").split(";")[0].strip()[:48]
+    if (doctrine or {}).get("id") == "first-line-not-rescue":
+        return f"Start {brand} as first-line maintenance, not after dual has failed"
+    return f"Start {brand} at the first eligible encounter"
+
+
+def _p02(brief, records, doctrine=None) -> dict:
     pop = brief.indication or brief.therapy_area or "the indicated population"
-    product = brief.product or brief.brand or "the product"
+    start = _start_action(brief, doctrine or {})
     pico = [
         ["Population", pop, "Taken from the brief. We will not widen it."],
-        ["Intervention", f"{product} at the first eligible encounter", "Eligible as labelled — not 'all comers'."],
+        ["Intervention", start, "Eligible as labelled — not 'all comers'."],
         ["Comparator", "Standard of care named in the brief", "The comparator is the current habit, not a straw man."],
         ["Outcomes we may use", _outcome_line(records), "Only endpoints published in numbered papers."],
         ["Setting", brief.market or "markets named in the brief", "Local label and code still govern."],
@@ -298,11 +305,13 @@ def _p05(brief, records, doctrine) -> dict:
         ),
     )
     start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
-    required = (
-        f"Start {brief.brand or 'the product'} at the first eligible encounter"
-        + (f" — the window studied in {mark(start)} {start.get('short')}" if start else "")
-        + "."
-    )
+    required = _start_action(brief, doctrine)
+    if start and (doctrine or {}).get("id") != "first-line-not-rescue":
+        required = (
+            f"{required} — the window studied in {mark(start)} {start.get('short')}."
+        )
+    else:
+        required = required.rstrip(".") + "."
     concerns = []
     if any(_looks_like_cost(c) for c in cost) or any(_looks_like_cost(i) for i in insights):
         concerns.append(["Economic", next((c for c in cost if _looks_like_cost(c)), "Cost concern named in the brief"), "Opportunity — cost", "Do not hide price. Give the doctor a legal way to stay on the patient's side."])
@@ -372,12 +381,30 @@ def _p07(brief, records, doctrine, lead) -> dict:
     outcome = next((r for r in records if r.get("directs") == "outcome-permission"), None)
     guide = next((r for r in records if r.get("directs") == "guideline-cover"), None)
     theme = doctrine.get("bet") or "Start at the first eligible visit."
+    if doctrine.get("id") == "first-line-not-rescue":
+        start_line = (
+            "First-line maintenance in the labelled exacerbator, not rescue after dual."
+            + (f" {mark(start)}" if start else " [citation pending]")
+        )
+        start_proof = (
+            start.get("claim_permitted") if start
+            else "Do not write this line until a triple/GOLD paper is numbered."
+        )
+    else:
+        start_line = (
+            "First eligible encounter is a guideline encounter, not a later clinic."
+            + (f" {mark(start)}" if start else " [citation pending]")
+        )
+        start_proof = (
+            start.get("claim_permitted") if start
+            else "Do not write this line until a timing paper is numbered."
+        )
     pillars = [
         [
-            "Start now",
-            f"First eligible encounter is a guideline encounter, not a later clinic." + (f" {mark(start)}" if start else " [citation pending]"),
+            "Start now" if doctrine.get("id") != "first-line-not-rescue" else "First-line, not rescue",
+            start_line,
             mark(start) if start else "—",
-            (start.get("claim_permitted") if start else "Do not write this line until a timing paper is numbered."),
+            start_proof,
         ],
         [
             "The outcome is already earned",
@@ -611,7 +638,10 @@ def _objections(brief: ExtractedBrief, records: list, start) -> list[list[str]]:
 
 def _looks_like_delay(text: str) -> bool:
     low = text.lower()
-    return any(w in low for w in ("stabilis", "stabiliz", "late", "second-line", "switch", "wait", "delay", "habit"))
+    return any(w in low for w in (
+        "stabilis", "stabiliz", "late", "second-line", "switch", "wait", "delay", "habit",
+        "step-up", "step up", "rescue", "mix it myself", "free-mix", "free mix",
+    ))
 
 
 def _looks_like_cost(text: str) -> bool:
