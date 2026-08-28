@@ -62,7 +62,11 @@ def build_client_deck(
             _close_slide(brand, doctrine, p11, p07),
         ]
     )
-    return _paginate(slides[:11] + reference_slides(references)[:1])
+    refs = reference_slides(references)[:1]
+    if refs:
+        refs[0]["id"] = "references"
+        refs[0]["kicker"] = "Appendix"
+    return _paginate(slides[:11] + refs)
 
 
 def people_rows(records: list[dict]) -> list[dict]:
@@ -466,10 +470,6 @@ def _science_lead_slide(
             "orange",
         ))
     if not stats:
-        independent = (
-            rec.get("independence") == "indication-landscape"
-            or "not a trial" in (rec.get("claim_permitted") or "").lower()
-        )
         stats = [
             _stat(
                 str(pmid) if pmid != "—" else "Pending",
@@ -477,11 +477,10 @@ def _science_lead_slide(
                 "blue",
             ),
             _stat(
-                "Class" if independent else (str(n) if n != "—" else "—"),
+                str(rec.get("year") or (str(n) if n != "—" else "Lead")),
                 _line(
-                    "Indication landscape. Not a trial of this brand."
-                    if independent
-                    else ("Patients in the lead paper." if n != "—" else "Do not invent a sample size."),
+                    rec.get("journal")
+                    or ("Patients in the lead paper." if n != "—" else "Numbered paper. Read full text before a promotional line."),
                     90,
                 ),
                 "orange",
