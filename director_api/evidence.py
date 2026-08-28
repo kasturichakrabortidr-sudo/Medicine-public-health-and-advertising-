@@ -1,11 +1,19 @@
 """Evidence ledger: catalog matches plus a live literature review.
 
-Catalog rows (with published effect sizes) attach only when this brief names
-that trial, molecule, PMID, or DOI — we will not paste KEYNOTE onto a
-different NSCLC brand. PubMed still runs a literature review for *this*
-product and indication even when the brief listed no papers. Abstracts drive
-the scientific strategy. Effect sizes are copied only when the paper states
-them; they are never invented.
+The brief is a starting brief, not the literature. We always search PubMed
+for this product and indication. Catalog rows with published effect sizes
+attach only when this brief names that trial, molecule, PMID, or DOI — we
+will not paste KEYNOTE onto a different brand as *its* pivotal.
+
+If the brief named an INN (lumenolol, sacubitril, pembrolizumab), keep that
+molecule's papers and drop another catalog molecule's pivotal.
+
+If the brief is brand + therapy area only (HelixOne in NSCLC), run an
+indication review: landmark RCTs, meta-analyses, and society guidelines of
+the disease are in play, labelled Independent / indication landscape — not
+a trial of this brand. Cross-therapy-area papers still stay off.
+
+Effect sizes are copied only when the paper states them; they are never invented.
 """
 
 from __future__ import annotations
@@ -399,7 +407,7 @@ def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str,
         for hit in pubmed_hits:
             if hit.get("pmid") in catalog_pmids:
                 continue
-            rec = _pubmed_as_record(hit)
+            rec = _pubmed_as_record(hit, brief)
             matched.append(rec)
             catalog_pmids.add(hit.get("pmid"))
 
@@ -575,29 +583,52 @@ def _first_sentences(text: str, n: int = 2) -> str:
 
 def _strategy_implication(brief: ExtractedBrief, records: list[dict]) -> str:
     brand = brief.brand or "the brand"
+    indication = brief.indication or brief.therapy_area or "this indication"
     insights = " ".join(brief.hcp_insights or []).lower()
     cost = " ".join(brief.access_and_cost or []).lower()
     science = " ".join(
         f"{r.get('title') or ''} {r.get('abstract') or ''} {r.get('claim_permitted') or ''}"
         for r in records
     ).lower()
-    if any(w in science for w in ("initiat", "first-line", "guideline", "in-hospital", "early")) and any(
-        w in insights for w in ("wait", "late", "stabil", "second", "habit")
-    ):
+    landscape = any(r.get("independence") == "indication-landscape" for r in records)
+    landscape_note = (
+        f" Landmark papers of other agents describe the {indication} standard — "
+        f"they are not trials of {brand}."
+        if landscape
+        else ""
+    )
+    start_lit = any(w in science for w in ("initiat", "first-line", "guideline", "in-hospital", "early"))
+    outcome_lit = any(w in science for w in ("surviv", "mortality", "hazard", "efficacy", "outcome"))
+    habit = any(w in insights for w in ("wait", "late", "stabil", "second", "habit"))
+    if start_lit and habit:
         return (
-            f"The papers already cover when to start. {brand} is not missing science — "
-            "the doctors described in the brief still wait. That delay is the campaign."
+            f"The papers already cover when to start in {indication}. {brand} is not missing science — "
+            f"the doctors described in the brief still wait. That delay is the campaign.{landscape_note}"
         )
-    if any(w in science for w in ("surviv", "mortality", "hazard", "efficacy", "outcome")) and any(
-        w in cost for w in ("cost", "oop", "price", "afford", "reimburs")
-    ):
+    if start_lit and not insights:
+        return (
+            f"The literature for {indication} already defines when to start. "
+            "This brief did not describe the current habit — capturing it is the first research task. "
+            f"Until then the scientific bet is first-eligible start, not a restated upload.{landscape_note}"
+        )
+    if start_lit:
+        return (
+            f"The literature for {indication} defines when to start. "
+            f"Spend {brand} against the delay the field still practices, not against a restated brief.{landscape_note}"
+        )
+    if outcome_lit and any(w in cost for w in ("cost", "oop", "price", "afford", "reimburs")):
         return (
             "Outcome literature is on the register. Conversion is gated by cost and access, "
-            "not by another reminder that the class works."
+            f"not by another reminder that the class works.{landscape_note}"
+        )
+    if outcome_lit:
+        return (
+            f"Numbered papers are permission to stand somewhere specific for {brand} in {indication}. "
+            f"The campaign is the gap between those findings and the current start.{landscape_note}"
         )
     return (
         f"Numbered papers are permission to stand somewhere specific for {brand}. "
-        "Spend against the behaviour in the brief, not against a generic funnel."
+        f"Spend against the behaviour in the field, not against a generic funnel.{landscape_note}"
     )
 
 
@@ -644,10 +675,23 @@ def _scientific_synthesis(brief: ExtractedBrief, records: list[dict]) -> str:
 
 
 def _review_note(brief: ExtractedBrief, matched: list[dict], terms: list[str]) -> dict[str, Any]:
-    excluded = [
-        m for m in ("KEYNOTE", "pembrolizumab", "PARADIGM-HF", "sacubitril", "Entresto")
-        if m.lower() not in _brief_blob(brief)
-    ]
+    independent_n = sum(1 for r in matched if r.get("independence") == "indication-landscape")
+    if _brief_has_named_inn(brief):
+        excluded = (
+            "Dropped papers that name another molecule's catalog pivotal — "
+            "this brief named a different INN."
+        )
+    elif independent_n:
+        excluded = (
+            f"Kept {independent_n} indication-landmark paper"
+            f"{'s' if independent_n != 1 else ''} as independent landscape — "
+            "not trials of this brand. Dropped cross-therapy-area papers."
+        )
+    else:
+        excluded = (
+            "Cross-therapy-area papers stay off this register. "
+            "Indication landmarks remain in play when they belong to this disease."
+        )
     findings = []
     for row in matched[:6]:
         findings.append({
@@ -661,10 +705,7 @@ def _review_note(brief: ExtractedBrief, matched: list[dict], terms: list[str]) -
     return {
         "searched": terms,
         "paperCount": len(matched),
-        "excluded": (
-            "Dropped papers that name another molecule's catalog pivotal — this brief did not."
-            if excluded else "No catalog molecule was excluded."
-        ),
+        "excluded": excluded,
         "findings": findings,
         "synthesis": _scientific_synthesis(brief, matched),
     }
@@ -691,8 +732,7 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict], review: dict | No
             "why": (
                 f"We searched PubMed for this product and indication instead of waiting for the brief "
                 f"to paste a bibliography. Lead source: {primary.get('short')} "
-                f"(PMID {primary.get('pmid') or '—'}). {implication} "
-                f"Excluded another molecule's catalog pivotal if this brief did not name it."
+                f"(PMID {primary.get('pmid') or '—'}). {implication}"
             ),
             "directs": directs,
             "primaryId": primary.get("id"),
@@ -800,9 +840,13 @@ _FOREIGN_MOLECULES = (
 )
 
 
-def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
+def _pubmed_as_record(hit: dict[str, Any], brief: ExtractedBrief) -> dict[str, Any]:
     title = hit.get("title") or "PubMed retrieval"
     abstract = hit.get("abstract") or ""
+    brand = brief.brand or brief.product or "this brand"
+    independent = hit.get("independence") == "indication-landscape" or _hit_is_independent_landscape(
+        brief, f"{title} {abstract}"
+    )
     claim = _first_sentences(abstract, 2) or (
         f"Retrieved from PubMed: {title.rstrip('.')}."
     )
@@ -813,9 +857,13 @@ def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
             f"PubMed record: {title.rstrip('.')}. "
             "Abstract not returned — retrieve full text before a promotional line."
         )
+    if independent:
+        claim = (
+            f"Independent / indication landscape — not a trial of {brand}. {claim}"
+        )
     return {
         "id": hit.get("id") or f"pubmed-{hit.get('pmid')}",
-        "stream": "Independent / retrieved",
+        "stream": "Independent / indication landscape" if independent else "Independent / retrieved",
         "trial": "",
         "short": title[:88],
         "title": title,
@@ -835,7 +883,11 @@ def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
         "high": hit.get("high"),
         "grade": "B" if abstract else "C",
         "claim_permitted": claim,
-        "caveat": "Retrieved literature. Not a substitute for reading the paper.",
+        "caveat": (
+            f"Indication landscape only. Do not present this as a trial of {brand}."
+            if independent
+            else "Retrieved literature. Not a substitute for reading the paper."
+        ),
         "mlr": "Do not quote an effect size unless it appears in the abstract or full text.",
         "directs": hit.get("directs") or "outcome-permission",
         "abstract": abstract,
@@ -843,6 +895,7 @@ def _pubmed_as_record(hit: dict[str, Any]) -> dict[str, Any]:
         "url": hit.get("url") or "",
         "status": "pubmed-retrieved",
         "matchedFrom": "pubmed",
+        "independence": "indication-landscape" if independent else "of-this-indication",
         "spine_means": _first_sentences(abstract or title, 1),
         "spine_barrier": "A paper on the register that the field never uses is not a campaign.",
         "spine_execute": "Put this finding in the first-eligible conversation, not in an appendix.",
@@ -883,13 +936,33 @@ def _looks_like_inn(product: str) -> bool:
     """True for generic/INN-like strings, not trade names like HelixOne."""
     if not product or len(product) < 5:
         return False
-    low = product.lower()
-    if re.search(
-        r"(mab|nib|tide|glutide|gliflozin|sartan|pril|olol|umab|ciclib|fenib|parib)\b",
-        low,
-    ):
+    low = product.lower().strip()
+    if "/" in product:
         return True
-    return "/" in product
+    tokens = [part for part in re.split(r"[\s,;]+", low) if part]
+    suffix = re.compile(
+        r"(mab|nib|tide|glutide|gliflozin|sartan|pril|olol|umab|ciclib|fenib|parib)$"
+    )
+    return any(suffix.search(token) for token in tokens)
+
+
+_CATALOG_INNS = (
+    "sacubitril",
+    "pembrolizumab",
+    "semaglutide",
+    "liraglutide",
+    "entresto",
+    "keytruda",
+    "ozempic",
+    "lcz696",
+)
+
+
+def _brief_has_named_inn(brief: ExtractedBrief) -> bool:
+    if _looks_like_inn(brief.product or ""):
+        return True
+    blob = _brief_blob(brief)
+    return any(m in blob for m in _CATALOG_INNS)
 
 
 def _disease_phrases(brief: ExtractedBrief) -> list[str]:
@@ -921,17 +994,24 @@ def _display_query(term: str) -> str:
 
 
 def _pubmed_not_clause(brief: ExtractedBrief) -> str:
+    """Exclude other molecules from the query when this brief named an INN.
+
+    Brand-only indication reviews must still find same-family landmarks
+    (KEYNOTE on an NSCLC brand, PARADIGM on an unnamed HF brand). Cross-family
+    exclusions always stay on (no sacubitril on NSCLC).
+    """
     blob = _brief_blob(brief)
+    brief_fam = _brief_family(brief, blob)
+    named_inn = _brief_has_named_inn(brief)
     parts = []
     for mol in _FOREIGN_MOLECULES:
         if mol.lower() in blob:
             continue
-        token = mol.replace("-", " ")
-        if " " in token:
-            parts.append(f"NOT {mol}[ti]")
-        else:
-            parts.append(f"NOT {mol}[ti]")
-        if len(parts) >= 6:
+        mol_fam = _text_family(mol)
+        if not named_inn and mol_fam and brief_fam and mol_fam == brief_fam:
+            continue
+        parts.append(f"NOT {mol}[ti]")
+        if len(parts) >= 8:
             break
     return " ".join(parts)
 
@@ -967,7 +1047,13 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
         terms.append(f"{primary_disease} randomized controlled trial {not_clause}".strip())
         terms.append(f"{primary_disease} AND (guideline[pt] OR practice guideline[pt])")
         terms.append(f"{primary_disease} meta-analysis {not_clause}".strip())
+        terms.append(f"{primary_disease} first-line treatment randomized {not_clause}".strip())
         terms.append(f"{primary_disease} epidemiology")
+        fam = _brief_family(brief, _brief_blob(brief))
+        if fam == "oncology" and not _brief_has_named_inn(brief):
+            terms.append(f"{primary_disease} immunotherapy chemotherapy randomized")
+        if fam == "cardiology" and not _brief_has_named_inn(brief):
+            terms.append(f"{primary_disease} guideline class I randomized")
         if len(diseases) > 1:
             terms.append(f"{diseases[1]} randomized controlled trial {not_clause}".strip())
 
@@ -981,7 +1067,7 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
             continue
         seen.add(key)
         uniq.append(term)
-    return uniq[:8]
+    return uniq[:10]
 
 
 def _term_smuggles_foreign_molecule(brief: ExtractedBrief, term: str) -> bool:
@@ -1004,7 +1090,7 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
     pmids = _pmids_in_brief(brief)
     for term in terms:
         try:
-            pmids.extend(_esearch(term, retmax=10))
+            pmids.extend(_esearch(term, retmax=12))
             time.sleep(0.12)
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
             continue
@@ -1012,23 +1098,26 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
     if not pmids:
         return []
     try:
-        summaries = _esummary(pmids[:36])
+        summaries = _esummary(pmids[:40])
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
         return []
     try:
-        abstracts = _efetch_abstracts(list(summaries.keys())[:24])
+        abstracts = _efetch_abstracts(list(summaries.keys())[:28])
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, KeyError, ValueError):
         abstracts = {}
 
     hits = []
     catalog_pmids = {e.get("pmid") for e in CATALOG}
     named_pmids = set(_pmids_in_brief(brief))
+    named_inn = _brief_has_named_inn(brief)
     for pmid, doc in summaries.items():
         title = doc.get("title") or ""
         abstract = abstracts.get(pmid) or ""
         if not _pubmed_hit_belongs(brief, title, abstract):
             continue
-        if pmid in catalog_pmids and pmid not in named_pmids:
+        # Named INN: do not sneak another molecule's catalog pivotal in via PubMed.
+        # Brand-only: keep that pivotal as an independent landscape record, not a catalog row.
+        if pmid in catalog_pmids and pmid not in named_pmids and named_inn:
             continue
         journal = doc.get("fulljournalname") or doc.get("source") or ""
         year = _year(doc.get("pubdate") or "")
@@ -1036,6 +1125,11 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
         doi = _doi_from(doc)
         pubtypes = ", ".join(str(x) for x in (doc.get("pubtype") or [])[:3])
         hr, low, high = _hr_from_text(f"{title} {abstract}")
+        independence = (
+            "indication-landscape"
+            if _hit_is_independent_landscape(brief, f"{title} {abstract}")
+            else "of-this-indication"
+        )
         hits.append({
             "pmid": pmid,
             "title": title,
@@ -1052,11 +1146,13 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
             "citation": f"{authors} {title} {journal}. {year}." + (f" doi:{doi}" if doi else f" PMID {pmid}"),
             "status": "pubmed-retrieved",
             "note": "Independent PubMed hit — confirm against the full text before promotional use.",
+            "independence": independence,
             "directs": _infer_directs(
                 [{"title": title, "abstract": abstract}],
                 brief,
             ),
         })
+    hits.sort(key=_pubmed_score, reverse=True)
     return hits[:12]
 
 
@@ -1111,6 +1207,39 @@ def _strip_xml(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def _pubmed_score(hit: dict[str, Any]) -> int:
+    blob = f"{hit.get('title') or ''} {hit.get('pubtype') or ''} {hit.get('abstract') or ''} {hit.get('journal') or ''}".lower()
+    score = 0
+    if any(w in blob for w in ("randomiz", "randomis", "rct", "phase 3", "phase iii")):
+        score += 4
+    if "guideline" in blob or "practice guideline" in blob:
+        score += 4
+    if "meta-analysis" in blob or "systematic review" in blob:
+        score += 3
+    if hit.get("abstract"):
+        score += 2
+    if hit.get("hr") is not None:
+        score += 2
+    journal = (hit.get("journal") or "").lower()
+    if any(
+        name in journal
+        for name in (
+            "n engl j med",
+            "lancet",
+            "jama",
+            "j clin oncol",
+            "circulation",
+            "eur heart",
+            "ann oncol",
+            "j natl compr",
+        )
+    ):
+        score += 2
+    if hit.get("independence") == "of-this-indication":
+        score += 1
+    return score
+
+
 def _unmentioned_catalog_markers(brief: ExtractedBrief) -> list[str]:
     blob = _fold(_brief_blob(brief))
     markers: list[str] = []
@@ -1130,12 +1259,70 @@ def _unmentioned_catalog_markers(brief: ExtractedBrief) -> list[str]:
     return list(dict.fromkeys(markers))
 
 
+def _hit_mentions_unmentioned_molecule(brief: ExtractedBrief, text: str) -> bool:
+    folded = _fold(text)
+    return any(_alias_in(folded, marker) for marker in _unmentioned_catalog_markers(brief))
+
+
+def _hit_is_independent_landscape(brief: ExtractedBrief, text: str) -> bool:
+    if _brief_has_named_inn(brief):
+        return False
+    return _hit_mentions_unmentioned_molecule(brief, text)
+
+
+def _text_family(text: str) -> str:
+    hay = (text or "").lower()
+    if any(k in hay for k in ("nsclc", "lung cancer", "oncology", "pembrolizumab", "keynote", "keytruda")):
+        return "oncology"
+    if any(
+        k in hay
+        for k in (
+            "hfref",
+            "heart failure",
+            "cardiology",
+            "arni",
+            "sacubitril",
+            "paradigm",
+            "neprilysin",
+            "entresto",
+            "pioneer-hf",
+        )
+    ):
+        return "cardiology"
+    if any(
+        k in hay
+        for k in (
+            "diabetes",
+            "obesity",
+            "glp-1",
+            "glp1",
+            "semaglutide",
+            "endocrin",
+            "ozempic",
+            "liraglutide",
+        )
+    ):
+        return "endocrinology"
+    return ""
+
+
+def _families_mismatch(brief: ExtractedBrief, text: str) -> bool:
+    brief_fam = _brief_family(brief, _brief_blob(brief))
+    hit_fam = _text_family(text)
+    return bool(brief_fam and hit_fam and brief_fam != hit_fam)
+
+
 def _pubmed_hit_belongs(brief: ExtractedBrief, title: str, extra: str = "") -> bool:
-    folded_title = _fold(f"{title or ''} {extra or ''}")
-    for marker in _unmentioned_catalog_markers(brief):
-        if _alias_in(folded_title, marker):
-            return False
-    return bool((title or "").strip())
+    hay = f"{title or ''} {extra or ''}"
+    if not (title or "").strip():
+        return False
+    if _families_mismatch(brief, hay):
+        return False
+    # Named INN: drop another catalog molecule's pivotal.
+    # Brand-only: keep same-family landmarks as independent landscape.
+    if _brief_has_named_inn(brief) and _hit_mentions_unmentioned_molecule(brief, hay):
+        return False
+    return True
 
 
 def _ncbi_get(url: str, timeout: int = 12) -> bytes:

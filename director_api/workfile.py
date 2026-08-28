@@ -84,13 +84,21 @@ def _p01(brief, doctrine, records, gaps) -> dict:
             f"{records[0].get('short')}. "
             f"{_strategy_implication(brief, records)} "
         )
-    need = (
-        science
-        + f"What {brief.brand or 'the brand'} needs is not another reminder that the science is positive. "
-        + (f"The doctors already told us: {delay} " if delay else "")
-        + (f"And then: {money} " if money else "")
-        + f"So the work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
-    )
+    else:
+        science = (
+            "No numbered paper is on the register yet. The brief is not the literature. "
+        )
+    need = science
+    if delay:
+        need += f"The doctors already told us: {delay} "
+    else:
+        need += (
+            "The brief did not describe what doctors do at the eligible moment. "
+            "Capturing that habit is the first research task. "
+        )
+    if money:
+        need += f"And then: {money} "
+    need += f"So the work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
     questions = _first_questions(brief, records, gaps)
     assumptions = []
     for raw, why, test in [
@@ -104,6 +112,12 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     ]:
         if raw:
             assumptions.append([_short(raw, 110), why, test])
+    if not insights:
+        assumptions.append([
+            "The current start habit is unknown because the brief omitted it.",
+            "If doctors already start at first-eligible, a delay campaign will miss.",
+            "Field capture of first-eligible starts in the next 30 calls.",
+        ])
     known = [
         f"{mark(r)} {r.get('short')}: {r.get('claim_permitted')}"
         for r in records[:6]
@@ -112,8 +126,10 @@ def _p01(brief, doctrine, records, gaps) -> dict:
         f"{g['stream']}: {g['item']}" for g in gaps[:6]
     ] or ["No uncited brief lines."]
     unknown.append("We do not have an audited first-eligible start rate for this market. Any % on a slide is a planning sketch until then.")
+    if not insights:
+        unknown.append("HCP habit at the eligible moment was not in the brief. That is a research task, not a reason to restate the upload.")
     hypotheses = [
-        f"H1. Delay, not disbelief, is the conversion problem — from the insight “{_short(delay or 'not supplied', 90)}”.",
+        f"H1. Delay, not disbelief, is the conversion problem — from the insight “{_short(delay or 'not supplied — infer from papers', 90)}”.",
         f"H2. Cost is a veto in tier-2, not a footnote — from “{_short(money or 'not supplied', 90)}”.",
         "H3. In-hospital first-eligible start is the highest-leverage behaviour change, because that is the window the initiation papers actually studied."
         if any(r.get("directs") == "first-eligible-start" for r in records)
@@ -121,7 +137,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     ]
     return _phase(
         "01",
-        "We searched PubMed for this product and indication, then separated the client's typed goal from the behaviour the papers actually contradict. Numbered papers sit under Known. Uncited brief lines sit under Unknown. We did not fill Unknown with a guess.",
+        "We searched PubMed for this product and indication, then wrote the need from those papers versus any habit the brief actually described. Numbered papers sit under Known. Uncited brief lines sit under Unknown. We did not fill Unknown with a guess, and we did not treat the upload as the strategy.",
         restatedAsk=asked,
         restatedNeed=need.strip(),
         questions=questions,
@@ -192,11 +208,31 @@ def _p03(brief, records, gaps, lead) -> dict:
 
 
 def _p04(brief, records, gaps) -> dict:
-    insights = brief.hcp_insights or ["No HCP insight was supplied. We will not invent an advisory board."]
+    insights = list(brief.hcp_insights or [])
     concord, discord, silent = [], [], []
     start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
     outcome = next((r for r in records if r.get("directs") == "outcome-permission"), None)
     guide = next((r for r in records if r.get("directs") == "guideline-cover"), None)
+    if not insights and records:
+        src = start or outcome or guide or records[0]
+        finding = _first_sentences(
+            src.get("abstract") or src.get("claim_permitted") or src.get("title") or "",
+            1,
+        )
+        discord.append([
+            "The brief did not describe what doctors do at the eligible moment.",
+            (
+                f"The literature already covers this indication. {mark(src)} {src.get('short')}. "
+                + (finding or "The papers define the scientific standard.")
+            ),
+            "Missing field insight",
+            "First research task: capture the habit. Strategy still leads from the papers.",
+        ])
+        inventory = [
+            "No HCP insight was supplied. Strategy is built from retrieved papers; capturing the habit is a research task."
+        ]
+    else:
+        inventory = insights or ["No HCP insight was supplied. We will not invent an advisory board."]
     for ins in insights:
         low = ins.lower()
         if _looks_like_delay(ins) and (start or outcome or guide or records):
@@ -243,8 +279,8 @@ def _p04(brief, records, gaps) -> dict:
             silent.append([_short(ins, 120), "Logged. Not yet mapped to a numbered paper."])
     return _phase(
         "04",
-        "We mapped each insight line onto the numbered papers. Agreement is an amplifier. Disagreement is the campaign. Silence is a research task.",
-        inventory=insights,
+        "We mapped each insight line onto the numbered papers. If the brief named no habit, we still built the landscape from the papers and flagged capturing the habit as a research task. Agreement is an amplifier. Disagreement is the campaign. Silence is a research task.",
+        inventory=inventory,
         concord={"headers": ["What they already believe", "What the papers show", "What we do"], "rows": concord or [["None yet", "—", "—"]]},
         discord={"headers": ["Belief that delays the start", "What the papers actually show", "Likely origin", "Implication"], "rows": discord or [["None mapped", "—", "—", "—"]]},
         silent={"headers": ["Insight or evidence that has no partner", "What that means"], "rows": silent or [["—", "—"]]},
@@ -254,7 +290,13 @@ def _p04(brief, records, gaps) -> dict:
 def _p05(brief, records, doctrine) -> dict:
     insights = brief.hcp_insights or []
     cost = brief.access_and_cost or []
-    current = delay = next((i for i in insights if _looks_like_delay(i)), "Start is later than first-eligible. The brief does not describe the current habit in so many words.")
+    current = delay = next(
+        (i for i in insights if _looks_like_delay(i)),
+        insights[0] if insights else (
+            "The brief does not describe the current habit. The literature says start at first-eligible; "
+            "field capture is the first research task."
+        ),
+    )
     start = next((r for r in records if r.get("directs") == "first-eligible-start"), None)
     required = (
         f"Start {brief.brand or 'the product'} at the first eligible encounter"

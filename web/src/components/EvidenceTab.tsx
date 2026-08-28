@@ -17,8 +17,9 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
           <h1>Numbered papers</h1>
           <p>
             Every claim we are willing to lead with has a number. We search PubMed for this
-            product and indication even when the brief listed no papers. Another molecule's
-            pivotal stays off the register unless this brief named it.
+            product and indication even when the brief listed no papers. Brand-only briefs
+            still get an indication review — landmark papers of other agents are labelled
+            independent landscape, never this brand's pivotal.
           </p>
         </div>
       </div>
@@ -140,7 +141,8 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         {records.length === 0 && (
           <p className="muted">
             No catalog match yet. Live PubMed hits, if any, are in the retrieved list — we will not
-            invent a trial name or effect size for another molecule.
+            invent a trial name or effect size, and we will not present another agent's pivotal as
+            this brand's trial.
           </p>
         )}
       </section>

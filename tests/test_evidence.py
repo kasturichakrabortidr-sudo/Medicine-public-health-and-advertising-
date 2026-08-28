@@ -197,13 +197,18 @@ def test_pubmed_does_not_search_another_molecule_from_therapy_area():
     terms = " ".join(_pubmed_terms(nsclc)).lower()
     assert terms
     core = re.sub(r"not\s+[a-z0-9\-]+(?:\[ti\])?", " ", terms)
+    # Query the indication, not a substitute catalog drug.
     assert "pembrolizumab" not in core
     assert "keynote" not in core
     assert "sacubitril" not in core
     assert "nsclc" in terms or "lung" in terms
     assert "randomized" in terms or "guideline" in terms
-    assert _pubmed_hit_belongs(nsclc, "Pembrolizumab plus chemotherapy in metastatic NSCLC") is False
+    # Brand-only: same-family landmarks belong as independent landscape.
+    assert "not pembrolizumab" not in terms
+    assert "not sacubitril" in terms
+    assert _pubmed_hit_belongs(nsclc, "Pembrolizumab plus chemotherapy in metastatic NSCLC") is True
     assert _pubmed_hit_belongs(nsclc, "NCCN guidelines for non-small cell lung cancer") is True
+    assert _pubmed_hit_belongs(nsclc, "Sacubitril/valsartan in heart failure") is False
 
     named = ExtractedBrief(
         brand="HelixOne",
@@ -235,7 +240,7 @@ def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
     from director_api import evidence as ev
 
     def fake_esearch(term, retmax=4):
-        return ["11111111", "22222222"]
+        return ["11111111", "22222222", "33333333"]
 
     def fake_esummary(pmids):
         return {
@@ -255,6 +260,14 @@ def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
                 "articleids": [],
                 "pubtype": ["Practice Guideline"],
             },
+            "33333333": {
+                "title": "Pembrolizumab plus chemotherapy in metastatic non-small cell lung cancer",
+                "fulljournalname": "N Engl J Med",
+                "pubdate": "2018",
+                "authors": [{"name": "Gandhi L"}],
+                "articleids": [{"idtype": "doi", "value": "10.1000/fake.keynote"}],
+                "pubtype": ["Randomized Controlled Trial"],
+            },
         }
 
     def fake_abstracts(pmids):
@@ -266,6 +279,10 @@ def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
             "22222222": (
                 "Guidelines recommend first-line systemic therapy for eligible patients "
                 "with metastatic NSCLC rather than delayed start."
+            ),
+            "33333333": (
+                "Pembrolizumab plus chemotherapy improved overall survival versus chemotherapy "
+                "alone in metastatic nonsquamous NSCLC. HR 0.49 (95% CI 0.38-0.64)."
             ),
         }
 
@@ -284,20 +301,28 @@ def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
     pack = generate_pack(brief, pubmed=True)
     records = pack["evidence"]["records"]
     assert records
-    assert {r["pmid"] for r in records} == {"11111111", "22222222"}
+    pmids = {r["pmid"] for r in records}
+    assert {"11111111", "22222222", "33333333"} <= pmids
     lead = pack["evidence"]["lead"]["statement"].lower()
     assert "do not lock" not in lead
     assert "literature review" in lead
     assert "11111111" in lead or "early initiation" in lead
     blob = json.dumps(pack)
     ids = {r["id"] for r in records}
-    assert ids == {"pubmed-11111111", "pubmed-22222222"}
+    assert "pubmed-11111111" in ids
+    assert "pubmed-33333333" in ids
     assert "keynote-189-2018" not in ids
     assert "paradigm-hf-2014" not in ids
     assert "29658856" not in blob
     assert "25176015" not in blob
+    landscape = next(r for r in records if r["pmid"] == "33333333")
+    assert landscape["independence"] == "indication-landscape"
+    assert "not a trial of helixone" in (landscape.get("claim_permitted") or "").lower()
+    assert pack["doctrine"]["id"] == "first-touch"
+    problem = next(s for s in pack["slides"] if s["id"] == "problem")
+    assert "grow first-line share" not in (problem.get("narrative") or "").lower()
     assert any(s["id"] == "literature-review" for s in pack["slides"])
     built = pack["workfile"]["howBuilt"].lower()
     assert "literature review" in built
-    assert pack["evidence"]["review"]["paperCount"] == 2
+    assert pack["evidence"]["review"]["paperCount"] == 3
     assert "nccn" in json.dumps(pack["evidence"]["review"]["findings"]).lower()

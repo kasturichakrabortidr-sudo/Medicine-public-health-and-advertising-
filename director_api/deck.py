@@ -262,45 +262,69 @@ def _title_slide(brand: str, ta: str, market: str, doctrine: dict, brief: Extrac
 
 
 def _problem_slide(doctrine: dict, p01: dict, goal: str, brief: ExtractedBrief, records: list[dict], gaps: list[dict]) -> dict:
-    delay = (brief.hcp_insights or ["The brief does not describe what doctors do at the eligible moment."])[0]
-    cost = (brief.access_and_cost or ["Cost is not described in this brief."])[0]
+    paper = next((r for r in records if r.get("pmid") or r.get("doi")), None)
+    finding = ""
+    if paper:
+        finding = _first_sentence(
+            paper.get("abstract") or paper.get("claim_permitted") or paper.get("title") or ""
+        )
+    delay = (brief.hcp_insights or [""])[0]
+    cost = (brief.access_and_cost or [""])[0]
     goal_stat = _pull_stat(goal)
     cost_stat = _pull_stat(cost)
     stats = [
         _stat(
             goal_stat or str(len(records) or "0"),
-            _complete(f"What the brief asked us to grow: {_first_sentence(goal)}") if goal_stat
-            else _complete(f"{len(records)} numbered paper{'s' if len(records) != 1 else ''} on the working-file register."),
+            _complete(finding or f"{len(records)} numbered paper{'s' if len(records) != 1 else ''} on the working-file register."),
             "blue",
         ),
         _stat(
             cost_stat or (str(len(gaps)) if gaps else "Uncited"),
-            _complete(f"What money does next: {_first_sentence(cost)}") if cost_stat
-            else _complete(f"{len(gaps)} brief line{'s' if len(gaps) != 1 else ''} still lack a DOI or PMID."),
+            _complete(
+                f"{len(gaps)} brief line{'s' if len(gaps) != 1 else ''} still lack a DOI or PMID."
+                if gaps else
+                (f"Access line from the brief: {_first_sentence(cost)}" if cost else "No access barrier was sourced as a paper.")
+            ),
             "orange",
         ),
     ]
     headline = _headline(
-        p01.get("restatedNeed")
-        or doctrine.get("enemy")
+        doctrine.get("enemy")
+        or p01.get("restatedNeed")
         or "The conversion problem is delay, not disbelief."
     )
+    narrative = _complete(
+        p01.get("restatedNeed")
+        or (f"{finding} That is the scientific problem, not a restated upload." if finding else "")
+        or f"What the brief asked us to grow: {_first_sentence(goal)}"
+    )
+    if records and not brief.hcp_insights:
+        so_what = (
+            "The brief did not describe the habit. First research task is to capture it. "
+            "Until then we lead from the papers."
+        )
+    elif records:
+        so_what = (
+            f"Papers versus the described habit: {doctrine.get('bet') or 'change the decision at the eligible moment'}."
+            + (f" Doctors said: {_first_sentence(delay)}" if delay else "")
+        )
+    else:
+        so_what = (
+            f"The doctors already told us: {_first_sentence(delay)} "
+            f"The work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
+            if delay else
+            f"The work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
+        )
     return {
         "id": "problem",
         "section": "Context",
         "kicker": "Market context",
         "title": headline,
-        "narrative": _complete(
-            p01.get("restatedAsk")
-            or f"What the brief asked us to grow: {_first_sentence(goal)}"
-        ),
+        "narrative": narrative,
         "layout": "insight",
         "stats": stats,
         "cards": _cards_from_stats(stats),
-        "soWhat": _complete(
-            f"The doctors already told us: {_first_sentence(delay)} "
-            f"The work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
-        ),
+        "soWhat": _complete(so_what),
         "source": "Working file 01 — literature vs the behaviour in this brief. Not a restated upload.",
     }
 
@@ -338,9 +362,14 @@ def _landscape_slide(p04: dict, brief: ExtractedBrief) -> dict:
         "id": "opportunity",
         "section": "Context",
         "kicker": "HCP landscape",
-        "title": "Agreement is an amplifier. Disagreement is the campaign.",
+        "title": (
+            "The literature already moved. The field has not."
+            if d_rows
+            else "Agreement is an amplifier. Disagreement is the campaign."
+        ),
         "narrative": _complete(
-            "Beliefs from the brief mapped onto numbered papers we retrieved. This is not a restated upload, and it is not a market model."
+            "Numbered papers versus the habit the brief actually described. "
+            "If the brief named no habit, capturing it is a research task — not a reason to restate the upload."
         ),
         "layout": "insight",
         "stats": stats,
@@ -406,7 +435,10 @@ def _idea_slide(doctrine: dict, p05: dict, p07: dict, lead: dict) -> dict:
         "section": "Idea",
         "kicker": "The strategic idea",
         "title": _complete(doctrine.get("name") or doctrine.get("bet") or "Start at the first eligible encounter"),
-        "subtitle": _complete(doctrine.get("whyNovel") or "One strategic idea resolves the problems named in this brief."),
+        "subtitle": _complete(
+            doctrine.get("whyNovel")
+            or "The idea is the gap between the papers and the current start — not a restated goal."
+        ),
         "narrative": "",
         "layout": "idea",
         "cards": cards,

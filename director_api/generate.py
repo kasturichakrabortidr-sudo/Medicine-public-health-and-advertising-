@@ -58,7 +58,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
 
 
 def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
-    """Pick the angle from literature vs the brief's described behaviour."""
+    """Pick the angle from retrieved literature first, then the brief's described behaviour."""
     records = (ledger or {}).get("records") or []
     science = " ".join(
         f"{r.get('title') or ''} {r.get('abstract') or ''} {r.get('claim_permitted') or ''}"
@@ -80,16 +80,22 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
         implication = _strategy_implication(brief, records)
     paper = next((r.get("short") for r in records if r.get("short")), "")
     pmid = next((str(r.get("pmid")) for r in records if r.get("pmid")), "")
+    indication = brief.indication or brief.therapy_area or "this indication"
+    paper_start = records and any(
+        w in science for w in ("initiat", "first-line", "in-hospital", "early", "guideline", "delay")
+    )
+    paper_outcome = records and any(
+        w in science for w in ("surviv", "mortality", "overall survival", "progression", "hazard", "efficacy")
+    )
+    brief_wait = any(
+        w in blob for w in ("stabilise", "stabilize", "late", "second-line", "switch", "habit", "wait")
+    )
+    cite = f" — {paper} (PMID {pmid}) is on the register" if pmid else ""
 
-    if any(w in blob for w in ("stabilise", "stabilize", "late", "second-line", "switch", "habit")) or (
-        records and any(w in science for w in ("initiat", "first-line", "guideline"))
-        and any(w in blob for w in ("wait", "late", "second", "habit", "stabil"))
-    ):
+    if paper_start or (records and brief_wait):
         thesis = (
-            f"The literature for {brief.indication or brief.therapy_area or 'this indication'} "
-            f"is not the bottleneck"
-            + (f" — {paper} (PMID {pmid}) is already on the register" if pmid else "")
-            + f". The doctors on this brief still wait. {implication} "
+            f"The literature for {indication} already moved{cite}. "
+            f"{implication or 'The scientific bet is first-eligible start, not a restated upload.'} "
             f"This is not a better-molecule story for {brief.brand or 'the brand'}."
         )
         return {
@@ -101,6 +107,38 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "whyNovel": (
                 "Most launch decks resell the label. This one spends against the wait, "
                 "using papers we actually retrieved rather than a restated brief."
+            ),
+        }
+    if not records and brief_wait:
+        thesis = (
+            f"The literature for {indication} is not yet on the register{cite}. "
+            f"The doctors on this brief still wait. "
+            f"This is not a better-molecule story for {brief.brand or 'the brand'}."
+        )
+        return {
+            "id": "first-touch",
+            "name": "Start at the first eligible visit",
+            "thesis": thesis,
+            "enemy": "The habit of waiting until the patient is 'stable' in clinic",
+            "bet": f"Start {brief.brand or 'the product'} at the first eligible encounter — in hospital if that is when they are eligible.",
+            "whyNovel": (
+                "Most launch decks resell the label. This one spends against the wait."
+            ),
+        }
+    if paper_outcome:
+        return {
+            "id": "conviction-cascade",
+            "name": "Conviction at the moment of the pen",
+            "thesis": (
+                f"The literature for {indication} is already on the register{cite}. "
+                f"{implication or 'Conversion is the gap between those findings and the current start.'} "
+                f"{brief.brand or 'The brand'} does not have an awareness problem."
+            ),
+            "enemy": "Fragile conviction at the point of prescribe",
+            "bet": "Stack scientific, peer, and practical conviction in that order — then lock the habit.",
+            "whyNovel": (
+                "We refuse the awareness-then-consideration funnel. "
+                "Prescribing is a habit with a few load-bearing joints. We work those."
             ),
         }
     if any(w in blob for w in ("cost", "afford", "oop", "out-of-pocket", "reimburs", "price")):
