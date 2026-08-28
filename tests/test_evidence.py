@@ -234,6 +234,11 @@ def test_pubmed_does_not_search_another_molecule_from_therapy_area():
     assert "pembrolizumab" not in hf_core
     assert _pubmed_hit_belongs(hf, "Angiotensin–neprilysin inhibition versus enalapril in heart failure") is False
     assert _pubmed_hit_belongs(hf, "Hospital admissions among patients with reduced ejection fraction") is True
+    assert _pubmed_hit_belongs(
+        hf,
+        "2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure",
+        "Sacubitril/valsartan is Class I in HFrEF",
+    ) is True
 
 
 def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):

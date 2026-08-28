@@ -1116,9 +1116,13 @@ def _pubmed_enrich(brief: ExtractedBrief, already: set[str]) -> list[dict[str, A
         if not _pubmed_hit_belongs(brief, title, abstract):
             continue
         # Named INN: do not sneak another molecule's catalog pivotal in via PubMed.
-        # Brand-only: keep that pivotal as an independent landscape record, not a catalog row.
-        if pmid in catalog_pmids and pmid not in named_pmids and named_inn:
-            continue
+        # Disease guidelines in the catalog may still enter as independent pubmed rows.
+        # Brand-only: keep same-family landmarks as independent landscape, not catalog rows.
+        if pmid in catalog_pmids and pmid not in named_pmids:
+            entry = next((e for e in CATALOG if str(e.get("pmid") or "") == str(pmid)), None)
+            stream = str((entry or {}).get("stream") or "").lower()
+            if named_inn and "guideline" not in stream:
+                continue
         journal = doc.get("fulljournalname") or doc.get("source") or ""
         year = _year(doc.get("pubdate") or "")
         authors = _author_line(doc.get("authors") or [])
@@ -1241,9 +1245,17 @@ def _pubmed_score(hit: dict[str, Any]) -> int:
 
 
 def _unmentioned_catalog_markers(brief: ExtractedBrief) -> list[str]:
+    """Other catalog molecules/trials this brief did not name.
+
+    Guideline *names* (ESC, ACC) are not foreign molecules — disease guidelines
+    still belong on a named-INN brief. Pivotals of another INN do not.
+    """
     blob = _fold(_brief_blob(brief))
     markers: list[str] = []
     for entry in CATALOG:
+        stream = str(entry.get("stream") or "").lower()
+        if "guideline" in stream:
+            continue
         for alias in entry.get("aliases") or ():
             token = str(alias).strip()
             if len(token) < 5:
@@ -1318,9 +1330,10 @@ def _pubmed_hit_belongs(brief: ExtractedBrief, title: str, extra: str = "") -> b
         return False
     if _families_mismatch(brief, hay):
         return False
-    # Named INN: drop another catalog molecule's pivotal.
+    # Named INN: drop another catalog molecule's pivotal when that molecule is in the TITLE.
+    # Abstracts of disease guidelines mention standard-of-care drugs; those still belong.
     # Brand-only: keep same-family landmarks as independent landscape.
-    if _brief_has_named_inn(brief) and _hit_mentions_unmentioned_molecule(brief, hay):
+    if _brief_has_named_inn(brief) and _hit_mentions_unmentioned_molecule(brief, title or ""):
         return False
     return True
 
