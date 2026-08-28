@@ -289,6 +289,7 @@ function CardsBody({ slide }: { slide: Slide }) {
           </div>
         ))}
       </div>
+      <Figure slide={slide} />
     </div>
   );
 }

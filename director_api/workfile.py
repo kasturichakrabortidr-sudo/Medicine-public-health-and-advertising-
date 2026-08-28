@@ -434,17 +434,27 @@ def _p07(brief, records, doctrine, lead) -> dict:
 
 def _p08(brief, doctrine) -> dict:
     specialties = brief.target_specialties or ["the named specialists"]
-    stages = [
-        ["Before launch", "A handful of hospital pathway owners write the first-eligible protocol", "Medical leads. Commercial listens."],
-        ["First quarter", "One hospital live, one cost conversation kit in the bag, one myth we can actually source", "Field + medical huddle weekly."],
-        ["Adoption", "The second prescription is designed. Repeat among trialists is the tell.", "CRM is promotional. It goes through MLR."],
-        ["After the burst", "The pathway stays when the campaign money stops", "Handover into the next cycle's working file."],
-    ]
+    if doctrine.get("id") == "first-line-not-rescue":
+        stages = [
+            ["Before launch", "Write the first-line maintenance protocol for labelled exacerbators", "Medical leads. Commercial listens."],
+            ["First quarter", "One metro cohort live, one free-mix objection kit, one GOLD-aligned start", "Field + medical huddle weekly."],
+            ["Adoption", "Home continuation after the hospital burst is designed, not hoped for", "CRM is promotional. It goes through MLR."],
+            ["After the burst", "First-line start stays when the campaign money stops", "Handover into the next cycle's working file."],
+        ]
+        rule = "If a contact cannot name first-line maintenance or the free-mix objection, it does not go on the plan."
+    else:
+        stages = [
+            ["Before launch", "A handful of hospital pathway owners write the first-eligible protocol", "Medical leads. Commercial listens."],
+            ["First quarter", "One hospital live, one cost conversation kit in the bag, one myth we can actually source", "Field + medical huddle weekly."],
+            ["Adoption", "The second prescription is designed. Repeat among trialists is the tell.", "CRM is promotional. It goes through MLR."],
+            ["After the burst", "The pathway stays when the campaign money stops", "Handover into the next cycle's working file."],
+        ]
+        rule = "If a contact cannot name a numbered paper or a behaviour we are trying to change, it does not go on the plan."
     return _phase(
         "08",
         "A doctor should feel a sequence, not a spray. We have not invented a 14-touch cadence. We have named the jobs in order.",
         stages={"headers": ["When", "Job", "Who owns it"], "rows": stages},
-        rule="If a contact cannot name a numbered paper or a behaviour we are trying to change, it does not go on the plan.",
+        rule=rule,
         who=f"Priority: {', '.join(specialties[:3])}.",
     )
 

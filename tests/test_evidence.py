@@ -30,18 +30,18 @@ def test_pack_exposes_science_slides_and_anchors():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
     ids = [s["id"] for s in pack["slides"]]
-    assert "literature-review" in ids
     assert "science-lead" in ids
-    assert "citation-register" in ids
     assert "science-meaning" in ids
-    assert "science-compare" in ids
     assert "science-execute" in ids
-    assert "forest" in ids
     assert "house" in ids
     assert "journey" in ids
     assert "how-built" not in ids
     assert "questions" not in ids
     assert "references" in ids
+    assert "literature-review" not in ids
+    kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
+    assert "forest" in kinds
+    assert "people" in kinds
     assert pack["workfile"]["phases"][0]["id"] == "01"
     assert len(pack["workfile"]["phases"]) == 11
     assert pack["references"][0]["n"] == 1
@@ -49,21 +49,17 @@ def test_pack_exposes_science_slides_and_anchors():
     assert "PMID: 25176015" in pack["references"][0]["citation"]
     meaning = next(s for s in pack["slides"] if s["id"] == "science-meaning")
     assert "[1]" in meaning["subtitle"] or "[1]" in meaning["narrative"]
-    register = next(s for s in pack["slides"] if s["id"] == "citation-register")
-    assert register["table"]["rows"][0][0] == "[1]"
     refs_slide = next(s for s in pack["slides"] if s["id"] == "references")
     assert refs_slide["layout"] == "references"
     assert "McMurray" in refs_slide["table"]["rows"][0][1]
     assert pack["doctrine"]["scienceAnchor"]
     assert "PMID" in pack["doctrine"]["scienceAnchor"]
-    forefront = " ".join(str(c) for row in register["table"]["rows"] for c in row)
-    assert "[1]" in forefront
     house = next(s for s in pack["slides"] if s["id"] == "house")
     house_text = " ".join(str(r) for r in (house.get("chart") or {}).get("data") or [])
     house_text += str(house.get("table") or "") + (house.get("narrative") or "")
     assert "[1]" in house_text or "[2]" in house_text or "PMID" in house_text
-    forest = next(s for s in pack["slides"] if s["id"] == "forest")
-    names = [row["name"] for row in forest["chart"]["data"]]
+    lead_slide = next(s for s in pack["slides"] if s["id"] == "science-lead")
+    names = [row["name"] for row in lead_slide["chart"]["data"]]
     assert any("PARADIGM-HF" in n for n in names)
     assert any("PIONEER-HF" in n for n in names)
 
@@ -96,9 +92,6 @@ def test_spine_connects_pioneer_to_first_touch():
     assert "First-Touch" in str(paradigm.get("move"))
     assert "First-Touch" in str(pioneer.get("move"))
     assert any("30415601" in str(r.get("pmid")) for r in execute["chart"]["data"])
-    compare = next(s for s in pack["slides"] if s["id"] == "science-compare")
-    assert compare["chart"]["kind"] == "compare"
-    assert compare["chart"]["data"][0]["pmid"] == "30415601"
     iv = next(s for s in pack["slides"] if s["id"] == "interventions")
     assert any("[" in b and "PMID" in b for b in iv["bullets"])
 
@@ -326,9 +319,7 @@ def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
     assert pack["doctrine"]["id"] == "first-touch"
     problem = next(s for s in pack["slides"] if s["id"] == "problem")
     assert "grow first-line share" not in (problem.get("narrative") or "").lower()
-    assert any(s["id"] == "literature-review" for s in pack["slides"])
-    built = pack["workfile"]["howBuilt"].lower()
-    assert "literature review" in built
+    assert "literature-review" not in [s["id"] for s in pack["slides"]]
     assert pack["evidence"]["review"]["paperCount"] == 3
     assert "nccn" in json.dumps(pack["evidence"]["review"]["findings"]).lower()
 

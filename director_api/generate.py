@@ -242,11 +242,12 @@ def _bind_science(doctrine: dict, ledger: dict) -> None:
         doctrine["scienceLead"] = "No validated citation yet — do not lock a scientific lead."
         return
     primary = cites[0]
-    doctrine["scienceLead"] = lead.get("statement") or ""
+    from .deck import _line
+
+    doctrine["scienceLead"] = _line(primary.get("claim") or primary.get("short") or "", 160)
     doctrine["scienceAnchor"] = (
         f"{mark(primary)} {primary.get('short')} · PMID {primary.get('pmid') or '—'} · doi:{primary.get('doi') or '—'}"
     )
-    doctrine["thesis"] = doctrine["thesis"] + " " + (lead.get("statement") or "")
 
 
 
@@ -269,20 +270,77 @@ def _interventions(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = 
             "kill": "If 'triple after dual' language is unchanged at week 8 in the pilot.",
             "evidenceAnchor": _anchor(ledger, "guideline-cover") or _anchor(ledger, "outcome-permission"),
         }
-    else:
-        first = {
-            "id": "first-touch",
-            "name": "First-Touch Protocol",
-            "promise": f"A hospital-to-clinic initiation bundle so {brand} is started at the first eligible encounter.",
-            "lever": "Opportunity — workflow",
-            "segment": "Hospital pathway owners + metro private",
-            "effort": "H",
-            "impact": 88,
-            "feasibility": 62,
-            "mlr": "Protocol language must match label and local code. No start-all implication.",
-            "kill": "If discharge initiation rate is unchanged at week 8 in the pilot site.",
-            "evidenceAnchor": _anchor(ledger, "first-eligible-start") or _anchor(ledger, "outcome-permission"),
-        }
+        return [
+            first,
+            {
+                "id": "afford-kit",
+                "name": "Free-mix cost script",
+                "promise": (
+                    f"A field-legal comparison of {brand} versus free-mix cost that stays "
+                    "inside MLR: no superiority, no price promise."
+                ),
+                "lever": "Opportunity — cost",
+                "segment": "Tier-2 consultants and high OOP caseloads",
+                "effort": "M",
+                "impact": 84,
+                "feasibility": 70,
+                "mlr": "No superiority vs free-mix. Assistance, not inducement.",
+                "kill": "If cost is still the first objection and first-line starts do not move.",
+                "evidenceAnchor": _anchor(ledger, "local-context") or _anchor(ledger, "outcome-permission"),
+            },
+            {
+                "id": "myth-reset",
+                "name": "One-device unlearning",
+                "promise": "Kill 'I mix it myself for finer control' with device and adherence facts, not a lecture.",
+                "lever": "Motivation — ritual / Capability — knowledge",
+                "segment": "Consultants who still free-mix at the point of care",
+                "effort": "M",
+                "impact": 61,
+                "feasibility": 78,
+                "mlr": "No comparative efficacy claim against free-mix.",
+                "kill": "If unaided free-mix preference does not drop in the next insight wave.",
+                "evidenceAnchor": _anchor(ledger, "segment-confidence") or _anchor(ledger, "outcome-permission"),
+            },
+            {
+                "id": "peer-cascade",
+                "name": "GOLD first-line cascade",
+                "promise": "Metro KOLs author the first-line protocol; tier-2 peers demonstrate it. Cover travels down.",
+                "lever": "Motivation — peer cover",
+                "segment": "KOL metro → senior tier-2",
+                "effort": "H",
+                "impact": 76,
+                "feasibility": 54,
+                "mlr": "Fair balance. No paid-endorsement theatre.",
+                "kill": "If cascade stops at the same five names by Q2.",
+                "evidenceAnchor": _anchor(ledger, "guideline-cover"),
+            },
+            {
+                "id": "habit-lock",
+                "name": "Hospital-to-home lock",
+                "promise": "Nebulised triple continues at home. The second fill is designed, not hoped for.",
+                "lever": "Motivation — automatic",
+                "segment": "Discharge and first follow-up",
+                "effort": "L",
+                "impact": 58,
+                "feasibility": 80,
+                "mlr": "CRM content is promotional and goes through MLR.",
+                "kill": "If home continuation among trialists is flat vs control geographies.",
+                "evidenceAnchor": _anchor(ledger, "outcome-permission"),
+            },
+        ]
+    first = {
+        "id": "first-touch",
+        "name": "First-Touch Protocol",
+        "promise": f"A hospital-to-clinic initiation bundle so {brand} is started at the first eligible encounter.",
+        "lever": "Opportunity — workflow",
+        "segment": "Hospital pathway owners + metro private",
+        "effort": "H",
+        "impact": 88,
+        "feasibility": 62,
+        "mlr": "Protocol language must match label and local code. No start-all implication.",
+        "kill": "If discharge initiation rate is unchanged at week 8 in the pilot site.",
+        "evidenceAnchor": _anchor(ledger, "first-eligible-start") or _anchor(ledger, "outcome-permission"),
+    }
     return [
         first,
         {

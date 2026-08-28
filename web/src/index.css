@@ -562,8 +562,8 @@ textarea {
 }
 
 .slide.title h2 {
-  font-size: clamp(28px, 3.1cqw, 40px);
-  max-width: 14ch;
+  font-size: clamp(26px, 2.8cqw, 38px);
+  max-width: 22ch;
   letter-spacing: -0.02em;
   margin-top: 0.15em;
   font-weight: 500;
@@ -648,7 +648,8 @@ textarea {
   display: grid;
   grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
   gap: 28px;
-  align-items: start;
+  align-items: stretch;
+  overflow: hidden;
 }
 
 .slide-insight-copy h2 {
@@ -657,10 +658,18 @@ textarea {
 
 .slide-insight-main {
   min-width: 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 14px;
   padding-top: 6px;
+  overflow: hidden;
+}
+
+.slide-insight-main .slide-visual {
+  flex: 1 1 0;
+  min-height: 88px;
+  margin-top: 0;
 }
 
 .stat-cards {
@@ -809,9 +818,10 @@ textarea {
 }
 .slide-insight-copy h2 {
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: clamp(16px, 1.5cqw, 20px);
 }
 .slide-insight-copy .lede {
   display: -webkit-box;

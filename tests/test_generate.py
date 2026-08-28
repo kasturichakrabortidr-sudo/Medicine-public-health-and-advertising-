@@ -19,7 +19,7 @@ def test_first_touch_doctrine_from_stabilize_insight():
     assert pack["doctrine"]["id"] == "first-touch"
     assert pack["meta"]["brand"] == "CardioShield"
     ids = [s["id"] for s in pack["slides"]]
-    assert 16 <= len(pack["slides"]) <= 26
+    assert 10 <= len(pack["slides"]) <= 13
     assert "how-built" not in ids
     assert "boxplot" not in ids
     # This brief never named PARADIGM-HF or sacubitril — do not invent those charts.
@@ -59,7 +59,8 @@ def test_example_brief_is_presentation_ready():
     assert "references" in ids
     assert pack["dashboard"]["alerts"]
     kinds = {s.get("chart", {}).get("kind") for s in pack["slides"] if s.get("chart")}
-    assert {"forest", "people", "compare", "spine", "flow", "house", "scatter", "line"} <= kinds
+    assert {"people", "spine", "flow", "house", "scatter", "line"} <= kinds
+    assert "forest" in kinds
     for slide in pack["slides"]:
         assert slide.get("chart") or slide.get("table") or slide.get("cards")
         headline = slide["title"]
@@ -105,6 +106,13 @@ def test_trivora_step_up_brief_is_first_line_not_hospital_wait():
     p05 = next(p for p in pack["workfile"]["phases"] if p["id"] == "05")
     assert "first eligible encounter" not in json.dumps(p05).lower()
     assert "first-line" in json.dumps(p05).lower()
+    slides = pack["slides"]
+    assert 10 <= len(slides) <= 13
+    titles = [s["title"] for s in slides]
+    assert all(len(t) <= 90 for t in titles)
+    dump = json.dumps(slides).lower()
+    assert "kronos" not in dump or "literature review retrieved" not in dump
+    assert "do not lock a scientific lead" not in dump
     blob = json.dumps(pack).lower()
     assert "paradigm-hf" not in blob
     assert "sacubitril" not in blob

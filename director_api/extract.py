@@ -408,7 +408,7 @@ def _parse_structured(raw: str) -> ExtractedBrief:
                 and title[:1].isupper()
                 and not title.lower().startswith(("consultant", "indian", "named"))
             )
-            if heading_like:
+            if heading_like and not re.search(r"\d", rest or ""):
                 flush()
                 current = None
                 continue

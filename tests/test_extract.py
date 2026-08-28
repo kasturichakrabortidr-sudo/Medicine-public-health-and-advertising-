@@ -97,6 +97,7 @@ def test_trivora_client_brief_is_not_swallowed_into_brand():
     assert "Glycopyrronium" in brief.product
     assert "COPD" in brief.therapy_area
     assert "first-line" in (brief.business_goal or "").lower()
+    assert "20%" in (brief.business_goal or "")
     assert any("free-mix" in c.lower() for c in brief.competitors)
     assert any("GOLD" in g for g in brief.guidelines)
     assert len(brief.hcp_insights) >= 5
