@@ -26,7 +26,20 @@ def test_cardioshield_lead_is_cited_first_eligible_science():
                for g in ledger["gaps"]) or ledger["gaps"]
 
 
-def test_pack_exposes_science_slides_and_anchors():
+def test_pubmed_finding_skips_methods_opener():
+    from director_api.evidence import _finding_from_abstract
+
+    abstract = (
+        "We evaluated BGF versus dual LAMA/LABA and ICS/LABA therapies in patients with COPD. "
+        "KRONOS and ETHOS enrolled patients with moderate-to-very-severe COPD. "
+        "BGF improved trough FEV1 versus GFF. "
+        "BGF was estimated to have benefits on lung function, exacerbations, and health-related "
+        "quality of life versus dual therapies in patients with COPD."
+    )
+    finding = _finding_from_abstract(abstract, "BGF versus dual therapies")
+    assert not finding.lower().startswith("we evaluated")
+    assert "abstract:" not in finding.lower()
+    assert "benefit" in finding.lower() or "improv" in finding.lower()
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
     ids = [s["id"] for s in pack["slides"]]
@@ -320,6 +333,9 @@ def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
     problem = next(s for s in pack["slides"] if s["id"] == "problem")
     assert "grow first-line share" not in (problem.get("narrative") or "").lower()
     assert "literature-review" not in [s["id"] for s in pack["slides"]]
+    lead_slide = next(s for s in pack["slides"] if s["id"] == "science-lead")
+    assert not lead_slide["title"].lower().startswith("abstract")
+    assert not lead_slide["title"].lower().startswith("we evaluated")
     assert pack["evidence"]["review"]["paperCount"] == 3
     assert "nccn" in json.dumps(pack["evidence"]["review"]["findings"]).lower()
 

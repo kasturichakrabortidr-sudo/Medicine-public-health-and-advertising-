@@ -416,6 +416,27 @@ def _idea_slide(doctrine: dict, p05: dict, p07: dict, lead: dict) -> dict:
     }
 
 
+def _usable_finding(primary: dict, rec: dict) -> str:
+    """A published finding, never a methods opener or abstract dump."""
+    raw = (
+        rec.get("claim_permitted")
+        or primary.get("claim")
+        or rec.get("abstract")
+        or primary.get("short")
+        or rec.get("title")
+        or ""
+    )
+    raw = re.sub(r"^Independent / indication landscape — not a trial of [^.]+.\s*", "", str(raw))
+    raw = re.sub(r"^Abstract:\s*", "", raw, flags=re.I)
+    raw = re.sub(r"\s*Confirm full text before promotional use\.?\s*$", "", raw, flags=re.I)
+    raw = re.sub(r"^PubMed record:\s*", "", raw, flags=re.I)
+    if re.match(r"^(We evaluated|We aimed|We assessed|This pooled|This study|This trial)", raw, re.I):
+        from .evidence import _finding_from_abstract
+
+        raw = _finding_from_abstract(rec.get("abstract") or raw, rec.get("title") or primary.get("short") or "")
+    return raw.strip()
+
+
 def _science_lead_slide(
     lead: dict,
     primary: dict,
@@ -426,12 +447,7 @@ def _science_lead_slide(
 ) -> dict:
     tag = mark(primary) if primary.get("ref") else ""
     rec = next((r for r in records if r.get("id") == primary.get("id")), {}) or {}
-    finding = (
-        primary.get("claim")
-        or rec.get("claim_permitted")
-        or rec.get("abstract")
-        or ""
-    )
+    finding = _usable_finding(primary, rec)
     claim = _line(finding, 72) if finding else _line(
         (doctrine or {}).get("name") or "Lead with a numbered paper, not a slogan.",
         72,

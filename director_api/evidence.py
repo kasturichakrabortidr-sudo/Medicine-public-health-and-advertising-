@@ -585,6 +585,35 @@ def _first_sentences(text: str, n: int = 2) -> str:
     return " ".join(parts[:n]).strip()
 
 
+_METHODS_OPEN = re.compile(
+    r"^(abstract:|background:|objective:|methods?:|"
+    r"we (evaluated|aimed|assessed|investigated|conducted|performed|sought|compared)|"
+    r"this (pooled |post hoc )?(study|trial|analysis)|patients were )",
+    re.I,
+)
+_FINDING_HINT = re.compile(
+    r"\b(improv|reduc|lower|fewer|versus| vs\.? |significan|benefit|"
+    r"superior|non-inferior|rate ratio|hazard|exacerbat|surviv)\b",
+    re.I,
+)
+
+
+def _finding_from_abstract(abstract: str, title: str = "") -> str:
+    """A result sentence, not the methods opener PubMed puts first."""
+    blob = re.sub(r"\s+", " ", (abstract or "").strip())
+    parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", blob) if len(p.strip()) > 24]
+    findings = [p for p in parts if _FINDING_HINT.search(p) and not _METHODS_OPEN.search(p)]
+    if findings:
+        conclusion = findings[-1]
+        if len(conclusion) <= 240:
+            return conclusion
+        return findings[0]
+    for part in parts:
+        if not _METHODS_OPEN.search(part):
+            return part
+    return _first_sentences(title, 1) or _first_sentences(abstract, 1)
+
+
 def _strategy_implication(brief: ExtractedBrief, records: list[dict]) -> str:
     brand = brief.brand or "the brand"
     indication = brief.indication or brief.therapy_area or "this indication"
@@ -851,16 +880,9 @@ def _pubmed_as_record(hit: dict[str, Any], brief: ExtractedBrief) -> dict[str, A
     independent = hit.get("independence") == "indication-landscape" or _hit_is_independent_landscape(
         brief, f"{title} {abstract}"
     )
-    claim = _first_sentences(abstract, 2) or (
+    claim = _finding_from_abstract(abstract, title) or (
         f"Retrieved from PubMed: {title.rstrip('.')}."
     )
-    if abstract:
-        claim = f"Abstract: {claim} Confirm full text before promotional use."
-    else:
-        claim = (
-            f"PubMed record: {title.rstrip('.')}. "
-            "Abstract not returned — retrieve full text before a promotional line."
-        )
     if independent:
         claim = (
             f"Independent / indication landscape — not a trial of {brand}. {claim}"
