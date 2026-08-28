@@ -19,7 +19,7 @@ def test_first_touch_doctrine_from_stabilize_insight():
     assert pack["doctrine"]["id"] == "first-touch"
     assert pack["meta"]["brand"] == "CardioShield"
     ids = [s["id"] for s in pack["slides"]]
-    assert 16 <= len(pack["slides"]) <= 24
+    assert 16 <= len(pack["slides"]) <= 26
     assert "how-built" not in ids
     assert "boxplot" not in ids
     # This brief never named PARADIGM-HF or sacubitril — do not invent those charts.

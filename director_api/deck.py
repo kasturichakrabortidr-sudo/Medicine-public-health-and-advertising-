@@ -53,6 +53,7 @@ def build_client_deck(
         _idea_slide(doctrine, p05, p07, lead),
         _science_lead_slide(lead, primary, records, p03),
     ]
+    slides.append(_literature_slide(ledger, brief))
     if forest:
         slides.append(_forest_slide(forest, records))
     if people:
@@ -300,7 +301,7 @@ def _problem_slide(doctrine: dict, p01: dict, goal: str, brief: ExtractedBrief, 
             f"The doctors already told us: {_first_sentence(delay)} "
             f"The work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
         ),
-        "source": "Working file 01 — restated from this brief. Not a market model.",
+        "source": "Working file 01 — literature vs the behaviour in this brief. Not a restated upload.",
     }
 
 
@@ -339,7 +340,7 @@ def _landscape_slide(p04: dict, brief: ExtractedBrief) -> dict:
         "kicker": "HCP landscape",
         "title": "Agreement is an amplifier. Disagreement is the campaign.",
         "narrative": _complete(
-            "These lines are from the brief, mapped onto numbered papers. They are not a market model."
+            "Beliefs from the brief mapped onto numbered papers we retrieved. This is not a restated upload, and it is not a market model."
         ),
         "layout": "insight",
         "stats": stats,
@@ -436,8 +437,16 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict], p03: dic
         ))
     if not stats:
         stats = [
-            _stat(tag or "—", _complete(primary.get("short") or "No validated lead"), "blue"),
-            _stat(str(primary.get("pmid") or rec.get("pmid") or "None"), "A line without a PMID does not lock.", "orange"),
+            _stat(
+                str(len([r for r in records if r.get("pmid")]) or "0"),
+                _complete(f"{len(records)} papers retrieved for this brief's product and indication."),
+                "blue",
+            ),
+            _stat(
+                str(primary.get("pmid") or rec.get("pmid") or "—"),
+                _complete(primary.get("short") or "No PMID yet"),
+                "orange",
+            ),
         ]
     return {
         "id": "science-lead",
@@ -461,13 +470,65 @@ def _science_lead_slide(lead: dict, primary: dict, records: list[dict], p03: dic
             },
             {
                 "title": "So the campaign leads here",
-                "body": "We spend against the delay in the window this paper actually studied — not against a later clinic visit.",
+                "body": _complete(
+                    lead.get("statement")
+                    or "We spend against the delay in the window this paper actually studied."
+                ),
                 "meta": f"n = {n}",
             },
         ],
-        "soWhat": _complete("We lead with a numbered paper, not with a slogan."),
+        "soWhat": _complete(lead.get("statement") or "We lead with a numbered paper, not with a slogan."),
         "source": _source_line(primary, rec),
         "refs": [c.get("ref") for c in (lead.get("citations") or []) if c.get("ref")],
+    }
+
+
+def _literature_slide(ledger: dict, brief: ExtractedBrief) -> dict:
+    review = ledger.get("review") or {}
+    terms = review.get("searched") or ledger.get("searchTerms") or []
+    records = ledger.get("records") or []
+    rows = []
+    for r in records[:8]:
+        finding = (r.get("abstract") or r.get("claim_permitted") or r.get("title") or "")[:180]
+        rows.append([
+            mark(r) or "—",
+            r.get("short") or r.get("title") or "",
+            f"PMID {r.get('pmid') or '—'}",
+            _complete(finding),
+        ])
+    if not rows:
+        rows = [["—", "No hit yet", "—", "PubMed returned nothing we could keep after molecule filters."]]
+    return {
+        "id": "literature-review",
+        "section": "Evidence",
+        "kicker": "Literature review",
+        "title": "We searched PubMed for this product and indication. The brief did not have to bring a bibliography.",
+        "narrative": _complete(
+            review.get("synthesis")
+            or f"Queries run against NCBI for {brief.product or brief.brand or 'this brand'}."
+        ),
+        "layout": "table",
+        "table": {
+            "headers": ["Ref", "Paper", "PMID", "What the abstract actually says"],
+            "rows": rows,
+        },
+        "cards": [
+            {
+                "title": "What we searched",
+                "body": _complete("; ".join(terms[:4]) or "No query built from this brief."),
+                "meta": f"{len(terms)} PubMed quer{'ies' if len(terms) != 1 else 'y'}",
+            },
+            {
+                "title": "What we refused",
+                "body": _complete(review.get("excluded") or "Another molecule's catalog pivotal stays off this register."),
+                "meta": "Molecule isolation",
+            },
+        ],
+        "soWhat": _complete(
+            "Strategy starts from these papers versus the behaviour in the brief — not from restating the upload."
+        ),
+        "source": "NCBI PubMed eutils + catalog rows this brief actually named.",
+        "refs": [r.get("ref") for r in records if r.get("ref")],
     }
 
 
@@ -968,4 +1029,7 @@ def _finding(row: dict) -> str:
         return f"{row.get('control_event')} vs {row.get('treat_event')} per 100; NNT {row['nnt']}"
     if row.get("hr") is not None:
         return f"{row.get('effect_metric') or 'HR'} {row['hr']} ({row.get('low')}–{row.get('high')})"
-    return (row.get("claim_permitted") or row.get("endpoint") or "—")[:110]
+    abstract = (row.get("abstract") or "").strip()
+    if abstract:
+        return abstract.split(". ")[0][:140]
+    return (row.get("claim_permitted") or row.get("endpoint") or "—")[:140]

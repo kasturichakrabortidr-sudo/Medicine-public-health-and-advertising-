@@ -58,7 +58,12 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
 
 
 def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
-    """Pick a novel strategic angle from the brief's actual tension — not a generic funnel."""
+    """Pick the angle from literature vs the brief's described behaviour."""
+    records = (ledger or {}).get("records") or []
+    science = " ".join(
+        f"{r.get('title') or ''} {r.get('abstract') or ''} {r.get('claim_permitted') or ''}"
+        for r in records
+    ).lower()
     blob = " ".join(
         [
             brief.business_goal,
@@ -68,22 +73,34 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             brief.indication,
         ]
     ).lower()
+    implication = ""
+    if records:
+        from .evidence import _strategy_implication
 
-    if any(w in blob for w in ("stabilise", "stabilize", "late", "second-line", "switch", "habit")):
+        implication = _strategy_implication(brief, records)
+    paper = next((r.get("short") for r in records if r.get("short")), "")
+    pmid = next((str(r.get("pmid")) for r in records if r.get("pmid")), "")
+
+    if any(w in blob for w in ("stabilise", "stabilize", "late", "second-line", "switch", "habit")) or (
+        records and any(w in science for w in ("initiat", "first-line", "guideline"))
+        and any(w in blob for w in ("wait", "late", "second", "habit", "stabil"))
+    ):
+        thesis = (
+            f"The literature for {brief.indication or brief.therapy_area or 'this indication'} "
+            f"is not the bottleneck"
+            + (f" — {paper} (PMID {pmid}) is already on the register" if pmid else "")
+            + f". The doctors on this brief still wait. {implication} "
+            f"This is not a better-molecule story for {brief.brand or 'the brand'}."
+        )
         return {
             "id": "first-touch",
             "name": "Start at the first eligible visit",
-            "thesis": (
-                f"The doctors on this brief already accept the science. They still wait. "
-                f"They start something familiar first, then the eligible moment has gone. "
-                f"Cost does the rest. So this is not a better-molecule story for {brief.brand or 'the brand'}. "
-                "It is a delay we have to retire, using only papers we can number."
-            ),
+            "thesis": thesis,
             "enemy": "The habit of waiting until the patient is 'stable' in clinic",
             "bet": f"Start {brief.brand or 'the product'} at the first eligible encounter — in hospital if that is when they are eligible.",
             "whyNovel": (
-                "Most launch decks sell the drug again. This one spends against the wait. "
-                "If we cannot number the paper that allows a line, the line does not ship."
+                "Most launch decks resell the label. This one spends against the wait, "
+                "using papers we actually retrieved rather than a restated brief."
             ),
         }
     if any(w in blob for w in ("cost", "afford", "oop", "out-of-pocket", "reimburs", "price")):
@@ -92,13 +109,14 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "name": "A cost conversation the doctor can survive",
             "thesis": (
                 f"Uptake of {brief.brand or 'the brand'} is gated by the doctor's fear of putting "
-                "the patient in financial distress — not by disbelief in the science."
+                "the patient in financial distress — not by disbelief in the science. "
+                + (implication or "Literature is on the register; cost is the conversion problem.")
             ),
             "enemy": "Prescriber guilt about what the patient will pay",
             "bet": "Make the cost conversation clinically honest, not commercially awkward.",
             "whyNovel": (
                 "We do not hide the price. We only say about money what a paper or a legal "
-                "assistance mechanic can carry. Everything else is a research task."
+                "assistance mechanic can carry."
             ),
         }
     if any(w in blob for w in ("myth", "monitor", "safety", "renal", "perception", "belief")):
@@ -107,13 +125,12 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "name": "Unlearn one wrong belief",
             "thesis": (
                 "A durable false belief is blocking an evidence-aligned start. "
-                "The job is unlearning, not another awareness burst."
+                + (implication or "The job is unlearning, not another awareness burst.")
             ),
             "enemy": "A high-prevalence clinical myth",
             "bet": "Replace the myth with one sourced number a peer can repeat.",
             "whyNovel": (
-                "Awareness adds messages. A reset subtracts a wrong one. "
-                "If we cannot number the paper behind the number, we do not run the line."
+                "Awareness adds messages. A reset subtracts a wrong one."
             ),
         }
     return {
@@ -121,7 +138,8 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
         "name": "Conviction at the moment of the pen",
         "thesis": (
             f"{brief.brand or 'The brand'} does not have an awareness problem. It has a "
-            "conviction problem at the decision moment — scientific, peer, and practical."
+            "conviction problem at the decision moment. "
+            + (implication or "Stack scientific, peer, and practical conviction in that order.")
         ),
         "enemy": "Fragile conviction at the point of prescribe",
         "bet": "Stack scientific, peer, and practical conviction in that order — then lock the habit.",
@@ -274,6 +292,8 @@ def _dashboard(
         "citations": (ledger or {}).get("records") or [],
         "evidenceGaps": (ledger or {}).get("gaps") or [],
         "pubmed": (ledger or {}).get("pubmed") or [],
+        "review": (ledger or {}).get("review") or {},
+        "searchTerms": (ledger or {}).get("searchTerms") or [],
         "meaning": people_rows((ledger or {}).get("records") or []),
         "compare": compare_rows((ledger or {}).get("records") or []),
         "spine": spine_rows(

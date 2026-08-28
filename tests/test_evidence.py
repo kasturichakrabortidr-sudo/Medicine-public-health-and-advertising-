@@ -1,4 +1,5 @@
 import json
+import re
 
 from director_api.app import _brief_from_mapping
 from director_api.evidence import resolve_evidence
@@ -29,6 +30,7 @@ def test_pack_exposes_science_slides_and_anchors():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
     ids = [s["id"] for s in pack["slides"]]
+    assert "literature-review" in ids
     assert "science-lead" in ids
     assert "citation-register" in ids
     assert "science-meaning" in ids
@@ -194,10 +196,12 @@ def test_pubmed_does_not_search_another_molecule_from_therapy_area():
     )
     terms = " ".join(_pubmed_terms(nsclc)).lower()
     assert terms
-    assert "pembrolizumab" not in terms
-    assert "keynote" not in terms
-    assert "sacubitril" not in terms
+    core = re.sub(r"not\s+[a-z0-9\-]+(?:\[ti\])?", " ", terms)
+    assert "pembrolizumab" not in core
+    assert "keynote" not in core
+    assert "sacubitril" not in core
     assert "nsclc" in terms or "lung" in terms
+    assert "randomized" in terms or "guideline" in terms
     assert _pubmed_hit_belongs(nsclc, "Pembrolizumab plus chemotherapy in metastatic NSCLC") is False
     assert _pubmed_hit_belongs(nsclc, "NCCN guidelines for non-small cell lung cancer") is True
 
@@ -220,7 +224,80 @@ def test_pubmed_does_not_search_another_molecule_from_therapy_area():
         indication="HFrEF",
     )
     hf_terms = " ".join(_pubmed_terms(hf)).lower()
-    assert "sacubitril" not in hf_terms
-    assert "pembrolizumab" not in hf_terms
+    hf_core = re.sub(r"not\s+[a-z0-9\-]+(?:\[ti\])?", " ", hf_terms)
+    assert "sacubitril" not in hf_core
+    assert "pembrolizumab" not in hf_core
     assert _pubmed_hit_belongs(hf, "Angiotensin–neprilysin inhibition versus enalapril in heart failure") is False
     assert _pubmed_hit_belongs(hf, "Hospital admissions among patients with reduced ejection fraction") is True
+
+
+def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
+    from director_api import evidence as ev
+
+    def fake_esearch(term, retmax=4):
+        return ["11111111", "22222222"]
+
+    def fake_esummary(pmids):
+        return {
+            "11111111": {
+                "title": "Early initiation of systemic therapy in advanced non-small cell lung cancer",
+                "fulljournalname": "J Clin Oncol",
+                "pubdate": "2023",
+                "authors": [{"name": "Smith A"}],
+                "articleids": [{"idtype": "doi", "value": "10.1000/fake.nsclc"}],
+                "pubtype": ["Journal Article"],
+            },
+            "22222222": {
+                "title": "NCCN guidelines for non-small cell lung cancer",
+                "fulljournalname": "J Natl Compr Canc Netw",
+                "pubdate": "2024",
+                "authors": [{"name": "Ettinger DS"}],
+                "articleids": [],
+                "pubtype": ["Practice Guideline"],
+            },
+        }
+
+    def fake_abstracts(pmids):
+        return {
+            "11111111": (
+                "Delayed first-line therapy is associated with worse survival. "
+                "Immediate initiation after diagnosis improved outcomes versus a clinic wait."
+            ),
+            "22222222": (
+                "Guidelines recommend first-line systemic therapy for eligible patients "
+                "with metastatic NSCLC rather than delayed start."
+            ),
+        }
+
+    monkeypatch.setattr(ev, "_esearch", fake_esearch)
+    monkeypatch.setattr(ev, "_esummary", fake_esummary)
+    monkeypatch.setattr(ev, "_efetch_abstracts", fake_abstracts)
+
+    brief = ExtractedBrief(
+        brand="HelixOne",
+        therapy_area="Oncology - NSCLC",
+        indication="first-line NSCLC",
+        business_goal="Grow first-line share. Cost of IO combo is the main barrier.",
+        hcp_insights=["Oncologists wait for molecular results then delay start"],
+        access_and_cost=["Out-of-pocket cost of IO combo is high"],
+    )
+    pack = generate_pack(brief, pubmed=True)
+    records = pack["evidence"]["records"]
+    assert records
+    assert {r["pmid"] for r in records} == {"11111111", "22222222"}
+    lead = pack["evidence"]["lead"]["statement"].lower()
+    assert "do not lock" not in lead
+    assert "literature review" in lead
+    assert "11111111" in lead or "early initiation" in lead
+    blob = json.dumps(pack)
+    ids = {r["id"] for r in records}
+    assert ids == {"pubmed-11111111", "pubmed-22222222"}
+    assert "keynote-189-2018" not in ids
+    assert "paradigm-hf-2014" not in ids
+    assert "29658856" not in blob
+    assert "25176015" not in blob
+    assert any(s["id"] == "literature-review" for s in pack["slides"])
+    built = pack["workfile"]["howBuilt"].lower()
+    assert "literature review" in built
+    assert pack["evidence"]["review"]["paperCount"] == 2
+    assert "nccn" in json.dumps(pack["evidence"]["review"]["findings"]).lower()

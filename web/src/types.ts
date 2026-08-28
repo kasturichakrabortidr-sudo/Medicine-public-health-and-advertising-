@@ -121,7 +121,15 @@ export interface StrategyPack {
     lead: CampaignLead;
     records: EvidenceRecord[];
     gaps: { stream: string; item: string; status: string; needed: string }[];
-    pubmed: { pmid: string; title: string; citation: string; url: string; year?: number; journal?: string; doi?: string; note?: string }[];
+    pubmed: { pmid: string; title: string; citation: string; url: string; year?: number; journal?: string; doi?: string; note?: string; abstract?: string }[];
+    searchTerms?: string[];
+    review?: {
+      searched?: string[];
+      paperCount?: number;
+      excluded?: string;
+      synthesis?: string;
+      findings?: { short?: string; pmid?: string; finding?: string }[];
+    };
     validatedCount: number;
     gapCount: number;
     references?: ReferenceItem[];
@@ -148,7 +156,14 @@ export interface StrategyPack {
     campaignLead?: CampaignLead;
     citations?: EvidenceRecord[];
     evidenceGaps?: { stream: string; item: string; status: string; needed: string }[];
-    pubmed?: { pmid: string; title: string; citation: string; url: string }[];
+    pubmed?: { pmid: string; title: string; citation: string; url: string; abstract?: string }[];
+    review?: {
+      searched?: string[];
+      paperCount?: number;
+      excluded?: string;
+      synthesis?: string;
+    };
+    searchTerms?: string[];
     meaning?: Record<string, string | number>[];
     compare?: Record<string, string | number>[];
     spine?: Record<string, string | number>[];

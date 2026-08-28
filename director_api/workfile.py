@@ -10,6 +10,7 @@ import re
 from typing import Any
 
 from .cite import mark
+from .evidence import _first_sentences, _strategy_implication
 from .extract import ExtractedBrief
 
 PHASE_TITLES = [
@@ -48,11 +49,12 @@ def build_workfile(brief: ExtractedBrief, doctrine: dict, ledger: dict) -> dict[
     ]
     return {
         "howBuilt": (
-            f"We started with the brief for {brief.brand or 'this brand'}, not with a deck. "
-            "Each section below is one step of the working process. "
+            f"We ran a literature review for {brief.product or brief.brand or 'this brand'} "
+            f"in {brief.indication or brief.therapy_area or 'the named indication'} — "
+            "the brief did not have to bring a bibliography. "
             f"{len(records)} paper{'s' if len(records) != 1 else ''} have a number. "
             f"{len(gaps)} line{'s' if len(gaps) != 1 else ''} from the brief still have no PMID or DOI. "
-            "Those lines cannot set a claim. The slides are this file, presented."
+            "Those lines cannot set a claim. The slides present this file, not a restated upload."
         ),
         "phases": phases,
         "references": refs,
@@ -75,8 +77,16 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     cost = brief.access_and_cost or []
     delay = next((i for i in insights if _looks_like_delay(i)), insights[0] if insights else "")
     money = next((c for c in cost if _looks_like_cost(c)), cost[0] if cost else "")
+    science = ""
+    if records:
+        science = (
+            f"Literature already on the register ({len(records)} papers), lead "
+            f"{records[0].get('short')}. "
+            f"{_strategy_implication(brief, records)} "
+        )
     need = (
-        f"What {brief.brand or 'the brand'} needs is not another reminder that the science is positive. "
+        science
+        + f"What {brief.brand or 'the brand'} needs is not another reminder that the science is positive. "
         + (f"The doctors already told us: {delay} " if delay else "")
         + (f"And then: {money} " if money else "")
         + f"So the work is {doctrine.get('bet') or 'to change the decision at the eligible moment'}."
@@ -111,7 +121,7 @@ def _p01(brief, doctrine, records, gaps) -> dict:
     ]
     return _phase(
         "01",
-        "We separated what the client typed as a goal from what the insight and access lines actually describe. The numbered papers from the register sit under Known. Uncited brief lines sit under Unknown. We did not fill Unknown with a guess.",
+        "We searched PubMed for this product and indication, then separated the client's typed goal from the behaviour the papers actually contradict. Numbered papers sit under Known. Uncited brief lines sit under Unknown. We did not fill Unknown with a guess.",
         restatedAsk=asked,
         restatedNeed=need.strip(),
         questions=questions,
@@ -170,7 +180,7 @@ def _p03(brief, records, gaps, lead) -> dict:
     ]
     return _phase(
         "03",
-        "Every row is a paper we can put a number on. Brief lines without a number are in the gap table. We did not give them an effect size.",
+        "Every row is a paper we retrieved or that this brief named. We did not wait for the upload to paste a bibliography. Brief lines without a number are in the gap table. We did not give them an effect size.",
         forefront={
             "headers": ["Ref", "Source", "Stream", "Design / N", "Published finding", "Grade", "What we may say", "Caveat"],
             "rows": rows,
@@ -189,12 +199,20 @@ def _p04(brief, records, gaps) -> dict:
     guide = next((r for r in records if r.get("directs") == "guideline-cover"), None)
     for ins in insights:
         low = ins.lower()
-        if _looks_like_delay(ins) and start:
+        if _looks_like_delay(ins) and (start or outcome or guide or records):
+            src = start or outcome or guide or records[0]
+            finding = _first_sentences(
+                src.get("abstract") or src.get("claim_permitted") or src.get("title") or "",
+                1,
+            )
             discord.append([
                 _short(ins, 120),
-                f"The initiation papers do not require a clinic wait. {mark(start)} {start.get('short')}.",
+                (
+                    f"The literature already covers this indication. {mark(src)} {src.get('short')}. "
+                    + (finding or "The wait is not required by the papers on the register.")
+                ),
                 "Habit / handover theatre",
-                "This is the campaign. Not a reminder of efficacy.",
+                "This is the campaign. Not a reminder that the class works.",
             ])
         elif any(w in low for w in ("agree", "principle", "accept")) and (outcome or guide):
             src = outcome or guide

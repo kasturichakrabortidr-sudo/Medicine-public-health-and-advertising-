@@ -7,6 +7,7 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
   const records = ev?.records || pack.dashboard.citations || [];
   const gaps = ev?.gaps || pack.dashboard.evidenceGaps || [];
   const pubmed = ev?.pubmed || pack.dashboard.pubmed || [];
+  const review = ev?.review || pack.dashboard.review;
   const refs = pack.references || ev?.references || pack.dashboard.references || [];
 
   return (
@@ -15,12 +16,25 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
         <div>
           <h1>Numbered papers</h1>
           <p>
-            Every claim we are willing to lead with has a number. Uncited brief items stay
-            gaps. The full Vancouver list is at the bottom.
+            Every claim we are willing to lead with has a number. We search PubMed for this
+            product and indication even when the brief listed no papers. Another molecule's
+            pivotal stays off the register unless this brief named it.
           </p>
         </div>
       </div>
 
+      {review && (
+        <section className="card" style={{ marginBottom: 16 }}>
+          <h3>Literature review — not copied from the brief</h3>
+          <p>{review.synthesis}</p>
+          <p className="small muted">{review.excluded}</p>
+          {(review.searched || []).length ? (
+            <p className="small muted">
+              Queries: {(review.searched || []).slice(0, 4).join(" · ")}
+            </p>
+          ) : null}
+        </section>
+      )}
       {lead && (
         <section className="card" style={{ marginBottom: 16 }}>
           <h3>Campaign lead</h3>
@@ -179,9 +193,9 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
       <section className="card" style={{ marginTop: 18 }}>
         <h3>PubMed — retrieved for this brief</h3>
         <p className="small muted">
-          Live NCBI hits for this product, named studies, and indication. Another molecule's
-          pivotal is excluded unless this brief named it. Confirm full text before promoting
-          any of these to the campaign lead.
+          Live NCBI hits for this product, named studies, and indication. Abstracts are
+          fetched even when the brief listed no papers. Another molecule's pivotal is
+          excluded unless this brief named it. Confirm full text before promotional use.
         </p>
         {pubmed.length > 0 ? (
           <ul className="bullets">
@@ -190,6 +204,12 @@ export function EvidenceTab({ pack }: { pack: StrategyPack }) {
                 <a href={p.url} target="_blank" rel="noreferrer">
                   {p.citation}
                 </a>
+                {p.abstract ? (
+                  <div className="small muted" style={{ marginTop: 6 }}>
+                    {p.abstract.slice(0, 420)}
+                    {p.abstract.length > 420 ? "…" : ""}
+                  </div>
+                ) : null}
               </li>
             ))}
           </ul>
