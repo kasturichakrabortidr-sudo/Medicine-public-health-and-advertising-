@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from director_api.extract import extract_one, merge_into_brief
 
 
@@ -81,3 +83,28 @@ def test_pasted_prose_infers_market():
     brief = merge_into_brief([], pasted="A cardiology brand launch in India for HFrEF.")
     assert brief.market == "India"
     assert "cardiology" in brief.therapy_area.lower()
+
+
+TRIVORA = (Path(__file__).resolve().parent / "fixtures" / "trivora_client_brief.txt").read_text(
+    encoding="utf-8"
+)
+
+
+def test_trivora_client_brief_is_not_swallowed_into_brand():
+    brief = merge_into_brief([], pasted=TRIVORA)
+    assert brief.brand == "Trivora-NB Smartules"
+    assert "Formoterol" in brief.product or "formoterol" in brief.product
+    assert "Glycopyrronium" in brief.product
+    assert "COPD" in brief.therapy_area
+    assert "first-line" in (brief.business_goal or "").lower()
+    assert any("free-mix" in c.lower() for c in brief.competitors)
+    assert any("GOLD" in g for g in brief.guidelines)
+    assert len(brief.hcp_insights) >= 5
+    blob = " ".join(brief.hcp_insights).lower()
+    assert "rescue or step-up" in blob or "when dual" in blob
+    assert "mix it myself" in blob
+    assert "consultant physicians, metro and tier-1)" not in blob
+    assert "Molecule" not in brief.brand
+    assert len(brief.brand) < 60
+    assert "GOLD 2026" not in (brief.indication or "")
+    assert "STATED POPULATION" not in (brief.indication or "")

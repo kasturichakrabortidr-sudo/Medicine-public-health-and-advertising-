@@ -81,3 +81,27 @@ def test_example_brief_is_presentation_ready():
                 value = row.get(key) if isinstance(row, dict) else None
                 if value and str(value).strip() not in {"—", "-"}:
                     assert "…" not in str(value)
+
+
+def test_trivora_step_up_brief_is_first_line_not_hospital_wait():
+    from pathlib import Path
+
+    from director_api.extract import merge_into_brief
+
+    raw = (Path(__file__).resolve().parent / "fixtures" / "trivora_client_brief.txt").read_text(
+        encoding="utf-8"
+    )
+    brief = merge_into_brief([], pasted=raw)
+    pack = generate_pack(brief, pubmed=False)
+    assert pack["meta"]["brand"] == "Trivora-NB Smartules"
+    assert pack["doctrine"]["id"] == "first-line-not-rescue"
+    assert "step-up" in pack["doctrine"]["name"].lower() or "first-line" in pack["doctrine"]["name"].lower()
+    enemy = (pack["doctrine"].get("enemy") or "").lower()
+    assert "stable" not in enemy
+    assert "rescue" in enemy or "free-mix" in enemy or "step-up" in enemy
+    assert pack["interventions"][0]["name"] == "First-line maintenance protocol"
+    blob = json.dumps(pack).lower()
+    assert "paradigm-hf" not in blob
+    assert "sacubitril" not in blob
+    assert "keynote" not in blob
+    assert "do not lock a scientific lead" in pack["evidence"]["lead"]["statement"].lower()

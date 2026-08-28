@@ -363,6 +363,7 @@ def _parse_structured(raw: str) -> ExtractedBrief:
     parsed = _try_load_mapping(raw)
     if parsed:
         _apply_mapping(brief, parsed)
+        _tidy_brief(brief, raw)
         return brief
 
     current = None
@@ -370,32 +371,53 @@ def _parse_structured(raw: str) -> ExtractedBrief:
 
     def flush():
         nonlocal current, bucket
-        if current:
+        if current and current in KNOWN_FIELDS:
             _assign(brief, current, bucket)
         current = None
         bucket = []
 
     for line in raw.splitlines():
-        heading = re.match(r"^#{1,3}\s+(.+)$", line.strip())
-        label = re.match(r"^([A-Za-z][A-Za-z0-9 /_-]{1,40}):\s*(.*)$", line.strip())
+        stripped = line.strip()
+        heading = re.match(r"^#{1,3}\s+(.+)$", stripped)
+        label = re.match(
+            r"^([A-Za-z][A-Za-z0-9 /&()_,'-]{1,70})\s*:\s*(.*)$",
+            stripped,
+        )
         key = None
         rest = ""
         if heading:
             key = _normalize_key(heading.group(1))
-        elif label and _normalize_key(label.group(1)) in KNOWN_FIELDS:
+        elif label:
             key = _normalize_key(label.group(1))
             rest = label.group(2).strip()
+        else:
+            prefix = _section_prefix(stripped)
+            if prefix:
+                key = prefix
         if key and key in KNOWN_FIELDS:
             flush()
             current = key
             if rest:
                 bucket.append(rest)
             continue
+        if label and key not in KNOWN_FIELDS:
+            title = label.group(1)
+            heading_like = (
+                len(title) < 42
+                and "," not in title
+                and title[:1].isupper()
+                and not title.lower().startswith(("consultant", "indian", "named"))
+            )
+            if heading_like:
+                flush()
+                current = None
+                continue
         if current:
-            cleaned = line.strip().lstrip("-*•").strip()
+            cleaned = stripped.lstrip("-*•").strip()
             if cleaned:
                 bucket.append(cleaned)
     flush()
+    _tidy_brief(brief, raw)
     return brief
 
 
@@ -407,13 +429,25 @@ def _try_load_mapping(raw: str) -> dict | None:
             return data if isinstance(data, dict) else None
         except json.JSONDecodeError:
             return None
-    if yaml is not None and re.search(r"^\w+:", text, re.M):
-        try:
-            data = yaml.safe_load(text)
-            return data if isinstance(data, dict) else None
-        except Exception:
-            return None
-    return None
+    if yaml is None or not re.search(r"^\w+:", text, re.M):
+        return None
+    try:
+        data = yaml.safe_load(text)
+    except Exception:
+        return None
+    if not isinstance(data, dict):
+        return None
+    known = sum(1 for k in data if _normalize_key(str(k)) in KNOWN_FIELDS)
+    if known < 2:
+        return None
+    snake = sum(1 for k in data if re.fullmatch(r"[a-z][a-z0-9_]*", str(k) or ""))
+    if snake < 2:
+        # Title-case "Brand:" client briefs are not YAML. Parse them as labeled prose.
+        return None
+    brand = str(data.get("brand") or data.get("Brand") or "")
+    if len(brand) > 80 or "molecule" in brand.lower() or "\n" in brand:
+        return None
+    return data
 
 
 def _apply_mapping(brief: ExtractedBrief, data: dict) -> None:
@@ -457,12 +491,12 @@ def _as_list(value) -> list[str]:
                 text = str(item).strip()
                 if text:
                     out.append(text)
-        return out
+        return _merge_wrapped(out)
     text = str(value).strip()
     if not text:
         return []
     if "\n" in text:
-        return [ln.lstrip("-*• ").strip() for ln in text.splitlines() if ln.strip()]
+        return _merge_wrapped([ln.lstrip("-*• ").strip() for ln in text.splitlines() if ln.strip()])
     return [text]
 
 
@@ -470,35 +504,93 @@ def _as_text(value) -> str:
     if value is None:
         return ""
     if isinstance(value, list):
-        return "; ".join(str(v) for v in value if v)
+        joined = " ".join(str(v).strip() for v in value if str(v).strip())
+        return re.sub(r"\s+", " ", joined.replace(" ; ", " ")).strip()
     return str(value).strip()
+
+
+def _merge_wrapped(items: list[str]) -> list[str]:
+    """Rejoin a client brief that wrapped mid-sentence; drop heading leftovers."""
+    out: list[str] = []
+    for raw in items:
+        s = re.sub(r"\s+", " ", (raw or "").strip())
+        if not s:
+            continue
+        # Wrap of a heading that already opened the section: "consultant physicians…):"
+        if re.search(r"\)\s*:\s*$", s) and not re.match(r"^\d+", s) and len(s) < 90:
+            continue
+        numbered = bool(re.match(r"^\d+[\.)]\s+", s))
+        bulleted = bool(re.match(r"^[-*•]\s+", s))
+        body = re.sub(r"^(\d+[\.)]\s+|[-*•]\s+)", "", s).strip() or s
+        if out and not numbered and not bulleted and s[:1].islower():
+            out[-1] = f"{out[-1]} {body}".strip()
+        else:
+            out.append(body)
+    return out
 
 
 def _normalize_key(label: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "_", label.lower()).strip("_")
+    s = re.sub(r"_+", "_", s).strip("_")
     aliases = {
         "therapy": "therapy_area",
         "ta": "therapy_area",
         "therapy_area": "therapy_area",
+        "therapeutic_area": "therapy_area",
         "brand_name": "brand",
         "product_name": "product",
         "molecule": "product",
+        "molecule_composition": "product",
+        "composition": "product",
         "goal": "business_goal",
         "objective": "business_goal",
+        "business_objective": "business_goal",
+        "business_objective_what_must_move_by_when_by_how_much": "business_goal",
         "specialties": "target_specialties",
+        "target_specialties": "target_specialties",
         "targets": "target_specialties",
         "segments": "hcp_segments",
+        "hcp_tiers_status_mix": "hcp_segments",
         "evidence": "brand_evidence",
+        "evidence_in_hand": "brand_evidence",
+        "evidence_in_hand_attached_see_test_source_pack_md": "brand_evidence",
         "insights": "hcp_insights",
         "hcp_insight": "hcp_insights",
+        "in_house_hcp_insights": "hcp_insights",
         "competitor": "competitors",
+        "competitive_set": "competitors",
+        "competitive_set_what_the_narrative_must_displace": "competitors",
         "access": "access_and_cost",
         "cost": "access_and_cost",
+        "price_and_access": "access_and_cost",
+        "price_and_access_context": "access_and_cost",
         "constraint": "constraints",
+        "mlr_constraints": "constraints",
+        "guidelines_in_play": "guidelines",
+        "evolving_new_evidence": "evolving_evidence",
         "country": "market",
         "geography": "market",
+        "geography_and_city_tiers": "market",
     }
-    return aliases.get(s, s)
+    if s in aliases:
+        return aliases[s]
+    for prefix, dest in (
+        ("business_objective", "business_goal"),
+        ("in_house_hcp", "hcp_insights"),
+        ("hcp_insight", "hcp_insights"),
+        ("competitive_set", "competitors"),
+        ("evidence_in_hand", "brand_evidence"),
+        ("guidelines", "guidelines"),
+        ("price_and_access", "access_and_cost"),
+        ("mlr", "constraints"),
+        ("molecule", "product"),
+        ("therapeutic", "therapy_area"),
+        ("target_specialt", "target_specialties"),
+        ("evolving", "evolving_evidence"),
+    ):
+        if s.startswith(prefix):
+            return dest
+    return s
 
 
 def _infer_missing(brief: ExtractedBrief) -> None:
@@ -509,10 +601,88 @@ def _infer_missing(brief: ExtractedBrief) -> None:
         if m:
             brief.brand = m.group(1).strip()
     if not brief.therapy_area:
-        m = re.search(r"(cardiology|oncology|diabetes|neurology|respiratory|immunology|dermatology|infectious|heart failure|HFrEF|HFpEF)[^\n]{0,40}", blob, re.I)
+        m = re.search(
+            r"(cardiology|oncology|diabetes|neurology|respiratory|immunology|"
+            r"dermatology|infectious|heart failure|HFrEF|HFpEF|COPD)[^\n]{0,40}",
+            blob,
+            re.I,
+        )
         if m:
             brief.therapy_area = m.group(0).strip()
     if not brief.market:
         m = re.search(r"\b(India|United States|USA|UK|EU|China|Brazil|Japan|Germany|France)\b", blob)
         if m:
             brief.market = m.group(1)
+    _tidy_brief(brief, blob)
+
+
+def _section_prefix(line: str) -> str | None:
+    low = line.lower()
+    pairs = (
+        ("in-house hcp insight", "hcp_insights"),
+        ("hcp insight", "hcp_insights"),
+        ("guidelines in play", "guidelines"),
+        ("evidence in hand", "brand_evidence"),
+        ("competitive set", "competitors"),
+        ("business objective", "business_goal"),
+        ("price and access", "access_and_cost"),
+        ("mlr constraint", "constraints"),
+        ("target specialt", "target_specialties"),
+        ("molecule / composition", "product"),
+        ("therapeutic area", "therapy_area"),
+    )
+    for prefix, field in pairs:
+        if low.startswith(prefix):
+            return field
+    return None
+
+
+def _tidy_brief(brief: ExtractedBrief, raw: str = "") -> None:
+    """Stop a labeled client brief from collapsing into one giant brand string."""
+    raw = raw or brief.raw_text or ""
+    brief.brand = _short_name(brief.brand, 48)
+    if brief.product:
+        brief.product = _clip_text(brief.product, 160)
+    elif raw:
+        mol = re.search(
+            r"molecule[^\n:]{0,20}:\s*(.+?)(?:\n[A-Z][^\n:]{0,40}:|\n\n|$)",
+            raw,
+            re.I | re.S,
+        )
+        if mol:
+            brief.product = _clip_text(re.sub(r"\s+", " ", mol.group(1)), 160)
+    brief.therapy_area = _clip_text(brief.therapy_area, 80)
+    brief.indication = _first_block(brief.indication, 280)
+    brief.business_goal = _first_block(brief.business_goal, 280)
+    if "molecule" in (brief.brand or "").lower() or len(brief.brand or "") > 48:
+        m = re.search(r"\bbrand\s*:\s*([^\n]+)", raw, re.I)
+        if m:
+            brief.brand = _short_name(m.group(1), 48)
+
+
+def _short_name(text: str, limit: int = 48) -> str:
+    text = (text or "").replace("\r", " ").strip().split("\n")[0]
+    text = re.split(r"\s*;\s*|molecule\s*/|therapeutic\s+area", text, maxsplit=1, flags=re.I)[0]
+    text = re.sub(r"\s+", " ", text).strip(" ,;—-")
+    return text[:limit].strip()
+
+
+def _clip_text(text: str, limit: int) -> str:
+    text = re.sub(r"\s+", " ", (text or "").replace("\r", " ")).strip()
+    return text[:limit].strip()
+
+
+def _first_block(text: str, limit: int) -> str:
+    text = (text or "").replace("\r", "\n").strip()
+    for stop in (
+        "STATED POPULATION",
+        "Business objective",
+        "Competitive set",
+        "Evidence in hand",
+        "In-house HCP",
+    ):
+        idx = text.lower().find(stop.lower())
+        if idx > 20:
+            text = text[:idx].strip()
+    para = text.split("\n\n")[0].strip()
+    return _clip_text(para.replace("\n", " "), limit)

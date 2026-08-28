@@ -9,12 +9,12 @@ import { WorkingFileTab } from "./components/WorkingFileTab";
 import type { StrategyPack, TabId } from "./types";
 
 export default function App() {
-  const [tab, setTab] = useState<TabId>("projects");
+  const [tab, setTab] = useState<TabId>("briefs");
   const [pack, setPack] = useState<StrategyPack | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const applyPack = (next: StrategyPack, go: TabId = "work") => {
+  const applyPack = (next: StrategyPack, go: TabId = "evidence") => {
     setPack(next);
     setTab(go);
   };
@@ -110,7 +110,7 @@ export default function App() {
               busy={busy}
               setBusy={setBusy}
               onPack={(next) => {
-                applyPack(next, "work");
+                applyPack(next, "evidence");
               }}
             />
           </>

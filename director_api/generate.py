@@ -7,6 +7,7 @@ schema the web app renders: doctrine, slides, charts, interventions, dashboard.
 from __future__ import annotations
 
 from datetime import date
+import re
 
 from .cite import attach_references, mark
 from .deck import (
@@ -71,6 +72,7 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             " ".join(brief.access_and_cost),
             " ".join(brief.competitors),
             brief.indication,
+            (brief.raw_text or "")[:2500],
         ]
     ).lower()
     implication = ""
@@ -80,7 +82,9 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
         implication = _strategy_implication(brief, records)
     paper = next((r.get("short") for r in records if r.get("short")), "")
     pmid = next((str(r.get("pmid")) for r in records if r.get("pmid")), "")
-    indication = brief.indication or brief.therapy_area or "this indication"
+    indication = brief.therapy_area or _short_indication(brief.indication) or "this indication"
+    brand = (brief.brand or "the brand").split(";")[0].strip()[:48]
+    cite = f" — {paper} (PMID {pmid}) is on the register" if pmid else ""
     paper_start = records and any(
         w in science for w in ("initiat", "first-line", "in-hospital", "early", "guideline", "delay")
     )
@@ -88,22 +92,58 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
         w in science for w in ("surviv", "mortality", "overall survival", "progression", "hazard", "efficacy")
     )
     brief_wait = any(
-        w in blob for w in ("stabilise", "stabilize", "late", "second-line", "switch", "habit", "wait")
+        w in blob for w in ("stabilise", "stabilize", "late", "second-line", "habit")
+    ) and not any(w in blob for w in ("step-up", "step up", "free-mix", "triple is what"))
+    step_up = any(
+        w in blob
+        for w in (
+            "step-up",
+            "step up",
+            "when dual",
+            "first-line maintenance",
+            "triple is what",
+            "rescue or step-up",
+        )
     )
-    cite = f" — {paper} (PMID {pmid}) is on the register" if pmid else ""
+    free_mix = any(w in blob for w in ("free-mix", "free mix", "mix it myself", "mix myself"))
+
+    if step_up:
+        enemy = (
+            "The habit of saving triple until dual has already failed"
+            if not free_mix
+            else "Triple as rescue, plus the belief that free-mix is finer and cheaper"
+        )
+        return {
+            "id": "first-line-not-rescue",
+            "name": "First-line maintenance, not a late step-up",
+            "thesis": (
+                f"Doctors on this brief already know the class. They still use triple as step-up. "
+                f"{implication or 'The literature and GOLD already describe first-line triple in exacerbators.'} "
+                f"{brand} is not a better-molecule story — it is a first-line vs rescue story."
+            ),
+            "enemy": enemy,
+            "bet": (
+                f"Start {brand} as first-line maintenance in the labelled exacerbator, "
+                "not after dual has failed, and not as a hospital-only rescue."
+            ),
+            "whyNovel": (
+                "The brief's own dipstick says triple is what they move to when dual stops working. "
+                "The campaign spends against that ritual, using retrieved papers, not a restated upload."
+            ),
+        }
 
     if paper_start or (records and brief_wait):
         thesis = (
             f"The literature for {indication} already moved{cite}. "
             f"{implication or 'The scientific bet is first-eligible start, not a restated upload.'} "
-            f"This is not a better-molecule story for {brief.brand or 'the brand'}."
+            f"This is not a better-molecule story for {brand}."
         )
         return {
             "id": "first-touch",
             "name": "Start at the first eligible visit",
             "thesis": thesis,
             "enemy": "The habit of waiting until the patient is 'stable' in clinic",
-            "bet": f"Start {brief.brand or 'the product'} at the first eligible encounter — in hospital if that is when they are eligible.",
+            "bet": f"Start {brand} at the first eligible encounter — in hospital if that is when they are eligible.",
             "whyNovel": (
                 "Most launch decks resell the label. This one spends against the wait, "
                 "using papers we actually retrieved rather than a restated brief."
@@ -113,14 +153,14 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
         thesis = (
             f"The literature for {indication} is not yet on the register{cite}. "
             f"The doctors on this brief still wait. "
-            f"This is not a better-molecule story for {brief.brand or 'the brand'}."
+            f"This is not a better-molecule story for {brand}."
         )
         return {
             "id": "first-touch",
             "name": "Start at the first eligible visit",
             "thesis": thesis,
             "enemy": "The habit of waiting until the patient is 'stable' in clinic",
-            "bet": f"Start {brief.brand or 'the product'} at the first eligible encounter — in hospital if that is when they are eligible.",
+            "bet": f"Start {brand} at the first eligible encounter — in hospital if that is when they are eligible.",
             "whyNovel": (
                 "Most launch decks resell the label. This one spends against the wait."
             ),
@@ -132,7 +172,7 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "thesis": (
                 f"The literature for {indication} is already on the register{cite}. "
                 f"{implication or 'Conversion is the gap between those findings and the current start.'} "
-                f"{brief.brand or 'The brand'} does not have an awareness problem."
+                f"{brand} does not have an awareness problem."
             ),
             "enemy": "Fragile conviction at the point of prescribe",
             "bet": "Stack scientific, peer, and practical conviction in that order — then lock the habit.",
@@ -146,7 +186,7 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "id": "affordability-confidence",
             "name": "A cost conversation the doctor can survive",
             "thesis": (
-                f"Uptake of {brief.brand or 'the brand'} is gated by the doctor's fear of putting "
+                f"Uptake of {brand} is gated by the doctor's fear of putting "
                 "the patient in financial distress — not by disbelief in the science. "
                 + (implication or "Literature is on the register; cost is the conversion problem.")
             ),
@@ -175,7 +215,7 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
         "id": "conviction-cascade",
         "name": "Conviction at the moment of the pen",
         "thesis": (
-            f"{brief.brand or 'The brand'} does not have an awareness problem. It has a "
+            f"{brand} does not have an awareness problem. It has a "
             "conviction problem at the decision moment. "
             + (implication or "Stack scientific, peer, and practical conviction in that order.")
         ),
@@ -186,6 +226,13 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "Prescribing is a habit with a few load-bearing joints. We work those."
         ),
     }
+
+
+def _short_indication(text: str) -> str:
+    line = re.sub(r"\s+", " ", (text or "").strip())
+    if not line:
+        return ""
+    return line[:120].rsplit(" ", 1)[0] if len(line) > 120 else line
 
 
 def _bind_science(doctrine: dict, ledger: dict) -> None:
@@ -204,9 +251,26 @@ def _bind_science(doctrine: dict, ledger: dict) -> None:
 
 
 def _interventions(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None) -> list[dict]:
-    brand = brief.brand or "the brand"
-    return [
-        {
+    brand = (brief.brand or "the brand").split(";")[0].strip()[:48]
+    if doctrine.get("id") == "first-line-not-rescue":
+        first = {
+            "id": "first-touch",
+            "name": "First-line maintenance protocol",
+            "promise": (
+                f"A labelled-exacerbator start so {brand} is first-line maintenance, "
+                "not the thing they add after dual has already failed."
+            ),
+            "lever": "Motivation — old ritual",
+            "segment": "Pulmonologists + consultant physicians, metro and tier-1",
+            "effort": "H",
+            "impact": 88,
+            "feasibility": 62,
+            "mlr": "No superiority vs free-mix. Stay inside the approved indication.",
+            "kill": "If 'triple after dual' language is unchanged at week 8 in the pilot.",
+            "evidenceAnchor": _anchor(ledger, "guideline-cover") or _anchor(ledger, "outcome-permission"),
+        }
+    else:
+        first = {
             "id": "first-touch",
             "name": "First-Touch Protocol",
             "promise": f"A hospital-to-clinic initiation bundle so {brand} is started at the first eligible encounter.",
@@ -218,7 +282,9 @@ def _interventions(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = 
             "mlr": "Protocol language must match label and local code. No start-all implication.",
             "kill": "If discharge initiation rate is unchanged at week 8 in the pilot site.",
             "evidenceAnchor": _anchor(ledger, "first-eligible-start") or _anchor(ledger, "outcome-permission"),
-        },
+        }
+    return [
+        first,
         {
             "id": "afford-kit",
             "name": "Affordability Confidence Kit",

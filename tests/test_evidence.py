@@ -331,3 +331,39 @@ def test_pubmed_review_builds_strategy_without_brief_bibliography(monkeypatch):
     assert "literature review" in built
     assert pack["evidence"]["review"]["paperCount"] == 3
     assert "nccn" in json.dumps(pack["evidence"]["review"]["findings"]).lower()
+
+
+def test_trivora_pubmed_queries_are_short_copd_not_the_whole_brief():
+    from pathlib import Path
+
+    from director_api.evidence import _pubmed_hit_belongs, _pubmed_terms
+    from director_api.extract import merge_into_brief
+
+    raw = (Path(__file__).resolve().parent / "fixtures" / "trivora_client_brief.txt").read_text(
+        encoding="utf-8"
+    )
+    brief = merge_into_brief([], pasted=raw)
+    terms = _pubmed_terms(brief)
+    joined = " ".join(terms).lower()
+    assert terms
+    assert all(len(t) < 180 for t in terms)
+    assert "cardiovascular risk" not in joined
+    assert "stated population" not in joined
+    assert "breath 6-month" not in joined
+    assert "glycopyrronium" in joined
+    assert "copd" in joined
+    assert "gold" in joined
+    assert "triple" in joined
+    assert _pubmed_hit_belongs(
+        brief,
+        "Budesonide/glycopyrronium/formoterol for COPD vs dual therapy",
+    )
+    assert _pubmed_hit_belongs(
+        brief,
+        "Global strategy for the diagnosis, management and prevention of COPD GOLD",
+    )
+    assert not _pubmed_hit_belongs(
+        brief,
+        "Tongxinluo capsule in patients with ST-segment elevation myocardial infarction",
+    )
+    assert not _pubmed_hit_belongs(brief, "Sacubitril/valsartan in heart failure")

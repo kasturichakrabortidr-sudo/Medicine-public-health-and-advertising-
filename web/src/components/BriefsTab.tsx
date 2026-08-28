@@ -185,7 +185,7 @@ export function BriefsTab({
             Extract fields
           </button>
           <button className="btn copper" type="button" disabled={busy} onClick={generate}>
-            {busy ? "Reading the brief…" : "Write the working file"}
+            {busy ? "Searching PubMed…" : "Write the working file"}
           </button>
         </div>
         {error ? <p className="error">{error}</p> : null}

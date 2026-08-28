@@ -514,6 +514,10 @@ def _brief_family(brief: ExtractedBrief, blob: str) -> str:
         return "oncology"
     if any(k in hay for k in ("hfref", "heart failure", "cardiology", "arni", "sacubitril", "paradigm")):
         return "cardiology"
+    if any(k in stated for k in ("respirat", "copd", "asthma", "nebulis", "nebuliz")):
+        return "respiratory"
+    if any(k in hay for k in ("respirat", "copd", "asthma", "nebulis", "nebuliz")):
+        return "respiratory"
     return ""
 
 
@@ -922,12 +926,13 @@ def _named_search_molecules(brief: ExtractedBrief) -> list[str]:
             if _alias_in(folded, token) and token.lower() not in {n.lower() for n in named}:
                 named.append(token)
     product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
-    if _looks_like_inn(product) and product.lower() not in {n.lower() for n in named}:
+    if 5 <= len(product) <= 80 and _looks_like_inn(product) and product.lower() not in {n.lower() for n in named}:
         named.append(product)
-    for token in re.findall(r"[A-Za-z][A-Za-z0-9-]{4,}", f"{brief.raw_text} {brief.product}"):
+    hay = f"{brief.product or ''} {brief.raw_text or ''}"[:2500]
+    for token in re.findall(r"[A-Za-z][A-Za-z0-9-]{4,}", hay):
         if _looks_like_inn(token) and token.lower() not in {n.lower() for n in named}:
             named.append(token)
-        if len(named) >= 6:
+        if len(named) >= 4:
             break
     return named
 
@@ -941,7 +946,7 @@ def _looks_like_inn(product: str) -> bool:
         return True
     tokens = [part for part in re.split(r"[\s,;]+", low) if part]
     suffix = re.compile(
-        r"(mab|nib|tide|glutide|gliflozin|sartan|pril|olol|umab|ciclib|fenib|parib)$"
+        r"(mab|nib|tide|glutide|gliflozin|sartan|pril|olol|umab|ciclib|fenib|parib|terol|onium|sonide|tropium)$"
     )
     return any(suffix.search(token) for token in tokens)
 
@@ -966,26 +971,44 @@ def _brief_has_named_inn(brief: ExtractedBrief) -> bool:
 
 
 def _disease_phrases(brief: ExtractedBrief) -> list[str]:
-    raw = (brief.indication or brief.therapy_area or "").strip()
-    cleaned = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", raw).strip()
-    out: list[str] = []
-    if cleaned and len(cleaned) >= 4:
-        out.append(cleaned)
+    raw = f"{brief.indication or ''} {brief.therapy_area or ''} {(brief.raw_text or '')[:2000]}"
+    cleaned = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", raw)
     low = cleaned.lower()
-    expand = (
-        ("nsclc", "non-small cell lung cancer"),
-        ("sclc", "small cell lung cancer"),
-        ("hfref", "heart failure with reduced ejection fraction"),
-        ("hfpef", "heart failure with preserved ejection fraction"),
-        ("t2dm", "type 2 diabetes"),
-        ("ckd", "chronic kidney disease"),
-    )
-    seen = {x.lower() for x in out}
-    for abbr, full in expand:
-        if abbr in low and full.lower() not in seen:
-            out.append(full)
-            seen.add(full.lower())
-    return out[:3]
+    out: list[str] = []
+
+    def add(*phrases: str) -> None:
+        for phrase in phrases:
+            if phrase and phrase.lower() not in {x.lower() for x in out}:
+                out.append(phrase)
+
+    if re.search(r"\bcopd\b|obstructive pulmonary", low):
+        add("COPD", "chronic obstructive pulmonary disease")
+    if re.search(r"\bnsclc\b|non-small cell lung|lung cancer", low):
+        add("NSCLC", "non-small cell lung cancer")
+    if re.search(r"\bhfref\b|reduced ejection", low):
+        add("HFrEF", "heart failure with reduced ejection fraction")
+    if re.search(r"\bhfpef\b|preserved ejection", low):
+        add("HFpEF", "heart failure with preserved ejection fraction")
+    if re.search(r"\bheart failure\b", low) and not out:
+        add("heart failure")
+    if re.search(r"\bt2dm\b|type 2 diabetes|type 2 dm", low):
+        add("type 2 diabetes")
+    if re.search(r"\basthma\b", low) and "copd" not in low:
+        add("asthma")
+
+    ta = (brief.therapy_area or "").strip()
+    if ta and len(ta) < 80:
+        m = re.search(r"\b(COPD|NSCLC|HFrEF|HFpEF|T2DM|CKD)\b", ta, re.I)
+        if m:
+            add(m.group(1))
+        elif not out:
+            add(ta)
+
+    indication = (brief.indication or "").strip()
+    if indication and len(indication) < 80:
+        add(indication)
+
+    return out[:4]
 
 
 def _display_query(term: str) -> str:
@@ -1011,7 +1034,7 @@ def _pubmed_not_clause(brief: ExtractedBrief) -> str:
         if not named_inn and mol_fam and brief_fam and mol_fam == brief_fam:
             continue
         parts.append(f"NOT {mol}[ti]")
-        if len(parts) >= 8:
+        if len(parts) >= 4:
             break
     return " ".join(parts)
 
@@ -1024,15 +1047,18 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
     primary_disease = diseases[0] if diseases else ""
     not_clause = _pubmed_not_clause(brief)
 
-    for mol in named[:3]:
+    if named:
         extra = primary_disease or ""
-        terms.append(f"{mol} {extra} randomized controlled trial".strip())
+        terms.append(f"{named[0]} {extra} randomized controlled trial".strip())
+        if len(named) >= 2:
+            terms.append(f"{' '.join(named[:3])} {extra} randomized".strip())
 
     product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
     brand = (brief.brand or "").strip()
-    if product and product.lower() != brand.lower() and len(product) >= 5:
+    if product and product.lower() != brand.lower() and 5 <= len(product) <= 80:
         terms.append(f"{product} {primary_disease} randomized".strip())
 
+    brief_fam = _brief_family(brief, _brief_blob(brief))
     for item in (
         *(brief.brand_evidence or []),
         *(brief.existing_evidence or []),
@@ -1040,8 +1066,28 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
         *(brief.guidelines or []),
     ):
         cleaned = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", item).strip()
-        if len(cleaned) >= 12:
-            terms.append(cleaned[:180])
+        if 12 <= len(cleaned) <= 140 and not cleaned[:1].isdigit():
+            low = cleaned.lower()
+            if any(
+                w in low
+                for w in (
+                    "no data",
+                    "expected q",
+                    "signal only",
+                    "data on file",
+                    "in press",
+                    "no guideline",
+                    "not attached",
+                    "emerging interest",
+                    "no dedicated",
+                    "interim analysis",
+                    "follow-up expected",
+                )
+            ):
+                continue
+            if "cardiovascular" in low and brief_fam != "cardiology":
+                continue
+            terms.append(cleaned[:140])
 
     if primary_disease and len(primary_disease) >= 4:
         terms.append(f"{primary_disease} randomized controlled trial {not_clause}".strip())
@@ -1054,6 +1100,10 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
             terms.append(f"{primary_disease} immunotherapy chemotherapy randomized")
         if fam == "cardiology" and not _brief_has_named_inn(brief):
             terms.append(f"{primary_disease} guideline class I randomized")
+        if fam == "respiratory" or "copd" in primary_disease.lower():
+            terms.append("COPD GOLD guideline")
+            terms.append("ICS LABA LAMA triple therapy COPD randomized")
+            terms.append("COPD exacerbation reduction randomized")
         if len(diseases) > 1:
             terms.append(f"{diseases[1]} randomized controlled trial {not_clause}".strip())
 
@@ -1064,6 +1114,8 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
         if key in seen or len(key) < 8:
             continue
         if _term_smuggles_foreign_molecule(brief, key):
+            continue
+        if len(term) > 220:
             continue
         seen.add(key)
         uniq.append(term)
@@ -1315,6 +1367,8 @@ def _text_family(text: str) -> str:
         )
     ):
         return "endocrinology"
+    if any(k in hay for k in ("copd", "asthma", "nebulis", "nebuliz", "glycopyrronium", "formoterol")):
+        return "respiratory"
     return ""
 
 
@@ -1330,6 +1384,23 @@ def _pubmed_hit_belongs(brief: ExtractedBrief, title: str, extra: str = "") -> b
         return False
     if _families_mismatch(brief, hay):
         return False
+    if _brief_family(brief, _brief_blob(brief)) == "respiratory":
+        need = (
+            "copd",
+            "asthma",
+            "obstructive pulmonary",
+            "glycopyrronium",
+            "formoterol",
+            "budesonide",
+            "triple therap",
+            "nebulis",
+            "nebuliz",
+            "gold ",
+            "lama",
+            "laba",
+        )
+        if not any(k in hay.lower() for k in need):
+            return False
     # Named INN: drop another catalog molecule's pivotal when that molecule is in the TITLE.
     # Abstracts of disease guidelines mention standard-of-care drugs; those still belong.
     # Brand-only: keep same-family landmarks as independent landscape.

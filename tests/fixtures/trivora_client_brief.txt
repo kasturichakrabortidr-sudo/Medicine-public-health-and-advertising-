@@ -1,0 +1,82 @@
+Brand: Trivora-NB Smartules
+Molecule / composition: Glycopyrronium 12.5 µg + formoterol 6 µg +
+  budesonide 800 µg — unit-dose nebulisation suspension, 2 mL ampoule
+Therapeutic area: Respiratory — COPD
+Indication: Maintenance therapy in moderate-to-severe COPD with ≥1
+  exacerbation in the prior 12 months, across the hospital-to-home continuum
+
+STATED POPULATION (the gate — be exact):
+Indian adults ≥40 years, spirometry-confirmed moderate-to-severe COPD
+(GOLD 2–3), with ≥1 documented exacerbation in the prior 12 months.
+Named sub-cohort of strategic interest: women ≥40 with biomass-exposure-
+related COPD.
+Only age-agnostic evidence, or evidence in adults ≥40 with COPD, may carry
+a claim.
+
+Business objective (what must move, by when, by how much):
+Move Trivora-NB from step-up therapy to first-line maintenance initiation.
+Target: 20% quarterly Rx growth in metro and tier-1 across four quarters
+post-campaign, with tier-2 entry from Q2. Hold volume share against
+free-mix nebulisation.
+
+Competitive set (what the narrative must displace):
+- Free-mix nebulisation — separate budesonide, formoterol and
+  glycopyrronium ampoules combined at the point of care
+- Dual ICS/LABA nebulised maintenance
+- ICS/LABA/LAMA triple therapy delivered by pMDI and DPI
+- Generic budesonide respules
+
+Evidence in hand — attached (see test-source-pack.md):
+  [1] BREATH trial — randomised, open-label, interim analysis at discharge
+  [2] Drug utilisation study — 2,477 patients, data on file
+  [3] PROMs study — CSR NIS/2025/32, 2,366 patients
+  [4] Hospital EMR exacerbation study — NIS/2026/12, 170 patients
+
+Evolving / new evidence (in press, recent readouts, emerging RWD):
+BREATH 6-month follow-up expected Q4. No data available yet.
+Emerging interest in cardiovascular risk in the 30 days following an
+exacerbation — signal only, no dedicated study in hand.
+
+Guidelines in play:
+GOLD 2026; Indian Chest Society / NCCP COPD guidance; ICMR.
+No guideline text is attached.
+
+In-house HCP insights (10-doctor dipstick survey — pulmonologists and
+consultant physicians, metro and tier-1):
+  1. "Triple is what I move to when dual stops working." Triple therapy is
+     read as rescue or step-up, not as first-line maintenance.
+  2. Success is judged by symptom relief at follow-up, not by how long the
+     patient stays exacerbation-free.
+  3. "I can titrate better when I mix it myself." Free-mixing is believed
+     to give finer dose control, and to cost the patient less.
+  4. Nebulisation is seen as a hospital modality. Low confidence that
+     patients will continue it correctly at home.
+  5. Women presenting with biomass-exposure COPD are frequently labelled
+     chronic bronchitis or asthma and not spirometry-confirmed.
+  6. In tier-2, the cost objection is raised before the efficacy objection.
+
+Target specialties: Pulmonologists; consultant physicians / internal
+  medicine; critical care intensivists. Tier-2 and tier-3 GPs secondary.
+HCP tiers / status mix: KOL, senior consultant, early-career
+Geography and city tiers: Pan-India. Metro and tier-1 lead; tier-2 from Q2.
+  South and West skew.
+
+Price and access context:
+Approximately 2.2× the per-day cost of free-mix nebulisation. Largely
+out-of-pocket. Reimbursement limited to insured inpatient admission.
+Tier-2 and tier-3 patients on long-duration maintenance are highly
+price-sensitive.
+
+MLR constraints (claims that cannot be made, and why):
+- No superiority claim against free-mix nebulisation. No head-to-head
+  trial exists.
+- BREATH is interim and open-label. It may not be presented as definitive.
+- Data on file must be labelled as such.
+- No comparative safety claims.
+- No promotion outside the approved indication.
+- Vancouver-numbered inline references throughout.
+- No patient-directed claims in HCP assets.
+
+Deliverable: HCP-facing scientific strategy deck
+Hard slide maximum, references slide included: 12
+```
