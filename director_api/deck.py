@@ -470,10 +470,11 @@ def _science_lead_slide(
             "orange",
         ))
     if not stats:
+        label = "BGF" if re.search(r"\bBGF\b|budesonide/glycopyr", f"{primary.get('short') or ''} {rec.get('title') or ''}", re.I) else "Lead"
         stats = [
             _stat(
-                str(pmid) if pmid != "—" else "Pending",
-                _line(primary.get("short") or rec.get("short") or "No numbered lead yet.", 90),
+                label,
+                _line(f"PMID {pmid}. {primary.get('short') or rec.get('short') or 'No numbered lead yet.'}", 90),
                 "blue",
             ),
             _stat(
