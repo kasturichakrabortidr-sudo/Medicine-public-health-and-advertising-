@@ -39,6 +39,7 @@ def test_pubmed_finding_skips_methods_opener():
     finding = _finding_from_abstract(abstract, "BGF versus dual therapies")
     assert not finding.lower().startswith("we evaluated")
     assert "abstract:" not in finding.lower()
+    assert finding.lower().startswith("bgf")
     assert "benefit" in finding.lower() or "improv" in finding.lower()
 
 
@@ -56,6 +57,9 @@ def test_ethos_headline_is_the_reduction_not_the_dose():
     assert "160-μg" not in clause
     finding = _finding_from_abstract(sentence, "ETHOS")
     assert finding.lower().startswith("reduced")
+
+
+def test_pack_exposes_science_slides_and_anchors():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
     ids = [s["id"] for s in pack["slides"]]

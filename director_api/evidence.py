@@ -604,10 +604,9 @@ def _result_clause(text: str) -> str:
     if not blob:
         return ""
     m = re.search(
-        r"((?:was estimated to have benefits|reduced the annual rate|"
+        r"((?:[A-Z]{2,8}\s+)?(?i:was estimated to have benefits|reduced the annual rate|"
         r"reduc(?:ed|es)|improv(?:ed|es)|lower(?:ed))\b[^.]{8,160})",
         blob,
-        re.I,
     )
     if not m:
         return blob
