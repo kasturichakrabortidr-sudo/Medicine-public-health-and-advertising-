@@ -40,6 +40,22 @@ def test_pubmed_finding_skips_methods_opener():
     assert not finding.lower().startswith("we evaluated")
     assert "abstract:" not in finding.lower()
     assert "benefit" in finding.lower() or "improv" in finding.lower()
+
+
+def test_ethos_headline_is_the_reduction_not_the_dose():
+    from director_api.evidence import _finding_from_abstract, _result_clause
+
+    sentence = (
+        "Triple therapy with twice-daily budesonide (at either the 160-μg or the 80-μg dose) "
+        "reduced the annual rate of moderate or severe COPD exacerbations by 24% "
+        "as compared with glycopyrrolate–formoterol."
+    )
+    clause = _result_clause(sentence)
+    assert clause.lower().startswith("reduced")
+    assert "24%" in clause
+    assert "160-μg" not in clause
+    finding = _finding_from_abstract(sentence, "ETHOS")
+    assert finding.lower().startswith("reduced")
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
     ids = [s["id"] for s in pack["slides"]]

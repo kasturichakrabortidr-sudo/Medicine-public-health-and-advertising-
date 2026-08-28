@@ -438,7 +438,9 @@ def _usable_finding(primary: dict, rec: dict) -> str:
         from .evidence import _finding_from_abstract
 
         raw = _finding_from_abstract(rec.get("abstract") or raw, rec.get("title") or primary.get("short") or "")
-    return raw.strip()
+    from .evidence import _result_clause
+
+    return _result_clause(raw.strip())
 
 
 def _science_lead_slide(
@@ -452,7 +454,7 @@ def _science_lead_slide(
     tag = mark(primary) if primary.get("ref") else ""
     rec = next((r for r in records if r.get("id") == primary.get("id")), {}) or {}
     finding = _usable_finding(primary, rec)
-    claim = _line(finding, 72) if finding else _line(
+    claim = _line(finding, 88) if finding else _line(
         (doctrine or {}).get("name") or "Lead with a numbered paper, not a slogan.",
         72,
     )

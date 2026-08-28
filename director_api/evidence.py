@@ -598,6 +598,25 @@ _FINDING_HINT = re.compile(
 )
 
 
+def _result_clause(text: str) -> str:
+    """Prefer the verb-and-number clause so a dose preamble does not become the headline."""
+    blob = re.sub(r"\s+", " ", (text or "").strip())
+    if not blob:
+        return ""
+    m = re.search(
+        r"((?:was estimated to have benefits|reduced the annual rate|"
+        r"reduc(?:ed|es)|improv(?:ed|es)|lower(?:ed))\b[^.]{8,160})",
+        blob,
+        re.I,
+    )
+    if not m:
+        return blob
+    clause = m.group(1).strip(" ,;")
+    if clause[:1].islower():
+        clause = clause[:1].upper() + clause[1:]
+    return clause
+
+
 def _finding_from_abstract(abstract: str, title: str = "") -> str:
     """A result sentence, not the methods opener PubMed puts first."""
     blob = re.sub(r"\s+", " ", (abstract or "").strip())
@@ -606,12 +625,12 @@ def _finding_from_abstract(abstract: str, title: str = "") -> str:
     if findings:
         conclusion = findings[-1]
         if len(conclusion) <= 240:
-            return conclusion
-        return findings[0]
+            return _result_clause(conclusion)
+        return _result_clause(findings[0])
     for part in parts:
         if not _METHODS_OPEN.search(part):
-            return part
-    return _first_sentences(title, 1) or _first_sentences(abstract, 1)
+            return _result_clause(part)
+    return _result_clause(_first_sentences(title, 1) or _first_sentences(abstract, 1))
 
 
 def _strategy_implication(brief: ExtractedBrief, records: list[dict]) -> str:

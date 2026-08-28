@@ -650,6 +650,7 @@ textarea {
   gap: 28px;
   align-items: stretch;
   overflow: hidden;
+  margin-bottom: 1.1em;
 }
 
 .slide-insight-copy h2 {
