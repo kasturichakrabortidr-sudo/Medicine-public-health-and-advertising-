@@ -466,15 +466,24 @@ def _science_lead_slide(
             "orange",
         ))
     if not stats:
+        independent = (
+            rec.get("independence") == "indication-landscape"
+            or "not a trial" in (rec.get("claim_permitted") or "").lower()
+        )
         stats = [
             _stat(
-                str(primary.get("short") or rec.get("short") or "Pending")[:18],
-                _line(f"{tag} PMID {pmid}." if pmid != "—" else "No numbered lead on this register yet.", 80),
+                str(pmid) if pmid != "—" else "Pending",
+                _line(primary.get("short") or rec.get("short") or "No numbered lead yet.", 90),
                 "blue",
             ),
             _stat(
-                str(n),
-                _line("Patients in the lead paper." if n != "—" else "Do not invent a sample size.", 80),
+                "Class" if independent else (str(n) if n != "—" else "—"),
+                _line(
+                    "Indication landscape. Not a trial of this brand."
+                    if independent
+                    else ("Patients in the lead paper." if n != "—" else "Do not invent a sample size."),
+                    90,
+                ),
                 "orange",
             ),
         ]
