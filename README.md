@@ -1,9 +1,15 @@
 # Medicomarketing Strategy Agent
 
-An AI agent that builds a complete, evidence-led **medicomarketing strategy from
+An AI agent that builds a complete, evidence-led **medicomarketing campaign from
 scratch** — and can also take an outline you write and **develop every outline
 point in full detail**. It is built for healthcare-professional (HCP) targeted
 campaigns: pharmaceutical brands, medical products, and health services.
+
+It also ships a **validated literature-to-deck workflow** (`python -m academic_research`)
+that searches journals, guidelines, UN/NGO sources and trial registries, keeps only
+identifiers that resolve in public registries, then produces frequency analysis,
+IPA-informed qualitative themes, and a visual slide deck. See
+[`EVIDENCE_WORKFLOW.md`](EVIDENCE_WORKFLOW.md).
 
 The agent runs on the Claude API (`claude-opus-5` by default) and encodes the
 entire working process as an explicit, auditable pipeline. Every phase writes a
@@ -68,6 +74,18 @@ the critical-thinking process behind each step stays visible and auditable.
 pip install -r requirements.txt
 export ANTHROPIC_API_KEY=sk-ant-...   # or use `ant auth login`
 ```
+
+## Evidence workflow (no Claude key)
+
+```bash
+python -m academic_research run --brief examples/brief.example.yaml --out output/research
+python -m academic_research demo
+cd web && npm install && npm run dev
+```
+
+Then open `/deck` for the numbered visual deck (forest plot, claim heatmap,
+PRISMA flow, IPA carousel, references). Option 4 in `python start.py` runs the
+same pipeline. Live Netlify briefs go to `/run` (background function + Blobs).
 
 ## Usage
 
