@@ -1096,6 +1096,7 @@ def _line(text, limit: int = 90) -> str:
     filler = {
         "if", "the", "a", "an", "in", "to", "for", "and", "or", "of", "as", "at", "by", "on",
         "is", "are", "was", "were", "be", "been", "being", "with", "from", "that",
+        "versus", "vs", "vs.", "than",
     }
     while cut:
         last = cut.split()[-1].lower()

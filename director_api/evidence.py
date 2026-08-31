@@ -938,6 +938,27 @@ _FOREIGN_MOLECULES = (
 )
 
 
+def _paper_short_label(title: str, abstract: str = "") -> str:
+    """A slide label, not a truncated methods title ending in 'versus'."""
+    blob = f"{title} {abstract}"
+    trials: list[str] = []
+    for name in ("KRONOS", "ETHOS", "TRIBUTE", "TRILOGY"):
+        if re.search(rf"\b{name}\b", blob, re.I) and name not in trials:
+            trials.append(name)
+    if len(trials) >= 2:
+        return f"{' + '.join(trials)} · BGF versus dual"
+    if trials:
+        return trials[0]
+    t = re.sub(r"\s+", " ", title or "").strip().rstrip(".")
+    if len(t) <= 72:
+        return t
+    cut = t[:72].rsplit(" ", 1)[0]
+    dangling = {"versus", "vs", "vs.", "with", "for", "and", "of", "the", "a", "in", "to"}
+    while cut and cut.split()[-1].lower() in dangling:
+        cut = cut.rsplit(" ", 1)[0]
+    return cut
+
+
 def _pubmed_as_record(hit: dict[str, Any], brief: ExtractedBrief) -> dict[str, Any]:
     title = hit.get("title") or "PubMed retrieval"
     abstract = hit.get("abstract") or ""
@@ -956,7 +977,7 @@ def _pubmed_as_record(hit: dict[str, Any], brief: ExtractedBrief) -> dict[str, A
         "id": hit.get("id") or f"pubmed-{hit.get('pmid')}",
         "stream": "Independent / indication landscape" if independent else "Independent / retrieved",
         "trial": "",
-        "short": title[:88],
+        "short": _paper_short_label(title, abstract),
         "title": title,
         "authors": hit.get("authors") or "",
         "year": hit.get("year"),

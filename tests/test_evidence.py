@@ -478,3 +478,11 @@ def test_trivora_pubmed_queries_are_short_copd_not_the_whole_brief():
             "abstract": "C max for glycopyrrolate was slightly lower.",
         }
     )
+    from director_api.evidence import _paper_short_label
+
+    short = _paper_short_label(
+        "Triple Therapy with Budesonide/Glycopyrronium/Formoterol Fumarate Dihydrate versus Dual Therapies",
+        "A pooled post hoc analysis of KRONOS and ETHOS.",
+    )
+    assert "KRONOS" in short and "ETHOS" in short
+    assert not short.lower().endswith("versus")
