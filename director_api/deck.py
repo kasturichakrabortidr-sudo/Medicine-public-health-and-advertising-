@@ -429,8 +429,11 @@ def _usable_finding(primary: dict, rec: dict) -> str:
         from .evidence import _finding_from_abstract
 
         raw = _finding_from_abstract(rec.get("abstract") or raw, rec.get("title") or primary.get("short") or "")
-    from .evidence import _result_clause
+    from .evidence import _BACKGROUND, _FINDING_HINT, _result_clause
 
+    raw = re.sub(r"^Retrieved from PubMed:\s*", "", str(raw), flags=re.I)
+    if not raw or _BACKGROUND.search(raw) or not _FINDING_HINT.search(raw):
+        return ""
     return _result_clause(raw.strip())
 
 
@@ -1155,7 +1158,9 @@ def _finding(row: dict) -> str:
         return f"{row.get('control_event')} vs {row.get('treat_event')} per 100; NNT {row['nnt']}"
     if row.get("hr") is not None:
         return f"{row.get('effect_metric') or 'HR'} {row['hr']} ({row.get('low')}–{row.get('high')})"
-    abstract = (row.get("abstract") or "").strip()
-    if abstract:
-        return abstract.split(". ")[0][:140]
+    from .evidence import _finding_from_abstract
+
+    finding = _finding_from_abstract(row.get("abstract") or "", row.get("title") or "")
+    if finding:
+        return finding[:140]
     return (row.get("claim_permitted") or row.get("endpoint") or "—")[:140]

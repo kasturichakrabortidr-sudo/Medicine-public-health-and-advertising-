@@ -243,8 +243,14 @@ def _bind_science(doctrine: dict, ledger: dict) -> None:
         return
     primary = cites[0]
     from .deck import _line
+    from .evidence import _FINDING_HINT, _finding_from_abstract
 
-    doctrine["scienceLead"] = _line(primary.get("claim") or primary.get("short") or "", 160)
+    rec_claim = primary.get("claim") or ""
+    finding = _finding_from_abstract(rec_claim, primary.get("short") or "")
+    if not finding and _FINDING_HINT.search(rec_claim) and not rec_claim.lower().startswith("retrieved from pubmed"):
+        finding = rec_claim
+    if finding:
+        doctrine["scienceLead"] = _line(finding, 160)
     doctrine["scienceAnchor"] = (
         f"{mark(primary)} {primary.get('short')} · PMID {primary.get('pmid') or '—'} · doi:{primary.get('doi') or '—'}"
     )

@@ -592,8 +592,15 @@ _METHODS_OPEN = re.compile(
     re.I,
 )
 _FINDING_HINT = re.compile(
-    r"\b(improv|reduc|lower|fewer|versus| vs\.? |significan|benefit|"
-    r"superior|non-inferior|rate ratio|hazard|exacerbat|surviv)\b",
+    r"\b(improv|reduc|lower(?:ed|ing)?|fewer|versus|vs\.?|significan|benefit|"
+    r"superior|non-inferior|rate ratio|hazard|exacerbat|surviv)",
+    re.I,
+)
+
+
+_BACKGROUND = re.compile(
+    r"^(chronic obstructive|copd is\b|heart failure is\b|background:|"
+    r".{0,60}\bis a (progressive|chronic|common|leading)\b)",
     re.I,
 )
 
@@ -620,16 +627,24 @@ def _finding_from_abstract(abstract: str, title: str = "") -> str:
     """A result sentence, not the methods opener PubMed puts first."""
     blob = re.sub(r"\s+", " ", (abstract or "").strip())
     parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", blob) if len(p.strip()) > 24]
-    findings = [p for p in parts if _FINDING_HINT.search(p) and not _METHODS_OPEN.search(p)]
+    findings = [
+        p for p in parts
+        if _FINDING_HINT.search(p) and not _METHODS_OPEN.search(p) and not _BACKGROUND.search(p)
+    ]
     if findings:
         conclusion = findings[-1]
         if len(conclusion) <= 240:
             return _result_clause(conclusion)
         return _result_clause(findings[0])
     for part in parts:
-        if not _METHODS_OPEN.search(part):
+        if _METHODS_OPEN.search(part) or _BACKGROUND.search(part):
+            continue
+        if _FINDING_HINT.search(part):
             return _result_clause(part)
-    return _result_clause(_first_sentences(title, 1) or _first_sentences(abstract, 1))
+    titled = _first_sentences(title, 1)
+    if titled and _FINDING_HINT.search(titled) and not _BACKGROUND.search(titled):
+        return _result_clause(titled)
+    return ""
 
 
 def _strategy_implication(brief: ExtractedBrief, records: list[dict]) -> str:
@@ -762,6 +777,18 @@ def _review_note(brief: ExtractedBrief, matched: list[dict], terms: list[str]) -
     }
 
 
+def _has_published_finding(row: dict) -> bool:
+    """True when the paper states a result, not a disease definition or methods opener."""
+    claim = str(row.get("claim_permitted") or "")
+    if claim.lower().startswith("retrieved from pubmed"):
+        claim = ""
+    claim = re.sub(r"^Independent / indication landscape — not a trial of [^.]+.\s*", "", claim)
+    if claim and _FINDING_HINT.search(claim) and not _BACKGROUND.search(claim):
+        return True
+    finding = _finding_from_abstract(row.get("abstract") or "", row.get("title") or "")
+    return bool(finding)
+
+
 def _campaign_lead(brief: ExtractedBrief, matched: list[dict], review: dict | None = None) -> dict[str, Any]:
     catalog = [r for r in matched if r.get("matchedFrom") != "pubmed"]
     retrieved = [r for r in matched if r.get("matchedFrom") == "pubmed"]
@@ -774,7 +801,8 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict], review: dict | No
             "doNotClaim": ["Any efficacy, safety, or guideline class statement"],
         }
     if not catalog and retrieved:
-        primary = retrieved[0]
+        with_finding = [r for r in retrieved if _has_published_finding(r)]
+        primary = (with_finding or retrieved)[0]
         implication = _strategy_implication(brief, retrieved)
         directs = _infer_directs(retrieved, brief)
         synthesis = (review or {}).get("synthesis") or _scientific_synthesis(brief, retrieved)
@@ -796,7 +824,7 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict], review: dict | No
                     "citation": c.get("citation"),
                     "claim": c.get("claim_permitted"),
                 }
-                for c in retrieved[:6]
+                for c in ([primary] + [r for r in retrieved if r is not primary])[:6]
             ],
             "doNotClaim": [
                 "An effect size the abstract did not state",
@@ -898,9 +926,9 @@ def _pubmed_as_record(hit: dict[str, Any], brief: ExtractedBrief) -> dict[str, A
     independent = hit.get("independence") == "indication-landscape" or _hit_is_independent_landscape(
         brief, f"{title} {abstract}"
     )
-    claim = _finding_from_abstract(abstract, title) or (
-        f"Retrieved from PubMed: {title.rstrip('.')}."
-    )
+    claim = _finding_from_abstract(abstract, title)
+    if not claim:
+        claim = f"Retrieved from PubMed: {title.rstrip('.')}."
     if independent:
         claim = (
             f"Independent / indication landscape — not a trial of {brand}. {claim}"
@@ -1093,6 +1121,16 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
         if len(named) >= 2:
             terms.append(f"{' '.join(named[:3])} {extra} randomized".strip())
 
+    fam = _brief_family(brief, _brief_blob(brief))
+    if fam == "respiratory" or "copd" in (primary_disease or "").lower():
+        terms.extend(
+            [
+                "KRONOS ETHOS budesonide glycopyrrolate formoterol COPD",
+                "ETHOS trial COPD triple therapy exacerbation",
+                "ICS LABA LAMA triple therapy COPD randomized",
+            ]
+        )
+
     product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
     brand = (brief.brand or "").strip()
     if product and product.lower() != brand.lower() and 5 <= len(product) <= 80:
@@ -1159,7 +1197,7 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
             continue
         seen.add(key)
         uniq.append(term)
-    return uniq[:10]
+    return uniq[:12]
 
 
 def _term_smuggles_foreign_molecule(brief: ExtractedBrief, term: str) -> bool:
@@ -1337,6 +1375,14 @@ def _pubmed_score(hit: dict[str, Any], brief: ExtractedBrief | None = None) -> i
         score += 3
     if "gold" in blob and ("copd" in blob or "obstructive" in blob):
         score += 3
+    if any(w in blob for w in ("kronos", "ethos", "tribute", "trilogy", "impact trial")):
+        score += 5
+    if any(w in blob for w in ("narrative review", "mini-review", "editorial", "commentary")):
+        score -= 8
+    if _FINDING_HINT.search(hit.get("abstract") or ""):
+        score += 3
+    if _BACKGROUND.search((hit.get("abstract") or "")[:180]) and not _FINDING_HINT.search(hit.get("abstract") or ""):
+        score -= 5
     if brief:
         named = [n.lower() for n in _named_search_molecules(brief)]
         hits_n = sum(1 for n in named if n in blob)

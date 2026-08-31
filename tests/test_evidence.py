@@ -59,6 +59,30 @@ def test_ethos_headline_is_the_reduction_not_the_dose():
     assert finding.lower().startswith("reduced")
 
 
+def test_copd_definition_sentence_is_not_the_finding():
+    from director_api.evidence import _finding_from_abstract
+
+    abstract = (
+        "Chronic obstructive pulmonary disease (COPD) is a progressive illness. "
+        "BGF reduced moderate or severe exacerbations versus dual bronchodilator therapy."
+    )
+    finding = _finding_from_abstract(abstract, "Safety and efficacy of BGF")
+    assert "progressive illness" not in finding.lower()
+    assert "reduc" in finding.lower()
+
+
+def test_background_only_review_is_not_a_finding():
+    from director_api.evidence import _finding_from_abstract
+
+    finding = _finding_from_abstract(
+        "Chronic obstructive pulmonary disease (COPD) is a progressive illness. "
+        "It is a leading cause of morbidity worldwide.",
+        "Safety and efficacy of BGF: A comprehensive narrative review",
+    )
+    assert finding == ""
+    assert "progressive illness" not in finding.lower()
+
+
 def test_pack_exposes_science_slides_and_anchors():
     brief = _brief_from_mapping(load_brief("examples/brief.example.yaml"))
     pack = generate_pack(brief, mode="demo", pubmed=False)
@@ -381,6 +405,7 @@ def test_trivora_pubmed_queries_are_short_copd_not_the_whole_brief():
     assert "copd" in joined
     assert "gold" in joined
     assert "triple" in joined
+    assert "kronos" in joined or "ethos" in joined
     assert _pubmed_hit_belongs(
         brief,
         "Budesonide/glycopyrronium/formoterol for COPD vs dual therapy",
@@ -409,3 +434,20 @@ def test_trivora_pubmed_queries_are_short_copd_not_the_whole_brief():
         brief,
     )
     assert triple > dual > junk
+    review = _pubmed_score(
+        {
+            "title": "Safety and efficacy of budesonide/glycopyrrolate/formoterol: A comprehensive narrative review",
+            "pubtype": "Review",
+            "abstract": "COPD is a progressive illness. BGF is an inhaled triple therapy.",
+        },
+        brief,
+    )
+    kronos = _pubmed_score(
+        {
+            "title": "KRONOS: budesonide/glycopyrrolate/formoterol fumarate in COPD",
+            "pubtype": "Randomized Controlled Trial",
+            "abstract": "BGF reduced exacerbations versus dual therapy in patients with COPD.",
+        },
+        brief,
+    )
+    assert kronos > review

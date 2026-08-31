@@ -68,6 +68,7 @@ def test_trivora_deck_is_a_strategy_argument_not_an_abstract_dump():
     assert "20%" in stats
     lead = next(s for s in slides if s["id"] == "science-lead")
     assert not lead["title"].lower().endswith("health-related.")
+    assert "progressive illness" not in lead["title"].lower()
     house = next(s for s in slides if s["id"] == "house")
     assert "pillar" in house["title"].lower()
     close = next(s for s in slides if s["id"] == "close")
