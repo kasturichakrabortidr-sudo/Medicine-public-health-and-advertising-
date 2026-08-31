@@ -35,6 +35,7 @@ def test_example_deck_is_twelve_slides_not_a_dump():
         if slide["id"] in {"title", "references"} or str(slide["id"]).startswith("references-"):
             continue
         assert len(slide["title"]) <= 90, (slide["id"], slide["title"])
+        assert not slide["title"].lower().endswith(" is.")
         blob = " ".join(
             [
                 slide["title"],
@@ -62,15 +63,21 @@ def test_trivora_deck_is_a_strategy_argument_not_an_abstract_dump():
     problem = next(s for s in slides if s["id"] == "problem")
     assert "stable in clinic" not in problem["title"].lower()
     assert "rescue" in problem["title"].lower() or "free-mix" in problem["title"].lower()
+    assert len(problem["title"]) <= 56
     stats = " ".join(st["value"] for st in problem["stats"])
     assert "20%" in stats
+    lead = next(s for s in slides if s["id"] == "science-lead")
+    assert not lead["title"].lower().endswith("health-related.")
+    house = next(s for s in slides if s["id"] == "house")
+    assert "pillar" in house["title"].lower()
+    close = next(s for s in slides if s["id"] == "close")
+    assert close["title"].startswith("Sign")
+    assert "do not lock a scientific lead" not in (close.get("callout") or {}).get("text", "").lower()
     moves = next(s for s in slides if s["id"] == "interventions")
     assert "first-line" in moves["title"].lower()
     assert "retire the wait" not in moves["title"].lower()
     names = [c["title"] for c in moves["cards"]]
     assert "First-line maintenance protocol" in names
     assert "Free-mix cost script" in names
-    close = next(s for s in slides if s["id"] == "close")
-    assert "do not lock a scientific lead" not in (close.get("callout") or {}).get("text", "").lower()
     blob = " ".join(s["title"] for s in slides).lower()
     assert "first-line" in blob or "maintenance" in blob

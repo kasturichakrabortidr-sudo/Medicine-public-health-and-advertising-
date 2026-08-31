@@ -635,26 +635,41 @@ textarea {
 
 .so-what {
   font-family: var(--display);
-  font-size: clamp(16px, 1.45cqw, 20px);
+  font-size: clamp(15px, 1.35cqw, 18px);
   line-height: 1.3;
   color: #000;
-  margin: 0.9em 0 0;
+  margin: 0.6em 0 0;
   max-width: 46ch;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .slide-insight {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: minmax(0, 0.48fr) minmax(0, 1fr);
+  gap: 22px;
   align-items: stretch;
   overflow: hidden;
-  margin-bottom: 1.1em;
+  margin-bottom: 1.4em;
+}
+
+.slide-insight-copy {
+  min-width: 0;
+  overflow: hidden;
 }
 
 .slide-insight-copy h2 {
-  font-size: clamp(18px, 1.65cqw, 22px);
+  font-size: clamp(17px, 1.65cqw, 22px);
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .slide-insight-main {
@@ -825,10 +840,11 @@ textarea {
 }
 .slide-insight-copy h2 {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: clamp(16px, 1.5cqw, 20px);
+  overflow-wrap: break-word;
+  font-size: clamp(17px, 1.65cqw, 22px);
 }
 .slide-insight-copy .lede {
   display: -webkit-box;
@@ -882,6 +898,9 @@ textarea {
   color: #777;
   font-family: var(--sans);
   line-height: 1.3;
+  z-index: 3;
+  background: #f7f7f4;
+  padding-top: 4px;
 }
 .slide.title .slide-source,
 .slide.close .slide-source,

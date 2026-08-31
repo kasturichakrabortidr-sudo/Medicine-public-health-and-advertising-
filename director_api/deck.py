@@ -271,12 +271,7 @@ def _problem_slide(doctrine: dict, p01: dict, goal: str, brief: ExtractedBrief, 
             "orange",
         ),
     ]
-    headline = _line(
-        doctrine.get("enemy")
-        or p01.get("restatedNeed")
-        or "The conversion problem is delay, not disbelief.",
-        72,
-    )
+    headline = _enemy_headline(doctrine, p01)
     narrative = _line(
         delay
         or f"What the brief asked us to grow: {_first_sentence(goal)}",
@@ -402,12 +397,8 @@ def _idea_slide(doctrine: dict, p05: dict, p07: dict, lead: dict) -> dict:
         "id": "the-bet",
         "section": "Idea",
         "kicker": "The strategic idea",
-        "title": _line(doctrine.get("name") or doctrine.get("bet") or "Start at the first eligible encounter", 72),
-        "subtitle": _line(
-            doctrine.get("whyNovel")
-            or "The idea is the gap between the papers and the current start — not a restated goal.",
-            110,
-        ),
+        "title": _line(doctrine.get("name") or doctrine.get("bet") or "Start at the first eligible encounter", 56),
+        "subtitle": _line(doctrine.get("bet") or doctrine.get("whyNovel") or "", 110),
         "narrative": "",
         "layout": "idea",
         "cards": cards,
@@ -434,7 +425,7 @@ def _usable_finding(primary: dict, rec: dict) -> str:
     raw = re.sub(r"^Abstract:\s*", "", raw, flags=re.I)
     raw = re.sub(r"\s*Confirm full text before promotional use\.?\s*$", "", raw, flags=re.I)
     raw = re.sub(r"^PubMed record:\s*", "", raw, flags=re.I)
-    if re.match(r"^(We evaluated|We aimed|We assessed|This pooled|This study|This trial)", raw, re.I):
+    if rec.get("abstract"):
         from .evidence import _finding_from_abstract
 
         raw = _finding_from_abstract(rec.get("abstract") or raw, rec.get("title") or primary.get("short") or "")
@@ -454,9 +445,9 @@ def _science_lead_slide(
     tag = mark(primary) if primary.get("ref") else ""
     rec = next((r for r in records if r.get("id") == primary.get("id")), {}) or {}
     finding = _usable_finding(primary, rec)
-    claim = _line(finding, 88) if finding else _line(
+    claim = _line(finding, 72) if finding else _line(
         (doctrine or {}).get("name") or "Lead with a numbered paper, not a slogan.",
-        72,
+        56,
     )
     nnt = rec.get("nnt")
     hr = rec.get("hr")
@@ -476,7 +467,7 @@ def _science_lead_slide(
         stats = [
             _stat(
                 label,
-                _line(f"PMID {pmid}. {primary.get('short') or rec.get('short') or 'No numbered lead yet.'}", 90),
+                _line(f"PMID {pmid}." if pmid != "—" else "No numbered lead yet.", 40),
                 "blue",
             ),
             _stat(
@@ -489,12 +480,11 @@ def _science_lead_slide(
                 "orange",
             ),
         ]
-    who = rec.get("population") or primary.get("population") or ""
-    design = rec.get("design") or primary.get("design") or ""
+    paper = primary.get("short") or rec.get("short") or rec.get("title") or ""
     narrative = _line(
-        " ".join(p for p in (primary.get("short"), design, who, f"n = {n}" if n != "—" else "") if p),
-        140,
-    ) if finding else _line("No DOI or PMID matched this brief. The working file keeps the search.", 140)
+        f"{tag} {paper} · PMID {pmid}.".strip() if finding else "No DOI or PMID matched this brief. The working file keeps the search.",
+        110,
+    )
     slide = {
         "id": "science-lead",
         "section": "Evidence",
@@ -714,7 +704,7 @@ def _house_slide(p07: dict, doctrine: dict, records: list[dict], brief: Extracte
         "id": "house",
         "section": "Message",
         "kicker": "Messaging architecture",
-        "title": _line(doctrine.get("name") or p07.get("theme") or "One theme. Pillars without a number do not ship.", 72),
+        "title": "One theme. Pillars without a number do not ship.",
         "narrative": _line(p07.get("theme") or doctrine.get("bet") or "One theme. Pillars without a number do not ship.", 140),
         "layout": "infographic",
         "soWhat": _line(p07.get("theme") or doctrine.get("bet") or "Start at the first eligible visit", 140),
@@ -997,7 +987,7 @@ def _close_slide(brand: str, doctrine: dict, p11: dict, p07: dict) -> dict:
         "id": "close",
         "section": "Ask",
         "kicker": "Strategic summary",
-        "title": _line(doctrine.get("name") or p11.get("bet") or "Sign the bet. Number the claims. Park the gaps.", 72),
+        "title": _close_headline(doctrine),
         "narrative": _line(p11.get("warn") or "Draft for medical, legal, and regulatory", 110),
         "layout": "close",
         "cards": chips,
@@ -1063,7 +1053,33 @@ def _cards_from_stats(stats: list[dict]) -> list[dict]:
 
 
 def _headline(text) -> str:
-    return _line(text, 72)
+    return _line(text, 56)
+
+
+def _enemy_headline(doctrine: dict, p01: dict | None = None) -> str:
+    named = {
+        "first-line-not-rescue": "Triple sits as rescue. Free-mix is the ritual.",
+        "first-touch": "They wait until the patient is 'stable' in clinic.",
+        "affordability-confidence": "Cost guilt, not disbelief, blocks the start.",
+        "perception-reset": "One wrong belief is blocking the start.",
+        "conviction-cascade": "Conviction fails at the moment of the pen.",
+    }
+    if doctrine.get("id") in named:
+        return named[doctrine["id"]]
+    return _line(
+        doctrine.get("enemy")
+        or (p01 or {}).get("restatedNeed")
+        or "The conversion problem is delay, not disbelief.",
+        56,
+    )
+
+
+def _close_headline(doctrine: dict) -> str:
+    if doctrine.get("id") == "first-line-not-rescue":
+        return "Sign first-line maintenance. Park the rest."
+    if doctrine.get("id") == "first-touch":
+        return "Sign first-eligible start. Number the claims."
+    return "Sign the bet. Number the claims. Park the gaps."
 
 
 def _line(text, limit: int = 90) -> str:
@@ -1074,8 +1090,15 @@ def _line(text, limit: int = 90) -> str:
     if len(text) <= limit:
         return text
     cut = text[: max(limit - 1, 8)].rsplit(" ", 1)[0].rstrip(".,;: ")
-    filler = {"if", "the", "a", "an", "in", "to", "for", "and", "or", "of", "as", "at", "by", "on"}
-    while cut and cut.split()[-1].lower() in filler:
+    filler = {
+        "if", "the", "a", "an", "in", "to", "for", "and", "or", "of", "as", "at", "by", "on",
+        "is", "are", "was", "were", "be", "been", "being", "with", "from", "that",
+    }
+    while cut:
+        last = cut.split()[-1].lower()
+        dangling = last in filler or ("-" in last and not re.search(r"\d", last))
+        if not dangling:
+            break
         cut = cut.rsplit(" ", 1)[0].rstrip(".,;: ")
     if not cut:
         cut = text[: limit - 1].rstrip()

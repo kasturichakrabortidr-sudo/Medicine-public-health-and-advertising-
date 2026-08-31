@@ -375,8 +375,8 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
         slide,
         Inches(0.34),
         Inches(1.06),
-        Inches(3.9) if insight else Inches(8.6),
-        Inches(1.2) if insight else Inches(0.78),
+        Inches(4.2) if insight else Inches(8.6),
+        Inches(1.35) if insight else Inches(0.78),
         spec.get("title") or "",
         size=18 if insight else 20,
         bold=True,
@@ -388,22 +388,22 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
         _textbox(
             slide,
             Inches(0.34),
-            Inches(2.32),
-            Inches(3.9),
-            Inches(2.6),
+            Inches(2.48),
+            Inches(4.2),
+            Inches(2.4),
             spec.get("narrative") or spec.get("subtitle") or "",
             size=13,
             color=BODY,
         )
         stats = spec.get("stats") or []
         if stats:
-            _stat_cards(slide, stats, Inches(4.45), Inches(1.06), Inches(8.4), Inches(2.15))
+            _stat_cards(slide, stats, Inches(4.75), Inches(1.06), Inches(8.1), Inches(2.15))
         if spec.get("soWhat"):
             _textbox(
                 slide,
-                Inches(4.45),
+                Inches(4.75),
                 Inches(3.35),
-                Inches(8.4),
+                Inches(8.1),
                 Inches(0.55),
                 spec["soWhat"],
                 size=15,
@@ -411,7 +411,7 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
                 font=DISPLAY,
             )
         if spec.get("chart"):
-            _add_chart(slide, spec["chart"], Inches(4.45), Inches(4.0), Inches(8.4), Inches(2.5))
+            _add_chart(slide, spec["chart"], Inches(4.75), Inches(4.0), Inches(8.1), Inches(2.5))
         elif spec.get("table") and not stats:
             table = spec["table"]
             _table(
