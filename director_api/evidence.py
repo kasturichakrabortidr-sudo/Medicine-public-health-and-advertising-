@@ -596,6 +596,12 @@ _FINDING_HINT = re.compile(
     r"superior|non-inferior|rate ratio|hazard|exacerbat|surviv)",
     re.I,
 )
+_PK_PAPER = re.compile(r"pharmacokinet|bioequivalence|\bc[\s-]?max\b|\bauc\b", re.I)
+_CLINICAL_OUTCOME = re.compile(
+    r"exacerbat|fev\d|lung function|hospital|mortal|death|quality of life|"
+    r"symptom|versus dual|composite|heart failure|surviv|progression",
+    re.I,
+)
 
 
 _BACKGROUND = re.compile(
@@ -629,7 +635,10 @@ def _finding_from_abstract(abstract: str, title: str = "") -> str:
     parts = [p.strip() for p in re.split(r"(?<=[.!?])\s+", blob) if len(p.strip()) > 24]
     findings = [
         p for p in parts
-        if _FINDING_HINT.search(p) and not _METHODS_OPEN.search(p) and not _BACKGROUND.search(p)
+        if _FINDING_HINT.search(p)
+        and not _METHODS_OPEN.search(p)
+        and not _BACKGROUND.search(p)
+        and not _is_pk_only(p)
     ]
     if findings:
         conclusion = findings[-1]
@@ -637,14 +646,26 @@ def _finding_from_abstract(abstract: str, title: str = "") -> str:
             return _result_clause(conclusion)
         return _result_clause(findings[0])
     for part in parts:
-        if _METHODS_OPEN.search(part) or _BACKGROUND.search(part):
+        if _METHODS_OPEN.search(part) or _BACKGROUND.search(part) or _is_pk_only(part):
             continue
         if _FINDING_HINT.search(part):
             return _result_clause(part)
     titled = _first_sentences(title, 1)
-    if titled and _FINDING_HINT.search(titled) and not _BACKGROUND.search(titled):
+    if titled and _FINDING_HINT.search(titled) and not _BACKGROUND.search(titled) and not _is_pk_only(titled):
         return _result_clause(titled)
     return ""
+
+
+def _is_pk_only(text: str) -> bool:
+    blob = text or ""
+    return bool(_PK_PAPER.search(blob) and not _CLINICAL_OUTCOME.search(blob))
+
+
+def _is_clinical_finding(text: str) -> bool:
+    blob = text or ""
+    if not blob or _BACKGROUND.search(blob) or _is_pk_only(blob):
+        return False
+    return bool(_FINDING_HINT.search(blob) and _CLINICAL_OUTCOME.search(blob))
 
 
 def _strategy_implication(brief: ExtractedBrief, records: list[dict]) -> str:
@@ -778,15 +799,13 @@ def _review_note(brief: ExtractedBrief, matched: list[dict], terms: list[str]) -
 
 
 def _has_published_finding(row: dict) -> bool:
-    """True when the paper states a result, not a disease definition or methods opener."""
+    """True when the paper states a clinical result, not a disease definition or PK Cmax."""
     claim = str(row.get("claim_permitted") or "")
     if claim.lower().startswith("retrieved from pubmed"):
         claim = ""
     claim = re.sub(r"^Independent / indication landscape — not a trial of [^.]+.\s*", "", claim)
-    if claim and _FINDING_HINT.search(claim) and not _BACKGROUND.search(claim):
-        return True
     finding = _finding_from_abstract(row.get("abstract") or "", row.get("title") or "")
-    return bool(finding)
+    return _is_clinical_finding(finding or claim)
 
 
 def _campaign_lead(brief: ExtractedBrief, matched: list[dict], review: dict | None = None) -> dict[str, Any]:
@@ -1393,7 +1412,12 @@ def _pubmed_score(hit: dict[str, Any], brief: ExtractedBrief | None = None) -> i
         product = (brief.product or "").lower()
         if "nebul" in product and "nebul" in blob:
             score += 2
-    # Soft-deprioritise adjacent-but-off papers (telerehab, biologics) on a triple-maintenance brief.
+    if any(w in blob for w in ("pharmacokinet", "bioequivalence", "c max", "cmax", "ethnic pharmacokinetic")):
+        score -= 12
+    if "cost-effectiveness" in blob or "cost effectiveness" in blob:
+        score -= 6
+    if re.search(r"(reduc\w*|lower rate).{0,80}exacerbat|exacerbat.{0,40}(reduc|lower)", blob):
+        score += 5
     if any(w in blob for w in ("telerehab", "biologic", "monoclonal", "dupilumab", "benralizumab")):
         score -= 4
     return score

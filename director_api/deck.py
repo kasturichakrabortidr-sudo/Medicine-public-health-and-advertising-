@@ -429,10 +429,10 @@ def _usable_finding(primary: dict, rec: dict) -> str:
         from .evidence import _finding_from_abstract
 
         raw = _finding_from_abstract(rec.get("abstract") or raw, rec.get("title") or primary.get("short") or "")
-    from .evidence import _BACKGROUND, _FINDING_HINT, _result_clause
+    from .evidence import _is_clinical_finding, _result_clause
 
     raw = re.sub(r"^Retrieved from PubMed:\s*", "", str(raw), flags=re.I)
-    if not raw or _BACKGROUND.search(raw) or not _FINDING_HINT.search(raw):
+    if not raw or not _is_clinical_finding(raw):
         return ""
     return _result_clause(raw.strip())
 

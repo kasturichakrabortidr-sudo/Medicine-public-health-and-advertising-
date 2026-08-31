@@ -451,3 +451,30 @@ def test_trivora_pubmed_queries_are_short_copd_not_the_whole_brief():
         brief,
     )
     assert kronos > review
+    pk = _pubmed_score(
+        {
+            "title": "Ethnic pharmacokinetic comparison of BGF MDI",
+            "pubtype": "Randomized Controlled Trial",
+            "abstract": "The Phase III KRONOS study found BGF MDI to be efficacious. C max for glycopyrrolate was slightly lower.",
+        },
+        brief,
+    )
+    ethos = _pubmed_score(
+        {
+            "title": "Triple Inhaled Therapy at Two Glucocorticoid Doses in Moderate-to-Very-Severe COPD",
+            "pubtype": "Randomized Controlled Trial",
+            "journal": "N Engl J Med",
+            "abstract": "Triple therapy resulted in a lower rate of moderate or severe COPD exacerbations than dual therapy.",
+        },
+        brief,
+    )
+    assert ethos > pk
+    from director_api.evidence import _has_published_finding
+
+    assert not _has_published_finding(
+        {
+            "title": "Ethnic pharmacokinetic comparison of BGF",
+            "claim_permitted": "C max for glycopyrrolate was slightly lower in Asian versus Western subjects.",
+            "abstract": "C max for glycopyrrolate was slightly lower.",
+        }
+    )
