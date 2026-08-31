@@ -245,7 +245,7 @@ def _title_slide(brand: str, ta: str, market: str, doctrine: dict, brief: Extrac
                 "meta": "Indication",
             },
             {
-                "title": _line(doctrine.get("name") or "The bet", 40).rstrip("."),
+                "title": _line(doctrine.get("name") or "The bet", 56).rstrip("."),
                 "body": bet,
                 "meta": "The bet",
             },
@@ -1000,7 +1000,7 @@ def _close_slide(brand: str, doctrine: dict, p11: dict, p07: dict) -> dict:
             "title": "What we need signed in the room",
             "data": steps,
         },
-        "callout": {"label": brand, "text": _line(doctrine.get("bet") or doctrine.get("name") or "", 140)},
+        "callout": {"label": brand, "text": _line(doctrine.get("bet") or doctrine.get("name") or "", 160)},
     }
 
 
@@ -1096,7 +1096,7 @@ def _line(text, limit: int = 90) -> str:
     filler = {
         "if", "the", "a", "an", "in", "to", "for", "and", "or", "of", "as", "at", "by", "on",
         "is", "are", "was", "were", "be", "been", "being", "with", "from", "that",
-        "versus", "vs", "vs.", "than",
+        "versus", "vs", "vs.", "than", "not",
     }
     while cut:
         last = cut.split()[-1].lower()
