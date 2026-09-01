@@ -49,6 +49,7 @@ def ensure_dependencies():
     try:
         import anthropic  # noqa: F401
         import yaml  # noqa: F401
+        import pptx  # noqa: F401
         return
     except ImportError:
         pass
@@ -132,10 +133,40 @@ def choose_mode():
     say("  1. Quick test        (runs just the first step - fast and cheap, good first try)")
     say("  2. Full strategy     (all 11 steps - the complete strategy document)")
     say("  3. Expand my outline (develops each point of an outline file you wrote)")
+    say("  4. Evidence deck     (literature search + frequency/IPA analysis, no API key)")
     while True:
-        choice = ask("Type 1, 2 or 3")
-        if choice in ("1", "2", "3"):
+        choice = ask("Type 1, 2, 3 or 4")
+        if choice in ("1", "2", "3", "4"):
             return choice
+
+
+def run_evidence_workflow():
+    """Literature-to-deck pipeline — no Anthropic key required."""
+    brief_path = HERE / "examples" / "brief.example.yaml"
+    if BRIEF_FILE.exists():
+        say(f"Found a saved brief ({BRIEF_FILE.name}).")
+        if ask("Use it for the literature run? (y = yes, n = CardioShield example)").lower().startswith("y"):
+            brief_path = BRIEF_FILE
+    out_dir = OUT_DIR / "research"
+    say("")
+    say("Searching journals, guidelines, UN-system pages and trial registries…")
+    say("Only registry-validated references will be kept.\n")
+    from academic_research.cli import main as research_main
+
+    code = research_main(
+        ["run", "--brief", str(brief_path), "--out", str(out_dir)]
+    )
+    dest = HERE / "web" / "public" / "demo" / "literature-deck.json"
+    src = out_dir / "literature-deck.json"
+    if src.exists():
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+        say(f"\nWrote {src}")
+        say(f"Copied a viewer copy to {dest}")
+    say("Open the visual deck with:  cd web && npm install && npm run dev")
+    say("Then visit  http://localhost:5173/deck")
+    open_folder(out_dir)
+    return code
 
 
 def open_folder(path: Path):
@@ -158,13 +189,17 @@ def main():
     say("")
 
     ensure_dependencies()
+    mode = choose_mode()
+    say("")
+    if mode == "4":
+        run_evidence_workflow()
+        return
+
     ensure_api_key()
 
     from medicomarketing_agent.engine import StrategyEngine
     from medicomarketing_agent.phases import PHASES
 
-    mode = choose_mode()
-    say("")
     brief = build_brief()
     engine = StrategyEngine(brief, out_dir=OUT_DIR)
 
