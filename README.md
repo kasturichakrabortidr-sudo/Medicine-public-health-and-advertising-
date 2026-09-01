@@ -62,6 +62,26 @@ the critical-thinking process behind each step stays visible and auditable.
 
 ---
 
+## Literature-to-deck evidence workflow
+
+A second automation (`python -m academic_research`) searches open-access and
+indexed journals, Cochrane reviews, national/international guidelines, UN-system
+and NGO pages (including WHO regional offices and additional UN branches), and
+ClinicalTrials.gov. A record is kept only when Crossref,
+Europe PMC, ClinicalTrials.gov, or an allow-listed official URL resolves. It
+then runs claim-frequency analysis, GRADE-style design bands, and IPA on
+qualitative papers, and writes a numbered visual deck plus BibTeX/RIS/CSV/PPTX.
+
+```bash
+python -m academic_research demo
+cd web && npm install && npm run dev
+```
+
+Open `/deck`. The launcher option **4** runs the same workflow without an
+Anthropic key. See [`EVIDENCE_WORKFLOW.md`](EVIDENCE_WORKFLOW.md).
+
+---
+
 ## Setup
 
 ```bash
