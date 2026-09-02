@@ -1064,9 +1064,10 @@ def _enemy_headline(doctrine: dict, p01: dict | None = None) -> str:
         "first-line-not-rescue": "Triple sits as rescue. Free-mix is the ritual.",
         "first-touch": "They wait until the patient is 'stable' in clinic.",
         "affordability-confidence": "Cost guilt, not disbelief, blocks the start.",
-        "perception-reset": "One wrong belief is blocking the start.",
         "conviction-cascade": "Conviction fails at the moment of the pen.",
     }
+    if doctrine.get("id") == "perception-reset":
+        return _headline(doctrine.get("enemy") or "One wrong belief is blocking the start.")
     if doctrine.get("id") in named:
         return named[doctrine["id"]]
     return _line(

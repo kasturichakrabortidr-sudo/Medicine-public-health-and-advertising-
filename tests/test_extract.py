@@ -79,10 +79,72 @@ def test_docx_and_pptx_extract_text():
     assert "Immunology" in ppt.text
 
 
-def test_pasted_prose_infers_market():
-    brief = merge_into_brief([], pasted="A cardiology brand launch in India for HFrEF.")
-    assert brief.market == "India"
-    assert "cardiology" in brief.therapy_area.lower()
+def test_labeled_prose_fills_hcp_habit():
+    brief = merge_into_brief(
+        [],
+        pasted=(
+            "Brand: Helix\nTherapy area: Oncology\nIndication: metastatic NSCLC\n"
+            "HCP habit: Most wait until the patient is stable in clinic\n"
+            "Business goal: Move first-eligible starts this quarter\n"
+            "MLR: No comparative claim without a numbered paper\n"
+        ),
+    )
+    assert brief.brand == "Helix"
+    assert "Oncology" in brief.therapy_area
+    assert brief.hcp_insights
+    assert "stable" in brief.hcp_insights[0].lower()
+    assert "first-eligible" in brief.business_goal.lower()
+    assert any("comparative" in c.lower() for c in brief.constraints)
+
+
+def test_alex_creative_brief_is_read():
+    raw = (Path(__file__).resolve().parent / "fixtures" / "alex_creative_brief.txt").read_text(
+        encoding="utf-8"
+    )
+    brief = merge_into_brief([], pasted=raw)
+    assert brief.brand == "Alex"
+    assert "cough" in (brief.indication or brief.therapy_area).lower()
+    assert any("similar" in line.lower() for line in brief.hcp_insights)
+    assert any("Zedex" in c or "Grilinctus" in c for c in brief.competitors)
+    assert "Alex" in (brief.business_goal or "")
+
+
+def test_novartis_portfolio_brief_leads_with_sybrava():
+    raw = (Path(__file__).resolve().parent / "fixtures" / "novartis_cv_brief.txt").read_text(
+        encoding="utf-8"
+    )
+    brief = merge_into_brief([], pasted=raw)
+    assert brief.brand == "Sybrava"
+    assert "Inclisiran" in (brief.product or "")
+    assert "Cardio" in (brief.therapy_area or "") or "LDL" in (brief.indication or "")
+
+
+def test_table_style_creative_brief_is_read():
+    brief = merge_into_brief(
+        [],
+        pasted=(
+            "What objective are we aiming to achieve? | Grow unaided recall of Nimbus\n"
+            "What is their Current belief / behavior? | Doctors treat every brand as interchangeable\n"
+            "Who’s the target audience (types of HCPs)? | Dermatologists\n"
+        ),
+    )
+    assert brief.brand == "Nimbus" or "Nimbus" in (brief.business_goal or "")
+    assert any("interchangeable" in line.lower() for line in brief.hcp_insights)
+    assert any("Dermatolog" in s for s in brief.target_specialties)
+
+
+def test_alex_filename_fills_brand_when_prose_is_thin():
+    from director_api.extract import ExtractedFile
+
+    extracted = ExtractedFile(
+        filename="Glenmark-Alex_creative brief format_mccann health.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        suffix=".docx",
+        text="Creative brief. Dry cough category. Rival visibility from Zedex.",
+    )
+    brief = merge_into_brief([extracted])
+    assert brief.brand == "Alex"
+    assert any("Zedex" in c for c in brief.competitors)
 
 
 TRIVORA = (Path(__file__).resolve().parent / "fixtures" / "trivora_client_brief.txt").read_text(

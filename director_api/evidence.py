@@ -427,18 +427,28 @@ def resolve_evidence(brief: ExtractedBrief, *, pubmed: bool = True) -> dict[str,
 
 def _brief_blob(brief: ExtractedBrief) -> str:
     parts = [
+        _structured_blob(brief),
+        brief.raw_text,
+    ]
+    return " ".join(p for p in parts if p).lower()
+
+
+def _structured_blob(brief: ExtractedBrief) -> str:
+    """Identity of this brief — not a scavenger hunt through a portfolio dump."""
+    parts = [
         brief.brand,
         brief.product,
         brief.therapy_area,
         brief.indication,
         brief.market,
         brief.business_goal,
-        brief.raw_text,
-        " ".join(brief.brand_evidence),
-        " ".join(brief.existing_evidence),
-        " ".join(brief.evolving_evidence),
-        " ".join(brief.guidelines),
-        " ".join(brief.hcp_insights),
+        " ".join(brief.brand_evidence or []),
+        " ".join(brief.existing_evidence or []),
+        " ".join(brief.evolving_evidence or []),
+        " ".join(brief.guidelines or []),
+        " ".join(brief.hcp_insights or []),
+        " ".join(brief.competitors or []),
+        brief.notes or "",
     ]
     return " ".join(p for p in parts if p).lower()
 
@@ -485,8 +495,18 @@ def _matches(entry: dict[str, Any], brief: ExtractedBrief, blob: str, folded: st
     brief_family = _brief_family(brief, blob)
     if family and brief_family and family != brief_family:
         return False
-    hay = folded if folded is not None else _fold(blob)
-    return any(_alias_in(hay, alias) for alias in _entry_aliases(entry))
+    hay_struct = _fold(_structured_blob(brief))
+    hay_full = folded if folded is not None else _fold(blob)
+    trial = str(entry.get("trial") or "").strip()
+    pmid = str(entry.get("pmid") or "").strip()
+    doi = str(entry.get("doi") or "").strip()
+    if trial and _alias_in(hay_full, trial):
+        return True
+    if pmid and pmid in hay_full:
+        return True
+    if doi and _alias_in(hay_full, doi):
+        return True
+    return any(_alias_in(hay_struct, alias) for alias in (entry.get("aliases") or ()) if alias)
 
 
 def _catalog_family(tags) -> str:
@@ -686,7 +706,7 @@ def _strategy_implication(brief: ExtractedBrief, records: list[dict]) -> str:
     )
     start_lit = any(w in science for w in ("initiat", "first-line", "guideline", "in-hospital", "early"))
     outcome_lit = any(w in science for w in ("surviv", "mortality", "hazard", "efficacy", "outcome"))
-    habit = any(w in insights for w in ("wait", "late", "stabil", "second", "habit"))
+    habit = any(w in insights for w in ("wait until", "late", "stabil", "second-line", "start late"))
     if start_lit and habit:
         return (
             f"The papers already cover when to start in {indication}. {brand} is not missing science — "
@@ -950,6 +970,7 @@ _FOREIGN_MOLECULES = (
     "keynote-189",
     "keynote-024",
     "neprilysin",
+    "valsartan",
 )
 
 
@@ -1037,22 +1058,31 @@ def _pmids_in_brief(brief: ExtractedBrief) -> list[str]:
 
 
 def _named_search_molecules(brief: ExtractedBrief) -> list[str]:
-    """INNs / trial names the brief actually used — never inferred from therapy area."""
-    blob = _brief_blob(brief)
-    folded = _fold(blob)
+    """INNs / trial names from structured fields — not a scavenger hunt through the upload."""
+    blob = _fold(
+        " ".join(
+            [
+                brief.brand or "",
+                brief.product or "",
+                brief.indication or "",
+                brief.therapy_area or "",
+                " ".join(brief.brand_evidence or []),
+                " ".join(brief.existing_evidence or []),
+            ]
+        )
+    )
     named: list[str] = []
     for entry in CATALOG:
         for alias in entry.get("aliases") or ():
             token = str(alias).strip()
             if len(token) < 4:
                 continue
-            if _alias_in(folded, token) and token.lower() not in {n.lower() for n in named}:
+            if _alias_in(blob, token) and token.lower() not in {n.lower() for n in named}:
                 named.append(token)
     product = re.sub(r"[^A-Za-z0-9 +/()-]+", " ", brief.product or "").strip()
     if 5 <= len(product) <= 80 and _looks_like_inn(product) and product.lower() not in {n.lower() for n in named}:
-        named.append(product)
-    hay = f"{brief.product or ''} {brief.raw_text or ''}"[:2500]
-    for token in re.findall(r"[A-Za-z][A-Za-z0-9-]{4,}", hay):
+        named.append(product.split()[0] if " " in product and _looks_like_inn(product.split()[0]) else product)
+    for token in re.findall(r"[A-Za-z][A-Za-z0-9-]{4,}", f"{brief.product or ''} {brief.brand or ''}"):
         if _looks_like_inn(token) and token.lower() not in {n.lower() for n in named}:
             named.append(token)
         if len(named) >= 4:
@@ -1069,7 +1099,7 @@ def _looks_like_inn(product: str) -> bool:
         return True
     tokens = [part for part in re.split(r"[\s,;]+", low) if part]
     suffix = re.compile(
-        r"(mab|nib|tide|glutide|gliflozin|sartan|pril|olol|umab|ciclib|fenib|parib|terol|onium|sonide|tropium)$"
+        r"(mab|nib|tide|glutide|gliflozin|sartan|pril|olol|umab|ciclib|fenib|parib|terol|onium|sonide|tropium|siran)$"
     )
     return any(suffix.search(token) for token in tokens)
 
@@ -1087,9 +1117,9 @@ _CATALOG_INNS = (
 
 
 def _brief_has_named_inn(brief: ExtractedBrief) -> bool:
-    if _looks_like_inn(brief.product or ""):
+    if _looks_like_inn(brief.product or "") or _looks_like_inn(brief.brand or ""):
         return True
-    blob = _brief_blob(brief)
+    blob = _structured_blob(brief)
     return any(m in blob for m in _CATALOG_INNS)
 
 
@@ -1116,8 +1146,10 @@ def _disease_phrases(brief: ExtractedBrief) -> list[str]:
         add("heart failure")
     if re.search(r"\bt2dm\b|type 2 diabetes|type 2 dm", low):
         add("type 2 diabetes")
-    if re.search(r"\basthma\b", low) and "copd" not in low:
-        add("asthma")
+    if re.search(r"\bcough\b|cough syrup", low):
+        add("cough", "dry cough")
+    if re.search(r"\bldl\b|lipid|cholesterol|inclisiran|lp\(a\)", low):
+        add("LDL cholesterol", "hypercholesterolemia")
 
     ta = (brief.therapy_area or "").strip()
     if ta and len(ta) < 80:
@@ -1146,7 +1178,7 @@ def _pubmed_not_clause(brief: ExtractedBrief) -> str:
     (KEYNOTE on an NSCLC brand, PARADIGM on an unnamed HF brand). Cross-family
     exclusions always stay on (no sacubitril on NSCLC).
     """
-    blob = _brief_blob(brief)
+    blob = _structured_blob(brief)
     brief_fam = _brief_family(brief, blob)
     named_inn = _brief_has_named_inn(brief)
     parts = []
@@ -1175,9 +1207,14 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
         terms.append(f"{named[0]} {extra} randomized controlled trial".strip())
         if len(named) >= 2:
             terms.append(f"{' '.join(named[:3])} {extra} randomized".strip())
+    elif (brief.brand or "").strip():
+        extra = primary_disease or brief.therapy_area or ""
+        terms.append(f"{brief.brand.strip()} {extra} randomized".strip())
 
-    fam = _brief_family(brief, _brief_blob(brief))
-    if fam == "respiratory" or "copd" in (primary_disease or "").lower():
+    copd = bool(
+        re.search(r"\bcopd\b", f"{primary_disease} {brief.indication or ''} {brief.therapy_area or ''}", re.I)
+    )
+    if copd:
         terms.extend(
             [
                 "KRONOS ETHOS budesonide glycopyrrolate formoterol COPD",
@@ -1223,22 +1260,25 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
             terms.append(cleaned[:140])
 
     if primary_disease and len(primary_disease) >= 4:
-        terms.append(f"{primary_disease} randomized controlled trial {not_clause}".strip())
-        terms.append(f"{primary_disease} AND (guideline[pt] OR practice guideline[pt])")
-        terms.append(f"{primary_disease} meta-analysis {not_clause}".strip())
-        terms.append(f"{primary_disease} first-line treatment randomized {not_clause}".strip())
-        terms.append(f"{primary_disease} epidemiology")
-        fam = _brief_family(brief, _brief_blob(brief))
-        if fam == "oncology" and not _brief_has_named_inn(brief):
-            terms.append(f"{primary_disease} immunotherapy chemotherapy randomized")
-        if fam == "cardiology" and not _brief_has_named_inn(brief):
-            terms.append(f"{primary_disease} guideline class I randomized")
-        if fam == "respiratory" or "copd" in primary_disease.lower():
-            terms.append("COPD GOLD guideline")
-            terms.append("ICS LABA LAMA triple therapy COPD randomized")
-            terms.append("COPD exacerbation reduction randomized")
-        if len(diseases) > 1:
-            terms.append(f"{diseases[1]} randomized controlled trial {not_clause}".strip())
+        if named:
+            terms.append(f"{primary_disease} AND (guideline[pt] OR practice guideline[pt])")
+        else:
+            terms.append(f"{primary_disease} randomized controlled trial {not_clause}".strip())
+            terms.append(f"{primary_disease} AND (guideline[pt] OR practice guideline[pt])")
+            terms.append(f"{primary_disease} meta-analysis {not_clause}".strip())
+            terms.append(f"{primary_disease} first-line treatment randomized {not_clause}".strip())
+            terms.append(f"{primary_disease} epidemiology")
+            fam = _brief_family(brief, _structured_blob(brief))
+            if fam == "oncology" and not _brief_has_named_inn(brief):
+                terms.append(f"{primary_disease} immunotherapy chemotherapy randomized")
+            if fam == "cardiology" and not _brief_has_named_inn(brief):
+                terms.append(f"{primary_disease} guideline class I randomized")
+            if copd:
+                terms.append("COPD GOLD guideline")
+                terms.append("ICS LABA LAMA triple therapy COPD randomized")
+                terms.append("COPD exacerbation reduction randomized")
+            if len(diseases) > 1:
+                terms.append(f"{diseases[1]} randomized controlled trial {not_clause}".strip())
 
     uniq: list[str] = []
     seen = set()
@@ -1256,7 +1296,7 @@ def _pubmed_terms(brief: ExtractedBrief) -> list[str]:
 
 
 def _term_smuggles_foreign_molecule(brief: ExtractedBrief, term: str) -> bool:
-    blob = _fold(_brief_blob(brief))
+    blob = _fold(_structured_blob(brief))
     cleaned = re.sub(r"\bnot\s+[a-z0-9\-]+(?:\[ti\])?", " ", term, flags=re.I)
     folded = _fold(cleaned)
     for mol in _FOREIGN_MOLECULES:
@@ -1465,7 +1505,7 @@ def _unmentioned_catalog_markers(brief: ExtractedBrief) -> list[str]:
     Guideline *names* (ESC, ACC) are not foreign molecules — disease guidelines
     still belong on a named-INN brief. Pivotals of another INN do not.
     """
-    blob = _fold(_brief_blob(brief))
+    blob = _fold(_structured_blob(brief))
     markers: list[str] = []
     for entry in CATALOG:
         stream = str(entry.get("stream") or "").lower()
@@ -1547,22 +1587,27 @@ def _pubmed_hit_belongs(brief: ExtractedBrief, title: str, extra: str = "") -> b
         return False
     if _families_mismatch(brief, hay):
         return False
-    if _brief_family(brief, _brief_blob(brief)) == "respiratory":
-        need = (
-            "copd",
-            "asthma",
-            "obstructive pulmonary",
-            "glycopyrronium",
-            "formoterol",
-            "budesonide",
-            "triple therap",
-            "nebulis",
-            "nebuliz",
-            "gold ",
-            "lama",
-            "laba",
-        )
-        if not any(k in hay.lower() for k in need):
+    if _brief_family(brief, _structured_blob(brief)) == "respiratory":
+        hay_l = hay.lower()
+        cough_brief = bool(re.search(r"\bcough\b", f"{brief.indication or ''} {brief.therapy_area or ''}", re.I))
+        if cough_brief:
+            need = ("cough", "antituss", "upper respiratory")
+        else:
+            need = (
+                "copd",
+                "asthma",
+                "obstructive pulmonary",
+                "glycopyrronium",
+                "formoterol",
+                "budesonide",
+                "triple therap",
+                "nebulis",
+                "nebuliz",
+                "gold ",
+                "lama",
+                "laba",
+            )
+        if not any(k in hay_l for k in need):
             return False
     # Named INN: drop another catalog molecule's pivotal when that molecule is in the TITLE.
     # Abstracts of disease guidelines mention standard-of-care drugs; those still belong.

@@ -84,6 +84,56 @@ def test_example_brief_is_presentation_ready():
                     assert "…" not in str(value)
 
 
+def test_alex_brief_is_not_a_hospital_first_touch_template():
+    from pathlib import Path
+
+    from director_api.extract import merge_into_brief
+
+    raw = (Path(__file__).resolve().parent / "fixtures" / "alex_creative_brief.txt").read_text(
+        encoding="utf-8"
+    )
+    brief = merge_into_brief([], pasted=raw)
+    pack = generate_pack(brief, pubmed=False)
+    assert pack["meta"]["brand"] == "Alex"
+    assert pack["doctrine"]["id"] == "perception-reset"
+    blob = json.dumps(pack).lower()
+    assert "stable" not in (pack["doctrine"].get("enemy") or "").lower()
+    assert "first eligible encounter" not in (pack["doctrine"].get("bet") or "").lower()
+    assert "tengfu" not in blob
+    assert "cardioshield" not in blob
+    assert "similar" in (pack["doctrine"].get("enemy") or "").lower()
+    titles = " ".join(s["title"] for s in pack["slides"])
+    assert "Alex" in pack["slides"][0]["title"]
+    assert "stable" not in titles.lower()
+    assert pack["interventions"][0]["name"] != "First-Touch Protocol"
+    assert "hospital-to-clinic" not in json.dumps(pack["interventions"]).lower()
+
+
+def test_novartis_brief_is_sybrava_not_a_nameless_template():
+    from pathlib import Path
+
+    from director_api.extract import merge_into_brief
+    from director_api.evidence import _named_search_molecules
+
+    raw = (Path(__file__).resolve().parent / "fixtures" / "novartis_cv_brief.txt").read_text(
+        encoding="utf-8"
+    )
+    brief = merge_into_brief([], pasted=raw)
+    pack = generate_pack(brief, pubmed=False)
+    assert pack["meta"]["brand"] == "Sybrava"
+    named = [n.lower() for n in _named_search_molecules(brief)]
+    assert any("inclisiran" in n for n in named)
+    assert not any("valsartan" in n for n in named)
+    blob = json.dumps(pack).lower()
+    assert "unnamed brand" not in blob
+    assert "tengfu" not in blob
+    assert pack["doctrine"]["id"] != "first-touch"
+    assert pack["interventions"][0]["name"] != "First-Touch Protocol"
+    assert "hospital-to-clinic" not in json.dumps(pack["interventions"]).lower()
+    ids = {r["id"] for r in pack["evidence"]["records"]}
+    assert "paradigm-hf-2014" not in ids
+
+
 def test_trivora_step_up_brief_is_first_line_not_hospital_wait():
     from pathlib import Path
 

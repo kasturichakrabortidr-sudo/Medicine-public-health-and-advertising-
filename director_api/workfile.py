@@ -649,9 +649,9 @@ def _objections(brief: ExtractedBrief, records: list, start) -> list[list[str]]:
 def _looks_like_delay(text: str) -> bool:
     low = text.lower()
     return any(w in low for w in (
-        "stabilis", "stabiliz", "late", "second-line", "switch", "wait", "delay", "habit",
-        "step-up", "step up", "rescue", "mix it myself", "free-mix", "free mix",
-    ))
+        "stabilis", "stabiliz", "second-line", "switch", "wait until", "delay",
+        "start late", "step-up", "step up", "rescue", "mix it myself", "free-mix", "free mix",
+    )) or bool(re.search(r"\blate\b", low))
 
 
 def _looks_like_cost(text: str) -> bool:

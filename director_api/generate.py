@@ -45,9 +45,10 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             " ".join(brief.access_and_cost),
             " ".join(brief.competitors),
             brief.indication,
-            (brief.raw_text or "")[:2500],
+            brief.notes or "",
         ]
     ).lower()
+    insights = " ".join(brief.hcp_insights).lower()
     implication = ""
     if records:
         from .evidence import _strategy_implication
@@ -65,8 +66,33 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
         w in science for w in ("surviv", "mortality", "overall survival", "progression", "hazard", "efficacy")
     )
     brief_wait = any(
-        w in blob for w in ("stabilise", "stabilize", "late", "second-line", "habit")
-    ) and not any(w in blob for w in ("step-up", "step up", "free-mix", "triple is what"))
+        w in insights or w in (brief.business_goal or "").lower()
+        for w in (
+            "stabilis",
+            "stabiliz",
+            "second-line",
+            "start late",
+            "wait until",
+            "first-eligible",
+            "early initiation",
+            "eligible visit",
+        )
+    )
+    parity = any(
+        w in insights or w in blob
+        for w in (
+            "similar",
+            "same efficacy",
+            "interchangeable",
+            "clutter",
+            "all the cough",
+            "all brands",
+            "another cough",
+            "not the first recalled",
+            "no differentiation",
+            "low involvement",
+        )
+    )
     step_up = any(
         w in blob
         for w in (
@@ -102,6 +128,27 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "whyNovel": (
                 "The brief's own dipstick says triple is what they move to when dual stops working. "
                 "The campaign spends against that ritual, using retrieved papers, not a restated upload."
+            ),
+        }
+
+    if parity:
+        enemy = (brief.hcp_insights or ["Doctors treat every brand in the category as interchangeable."])[0]
+        return {
+            "id": "perception-reset",
+            "name": f"Name {brand}, do not look like the clutter",
+            "thesis": (
+                f"The brief already said the category looks the same. "
+                f"{implication or 'The job is a distinctive choice, not another hospital-start template.'} "
+                f"{brand} has a recall and differentiation problem, not a first-eligible-visit problem."
+            ),
+            "enemy": enemy[:180],
+            "bet": (
+                f"Make {brand} the named choice — the expert they can defend — "
+                "not a habit prescription in a cluttered set."
+            ),
+            "whyNovel": (
+                "We do not import a heart-failure first-touch playbook. "
+                "The spend is against interchangeability, using the brief's own belief lines."
             ),
         }
 
@@ -192,7 +239,7 @@ def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:
             "conviction problem at the decision moment. "
             + (implication or "Stack scientific, peer, and practical conviction in that order.")
         ),
-        "enemy": "Fragile conviction at the point of prescribe",
+        "enemy": (brief.hcp_insights[0][:180] if brief.hcp_insights else "Fragile conviction at the point of prescribe"),
         "bet": "Stack scientific, peer, and practical conviction in that order — then lock the habit.",
         "whyNovel": (
             "We refuse the awareness-then-consideration funnel. "
@@ -232,6 +279,79 @@ def _bind_science(doctrine: dict, ledger: dict) -> None:
 
 def _interventions(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = None) -> list[dict]:
     brand = (brief.brand or "the brand").split(";")[0].strip()[:48]
+    specialists = ", ".join((brief.target_specialties or [])[:3]) or "the named specialists"
+    if doctrine.get("id") == "perception-reset":
+        rival = (brief.competitors or ["the clutter"])[0]
+        return [
+            {
+                "id": "myth-reset",
+                "name": f"{brand} is not the category",
+                "promise": (
+                    f"Kill 'they all work the same' with one proof a peer can repeat for {brand}, "
+                    f"not a hospital-start protocol copied from another brief."
+                ),
+                "lever": "Motivation — ritual / Capability — knowledge",
+                "segment": specialists,
+                "effort": "M",
+                "impact": 88,
+                "feasibility": 70,
+                "mlr": "No superiority claim the papers did not state.",
+                "kill": "If unaided 'all brands similar' does not drop in the next insight wave.",
+                "evidenceAnchor": _anchor(ledger, "segment-confidence") or _anchor(ledger, "outcome-permission"),
+            },
+            {
+                "id": "peer-cascade",
+                "name": "First-recalled expert",
+                "promise": f"Put {brand} in the first slot, not as a relationship refill after {rival}.",
+                "lever": "Motivation — peer cover",
+                "segment": specialists,
+                "effort": "H",
+                "impact": 84,
+                "feasibility": 58,
+                "mlr": "Fair balance. No paid-endorsement theatre.",
+                "kill": "If first-mention stays behind the clutter brands at week 8.",
+                "evidenceAnchor": _anchor(ledger, "guideline-cover") or _anchor(ledger, "outcome-permission"),
+            },
+            {
+                "id": "first-touch",
+                "name": "Patient-profile range",
+                "promise": f"Make the range and the patient picture the reason to write {brand}, not a generic cough script.",
+                "lever": "Opportunity — workflow",
+                "segment": specialists,
+                "effort": "M",
+                "impact": 76,
+                "feasibility": 72,
+                "mlr": "Stay inside the approved indication and claims.",
+                "kill": "If profiled patients are still written a rival by default.",
+                "evidenceAnchor": _anchor(ledger, "local-context") or _anchor(ledger, "outcome-permission"),
+            },
+            {
+                "id": "afford-kit",
+                "name": "Visible proof in the clutter",
+                "promise": "Match the rival's visibility with one distinctive proof, not more of the same reminder.",
+                "lever": "Opportunity — salience",
+                "segment": specialists,
+                "effort": "M",
+                "impact": 71,
+                "feasibility": 66,
+                "mlr": "No disparagement. Named rivals stay as the clutter, not as a smear.",
+                "kill": "If share keeps slipping in the named states.",
+                "evidenceAnchor": _anchor(ledger, "local-context"),
+            },
+            {
+                "id": "habit-lock",
+                "name": "Repeat among trialists",
+                "promise": f"The second {brand} write is designed. Taste, relief, and trust have to show up in the next visit.",
+                "lever": "Motivation — automatic",
+                "segment": "Trialists in Q1–Q2",
+                "effort": "L",
+                "impact": 64,
+                "feasibility": 80,
+                "mlr": "CRM content is promotional and goes through MLR.",
+                "kill": "If repeat among trialists is flat vs control geographies.",
+                "evidenceAnchor": _anchor(ledger, "outcome-permission"),
+            },
+        ]
     if doctrine.get("id") == "first-line-not-rescue":
         first = {
             "id": "first-touch",
@@ -304,6 +424,77 @@ def _interventions(brief: ExtractedBrief, doctrine: dict, ledger: dict | None = 
                 "feasibility": 80,
                 "mlr": "CRM content is promotional and goes through MLR.",
                 "kill": "If home continuation among trialists is flat vs control geographies.",
+                "evidenceAnchor": _anchor(ledger, "outcome-permission"),
+            },
+        ]
+    if doctrine.get("id") != "first-touch":
+        return [
+            {
+                "id": "decision",
+                "name": f"Write {brand} at the decision",
+                "promise": (
+                    f"Stack scientific, peer, and practical cover so {brand} is written "
+                    "at the decision — not a hospital-start protocol copied from another brief."
+                ),
+                "lever": "Motivation — decision",
+                "segment": specialists,
+                "effort": "H",
+                "impact": 88,
+                "feasibility": 62,
+                "mlr": "No start-all implication. Stay inside the papers and the label.",
+                "kill": "If unaided preference does not move in the next insight wave.",
+                "evidenceAnchor": _anchor(ledger, "outcome-permission") or _anchor(ledger, "local-context"),
+            },
+            {
+                "id": "afford-kit",
+                "name": "Affordability Confidence Kit",
+                "promise": "A field-legal script, PAP mechanics, and HE one-pager that lets the HCP stay on the patient's side.",
+                "lever": "Opportunity — cost",
+                "segment": "Tier-2 consultants and high OOP caseloads",
+                "effort": "M",
+                "impact": 84,
+                "feasibility": 70,
+                "mlr": "No price promises. Assistance, not inducement.",
+                "kill": "If PAP mention rate rises but initiation does not.",
+                "evidenceAnchor": _anchor(ledger, "local-context") or _anchor(ledger, "outcome-permission"),
+            },
+            {
+                "id": "myth-reset",
+                "name": "Myth-Reset Asset",
+                "promise": "One wrong belief, one local number, one peer voice. Unlearning, not a lecture.",
+                "lever": "Motivation — ritual / Capability — knowledge",
+                "segment": "Early-career + high-myth clusters",
+                "effort": "M",
+                "impact": 61,
+                "feasibility": 78,
+                "mlr": "Comparative safety claims need the source grade on-slide.",
+                "kill": "If unaided myth prevalence does not drop in the next insight wave.",
+                "evidenceAnchor": _anchor(ledger, "segment-confidence") or _anchor(ledger, "outcome-permission"),
+            },
+            {
+                "id": "peer-cascade",
+                "name": "Peer Cascade",
+                "promise": "Metro KOLs author the protocol; tier-2 peers demonstrate it. Cover travels down, not out as a TV ad.",
+                "lever": "Motivation — peer cover",
+                "segment": "KOL metro → senior tier-2",
+                "effort": "H",
+                "impact": 76,
+                "feasibility": 54,
+                "mlr": "Fair balance. No paid-endorsement theatre.",
+                "kill": "If cascade stops at the same five names by Q2.",
+                "evidenceAnchor": _anchor(ledger, "guideline-cover"),
+            },
+            {
+                "id": "habit-lock",
+                "name": "Habit-Lock CRM",
+                "promise": "The second prescription is designed, not hoped for. Prompts, feedback, peer norms.",
+                "lever": "Motivation — automatic",
+                "segment": "Trialists in Q1–Q2",
+                "effort": "L",
+                "impact": 58,
+                "feasibility": 80,
+                "mlr": "CRM content is promotional and goes through MLR.",
+                "kill": "If repeat rate among trialists is flat vs control geographies.",
                 "evidenceAnchor": _anchor(ledger, "outcome-permission"),
             },
         ]

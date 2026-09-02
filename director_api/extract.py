@@ -206,6 +206,7 @@ def merge_into_brief(files: list[ExtractedFile], pasted: str = "") -> ExtractedB
     brief.source_files = [f.filename for f in files]
     brief.extraction_notes = [n for f in files for n in f.notes]
     _infer_missing(brief)
+    _fill_from_prose(brief)
     return brief
 
 
@@ -377,7 +378,7 @@ def _parse_structured(raw: str) -> ExtractedBrief:
         bucket = []
 
     for line in raw.splitlines():
-        stripped = line.strip()
+        stripped = re.sub(r"^[\s\-*•\u2022\u25cf]+", "", line.strip())
         heading = re.match(r"^#{1,3}\s+(.+)$", stripped)
         label = re.match(
             r"^([A-Za-z][A-Za-z0-9 /&()_,'-]{1,70})\s*:\s*(.*)$",
@@ -549,6 +550,8 @@ def _normalize_key(label: str) -> str:
         "specialties": "target_specialties",
         "target_specialties": "target_specialties",
         "targets": "target_specialties",
+        "target_audience": "target_specialties",
+        "target_audience_types_of_hcps": "target_specialties",
         "segments": "hcp_segments",
         "hcp_tiers_status_mix": "hcp_segments",
         "evidence": "brand_evidence",
@@ -556,6 +559,10 @@ def _normalize_key(label: str) -> str:
         "evidence_in_hand_attached_see_test_source_pack_md": "brand_evidence",
         "insights": "hcp_insights",
         "hcp_insight": "hcp_insights",
+        "hcp_habit": "hcp_insights",
+        "current_belief": "hcp_insights",
+        "current_behavior": "hcp_insights",
+        "current_belief_behavior": "hcp_insights",
         "in_house_hcp_insights": "hcp_insights",
         "competitor": "competitors",
         "competitive_set": "competitors",
@@ -565,12 +572,20 @@ def _normalize_key(label: str) -> str:
         "price_and_access": "access_and_cost",
         "price_and_access_context": "access_and_cost",
         "constraint": "constraints",
+        "mlr": "constraints",
         "mlr_constraints": "constraints",
         "guidelines_in_play": "guidelines",
         "evolving_new_evidence": "evolving_evidence",
         "country": "market",
         "geography": "market",
         "geography_and_city_tiers": "market",
+        "brand_proposition": "notes",
+        "single_minded_proposition": "notes",
+        "single_line_single_minded_brand_proposition": "notes",
+        "core_challenge": "hcp_insights",
+        "strategic_role": "notes",
+        "key_message": "brand_evidence",
+        "key_messages": "brand_evidence",
     }
     if s in aliases:
         return aliases[s]
@@ -578,6 +593,7 @@ def _normalize_key(label: str) -> str:
         ("business_objective", "business_goal"),
         ("in_house_hcp", "hcp_insights"),
         ("hcp_insight", "hcp_insights"),
+        ("core_challenge", "hcp_insights"),
         ("competitive_set", "competitors"),
         ("evidence_in_hand", "brand_evidence"),
         ("guidelines", "guidelines"),
@@ -597,13 +613,14 @@ def _infer_missing(brief: ExtractedBrief) -> None:
     """Fill obvious gaps from free text when structured fields are empty."""
     blob = brief.raw_text
     if not brief.brand:
-        m = re.search(r"\bbrand\s*[:\-]\s*([A-Z][\w\- ]{1,40})", blob, re.I)
-        if m:
+        m = re.search(r"\bbrand(?!s)\s*[:\-]\s*([A-Z][\w\- ]{1,40})", blob, re.I)
+        if m and "overview" not in m.group(1).lower():
             brief.brand = m.group(1).strip()
     if not brief.therapy_area:
         m = re.search(
-            r"(cardiology|oncology|diabetes|neurology|respiratory|immunology|"
-            r"dermatology|infectious|heart failure|HFrEF|HFpEF|COPD)[^\n]{0,40}",
+            r"(cardiology|cardiovascular|oncology|diabetes|neurology|respiratory|"
+            r"immunology|dermatology|infectious|heart failure|HFrEF|HFpEF|COPD|"
+            r"dry cough|lipid management)[^\n]{0,40}",
             blob,
             re.I,
         )
@@ -616,11 +633,193 @@ def _infer_missing(brief: ExtractedBrief) -> None:
     _tidy_brief(brief, blob)
 
 
+def _fill_from_prose(brief: ExtractedBrief) -> None:
+    """Read agency / creative-brief prose that is not YAML."""
+    raw = brief.raw_text or ""
+    if not raw.strip():
+        return
+    _apply_qa_sections(brief, raw)
+    _apply_named_brands(brief, raw)
+    _apply_filename_brand(brief)
+    _apply_category_and_rivals(brief, raw)
+    _tidy_brief(brief, raw)
+
+
+def _apply_qa_sections(brief: ExtractedBrief, raw: str) -> None:
+    questions = (
+        (r"what objective are we aiming to achieve", "business_goal"),
+        (r"what problem are we trying to solve", "problem"),
+        (r"who.?s the target audience", "target_specialties"),
+        (r"what is their current belief\s*/\s*behavior", "hcp_insights"),
+        (r"current belief\s*/\s*behavior", "hcp_insights"),
+        (r"what is their desired belief\s*/\s*behavior", "notes"),
+        (r"what are the blocks?/?\s*barriers", "hcp_insights"),
+        (r"what can be communicated", "notes"),
+        (r"single-?line single-?minded brand proposition", "notes"),
+        (r"what are the key messages", "brand_evidence"),
+        (r"share product details", "product"),
+        (r"overall objective", "business_goal"),
+        (r"core challenge", "hcp_insights"),
+    )
+    chunks = _split_qa(raw)
+    problem_body = ""
+    for heading, body in chunks:
+        key = None
+        low = heading.lower()
+        for pattern, dest in questions:
+            if re.search(pattern, low):
+                key = dest
+                break
+        if not key or not body:
+            continue
+        if key == "problem":
+            _absorb_rivals(brief, body)
+            problem_body = body
+            continue
+        if key == "notes":
+            brief.notes = _clip_text((brief.notes + " " + body).strip(), 400)
+            continue
+        if not getattr(brief, key):
+            _assign(brief, key, body)
+    if not brief.hcp_insights and problem_body:
+        _assign(brief, "hcp_insights", problem_body)
+
+
+def _split_qa(raw: str) -> list[tuple[str, str]]:
+    lines = raw.replace("\r", "\n").splitlines()
+    out: list[tuple[str, str]] = []
+    heading = ""
+    bucket: list[str] = []
+
+    def flush() -> None:
+        nonlocal heading, bucket
+        if heading:
+            out.append((heading, "\n".join(bucket).strip()))
+        heading = ""
+        bucket = []
+
+    q = re.compile(
+        r"^(what |who.?s |who is |any |share |profile the |overall objective|core challenge|target audience)",
+        re.I,
+    )
+    for line in lines:
+        stripped = re.sub(r"^[\s\-*•\u2022\u25cf]+", "", line.strip())
+        if not stripped:
+            continue
+        left, _, right = stripped.partition("|")
+        left = left.strip()
+        right = right.strip()
+        if right and q.match(left):
+            flush()
+            heading = left
+            bucket.append(right)
+            continue
+        inline = re.match(r"^(.{12,180}\?)\s+([^?].+)$", stripped)
+        if inline and q.match(stripped):
+            flush()
+            heading = inline.group(1).strip()
+            bucket.append(inline.group(2).strip())
+            continue
+        if q.match(stripped) or stripped.endswith("?"):
+            flush()
+            heading = stripped
+            continue
+        if heading:
+            bucket.append(stripped)
+    flush()
+    return out
+
+
+def _apply_named_brands(brief: ExtractedBrief, raw: str) -> None:
+    if not brief.brand:
+        growth = re.search(
+            r"([A-Z][A-Za-z0-9\-]{2,40})\s*\(([A-Za-z][A-Za-z0-9\-]+)\)[\s\S]{0,400}growth driver",
+            raw,
+            re.I,
+        )
+        numbered = re.findall(
+            r"(?:^|\n|Overview:)\s*\d+[\.)\t ]+([A-Z][A-Za-z0-9\-]{2,40})(?:\s*\(([A-Za-z][A-Za-z0-9\-]+)\))?",
+            raw,
+        )
+        if growth:
+            brief.brand = growth.group(1)
+            if not brief.product:
+                brief.product = growth.group(2)
+        elif numbered:
+            brief.brand = numbered[0][0]
+            inns = [inn for _, inn in numbered if inn]
+            if inns and not brief.product:
+                brief.product = inns[0]
+    if not brief.brand:
+        for pattern in (
+            r"\breinforce\s+([A-Z][A-Za-z0-9\-]{2,30})\s+as\b",
+            r"\bpreference for\s+([A-Z][A-Za-z0-9\-]{2,30})\b",
+            r"^([A-Z][a-z]{2,20})\s+[–—-]\s+The Trusted",
+            r"\b([A-Z][a-z]{2,20})\s+as (?:the |trusted |not just)",
+        ):
+            m = re.search(pattern, raw, re.M)
+            if m:
+                brief.brand = m.group(1)
+                break
+    if not brief.product:
+        inn = re.search(
+            r"([A-Z][A-Za-z0-9\-]{2,40})\s*\(([A-Za-z][A-Za-z0-9\-]{4,})\)[\s\S]{0,400}growth driver",
+            raw,
+            re.I,
+        )
+        if inn:
+            brief.product = inn.group(2)
+            if not brief.brand:
+                brief.brand = inn.group(1)
+
+
+def _apply_filename_brand(brief: ExtractedBrief) -> None:
+    if brief.brand:
+        return
+    for name in brief.source_files or []:
+        stem = Path(name).stem
+        m = re.search(r"(?:^|[_\s-])([A-Z][a-z]{2,20})(?:_|\s|-)(?:creative|brief)", stem)
+        if m:
+            brief.brand = m.group(1)
+            return
+        m = re.match(r"[A-Za-z]+-([A-Z][a-z]{2,20})\b", stem)
+        if m:
+            brief.brand = m.group(1)
+            return
+
+
+def _apply_category_and_rivals(brief: ExtractedBrief, raw: str) -> None:
+    low = raw.lower()
+    if not brief.indication and re.search(r"\bdry cough\b|cough syrup|cough expert", low):
+        brief.indication = "Dry cough"
+        if not brief.therapy_area:
+            brief.therapy_area = "Respiratory — dry cough"
+    if not brief.indication and re.search(r"\bldl-c\b|lipoprotein\(a\)|lp\(a\)|lipid management", low):
+        brief.indication = brief.indication or "LDL-C reduction / cardiovascular risk"
+        if not brief.therapy_area:
+            brief.therapy_area = "Cardiology"
+    _absorb_rivals(brief, raw)
+
+
+def _absorb_rivals(brief: ExtractedBrief, text: str) -> None:
+    found = re.findall(
+        r"\b(Zedex|Grilinctus(?:-DX)?|Tusq(?:-DX)?|Ozempic|Keytruda)\b",
+        text,
+        re.I,
+    )
+    for name in found:
+        if name not in brief.competitors:
+            brief.competitors.append(name)
+
+
 def _section_prefix(line: str) -> str | None:
     low = line.lower()
     pairs = (
         ("in-house hcp insight", "hcp_insights"),
         ("hcp insight", "hcp_insights"),
+        ("hcp habit", "hcp_insights"),
+        ("current belief", "hcp_insights"),
+        ("core challenge", "hcp_insights"),
         ("guidelines in play", "guidelines"),
         ("evidence in hand", "brand_evidence"),
         ("competitive set", "competitors"),
@@ -628,6 +827,7 @@ def _section_prefix(line: str) -> str | None:
         ("price and access", "access_and_cost"),
         ("mlr constraint", "constraints"),
         ("target specialt", "target_specialties"),
+        ("target audience", "target_specialties"),
         ("molecule / composition", "product"),
         ("therapeutic area", "therapy_area"),
     )
