@@ -139,6 +139,15 @@ button {
   max-width: 720px;
   margin: 8vh auto 0;
 }
+.home.running {
+  margin-top: 24px;
+}
+.home.running textarea {
+  min-height: 96px;
+}
+.home.running .home-levels {
+  display: none;
+}
 .home-levels {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

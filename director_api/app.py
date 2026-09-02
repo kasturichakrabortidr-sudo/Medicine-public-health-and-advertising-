@@ -155,6 +155,7 @@ async def generate_stream(
             kind, payload = mailbox.get()
             if kind == "event":
                 yield _sse(payload)
+                yield ": \n\n"
             elif kind == "done":
                 yield _sse({"type": "pack", "pack": payload})
                 break

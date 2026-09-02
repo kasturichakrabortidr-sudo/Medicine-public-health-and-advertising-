@@ -47,7 +47,10 @@ export default function App() {
         setLog((prev) => [...prev, event]);
       });
       if (next.agent?.log?.length) setLog(next.agent.log);
-      openPack(next, "deck");
+      setPack(next);
+      setError("");
+      await new Promise((resolve) => window.setTimeout(resolve, 1200));
+      setTab("deck");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

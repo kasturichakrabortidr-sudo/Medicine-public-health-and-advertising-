@@ -31,7 +31,7 @@ export function HomeScreen({
   const latest = log[log.length - 1];
 
   return (
-    <section className="home">
+    <section className={busy ? "home running" : "home"}>
       <p className="eyebrow">Five levels. One argument.</p>
       <h1>Paste the brief. Get every level of the strategy, not a literature dump.</h1>
       <p className="lede">
