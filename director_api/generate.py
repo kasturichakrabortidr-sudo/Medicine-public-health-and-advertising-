@@ -34,6 +34,7 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
     _bind_science(doctrine, ledger)
     work = build_workfile(brief, doctrine, ledger)
     moves = _interventions(brief, doctrine, ledger)
+    slides = build_client_deck(brief, doctrine, ledger, work, moves)
 
     return {
         "meta": {
@@ -52,9 +53,26 @@ def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = 
         "evidence": ledger,
         "workfile": work,
         "references": ledger.get("references") or [],
-        "slides": build_client_deck(brief, doctrine, ledger, work, moves),
+        "slides": slides,
         "interventions": moves,
         "dashboard": _dashboard(brief, doctrine, ledger, work, moves),
+        "levels": {
+            "brief": {"n": "01", "label": "Brief", "title": brand, "note": brief.business_goal or ""},
+            "workfile": {
+                "n": "02",
+                "label": "Working file",
+                "phases": len(work.get("phases") or []),
+                "gaps": work.get("gapCount") or 0,
+            },
+            "papers": {
+                "n": "03",
+                "label": "Papers",
+                "count": len(ledger.get("records") or []),
+                "gaps": len(ledger.get("gaps") or []),
+            },
+            "deck": {"n": "04", "label": "Deck", "slides": len(slides)},
+            "take": {"n": "05", "label": "Take", "pptx": True, "markdown": True, "print": True},
+        },
     }
 
 

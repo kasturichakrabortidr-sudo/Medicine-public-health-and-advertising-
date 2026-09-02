@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ACCEPT } from "../api";
+import { LEVELS } from "../levels";
 
 export function HomeScreen({
   busy,
@@ -21,12 +22,21 @@ export function HomeScreen({
 
   return (
     <section className="home">
-      <p className="eyebrow">Client brief in. Strategy deck out.</p>
-      <h1>Paste the brief. Get a 12-slide argument, not a literature dump.</h1>
+      <p className="eyebrow">Five levels. One argument.</p>
+      <h1>Paste the brief. Get every level of the strategy, not a literature dump.</h1>
       <p className="lede">
-        STRATA reads the habit in the brief, searches PubMed for this product and indication, and writes a
-        working file plus a client deck. Nothing is preloaded. Claims stay inside the papers.
+        STRATA writes the working file, numbers the papers, and builds a 12-slide deck you can print or
+        take as PowerPoint. Nothing is preloaded. Claims stay inside the papers.
       </p>
+
+      <ol className="home-levels">
+        {LEVELS.map((level) => (
+          <li key={level.id}>
+            <span>{level.n}</span>
+            <strong>{level.label}</strong>
+          </li>
+        ))}
+      </ol>
 
       <label className="paste-label" htmlFor="paste">
         Brief

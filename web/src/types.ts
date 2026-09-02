@@ -137,6 +137,7 @@ export interface StrategyPack {
   workfile?: Workfile;
   references?: ReferenceItem[];
   slides: Slide[];
+  levels?: PackLevels;
   interventions: Intervention[];
   dashboard: {
     kpis: {
@@ -312,7 +313,15 @@ export interface Workfile {
   gapCount: number;
 }
 
-export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence" | "projects";
+export type TabId = "briefs" | "work" | "deck" | "dashboard" | "evidence" | "projects" | "take";
+
+export interface PackLevels {
+  brief: { n: string; label: string; title: string; note: string };
+  workfile: { n: string; label: string; phases: number; gaps: number };
+  papers: { n: string; label: string; count: number; gaps: number };
+  deck: { n: string; label: string; slides: number };
+  take: { n: string; label: string; pptx: boolean; markdown: boolean; print: boolean };
+}
 
 export type ProjectStatus = "ongoing" | "saved";
 

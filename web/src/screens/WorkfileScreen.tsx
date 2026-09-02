@@ -69,7 +69,7 @@ export function WorkfileScreen({
     <section className="workfile">
       <header className="doc-bar no-print">
         <div>
-          <p className="eyebrow">Working file</p>
+          <p className="eyebrow">02 · Working file</p>
           <h1>{pack.meta.brand}</h1>
           <p className="muted">
             {pack.meta.therapyArea} · {work.refCount} references · {work.validatedCount} numbered papers
@@ -96,6 +96,14 @@ export function WorkfileScreen({
           <strong>The enemy.</strong> {pack.doctrine.enemy}
         </p>
       </article>
+
+      <nav className="phase-nav no-print">
+        {work.phases.map((phase) => (
+          <a key={phase.id} href={`#phase-${phase.id}`}>
+            {phase.id}
+          </a>
+        ))}
+      </nav>
 
       {work.cannotClaim?.length ? (
         <div className="warn">
@@ -129,7 +137,7 @@ export function WorkfileScreen({
 
 function PhaseCard({ phase }: { phase: WorkPhase }) {
   return (
-    <article className="phase">
+    <article className="phase" id={`phase-${phase.id}`}>
       <p className="kicker">
         {phase.id} · Working file
       </p>

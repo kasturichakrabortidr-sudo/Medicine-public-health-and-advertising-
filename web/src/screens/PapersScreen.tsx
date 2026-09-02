@@ -8,7 +8,7 @@ export function PapersScreen({ pack }: { pack: StrategyPack }) {
     <section className="panel papers-page">
       <header className="doc-bar no-print">
         <div>
-          <p className="eyebrow">Papers</p>
+          <p className="eyebrow">03 · Papers</p>
           <h1>Numbered register</h1>
         </div>
         <button type="button" onClick={() => printAs("work")}>

@@ -1,9 +1,13 @@
 import { useState } from "react";
 import { deleteProject, downloadPptx, downloadWorkfile, generatePack, listProjects, loadProject, saveProject } from "./api";
+import { LEVELS } from "./levels";
+import { printAs } from "./print";
+import { PrintSheet } from "./components/PrintSheet";
 import { DeckScreen } from "./screens/DeckScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { PapersScreen } from "./screens/PapersScreen";
 import { ProjectsScreen } from "./screens/ProjectsScreen";
+import { TakeScreen } from "./screens/TakeScreen";
 import { WorkfileScreen } from "./screens/WorkfileScreen";
 import type { ProjectSummary, StrategyPack, TabId } from "./types";
 
@@ -107,28 +111,23 @@ export default function App() {
           <strong>STRATA</strong>
           <span>HCP strategy director</span>
         </div>
-        <nav>
-          <button type="button" className={tab === "briefs" ? "on" : ""} onClick={() => setTab("briefs")}>
-            Brief
-          </button>
-          <button type="button" className={tab === "projects" ? "on" : ""} onClick={() => setTab("projects")}>
-            Projects
-          </button>
-          <button type="button" className={tab === "work" ? "on" : ""} disabled={!pack} onClick={() => setTab("work")}>
-            Working file
-          </button>
-          <button
-            type="button"
-            className={tab === "evidence" ? "on" : ""}
-            disabled={!pack}
-            onClick={() => setTab("evidence")}
-          >
-            Papers
-          </button>
-          <button type="button" className={tab === "deck" ? "on" : ""} disabled={!pack} onClick={() => setTab("deck")}>
-            Deck
-          </button>
+        <nav className="levels-nav">
+          {LEVELS.map((level) => (
+            <button
+              key={level.id}
+              type="button"
+              className={tab === level.id ? "on" : ""}
+              disabled={level.needsPack && !pack}
+              onClick={() => setTab(level.id)}
+            >
+              <em>{level.n}</em>
+              {level.label}
+            </button>
+          ))}
         </nav>
+        <button type="button" className={tab === "projects" ? "on archive" : "archive"} onClick={() => setTab("projects")}>
+          Projects
+        </button>
         <div className="rail-foot">
           <button type="button" className="ghost" disabled={!pack || busy} onClick={pin}>
             Save this pack
@@ -138,7 +137,7 @@ export default function App() {
               {pack.doctrine.name}. {pack.doctrine.bet}
             </p>
           ) : (
-            <p className="doctrine">Paste a brief. STRATA writes the working file and a 12-slide strategy deck.</p>
+            <p className="doctrine">Five levels from one brief: working file, papers, deck, then the takeaway.</p>
           )}
         </div>
       </aside>
@@ -158,6 +157,19 @@ export default function App() {
         {tab === "work" && pack ? <WorkfileScreen pack={pack} busy={busy} onExport={exportWork} /> : null}
         {tab === "evidence" && pack ? <PapersScreen pack={pack} /> : null}
         {tab === "deck" && pack ? <DeckScreen pack={pack} busy={busy} onExport={exportDeck} /> : null}
+        {tab === "take" && pack ? (
+          <TakeScreen
+            pack={pack}
+            busy={busy}
+            onPptx={exportDeck}
+            onWorkfile={exportWork}
+            onPrintWork={() => {
+              setTab("work");
+              window.setTimeout(() => printAs("work"), 120);
+            }}
+          />
+        ) : null}
+        {pack ? <PrintSheet pack={pack} /> : null}
       </main>
     </div>
   );

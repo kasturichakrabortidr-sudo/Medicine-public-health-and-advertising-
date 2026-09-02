@@ -66,6 +66,7 @@ export function DeckScreen({
     <div className="deck">
       <header className="deck-bar no-print">
         <div>
+          <p className="eyebrow">04 · Deck</p>
           <h1>{pack.meta.brand}</h1>
           <p>
             {pack.meta.therapyArea} · {slides.length} slides
@@ -104,13 +105,6 @@ export function DeckScreen({
             </button>
           </div>
         </div>
-      </div>
-      <div className="print-deck" aria-hidden="true">
-        {slides.map((s) => (
-          <div className="print-page" key={s.id}>
-            <SlideCanvas slide={s} />
-          </div>
-        ))}
       </div>
     </div>
   );

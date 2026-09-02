@@ -107,7 +107,18 @@ function DefaultSlide({ slide }: { slide: Slide }) {
           ))}
         </div>
       ) : null}
+      {(slide.stats || []).length ? (
+        <div className="stats">
+          {slide.stats!.map((s) => (
+            <div className={`stat ${s.accent || "blue"}`} key={s.value + s.caption}>
+              <strong>{s.value}</strong>
+              <p>{s.caption}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
       {slide.chart ? <SlideChart spec={slide.chart} /> : null}
+      {slide.soWhat ? <p className="so-what">{slide.soWhat}</p> : null}
       {slide.narrative ? <p className="narrative">{slide.narrative}</p> : null}
     </>
   );

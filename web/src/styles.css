@@ -62,10 +62,32 @@ button {
   font-size: 12px;
   color: #b9b6ae;
 }
-.rail nav {
+.rail nav,
+.levels-nav {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+.levels-nav em {
+  display: inline-block;
+  width: 1.6em;
+  font-style: normal;
+  color: var(--orange);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.archive {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 8px;
+  opacity: 0.7;
+}
+.archive.on {
+  color: var(--orange);
+  opacity: 1;
 }
 .rail nav button,
 .ghost,
@@ -116,6 +138,31 @@ button {
 .home {
   max-width: 720px;
   margin: 8vh auto 0;
+}
+.home-levels {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 8px;
+}
+.home-levels li {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px 10px;
+}
+.home-levels span {
+  display: block;
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.home-levels strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
 }
 .eyebrow {
   color: var(--orange);
@@ -690,6 +737,73 @@ textarea {
   background: var(--blue);
 }
 
+.take {
+  max-width: 920px;
+  padding-bottom: 48px;
+}
+.level-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 18px 0;
+}
+.level-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px;
+  text-align: left;
+}
+.level-card span {
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.level-card strong {
+  display: block;
+  font-family: var(--display);
+  font-size: 20px;
+  margin: 8px 0;
+}
+.level-card p {
+  margin: 0;
+  color: var(--body);
+  font-size: 14px;
+}
+.level-strip {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  font-size: 13px;
+}
+.level-strip span {
+  color: var(--orange);
+  font-weight: 700;
+  margin-right: 6px;
+}
+.callout-line {
+  color: var(--orange);
+  font-weight: 700;
+  margin-top: 16px;
+}
+.phase-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 18px;
+}
+.phase-nav a {
+  color: var(--ink);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
 .workfile {
   max-width: 900px;
   padding-bottom: 48px;
@@ -809,7 +923,9 @@ td {
   }
   .insight-body,
   .cards,
-  .cards.five {
+  .cards.five,
+  .home-levels,
+  .level-grid {
     grid-template-columns: 1fr;
   }
 }

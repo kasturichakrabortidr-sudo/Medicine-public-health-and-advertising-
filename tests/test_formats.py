@@ -39,7 +39,9 @@ def test_print_and_visual_surfaces_exist():
     assert "print-deck" in css
     deck = (ROOT / "web" / "src" / "screens" / "DeckScreen.tsx").read_text(encoding="utf-8")
     assert "Print PDF" in deck
-    assert "print-deck" in deck
+    sheet = (ROOT / "web" / "src" / "components" / "PrintSheet.tsx").read_text(encoding="utf-8")
+    assert "print-deck" in sheet
+    assert "print-page" in sheet
     work = (ROOT / "web" / "src" / "screens" / "WorkfileScreen.tsx").read_text(encoding="utf-8")
     assert "Download markdown" in work
     assert "Print PDF" in work
@@ -48,3 +50,23 @@ def test_print_and_visual_surfaces_exist():
     assert "ForestChart" in charts
     assert "HouseChart" in charts
     assert "SpineChart" in charts
+    app = (ROOT / "web" / "src" / "App.tsx").read_text(encoding="utf-8")
+    assert "TakeScreen" in app
+    assert "LEVELS" in app
+    home = (ROOT / "web" / "src" / "screens" / "HomeScreen.tsx").read_text(encoding="utf-8")
+    assert "Five levels" in home
+    take = (ROOT / "web" / "src" / "screens" / "TakeScreen.tsx").read_text(encoding="utf-8")
+    assert "Download PowerPoint" in take
+    assert "Download working file" in take
+
+
+def test_pack_exposes_five_levels():
+    pack = _sample_pack()
+    levels = pack["levels"]
+    assert levels["brief"]["n"] == "01"
+    assert levels["workfile"]["n"] == "02"
+    assert levels["workfile"]["phases"] == 11
+    assert levels["papers"]["n"] == "03"
+    assert levels["deck"]["n"] == "04"
+    assert levels["deck"]["slides"] >= 10
+    assert levels["take"]["n"] == "05"
