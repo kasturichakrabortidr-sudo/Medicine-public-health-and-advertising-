@@ -82,10 +82,12 @@ def run_director(
     ledger = resolve_evidence(brief, pubmed=pubmed)
     attach_references(ledger)
     records = list(ledger.get("records") or [])
-    if records:
-        records.sort(key=_lead_priority)
-        ledger["records"] = records
-        ledger["lead"] = _campaign_lead(brief, records, ledger.get("review"))
+    catalog = [r for r in records if r.get("matchedFrom") != "pubmed"]
+    retrieved = [r for r in records if r.get("matchedFrom") == "pubmed"]
+    if retrieved:
+        retrieved.sort(key=_lead_priority)
+        ledger["records"] = catalog + retrieved
+        ledger["lead"] = _campaign_lead(brief, ledger["records"], ledger.get("review"))
         attach_references(ledger)
     lead = ledger.get("lead") or {}
     primary = (lead.get("citations") or [{}])[0]
