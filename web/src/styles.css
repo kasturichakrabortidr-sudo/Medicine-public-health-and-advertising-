@@ -225,20 +225,37 @@ textarea {
   flex-direction: column;
   min-height: 0;
 }
-.deck-bar {
+.deck-bar,
+.doc-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 16px 24px;
 }
-.deck-bar h1 {
+.deck-bar h1,
+.doc-bar h1 {
   font-size: 22px;
   margin: 0;
 }
-.deck-bar p {
+.deck-bar p,
+.doc-bar p {
   margin: 4px 0 0;
   color: var(--mute);
   font-size: 13px;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.actions button:not(.primary),
+.doc-bar button:not(.primary) {
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 600;
 }
 .presenter {
   flex: 1;
@@ -419,13 +436,354 @@ textarea {
   font-weight: 700;
   margin-top: auto;
 }
+.title-body,
+.dark-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.title-body .cards,
+.dark-body .cards {
+  margin-top: auto;
+}
+
+.slide.insight {
+  background: #f7f7f4;
+}
+.slide.insight .stat {
+  background: #fff;
+}
+
 .chart,
-.people,
-.spine,
-.forest {
+.people-chart,
+.forest-chart,
+.spine-chart,
+.house-chart,
+.compare-chart,
+.flow-chart {
   flex: 1;
-  min-height: 120px;
+  min-height: 140px;
   margin-top: 10px;
+  width: 100%;
+}
+.chart {
+  height: 220px;
+}
+.chart-title {
+  margin: 0 0 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--orange);
+  font-weight: 700;
+}
+
+.people-chart,
+.compare-chart {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  flex: 1;
+  min-height: 0;
+}
+.people-grid,
+.compare-col,
+.nnt-card,
+.compare-mid {
+  background: #f7f7f4;
+  padding: 12px;
+  min-height: 0;
+}
+.nnt-card,
+.compare-mid {
+  background: #111;
+  color: #f7f7f4;
+}
+.nnt-card span,
+.compare-mid span {
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nnt-card strong,
+.compare-mid strong,
+.people-grid strong,
+.compare-col strong {
+  font-family: var(--display);
+  font-size: clamp(22px, 2.8cqw, 40px);
+  display: block;
+}
+.dots {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+  margin: 10px 0;
+}
+.dot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #d4cec3;
+  display: block;
+}
+.dot.event {
+  background: var(--orange);
+}
+.dot.saved {
+  background: var(--blue);
+}
+
+.forest-chart {
+  flex: 1;
+  min-height: 0;
+}
+.forest-axis {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  font-size: 10px;
+  color: var(--mute);
+  margin-bottom: 6px;
+}
+.forest-axis span:last-child {
+  text-align: right;
+}
+.forest-axis span:nth-child(2) {
+  color: var(--orange);
+}
+.forest-chart ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.forest-chart li {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1.4fr;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.forest-label span,
+.forest-num {
+  font-size: 11px;
+  color: var(--mute);
+}
+.forest-track {
+  position: relative;
+  height: 16px;
+  background: #efebe3;
+}
+.forest-track .null {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--orange);
+}
+.forest-track .ci {
+  position: absolute;
+  top: 6px;
+  height: 4px;
+  background: #111;
+}
+.forest-track .hr {
+  position: absolute;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--orange);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.spine-chart {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.spine-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.spine-cell {
+  background: #f7f7f4;
+  padding: 10px;
+  border-left: 3px solid var(--blue);
+}
+.spine-cell.execute {
+  background: #111;
+  color: #f7f7f4;
+  border-left-color: var(--orange);
+}
+.spine-cell.measure {
+  border-left-color: var(--orange);
+}
+.spine-cell span {
+  display: block;
+  font-size: 10px;
+  color: var(--orange);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.spine-cell p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.house-chart {
+  flex: 1;
+  min-height: 0;
+}
+.house-chart h3 {
+  font-family: var(--display);
+  margin: 0 0 10px;
+  font-size: clamp(16px, 1.6cqw, 22px);
+}
+.house-chart em {
+  display: block;
+  margin-top: 8px;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--mute);
+}
+
+.flow-chart {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.flow-chart li {
+  background: #f7f7f4;
+  padding: 12px;
+}
+.flow-chart span {
+  color: var(--orange);
+  font-weight: 700;
+}
+.flow-chart p {
+  margin: 6px 0 0;
+  font-size: 13px;
+}
+
+.compare-bar {
+  height: 90px;
+  display: flex;
+  align-items: flex-end;
+  margin-top: 8px;
+}
+.compare-bar i {
+  display: block;
+  width: 28%;
+  margin: 0 auto;
+}
+.compare-bar i.event {
+  background: var(--orange);
+}
+.compare-bar i.saved {
+  background: var(--blue);
+}
+
+.workfile {
+  max-width: 900px;
+  padding-bottom: 48px;
+}
+.workfile .doc-bar {
+  padding: 0 0 18px;
+}
+.work-cover {
+  background: #111;
+  color: #f7f7f4;
+  padding: 28px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.work-cover h2 {
+  font-family: var(--display);
+  font-size: 28px;
+  margin: 8px 0 12px;
+}
+.work-cover .lede {
+  color: #c8c4bc;
+}
+.phase h3 {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin: 16px 0 8px;
+}
+.work-table {
+  overflow-x: auto;
+}
+.workfile table {
+  font-size: 13px;
+}
+
+.print-deck {
+  position: absolute;
+  left: -200vw;
+  top: 0;
+  width: 13.333in;
+}
+.print-page {
+  width: 13.333in;
+  height: 7.5in;
+  container-type: size;
+  break-after: page;
+  page-break-after: always;
+}
+.print-page .slide {
+  box-shadow: none;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    background: #fff;
+  }
+  .rail,
+  .no-print,
+  .banner {
+    display: none !important;
+  }
+  .shell,
+  .shell.decking,
+  .stage,
+  .deck {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+  body[data-print="deck"] .print-deck {
+    position: static;
+    left: auto;
+    width: auto;
+  }
+  body[data-print="deck"] .print-page .slide {
+    width: 13.333in;
+    height: 7.5in;
+  }
+  .workfile,
+  .papers-page,
+  .panel {
+    max-width: none;
+  }
+  .phase,
+  .work-cover,
+  .papers li {
+    break-inside: avoid;
+  }
 }
 .spine,
 .forest {

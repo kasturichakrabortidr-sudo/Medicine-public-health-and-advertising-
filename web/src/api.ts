@@ -31,16 +31,10 @@ export async function generatePack(files: File[], pasted: string): Promise<Strat
   return res.json();
 }
 
-export async function downloadPptx(pack: StrategyPack): Promise<void> {
-  const res = await fetch("/api/export/pptx", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(pack),
-  });
-  if (!res.ok) throw new Error(await fail(res));
+async function downloadBlob(res: Response, fallback: string): Promise<void> {
   const blob = await res.blob();
   const match = /filename="?([^"]+)"?/i.exec(res.headers.get("content-disposition") || "");
-  const name = match?.[1] || `${pack.meta.brand || "strategy"}-strategy-deck.pptx`;
+  const name = match?.[1] || fallback;
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -49,6 +43,26 @@ export async function downloadPptx(pack: StrategyPack): Promise<void> {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+export async function downloadPptx(pack: StrategyPack): Promise<void> {
+  const res = await fetch("/api/export/pptx", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pack),
+  });
+  if (!res.ok) throw new Error(await fail(res));
+  await downloadBlob(res, `${pack.meta.brand || "strategy"}-strategy-deck.pptx`);
+}
+
+export async function downloadWorkfile(pack: StrategyPack): Promise<void> {
+  const res = await fetch("/api/export/workfile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pack),
+  });
+  if (!res.ok) throw new Error(await fail(res));
+  await downloadBlob(res, `${pack.meta.brand || "strategy"}-working-file.md`);
 }
 
 export async function listProjects(): Promise<ProjectSummary[]> {

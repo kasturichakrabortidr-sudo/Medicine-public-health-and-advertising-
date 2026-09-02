@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { deleteProject, downloadPptx, generatePack, listProjects, loadProject, saveProject } from "./api";
+import { deleteProject, downloadPptx, downloadWorkfile, generatePack, listProjects, loadProject, saveProject } from "./api";
 import { DeckScreen } from "./screens/DeckScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { PapersScreen } from "./screens/PapersScreen";
@@ -87,6 +87,19 @@ export default function App() {
     }
   };
 
+  const exportWork = async () => {
+    if (!pack) return;
+    setBusy(true);
+    setError("");
+    try {
+      await downloadWorkfile(pack);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className={tab === "deck" && pack ? "shell decking" : "shell"}>
       <aside className="rail">
@@ -142,7 +155,7 @@ export default function App() {
             onDelete={remove}
           />
         ) : null}
-        {tab === "work" && pack ? <WorkfileScreen pack={pack} /> : null}
+        {tab === "work" && pack ? <WorkfileScreen pack={pack} busy={busy} onExport={exportWork} /> : null}
         {tab === "evidence" && pack ? <PapersScreen pack={pack} /> : null}
         {tab === "deck" && pack ? <DeckScreen pack={pack} busy={busy} onExport={exportDeck} /> : null}
       </main>

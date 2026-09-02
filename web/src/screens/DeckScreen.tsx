@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SlideCanvas } from "../components/SlideCanvas";
+import { printAs } from "../print";
 import type { StrategyPack } from "../types";
 
 export function DeckScreen({
@@ -63,18 +64,23 @@ export function DeckScreen({
 
   return (
     <div className="deck">
-      <header className="deck-bar">
+      <header className="deck-bar no-print">
         <div>
           <h1>{pack.meta.brand}</h1>
           <p>
             {pack.meta.therapyArea} · {slides.length} slides
           </p>
         </div>
-        <button className="primary" type="button" disabled={busy} onClick={onExport}>
-          {busy ? "Building PPTX…" : "Download PPTX"}
-        </button>
+        <div className="actions">
+          <button type="button" onClick={() => printAs("deck")}>
+            Print PDF
+          </button>
+          <button className="primary" type="button" disabled={busy} onClick={onExport}>
+            {busy ? "Building PPTX…" : "Download PPTX"}
+          </button>
+        </div>
       </header>
-      <div className="presenter">
+      <div className="presenter no-print">
         <nav className="sections">
           {sections.map((s) => (
             <button key={`${s.section}-${s.index}`} type="button" className={slide.section === s.section ? "on" : ""} onClick={() => go(s.index)}>
@@ -98,6 +104,13 @@ export function DeckScreen({
             </button>
           </div>
         </div>
+      </div>
+      <div className="print-deck" aria-hidden="true">
+        {slides.map((s) => (
+          <div className="print-page" key={s.id}>
+            <SlideCanvas slide={s} />
+          </div>
+        ))}
       </div>
     </div>
   );

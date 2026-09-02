@@ -1,14 +1,22 @@
+import { printAs } from "../print";
 import type { StrategyPack } from "../types";
 
 export function PapersScreen({ pack }: { pack: StrategyPack }) {
   const records = pack.evidence?.records || [];
   const gaps = pack.evidence?.gaps || [];
   return (
-    <section className="panel">
-      <h1>Papers</h1>
+    <section className="panel papers-page">
+      <header className="doc-bar no-print">
+        <div>
+          <p className="eyebrow">Papers</p>
+          <h1>Numbered register</h1>
+        </div>
+        <button type="button" onClick={() => printAs("work")}>
+          Print PDF
+        </button>
+      </header>
       <p className="lede">
-        Numbered register for this brief. Independent class papers are labelled as such — not trials of{" "}
-        {pack.meta.brand}.
+        Independent class papers are labelled as such — not trials of {pack.meta.brand}.
       </p>
       <ol className="papers">
         {records.map((row) => (

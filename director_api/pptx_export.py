@@ -239,7 +239,8 @@ def _stat_cards(slide, stats: list[dict], l, t, w, h) -> None:
         card_w = cw - Inches(0.16)
         _rail_box(slide, x, t, card_w, h, _accent(i, st), PAPER)
         _textbox(slide, x + Inches(0.18), t + Inches(0.16), card_w - Inches(0.28), Inches(0.55),
-                 str(st.get("value") or ""), size=28, bold=True, color=INK, font=DISPLAY)
+                 str(st.get("value") or ""), size=28, bold=True,
+                 color=ORANGE if st.get("accent") == "orange" else BLUE, font=DISPLAY)
         _textbox(slide, x + Inches(0.18), t + Inches(0.78), card_w - Inches(0.28), h - Inches(0.92),
                  st.get("caption") or "", size=12, color=BODY)
 
@@ -260,7 +261,7 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
             (spec.get("kicker") or "").upper(),
             size=12,
             bold=True,
-            color=BLUE,
+            color=ORANGE,
         )
         _textbox(
             slide,
@@ -376,9 +377,9 @@ def _render_slide(slide, spec: dict, dark: bool) -> None:
         Inches(0.34),
         Inches(1.06),
         Inches(4.2) if insight else Inches(8.6),
-        Inches(1.35) if insight else Inches(0.78),
+        Inches(1.55) if insight else Inches(0.86),
         spec.get("title") or "",
-        size=18 if insight else 20,
+        size=24 if insight else 22,
         bold=True,
         color=INK,
         font=DISPLAY,

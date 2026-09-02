@@ -15,6 +15,7 @@ from .extract import ExtractedBrief, extract_files, merge_into_brief, partition_
 from .generate import generate_pack
 from .pptx_export import filename_for, pack_to_pptx
 from .projects import delete_project, get_project, list_projects, save_project, upsert_ongoing
+from .workfile_export import filename_for_workfile, workfile_to_markdown
 
 app = FastAPI(title="STRATA Strategy Director", version="1.0.0")
 app.add_middleware(
@@ -218,12 +219,36 @@ async def export_pptx(request: Request):
     return _pptx_response(pack)
 
 
+@app.post("/api/export/workfile")
+async def export_workfile(request: Request):
+    try:
+        pack = await request.json()
+    except Exception as exc:
+        raise HTTPException(400, f"Body must be a JSON strategy pack: {exc}") from exc
+    if not isinstance(pack, dict) or not pack.get("workfile"):
+        raise HTTPException(400, "JSON must be a strategy pack with a working file.")
+    return _workfile_response(pack)
+
+
 def _pptx_response(pack: dict) -> Response:
     data = pack_to_pptx(pack)
     name = filename_for(pack)
     return Response(
         content=data,
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        headers={
+            "Content-Disposition": f'attachment; filename="{name}"',
+            "Content-Length": str(len(data)),
+        },
+    )
+
+
+def _workfile_response(pack: dict) -> Response:
+    data = workfile_to_markdown(pack).encode("utf-8")
+    name = filename_for_workfile(pack)
+    return Response(
+        content=data,
+        media_type="text/markdown; charset=utf-8",
         headers={
             "Content-Disposition": f'attachment; filename="{name}"',
             "Content-Length": str(len(data)),
