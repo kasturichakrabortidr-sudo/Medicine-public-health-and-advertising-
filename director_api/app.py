@@ -44,6 +44,7 @@ def health():
     return {
         "ok": True,
         "service": "strata-director",
+        "edition": "strategy-director",
         "accept": ACCEPT_HINT,
         "web": (dist / "index.html").is_file(),
     }

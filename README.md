@@ -21,7 +21,7 @@ Opens `http://127.0.0.1:5173`
 
 | Tab | What it does |
 |---|---|
-| **Brief** | Upload or paste a client brief. Nothing is preloaded. |
+| **Brief** | Upload or paste a client brief. **Build the strategy**. Nothing is preloaded. |
 | **Projects** | **Ongoing** working files from Generate, and **Saved** packs you pin. Open, save, or delete them here. |
 | **Working file** | The eleven-step strategy for the open pack. |
 | **Papers** | Validated citation register (DOI/PMID). Uncited brief items stay gaps. |
@@ -34,10 +34,13 @@ CRM baselines. All claims still need MLR.
 
 ### Live website
 
-Use the **manual Web Service** path below. Do not type a guessed
-`strata-director.onrender.com` URL — that host does not exist. Render only
-makes a URL after the service is **Live**, and the hostname is whatever Render
-prints on the service page.
+**https://medicine-public-health-and-advertising-1.onrender.com/**
+
+Paste a brief and click **Build the strategy**. Old saved Projects packs are stale — generate again.
+
+Point the Render service at this branch for a public deploy. Free instances sleep; the first request can take about a minute.
+
+Do not type a guessed `strata-director.onrender.com` URL — that host does not exist.
 
 GitHub’s default branch in this repo is the old CLI launcher. It has **no
 website**. If you leave **Branch** on the default, the deploy has nothing to

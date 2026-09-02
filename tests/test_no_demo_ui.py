@@ -11,6 +11,7 @@ def test_app_does_not_autoload_cardioshield():
     assert "fetchDemo" not in app
     assert "fetchDemo" not in api
     assert 'useState<TabId>("briefs")' in app
-    assert "ProjectsTab" in app
+    assert "ProjectsScreen" in app
     assert "/api/demo" not in api
     assert "/demo.json" not in api
+    assert "CardioShield" not in api
