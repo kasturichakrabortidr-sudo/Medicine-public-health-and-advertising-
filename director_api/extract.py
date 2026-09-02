@@ -401,6 +401,14 @@ def _parse_structured(raw: str) -> ExtractedBrief:
             if rest:
                 bucket.append(rest)
             continue
+        numbered_brand = re.match(
+            r"^\d+[\.)]\s+[A-Z][A-Za-z0-9\-]{2,40}(\s*\(|$)",
+            stripped,
+        )
+        if numbered_brand:
+            flush()
+            current = None
+            continue
         if label and key not in KNOWN_FIELDS:
             title = label.group(1)
             heading_like = (
@@ -618,14 +626,14 @@ def _infer_missing(brief: ExtractedBrief) -> None:
             brief.brand = m.group(1).strip()
     if not brief.therapy_area:
         m = re.search(
-            r"(cardiology|cardiovascular|oncology|diabetes|neurology|respiratory|"
+            r"\b(cardiology|cardiovascular|oncology|diabetes|neurology|respiratory|"
             r"immunology|dermatology|infectious|heart failure|HFrEF|HFpEF|COPD|"
-            r"dry cough|lipid management)[^\n]{0,40}",
+            r"dry cough|lipid management)\b",
             blob,
             re.I,
         )
         if m:
-            brief.therapy_area = m.group(0).strip()
+            brief.therapy_area = m.group(1)
     if not brief.market:
         m = re.search(r"\b(India|United States|USA|UK|EU|China|Brazil|Japan|Germany|France)\b", blob)
         if m:
@@ -792,8 +800,13 @@ def _apply_category_and_rivals(brief: ExtractedBrief, raw: str) -> None:
     low = raw.lower()
     if not brief.indication and re.search(r"\bdry cough\b|cough syrup|cough expert", low):
         brief.indication = "Dry cough"
-        if not brief.therapy_area:
+        if not brief.therapy_area or "loss of rank" in (brief.therapy_area or "").lower():
             brief.therapy_area = "Respiratory — dry cough"
+    elif re.search(r"\bdry cough\b", low) and (
+        not brief.therapy_area or "loss of rank" in (brief.therapy_area or "").lower()
+        or brief.therapy_area.lower() in {"dry cough", "cough"}
+    ):
+        brief.therapy_area = "Respiratory — dry cough"
     if not brief.indication and re.search(r"\bldl-c\b|lipoprotein\(a\)|lp\(a\)|lipid management", low):
         brief.indication = brief.indication or "LDL-C reduction / cardiovascular risk"
         if not brief.therapy_area:

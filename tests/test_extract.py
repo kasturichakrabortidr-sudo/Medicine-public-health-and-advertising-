@@ -104,6 +104,7 @@ def test_alex_creative_brief_is_read():
     brief = merge_into_brief([], pasted=raw)
     assert brief.brand == "Alex"
     assert "cough" in (brief.indication or brief.therapy_area).lower()
+    assert "loss of rank" not in (brief.therapy_area or "").lower()
     assert any("similar" in line.lower() for line in brief.hcp_insights)
     assert any("Zedex" in c or "Grilinctus" in c for c in brief.competitors)
     assert "Alex" in (brief.business_goal or "")
@@ -117,6 +118,7 @@ def test_novartis_portfolio_brief_leads_with_sybrava():
     assert brief.brand == "Sybrava"
     assert "Inclisiran" in (brief.product or "")
     assert "Cardio" in (brief.therapy_area or "") or "LDL" in (brief.indication or "")
+    assert "Pelacarsen" not in " ".join(brief.hcp_insights)
 
 
 def test_table_style_creative_brief_is_read():
