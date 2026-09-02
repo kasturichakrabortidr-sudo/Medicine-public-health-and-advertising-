@@ -1,0 +1,11 @@
+claim_id,label,count,percent,citation_ids
+epidemiology_and_burden,Epidemiology and disease burden,47,23.5,1;10;16;17;22;43;49;50;53;54;59;62;67;79;86;88;91;94;99;100;101;102;105;106;109;110;111;116;117;123;124;129;141;143;144;146;150;153;160;169;170;171;176;177;180;185;192
+symptom_or_quality_of_life,Symptoms / quality of life,43,21.5,1;5;6;29;53;54;60;65;83;87;88;94;100;102;105;122;123;129;130;135;139;141;146;148;150;154;160;161;164;171;172;174;177;178;180;182;187;188;190;192;193;194;196
+mortality_or_hospitalisation_benefit,Mortality or HF hospitalisation benefit,21,10.5,10;42;72;77;84;96;100;102;105;114;123;127;129;135;164;168;169;171;172;175;187
+safety_hypotension_or_renal,"Safety: hypotension, renal, electrolytes",13,6.5,4;13;42;73;94;105;114;115;129;130;159;169;171
+cost_or_access_barrier,Cost and access barriers,10,5.0,21;43;49;109;154;163;164;167;172;188
+lived_experience_or_care_relationship,Lived experience and care relationships,11,5.5,29;36;71;103;120;131;132;146;148;161;188
+lmics_or_national_context,LMIC / national context,11,5.5,34;35;39;45;47;55;67;94;116;141;169
+guideline_directed_foundational_therapy,Guideline-directed foundational therapy,5,2.5,2;54;63;94;95
+early_or_in_hospital_initiation,Early / in-hospital initiation,5,2.5,72;122;148;164;169
+implementation_gap_or_inertia,Implementation gap / clinical inertia,4,2.0,2;54;169;170
