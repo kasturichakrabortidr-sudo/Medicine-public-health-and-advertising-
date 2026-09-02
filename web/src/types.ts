@@ -94,6 +94,19 @@ export interface ExtractedBrief {
   extraction_notes: string[];
 }
 
+export interface AgentEvent {
+  type: "think" | "execute" | "error";
+  step?: string;
+  title?: string;
+  text?: string;
+}
+
+export interface AgentState {
+  model: string;
+  llm: boolean;
+  log: AgentEvent[];
+}
+
 export interface StrategyPack {
   meta: {
     brand: string;
@@ -135,6 +148,7 @@ export interface StrategyPack {
     references?: ReferenceItem[];
   };
   workfile?: Workfile;
+  agent?: AgentState;
   references?: ReferenceItem[];
   slides: Slide[];
   levels?: PackLevels;

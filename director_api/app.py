@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import re
+import threading
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, Response, StreamingResponse
 
+from .agent import llm_model, llm_ready
 from .extract import ExtractedBrief, extract_files, merge_into_brief, partition_uploads
 from .generate import generate_pack
 from .pptx_export import filename_for, pack_to_pptx
@@ -42,12 +45,16 @@ def web_dist() -> Path:
 @app.get("/api/health")
 def health():
     dist = web_dist()
+    ready = llm_ready()
     return {
         "ok": True,
         "service": "strata-director",
         "edition": "strategy-director",
         "accept": ACCEPT_HINT,
         "web": (dist / "index.html").is_file(),
+        "agent": True,
+        "llm": ready,
+        "model": llm_model() if ready else "director-workflow",
     }
 
 
@@ -111,61 +118,59 @@ async def generate(
     pasted: str = Form(default=""),
     brief_json: str = Form(default=""),
     mode: str = Form(default="director"),
+    pubmed: str = Form(default="true"),
 ):
-    uploads = []
-    template_names: list[str] = []
-    if files:
-        for f in files:
-            payload = await f.read()
-            if len(payload) > 25 * 1024 * 1024:
-                raise HTTPException(413, f"{f.filename} exceeds 25 MB")
-            uploads.append((f.filename or "upload", payload, f.content_type or ""))
-        templates, briefs = partition_uploads(uploads)
-        template_names = [name for name, _, _ in templates]
-        uploads = briefs
+    brief, template_names = await _intake_brief(files, pasted, brief_json, mode)
+    pack = generate_pack(brief, mode=mode, pubmed=_pubmed_flag(pubmed))
+    return _stamp_and_save(pack, brief, template_names)
 
-    form = None
-    if brief_json.strip():
-        try:
-            mapping = json.loads(brief_json)
-        except json.JSONDecodeError as exc:
-            raise HTTPException(400, f"brief_json is not valid JSON: {exc}") from exc
-        form = _brief_from_mapping(mapping)
 
-    extracted = None
-    if uploads or pasted.strip():
-        extracted = merge_into_brief(extract_files(uploads), pasted)
+@app.post("/api/generate/stream")
+async def generate_stream(
+    files: list[UploadFile] | None = File(default=None),
+    pasted: str = Form(default=""),
+    brief_json: str = Form(default=""),
+    mode: str = Form(default="director"),
+    pubmed: str = Form(default="true"),
+):
+    brief, template_names = await _intake_brief(files, pasted, brief_json, mode)
+    pubmed_on = _pubmed_flag(pubmed)
 
-    brief = _compose_brief(extracted, form)
-    if not brief:
-        raise HTTPException(400, "Provide files, pasted text, or brief_json.")
-    if template_names:
-        note = (
-            "Design template kept for the deck look, not read as a second brief: "
-            + ", ".join(template_names)
-        )
-        if note not in brief.extraction_notes:
-            brief.extraction_notes.append(note)
+    def events():
+        mailbox: queue.Queue = queue.Queue()
 
-    if not brief.brand and not brief.therapy_area and not brief.raw_text:
-        raise HTTPException(422, "Could not read a usable brief from the upload.")
+        def emit(event: dict) -> None:
+            mailbox.put(("event", event))
 
-    if mode == "demo":
-        raise HTTPException(400, "Demo mode is not available. Upload your own brief.")
+        def run() -> None:
+            try:
+                pack = generate_pack(brief, mode=mode, pubmed=pubmed_on, emit=emit)
+                _stamp_and_save(pack, brief, template_names)
+                mailbox.put(("done", pack))
+            except Exception as exc:
+                mailbox.put(("error", str(exc) or exc.__class__.__name__))
 
-    pack = generate_pack(brief, mode=mode, pubmed=True)
-    pack["meta"]["source"] = (
-        ", ".join(brief.source_files)
-        or pack["meta"].get("source")
-        or "uploaded brief"
+        threading.Thread(target=run, daemon=True).start()
+        while True:
+            kind, payload = mailbox.get()
+            if kind == "event":
+                yield _sse(payload)
+            elif kind == "done":
+                yield _sse({"type": "pack", "pack": payload})
+                break
+            else:
+                yield _sse({"type": "error", "text": payload})
+                break
+
+    return StreamingResponse(
+        events(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
     )
-    if template_names:
-        pack["meta"]["templateFiles"] = template_names
-    try:
-        upsert_ongoing(pack)
-    except OSError:
-        pass
-    return pack
 
 
 @app.get("/api/projects")
@@ -287,6 +292,79 @@ def spa_or_asset(full_path: str):
     if first in _RESERVED_SPA:
         raise HTTPException(404, "Not found")
     return _web_file(full_path)
+
+
+def _pubmed_flag(value: str) -> bool:
+    return (value or "true").strip().lower() not in {"0", "false", "no", "off"}
+
+
+def _sse(payload: dict) -> str:
+    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+
+async def _intake_brief(
+    files: list[UploadFile] | None,
+    pasted: str,
+    brief_json: str,
+    mode: str,
+) -> tuple[ExtractedBrief, list[str]]:
+    uploads = []
+    template_names: list[str] = []
+    if files:
+        for f in files:
+            payload = await f.read()
+            if len(payload) > 25 * 1024 * 1024:
+                raise HTTPException(413, f"{f.filename} exceeds 25 MB")
+            uploads.append((f.filename or "upload", payload, f.content_type or ""))
+        templates, briefs = partition_uploads(uploads)
+        template_names = [name for name, _, _ in templates]
+        uploads = briefs
+
+    form = None
+    if brief_json.strip():
+        try:
+            mapping = json.loads(brief_json)
+        except json.JSONDecodeError as exc:
+            raise HTTPException(400, f"brief_json is not valid JSON: {exc}") from exc
+        form = _brief_from_mapping(mapping)
+
+    extracted = None
+    if uploads or pasted.strip():
+        extracted = merge_into_brief(extract_files(uploads), pasted)
+
+    brief = _compose_brief(extracted, form)
+    if not brief:
+        raise HTTPException(400, "Provide files, pasted text, or brief_json.")
+    if template_names:
+        note = (
+            "Design template kept for the deck look, not read as a second brief: "
+            + ", ".join(template_names)
+        )
+        if note not in brief.extraction_notes:
+            brief.extraction_notes.append(note)
+
+    if not brief.brand and not brief.therapy_area and not brief.raw_text:
+        raise HTTPException(422, "Could not read a usable brief from the upload.")
+
+    if mode == "demo":
+        raise HTTPException(400, "Demo mode is not available. Upload your own brief.")
+    return brief, template_names
+
+
+def _stamp_and_save(pack: dict, brief: ExtractedBrief, template_names: list[str]) -> dict:
+    pack.setdefault("meta", {})
+    pack["meta"]["source"] = (
+        ", ".join(brief.source_files)
+        or pack["meta"].get("source")
+        or "uploaded brief"
+    )
+    if template_names:
+        pack["meta"]["templateFiles"] = template_names
+    try:
+        upsert_ongoing(pack)
+    except OSError:
+        pass
+    return pack
 
 
 def _norm_brand(value: str) -> str:

@@ -1,3 +1,4 @@
+import { AgentLog } from "../components/AgentLog";
 import { printAs } from "../print";
 import type { StrategyPack } from "../types";
 
@@ -79,6 +80,16 @@ export function TakeScreen({
             <span>05</span> Take · PPTX, print, markdown
           </li>
         </ol>
+      ) : null}
+
+      {pack.agent?.log?.length ? (
+        <div className="director-trace">
+          <p className="eyebrow">Director log</p>
+          <p className="muted">
+            {pack.agent.llm ? `Model pass on ${pack.agent.model}` : "Workflow agent — think, then execute, at every level."}
+          </p>
+          <AgentLog events={pack.agent.log} />
+        </div>
       ) : null}
 
       {pack.workfile?.cannotClaim?.length ? (

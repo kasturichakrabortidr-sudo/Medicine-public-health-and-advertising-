@@ -798,6 +798,20 @@ def _review_note(brief: ExtractedBrief, matched: list[dict], terms: list[str]) -
     }
 
 
+def _lead_priority(row: dict) -> tuple:
+    """Campaign lead: clinical result clause first, guideline-recommend last, PK never."""
+    claim = str(row.get("claim_permitted") or "")
+    abstract = str(row.get("abstract") or "")
+    title = str(row.get("title") or "")
+    finding = _finding_from_abstract(abstract, title)
+    blob = f"{finding} {claim} {title}".lower()
+    guideline = 1 if re.search(r"guideline[s] recommend|japanese guidelines|practice guideline", blob) else 0
+    pk = 1 if _is_pk_only(blob) else 0
+    named = 0 if re.search(r"\b(kronos|ethos|tribute|trilog|impact|bgf)\b", blob) else 1
+    clinical = 0 if _has_published_finding(row) else 1
+    return (pk, guideline, clinical, named, -(row.get("year") or 0))
+
+
 def _has_published_finding(row: dict) -> bool:
     """True when the paper states a clinical result, not a disease definition or PK Cmax."""
     claim = str(row.get("claim_permitted") or "")
@@ -820,8 +834,9 @@ def _campaign_lead(brief: ExtractedBrief, matched: list[dict], review: dict | No
             "doNotClaim": ["Any efficacy, safety, or guideline class statement"],
         }
     if not catalog and retrieved:
-        with_finding = [r for r in retrieved if _has_published_finding(r)]
-        primary = (with_finding or retrieved)[0]
+        ranked = sorted(retrieved, key=_lead_priority)
+        with_finding = [r for r in ranked if _has_published_finding(r)]
+        primary = (with_finding or ranked)[0]
         implication = _strategy_implication(brief, retrieved)
         directs = _infer_directs(retrieved, brief)
         synthesis = (review or {}).get("synthesis") or _scientific_synthesis(brief, retrieved)

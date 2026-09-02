@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { ACCEPT } from "../api";
+import { AgentLog } from "../components/AgentLog";
 import { LEVELS } from "../levels";
+import type { AgentEvent } from "../types";
 
 export function HomeScreen({
   busy,
+  log,
+  llm,
+  model,
   onBuild,
 }: {
   busy: boolean;
+  log: AgentEvent[];
+  llm: boolean | null;
+  model: string;
   onBuild: (files: File[], pasted: string) => Promise<void>;
 }) {
   const [pasted, setPasted] = useState("");
@@ -20,13 +28,19 @@ export function HomeScreen({
     setFiles(next);
   };
 
+  const latest = log[log.length - 1];
+
   return (
     <section className="home">
       <p className="eyebrow">Five levels. One argument.</p>
       <h1>Paste the brief. Get every level of the strategy, not a literature dump.</h1>
       <p className="lede">
-        STRATA writes the working file, numbers the papers, and builds a 12-slide deck you can print or
-        take as PowerPoint. Nothing is preloaded. Claims stay inside the papers.
+        A director agent thinks before each step, then executes the workflow: working file, numbered
+        papers, 12-slide deck, takeaway. Claims stay inside the papers.
+      </p>
+      <p className="agent-status">
+        Director connected
+        {llm === true ? ` · model pass on ${model}` : " · workflow agent (model pass off until an API key is set)"}
       </p>
 
       <ol className="home-levels">
@@ -71,8 +85,10 @@ export function HomeScreen({
         disabled={busy || (!pasted.trim() && files.length === 0)}
         onClick={() => onBuild(files, pasted)}
       >
-        {busy ? "Searching PubMed…" : "Build the strategy"}
+        {busy ? (latest ? `${latest.type === "think" ? "Thinking" : "Executing"} · ${latest.title}` : "Director running") : "Build the strategy"}
       </button>
+
+      {log.length ? <AgentLog events={log} /> : null}
     </section>
   );
 }

@@ -55,6 +55,10 @@ def test_print_and_visual_surfaces_exist():
     assert "LEVELS" in app
     home = (ROOT / "web" / "src" / "screens" / "HomeScreen.tsx").read_text(encoding="utf-8")
     assert "Five levels" in home
+    assert "THINK" in home
+    assert "Director connected" in home
+    api = (ROOT / "web" / "src" / "api.ts").read_text(encoding="utf-8")
+    assert "/api/generate/stream" in api
     take = (ROOT / "web" / "src" / "screens" / "TakeScreen.tsx").read_text(encoding="utf-8")
     assert "Download PowerPoint" in take
     assert "Download working file" in take

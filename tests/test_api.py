@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+import json
 
 from director_api.app import app
 
@@ -8,8 +9,11 @@ client = TestClient(app)
 def test_health():
     res = client.get("/api/health")
     assert res.status_code == 200
-    assert res.json()["ok"] is True
-    assert "pdf" in res.json()["accept"]
+    body = res.json()
+    assert body["ok"] is True
+    assert body["agent"] is True
+    assert "model" in body
+    assert "pdf" in body["accept"]
 
 
 def test_cardioshield_demo_is_not_in_the_app():
@@ -51,3 +55,32 @@ def test_generate_rejects_demo_mode():
         data={"pasted": "brand: Helix\ntherapy_area: Oncology\n", "mode": "demo"},
     )
     assert res.status_code == 400
+
+
+def test_generate_stream_thinks_then_executes():
+    res = client.post(
+        "/api/generate/stream",
+        data={"pasted": "brand: Helix\ntherapy_area: Oncology\n", "pubmed": "false"},
+    )
+    assert res.status_code == 200
+    assert "text/event-stream" in (res.headers.get("content-type") or "")
+    events = []
+    pack = None
+    for chunk in res.text.split("\n\n"):
+        line = next((row for row in chunk.split("\n") if row.startswith("data:")), "")
+        if not line:
+            continue
+        payload = json.loads(line[5:].strip())
+        if payload.get("type") == "pack":
+            pack = payload["pack"]
+        else:
+            events.append(payload)
+    assert pack and pack["meta"]["brand"] == "Helix"
+    assert pack["agent"]["log"]
+    assert events[0]["type"] == "think"
+    seen = set()
+    for event in events:
+        if event["type"] == "think":
+            seen.add(event["step"])
+        elif event["type"] == "execute":
+            assert event["step"] in seen

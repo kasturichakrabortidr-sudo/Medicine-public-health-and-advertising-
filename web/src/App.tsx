@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { deleteProject, downloadPptx, downloadWorkfile, generatePack, listProjects, loadProject, saveProject } from "./api";
+import { useEffect, useState } from "react";
+import { deleteProject, downloadPptx, downloadWorkfile, fetchHealth, generatePack, listProjects, loadProject, saveProject } from "./api";
 import { LEVELS } from "./levels";
 import { printAs } from "./print";
 import { PrintSheet } from "./components/PrintSheet";
@@ -9,7 +9,7 @@ import { PapersScreen } from "./screens/PapersScreen";
 import { ProjectsScreen } from "./screens/ProjectsScreen";
 import { TakeScreen } from "./screens/TakeScreen";
 import { WorkfileScreen } from "./screens/WorkfileScreen";
-import type { ProjectSummary, StrategyPack, TabId } from "./types";
+import type { AgentEvent, ProjectSummary, StrategyPack, TabId } from "./types";
 
 export default function App() {
   const [tab, setTab] = useState<TabId>("briefs");
@@ -17,6 +17,20 @@ export default function App() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [projects, setProjects] = useState<ProjectSummary[] | null>(null);
+  const [log, setLog] = useState<AgentEvent[]>([]);
+  const [llm, setLlm] = useState<boolean | null>(null);
+  const [model, setModel] = useState("director-workflow");
+
+  useEffect(() => {
+    fetchHealth()
+      .then((health) => {
+        setLlm(Boolean(health.llm));
+        setModel(health.model || "director-workflow");
+      })
+      .catch(() => {
+        setLlm(false);
+      });
+  }, []);
 
   const openPack = (next: StrategyPack, go: TabId = "deck") => {
     setPack(next);
@@ -27,8 +41,12 @@ export default function App() {
   const build = async (files: File[], pasted: string) => {
     setBusy(true);
     setError("");
+    setLog([]);
     try {
-      const next = await generatePack(files, pasted);
+      const next = await generatePack(files, pasted, (event) => {
+        setLog((prev) => [...prev, event]);
+      });
+      if (next.agent?.log?.length) setLog(next.agent.log);
       openPack(next, "deck");
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -144,7 +162,7 @@ export default function App() {
 
       <main className="stage">
         {error ? <p className="banner">{error}</p> : null}
-        {tab === "briefs" ? <HomeScreen busy={busy} onBuild={build} /> : null}
+        {tab === "briefs" ? <HomeScreen busy={busy} log={log} llm={llm} model={model} onBuild={build} /> : null}
         {tab === "projects" ? (
           <ProjectsScreen
             rows={projects}

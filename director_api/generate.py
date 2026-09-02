@@ -6,74 +6,29 @@ schema the web app renders: doctrine, slides, charts, interventions, dashboard.
 
 from __future__ import annotations
 
-from datetime import date
 import re
 
-from .cite import attach_references, mark
+from .cite import mark
 from .deck import (
-    build_client_deck,
     compare_rows,
     people_rows,
     spine_rows,
     stream_mix,
 )
-from .evidence import resolve_evidence
 from .extract import ExtractedBrief
-from .workfile import build_workfile
 
 
-def generate_pack(brief: ExtractedBrief, mode: str = "director", pubmed: bool = True) -> dict:
-    """Build a presentation-ready strategy pack from a structured brief."""
-    brand = brief.brand or "Unnamed brand"
-    ta = brief.therapy_area or "Specialty care"
-    market = brief.market or "Priority markets"
-    product = brief.product or brand
-    ledger = resolve_evidence(brief, pubmed=pubmed)
-    attach_references(ledger)
-    doctrine = _doctrine_for(brief, ledger)
-    _bind_science(doctrine, ledger)
-    work = build_workfile(brief, doctrine, ledger)
-    moves = _interventions(brief, doctrine, ledger)
-    slides = build_client_deck(brief, doctrine, ledger, work, moves)
+def generate_pack(
+    brief: ExtractedBrief,
+    mode: str = "director",
+    pubmed: bool = True,
+    emit=None,
+    llm=None,
+) -> dict:
+    """Think, then execute, through the director workflow. Returns a pack."""
+    from .agent import run_director
 
-    return {
-        "meta": {
-            "brand": brand,
-            "product": product,
-            "therapyArea": ta,
-            "market": market,
-            "generatedAt": date.today().isoformat(),
-            "mode": mode,
-            "doctrine": doctrine["name"],
-            "angleId": doctrine["id"],
-            "campaignLead": (ledger.get("lead") or {}).get("directs"),
-        },
-        "brief": brief.to_dict(),
-        "doctrine": doctrine,
-        "evidence": ledger,
-        "workfile": work,
-        "references": ledger.get("references") or [],
-        "slides": slides,
-        "interventions": moves,
-        "dashboard": _dashboard(brief, doctrine, ledger, work, moves),
-        "levels": {
-            "brief": {"n": "01", "label": "Brief", "title": brand, "note": brief.business_goal or ""},
-            "workfile": {
-                "n": "02",
-                "label": "Working file",
-                "phases": len(work.get("phases") or []),
-                "gaps": work.get("gapCount") or 0,
-            },
-            "papers": {
-                "n": "03",
-                "label": "Papers",
-                "count": len(ledger.get("records") or []),
-                "gaps": len(ledger.get("gaps") or []),
-            },
-            "deck": {"n": "04", "label": "Deck", "slides": len(slides)},
-            "take": {"n": "05", "label": "Take", "pptx": True, "markdown": True, "print": True},
-        },
-    }
+    return run_director(brief, mode=mode, pubmed=pubmed, emit=emit, llm=llm)
 
 
 def _doctrine_for(brief: ExtractedBrief, ledger: dict | None = None) -> dict:

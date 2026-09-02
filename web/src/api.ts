@@ -1,4 +1,4 @@
-import type { ExtractedBrief, FilePreview, ProjectRecord, ProjectStatus, ProjectSummary, StrategyPack } from "./types";
+import type { AgentEvent, ExtractedBrief, FilePreview, ProjectRecord, ProjectStatus, ProjectSummary, StrategyPack } from "./types";
 
 export const ACCEPT =
   ".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.csv,.tsv,.txt,.md,.rtf,.yaml,.yml,.json,.html,.htm,.xml,.odt,.odp,.ods,.png,.jpg,.jpeg,.webp,.gif,.log,.outline";
@@ -12,6 +12,20 @@ async function fail(res: Response): Promise<string> {
   }
 }
 
+function directorForm(files: File[], pasted: string): FormData {
+  const body = new FormData();
+  files.forEach((f) => body.append("files", f));
+  body.append("pasted", pasted);
+  body.append("mode", "director");
+  return body;
+}
+
+export async function fetchHealth(): Promise<{ ok: boolean; agent?: boolean; llm?: boolean; model?: string }> {
+  const res = await fetch("/api/health");
+  if (!res.ok) throw new Error(await fail(res));
+  return res.json();
+}
+
 export async function extractBriefs(files: File[], pasted: string): Promise<{ files: FilePreview[]; brief: ExtractedBrief }> {
   const body = new FormData();
   files.forEach((f) => body.append("files", f));
@@ -21,14 +35,69 @@ export async function extractBriefs(files: File[], pasted: string): Promise<{ fi
   return res.json();
 }
 
-export async function generatePack(files: File[], pasted: string): Promise<StrategyPack> {
-  const body = new FormData();
-  files.forEach((f) => body.append("files", f));
-  body.append("pasted", pasted);
-  body.append("mode", "director");
-  const res = await fetch("/api/generate", { method: "POST", body });
+export async function generatePack(
+  files: File[],
+  pasted: string,
+  onEvent?: (event: AgentEvent) => void,
+): Promise<StrategyPack> {
+  const streamed = await fetch("/api/generate/stream", {
+    method: "POST",
+    body: directorForm(files, pasted),
+    headers: { Accept: "text/event-stream" },
+  });
+  if (streamed.ok && streamed.body) {
+    return readDirectorStream(streamed, onEvent);
+  }
+  if (streamed.status !== 404 && streamed.status !== 405) {
+    throw new Error(await fail(streamed));
+  }
+  const res = await fetch("/api/generate", { method: "POST", body: directorForm(files, pasted) });
   if (!res.ok) throw new Error(await fail(res));
-  return res.json();
+  const pack: StrategyPack = await res.json();
+  for (const event of pack.agent?.log || []) onEvent?.(event);
+  return pack;
+}
+
+async function readDirectorStream(
+  res: Response,
+  onEvent?: (event: AgentEvent) => void,
+): Promise<StrategyPack> {
+  const reader = res.body!.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let pack: StrategyPack | null = null;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() || "";
+    for (const chunk of chunks) {
+      const line = chunk
+        .split("\n")
+        .map((row) => row.trimEnd())
+        .find((row) => row.startsWith("data:"));
+      if (!line) continue;
+      const event = JSON.parse(line.slice(5).trim());
+      if (event.type === "pack") pack = event.pack;
+      else if (event.type === "error") throw new Error(event.text || "Director failed.");
+      else onEvent?.(event);
+    }
+  }
+  if (buffer.trim()) {
+    const line = buffer
+      .split("\n")
+      .map((row) => row.trimEnd())
+      .find((row) => row.startsWith("data:"));
+    if (line) {
+      const event = JSON.parse(line.slice(5).trim());
+      if (event.type === "pack") pack = event.pack;
+      else if (event.type === "error") throw new Error(event.text || "Director failed.");
+      else onEvent?.(event);
+    }
+  }
+  if (!pack) throw new Error("Director finished without a pack.");
+  return pack;
 }
 
 async function downloadBlob(res: Response, fallback: string): Promise<void> {
