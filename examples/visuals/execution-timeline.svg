@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="execution-timeline-title execution-timeline-desc"
+     viewBox="0 0 920 280" width="920" height="280">
+  <title id="execution-timeline-title">When each cascade row enters the field</title>
+  <desc id="execution-timeline-desc">Execution is sequenced, not a launch-day dump of every visual. Source: Phase 10 journey scaffold. MLR: not-promotional.</desc>
+  <rect width="920" height="280" fill="#F7F4EF"/>
+  <rect x="0" y="0" width="8" height="280" fill="#1A7A7A"/>
+  <text x="32" y="36" fill="#C4A35A" font-size="11"
+        font-family="Helvetica, Arial, sans-serif" letter-spacing="1.6">
+    WHAT THE SCIENCE REPRESENTS</text>
+  <text x="32" y="64" fill="#0B1F3A" font-size="22"
+        font-family="Georgia, 'Times New Roman', serif">When each cascade row enters the field</text>
+  <text x="32" y="88" fill="#4A5568" font-size="13"
+        font-family="Helvetica, Arial, sans-serif">Execution is sequenced, not a launch-day dump of every visual</text>
+  <line x1="60" y1="180" x2="860" y2="180" stroke="#C4A35A" stroke-width="3"/><circle cx="144.0" cy="180" r="10" fill="#1A7A7A"/><text x="144.0" y="150" text-anchor="middle" fill="#0B1F3A" font-size="13" font-family="Helvetica, Arial, sans-serif">Pre-launch</text><text x="144.0" y="214" text-anchor="middle" fill="#4A5568" font-size="11" font-family="Helvetica, Arial, sans-serif">KOL lock the position</text><text x="144.0" y="232" text-anchor="middle" fill="#C4A35A" font-size="11" font-family="Helvetica, Arial, sans-serif">C1, C2</text><circle cx="312.0" cy="180" r="10" fill="#1A7A7A"/><text x="312.0" y="150" text-anchor="middle" fill="#0B1F3A" font-size="13" font-family="Helvetica, Arial, sans-serif">Launch</text><text x="312.0" y="214" text-anchor="middle" fill="#4A5568" font-size="11" font-family="Helvetica, Arial, sans-serif">Put the patient-impact visual in the room</text><text x="312.0" y="232" text-anchor="middle" fill="#C4A35A" font-size="11" font-family="Helvetica, Arial, sans-serif">C1</text><circle cx="480.0" cy="180" r="10" fill="#1A7A7A"/><text x="480.0" y="150" text-anchor="middle" fill="#0B1F3A" font-size="13" font-family="Helvetica, Arial, sans-serif">Adoption</text><text x="480.0" y="214" text-anchor="middle" fill="#4A5568" font-size="11" font-family="Helvetica, Arial, sans-serif">Cost path + first starts</text><text x="480.0" y="232" text-anchor="middle" fill="#C4A35A" font-size="11" font-family="Helvetica, Arial, sans-serif">C3</text><circle cx="648.0" cy="180" r="10" fill="#1A7A7A"/><text x="648.0" y="150" text-anchor="middle" fill="#0B1F3A" font-size="13" font-family="Helvetica, Arial, sans-serif">Reinforce</text><text x="648.0" y="214" text-anchor="middle" fill="#4A5568" font-size="11" font-family="Helvetica, Arial, sans-serif">90-day persistency + peer proof</text><text x="648.0" y="232" text-anchor="middle" fill="#C4A35A" font-size="11" font-family="Helvetica, Arial, sans-serif">C1, C2</text><circle cx="816.0" cy="180" r="10" fill="#1A7A7A"/><text x="816.0" y="150" text-anchor="middle" fill="#0B1F3A" font-size="13" font-family="Helvetica, Arial, sans-serif">Beyond</text><text x="816.0" y="214" text-anchor="middle" fill="#4A5568" font-size="11" font-family="Helvetica, Arial, sans-serif">Local RWE feedback loop</text><text x="816.0" y="232" text-anchor="middle" fill="#C4A35A" font-size="11" font-family="Helvetica, Arial, sans-serif">C2</text>
+  <text x="32" y="262" fill="#8A8276" font-size="11"
+        font-family="Helvetica, Arial, sans-serif">Source: Phase 10 journey scaffold  ·  MLR: not-promotional</text>
+</svg>

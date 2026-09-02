@@ -14,6 +14,7 @@ import anthropic
 
 from .config import render_brief
 from .phases import EXPAND_PROMPT, PHASES, SYSTEM_PROMPT, Phase
+from .visuals import attach_visuals, write_visual_brief
 
 DEFAULT_MODEL = "claude-opus-5"
 MAX_TOKENS = 64000
@@ -37,6 +38,7 @@ class StrategyEngine:
         self.quiet = quiet
         self.messages: list[dict] = []
         self.results: dict[str, str] = {}
+        self.visuals: list[Path] = []
 
     # ------------------------------------------------------------------ run
 
@@ -55,17 +57,30 @@ class StrategyEngine:
                 content = render_brief(self.brief) + "\n\n---\n\n" + content
                 first = False
             text = self._turn(content)
+            text, visual_paths = attach_visuals(text, self.out_dir / "visuals")
+            self.visuals.extend(visual_paths)
             self.results[phase.id] = text
             phase_path = self.out_dir / f"{phase.id}.md"
             phase_path.write_text(f"# {phase.title}\n\n{text}\n", encoding="utf-8")
             self._log(f"\n[saved {phase_path}]")
+            if visual_paths:
+                self._log(
+                    f"[rendered {len(visual_paths)} infographic(s) in {self.out_dir / 'visuals'}]"
+                )
 
         combined = self.out_dir / "medicomarketing-strategy.md"
         parts = [f"# Medicomarketing Strategy: {self.brief.get('brand', '')}", ""]
         for phase in phases:
             parts += [f"\n\n---\n\n## {phase.title}", "", self.results[phase.id]]
         combined.write_text("\n".join(parts), encoding="utf-8")
+        brief_path = write_visual_brief(
+            self.out_dir,
+            self.brief,
+            [(p.id, p.title) for p in phases],
+            self.visuals,
+        )
         self._log(f"\n\nCombined strategy written to {combined}")
+        self._log(f"Visual strategy brief written to {brief_path}")
         return combined
 
     def expand_outline(self, points: list[str]) -> Path:
@@ -78,6 +93,8 @@ class StrategyEngine:
             if i == 1:
                 content = render_brief(self.brief) + "\n\n---\n\n" + content
             text = self._turn(content)
+            text, visual_paths = attach_visuals(text, self.out_dir / "visuals")
+            self.visuals.extend(visual_paths)
             sections.append(f"## {i}. {point}\n\n{text}")
 
         out = self.out_dir / "outline-expansion.md"
@@ -85,7 +102,14 @@ class StrategyEngine:
             f"# Developed Outline: {self.brief.get('brand', '')}\n\n" + "\n\n---\n\n".join(sections) + "\n",
             encoding="utf-8",
         )
+        brief_path = write_visual_brief(
+            self.out_dir,
+            self.brief,
+            [(f"outline-{i}", point) for i, point in enumerate(points, 1)],
+            self.visuals,
+        )
         self._log(f"\n\nExpanded outline written to {out}")
+        self._log(f"Visual strategy brief written to {brief_path}")
         return out
 
     # ----------------------------------------------------------------- turns

@@ -2,8 +2,9 @@
 
 Usage:
     python -m medicomarketing_agent run --brief examples/brief.example.yaml
-    python -m medicomarketing_agent run --brief brief.yaml --phases 01,03,07
+    python -m medicomarketing_agent run --brief brief.yaml --phases 01,03,04,08
     python -m medicomarketing_agent expand --brief brief.yaml --outline outline.md
+    python -m medicomarketing_agent render-visuals --input output/03-evidence-forefront.md
     python -m medicomarketing_agent phases        # list all pipeline phases
 """
 
@@ -38,6 +39,13 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Markdown/text file with one outline point per line or bullet.",
     )
+
+    render = sub.add_parser(
+        "render-visuals",
+        help="Render science-viz infographic blocks from an existing Markdown file.",
+    )
+    render.add_argument("--input", required=True, help="Markdown file containing science-viz blocks.")
+    render.add_argument("--out", default="output", help="Output directory (default: output/).")
 
     sub.add_parser("phases", help="List the pipeline phases and exit.")
     return parser
@@ -96,6 +104,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "phases":
         for p in PHASES:
             print(f"{p.id}  {p.title}")
+        return 0
+
+    if args.command == "render-visuals":
+        from .visuals import attach_visuals, extract_viz_specs
+
+        source = Path(args.input)
+        markdown = source.read_text(encoding="utf-8")
+        out_dir = Path(args.out)
+        rewritten, paths = attach_visuals(markdown, out_dir / "visuals")
+        dest = out_dir / source.name
+        dest.write_text(rewritten, encoding="utf-8")
+        print(f"Found {len(extract_viz_specs(markdown))} science-viz block(s).")
+        print(f"Rendered {len(paths)} infographic(s) into {out_dir / 'visuals'}")
+        print(f"Wrote {dest}")
         return 0
 
     if not os.environ.get("ANTHROPIC_API_KEY") and not os.environ.get("ANTHROPIC_AUTH_TOKEN"):
